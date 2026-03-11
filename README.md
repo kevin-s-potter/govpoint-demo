@@ -10,6 +10,7 @@ A clickable prototype demonstrating GovPoint's deterministic rule evaluation eng
 - **Rule Evaluation**: Animated walkthrough of 40 rules across 9 regulatory domains (federal CMS, NFPA 101, EMTALA, ADA, Ohio ORC/OAC)
 - **Decision Report**: Compliance checklist with pass/flag/block statuses and required actions timeline
 - **Audit Trail**: Full reasoning chain for every rule evaluated — condition logic, input facts, plain-English reasoning, and dependency edges
+- **Ontology Manager**: Business-user interface for browsing, editing, and publishing the regulatory rules that drive decision-making — includes structured condition builder, dependency visualization, version history, and impact simulation
 
 ## Deploy
 
