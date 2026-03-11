@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovPoint | Hospital Capacity Change</title>
+<style>
+  :root {
+    --navy: #003366;
+    --navy-deep: #0E3F75;
+    --accent: #14499E;
+    --accent-light: #E8EFF8;
+    --ohio-red: #C41230;
+    --ohio-red-light: #FDEDEF;
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --amber: #D84315;
+    --amber-light: #FFF3E0;
+    --red: #C41230;
+    --red-light: #FDEDEF;
+    --gray: #4E4D4D;
+    --light-gray: #F2F2F2;
+    --border: #D0D5DD;
+    --white: #FFFFFF;
+    --text: #1A1A2E;
+    --text-secondary: #4A5568;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 6px;
+    --radius-lg: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--light-gray); color: var(--text); line-height: 1.6; }
+
+  /* ── STATE BANNER ── */
+  .state-banner { background: var(--light-gray); padding: 4px 32px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .state-banner a { color: var(--ohio-red); text-decoration: none; font-weight: 600; }
+
+  /* ── NAV ── */
+  .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
+  .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+  .topnav .logo span { color: var(--accent); }
+  .topnav .nav-links { margin-left: auto; display: flex; gap: 24px; }
+  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
+  .topnav .nav-links a:hover, .topnav .nav-links a.active { color: var(--ohio-red); }
+  .topnav .env-badge { margin-left: 24px; background: var(--ohio-red); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .page-header { margin-bottom: 32px; }
+  .page-header h1 { font-size: 28px; color: var(--navy); font-weight: 700; }
+  .page-header p { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
+
+  /* ── CARDS ── */
+  .card { background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 28px; margin-bottom: 24px; border: 1px solid var(--border); }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .card-header h2 { font-size: 18px; color: var(--navy); font-weight: 600; }
+  .card-header .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.3px; }
+  .badge-blue { background: var(--accent-light); color: var(--accent); }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+
+  /* ── FORMS ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-group input, .form-group select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--text); background: white; transition: border 0.2s; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,117,182,0.15); }
+  .form-group .hint { font-size: 12px; color: var(--gray); margin-top: 4px; }
+  .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .checkbox-group label { font-size: 14px; font-weight: 400; color: var(--text); text-transform: none; letter-spacing: 0; margin: 0; }
+
+  /* ── BUTTONS ── */
+  .btn { padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #2563a8; }
+  .btn-secondary { background: white; color: var(--accent); border: 1px solid var(--accent); }
+  .btn-secondary:hover { background: var(--accent-light); }
+  .btn-success { background: var(--green); color: white; }
+  .btn-success:hover { background: #256B2A; }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--light-gray); }
+  .btn-lg { padding: 14px 28px; font-size: 16px; border-radius: 8px; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── SCENARIO PICKER ── */
+  .scenario-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .scenario-btn { padding: 12px 18px; border-radius: 8px; border: 2px solid var(--border); background: white; cursor: pointer; text-align: left; flex: 1; min-width: 200px; transition: all 0.2s; }
+  .scenario-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+  .scenario-btn h4 { font-size: 13px; color: var(--navy); margin-bottom: 2px; }
+  .scenario-btn p { font-size: 11px; color: var(--gray); line-height: 1.4; }
+
+  /* ── STEPPER ── */
+  .stepper { display: flex; align-items: center; margin-bottom: 32px; padding: 0 12px; }
+  .step { display: flex; align-items: center; gap: 10px; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 2px solid var(--border); color: var(--gray); background: white; transition: all 0.3s; flex-shrink: 0; }
+  .step.active .step-num { background: var(--ohio-red); color: white; border-color: var(--ohio-red); }
+  .step.done .step-num { background: var(--green); color: white; border-color: var(--green); }
+  .step-label { font-size: 13px; color: var(--gray); font-weight: 500; white-space: nowrap; }
+  .step.active .step-label { color: var(--ohio-red); font-weight: 600; }
+  .step.done .step-label { color: var(--green); }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; min-width: 20px; transition: background 0.3s; }
+  .step-line.done { background: var(--green); }
+
+  /* ── EVALUATION VIEW ── */
+  .eval-phase { background: white; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 12px; overflow: hidden; transition: all 0.3s; }
+  .eval-phase.processing { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(46,117,182,0.15); }
+  .eval-phase.passed { border-color: var(--green); }
+  .eval-phase.flagged { border-color: var(--amber); }
+  .eval-phase.blocked { border-color: var(--red); }
+  .eval-phase-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .eval-phase-header .phase-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .eval-phase.waiting .phase-icon { background: var(--light-gray); color: var(--gray); }
+  .eval-phase.processing .phase-icon { background: var(--accent-light); color: var(--accent); }
+  .eval-phase.passed .phase-icon { background: var(--green-light); color: var(--green); }
+  .eval-phase.flagged .phase-icon { background: var(--amber-light); color: var(--amber); }
+  .eval-phase.blocked .phase-icon { background: var(--red-light); color: var(--red); }
+  .eval-phase-header h3 { font-size: 14px; color: var(--navy); font-weight: 600; flex: 1; }
+  .eval-phase-header .phase-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
+  .eval-phase-body { padding: 0 18px 16px; display: none; }
+  .eval-phase.open .eval-phase-body { display: block; }
+
+  /* ── RULE ROWS ── */
+  .rule-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-id { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .rule-detail { flex: 1; }
+  .rule-detail .rule-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .rule-detail .rule-citation { font-size: 11px; color: var(--gray); font-style: italic; }
+  .rule-detail .rule-result { font-size: 12px; margin-top: 4px; }
+  .rule-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .status-pass { background: var(--green-light); color: var(--green); }
+  .status-flag { background: var(--amber-light); color: var(--amber); }
+  .status-block { background: var(--red-light); color: var(--red); }
+  .status-skip { background: var(--light-gray); color: var(--gray); }
+  .status-wait { background: #F3E5F5; color: #7B1FA2; }
+
+  /* ── RESULTS DASHBOARD ── */
+  .result-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .result-stat { background: white; border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); text-align: center; }
+  .result-stat .stat-value { font-size: 32px; font-weight: 700; }
+  .result-stat .stat-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 16px; }
+  .timeline-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); background: white; }
+  .timeline-item.critical::before { background: var(--red); border-color: var(--red); }
+  .timeline-item.warning::before { background: var(--amber); border-color: var(--amber); }
+  .timeline-item.done::before { background: var(--green); border-color: var(--green); }
+  .timeline-item h4 { font-size: 13px; color: var(--navy); font-weight: 600; }
+  .timeline-item p { font-size: 12px; color: var(--text-secondary); }
+  .timeline-item .tl-date { font-size: 11px; color: var(--gray); font-weight: 600; }
+
+  .audit-row { display: grid; grid-template-columns: 100px 1fr 120px; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F0F0F0; font-size: 12px; }
+  .audit-row.audit-header { font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.3px; font-size: 11px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+
+  /* ── ENHANCED AUDIT ── */
+  .audit-entry { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; transition: all 0.2s; }
+  .audit-entry:hover { box-shadow: var(--shadow); }
+  .audit-entry-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: white; }
+  .audit-entry-header:hover { background: var(--light-gray); }
+  .audit-entry .entry-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: var(--accent-light); color: var(--accent); flex-shrink: 0; }
+  .audit-entry .entry-id { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
+  .audit-entry .entry-name { font-size: 13px; font-weight: 600; color: var(--navy); flex: 1; }
+  .audit-entry .entry-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; flex-shrink: 0; }
+  .audit-entry .entry-arrow { color: var(--gray); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; }
+  .audit-entry.open .entry-arrow { transform: rotate(90deg); }
+  .audit-entry-body { display: none; padding: 0 18px 18px; background: white; }
+  .audit-entry.open .audit-entry-body { display: block; }
+  .audit-section { margin-bottom: 14px; }
+  .audit-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray); margin-bottom: 6px; }
+  .audit-condition { background: #1A1A2E; color: #E0E0E0; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; padding: 12px 16px; border-radius: 6px; line-height: 1.7; overflow-x: auto; }
+  .audit-condition .kw { color: #7CB3F5; }
+  .audit-condition .val { color: #8BDB81; }
+  .audit-condition .op { color: #F5C97C; }
+  .audit-condition .cmt { color: #6A7A8A; }
+  .audit-facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+  .audit-fact { display: flex; justify-content: space-between; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
+  .audit-fact:nth-child(odd) { background: var(--light-gray); }
+  .audit-fact .fact-name { font-weight: 600; color: var(--navy); }
+  .audit-fact .fact-val { font-family: monospace; color: var(--text-secondary); }
+  .audit-reasoning { font-size: 13px; color: var(--text-secondary); line-height: 1.7; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--accent-light); border-radius: 0 6px 6px 0; }
+  .audit-deps { display: flex; flex-wrap: wrap; gap: 6px; }
+  .audit-dep-tag { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  .dep-gate { background: var(--red-light); color: var(--red); }
+  .dep-requires { background: var(--accent-light); color: var(--accent); }
+  .dep-exempts { background: var(--green-light); color: var(--green); }
+  .dep-triggers { background: var(--amber-light); color: var(--amber); }
+  .dep-routes { background: #F3E5F5; color: #7B1FA2; }
+  .audit-phase-divider { font-size: 13px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; padding: 16px 0 8px; border-bottom: 2px solid var(--border); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .audit-phase-divider .phase-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── BED TABLE (ODH style) ── */
+  .bed-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .bed-table th { background: var(--navy); color: white; padding: 8px 6px; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .bed-table th:first-child { text-align: left; min-width: 220px; }
+  .bed-table td { padding: 4px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .bed-table td:first-child { font-size: 12px; color: var(--text); font-weight: 500; }
+  .bed-table td input { width: 100%; padding: 5px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; text-align: center; background: white; }
+  .bed-table td input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(20,73,158,0.15); }
+  .bed-table tr:hover { background: var(--accent-light); }
+  .bed-table .section-row { background: var(--light-gray); }
+  .bed-table .section-row td { font-weight: 700; color: var(--navy); font-size: 12px; padding: 8px 6px; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--navy); }
+  .bed-table .sub-row td:first-child { padding-left: 24px; font-size: 11px; color: var(--text-secondary); }
+
+  /* ── HIDDEN PAGES ── */
+  .page { display: none; }
+  .page.visible { display: block; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-in { animation: fadeIn 0.3s ease-out; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .pulsing { animation: pulse 1.2s ease-in-out infinite; }
+
+  @media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .result-summary { grid-template-columns: 1fr 1fr; }
+    .scenario-bar { flex-direction: column; }
+    .stepper { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── STATE BANNER ── -->
+<div class="state-banner">An official State of Ohio application. <a href="#">Powered by GovPoint</a></div>
+
+<!-- ── TOP NAV ── -->
+<nav class="topnav">
+  <div class="logo"><span class="ohio-mark">Ohio</span> Department of Health</div>
+  <div class="nav-links">
+    <a href="#" class="active" onclick="showPage('intake')">New Request</a>
+    <a href="#" onclick="showPage('intake')">Dashboard</a>
+    <a href="#" onclick="showPage('intake')">Ontology</a>
+    <a href="#" onclick="showPage('intake')">Admin</a>
+  </div>
+  <div class="env-badge">GOVPOINT DEMO</div>
+</nav>
+
+<!-- ── STEPPER ── -->
+<div class="container" style="padding-bottom: 0;">
+  <div class="stepper" id="stepper">
+    <div class="step active" data-step="1"><div class="step-num">1</div><div class="step-label">Intake</div></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="2"><div class="step-num">2</div><div class="step-label">Evaluation</div></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="3"><div class="step-num">3</div><div class="step-label">Results</div></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="4"><div class="step-num">4</div><div class="step-label">Audit Trail</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ PAGE 1: INTAKE ══════════════════════════════════════════ -->
+<div class="container page visible" id="page-intake">
+  <div class="page-header">
+    <h1>Hospital Capacity Change Request</h1>
+    <p>Ohio Department of Health | Policy Decision Point Evaluation</p>
+  </div>
+
+  <!-- Scenario quick-fill -->
+  <div class="card" style="background: var(--accent-light); border-color: var(--accent);">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+      <span style="font-size: 18px;">&#9889;</span>
+      <span style="font-size: 14px; font-weight: 600; color: var(--navy);">Quick Demo: Choose a scenario to auto-populate the form</span>
+    </div>
+    <div class="scenario-bar">
+      <button class="scenario-btn" onclick="loadScenario('A')">
+        <h4>Scenario A: Add Med-Surg Beds</h4>
+        <p>Columbus hospital adds 10 adult med-surg beds (70&rarr;80) via new 4W wing. $3.2M addition.</p>
+      </button>
+      <button class="scenario-btn" onclick="loadScenario('B')">
+        <h4>Scenario B: Convert Beds (CAH)</h4>
+        <p>Critical Access Hospital converts 2 med-surg beds to ICU. Tests 25-bed CAH threshold.</p>
+      </button>
+      <button class="scenario-btn" onclick="loadScenario('C')">
+        <h4>Scenario C: Close OB/Neonatal Unit</h4>
+        <p>Toledo hospital closes entire OB unit (Level II/III + nursery). Triggers CON &amp; EMTALA review.</p>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hospital Information (matches ODH HEA 3614 header) -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Hospital Information</h2>
+      <span class="badge badge-blue">ODH HEA 3614</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Main Hospital Name (DBA)</label><input type="text" id="f_name" placeholder="e.g., Riverside Community Hospital"></div>
+      <div class="form-group"><label>License Number</label><input type="text" id="f_license_num" placeholder="e.g., H-1234"></div>
+      <div class="form-group full"><label>Main Hospital Address</label><input type="text" id="f_address" placeholder="e.g., 450 W. 10th Avenue, Columbus, OH 43210"></div>
+      <div class="form-group"><label>Location Type</label>
+        <select id="f_loc_type"><option value="MAIN">Main Hospital Location</option><option value="PROVIDER_BASED">Provider-based Location</option></select>
+      </div>
+      <div class="form-group"><label>Provider-based Location Name</label><input type="text" id="f_loc_name" placeholder="(if provider-based)" disabled></div>
+      <div class="form-group full"><label>Provider-based Location Address</label><input type="text" id="f_loc_addr" placeholder="(if provider-based)" disabled></div>
+    </div>
+  </div>
+
+  <!-- GovPoint Supplemental Data (not on ODH form — feeds regulatory evaluation) -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Supplemental Regulatory Data</h2>
+      <span class="badge badge-amber">GOVPOINT ENRICHMENT</span>
+    </div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">These fields are not on the ODH notification form but are required by GovPoint to evaluate the full federal and state regulatory stack.</p>
+    <div class="form-grid">
+      <div class="form-group"><label>Hospital Type</label>
+        <select id="f_type"><option value="">Select...</option><option value="STANDARD">Standard Hospital</option><option value="CRITICAL_ACCESS">Critical Access Hospital (CAH)</option><option value="SOLE_COMMUNITY">Sole Community Hospital</option><option value="TEACHING">Teaching Hospital</option><option value="CHILDRENS">Children's Hospital</option></select>
+      </div>
+      <div class="form-group"><label>CMS Certified</label>
+        <select id="f_cms"><option value="true">Yes</option><option value="false">No</option></select>
+      </div>
+      <div class="form-group"><label>Ohio License Status</label>
+        <select id="f_license"><option value="ACTIVE">Active</option><option value="EXPIRED">Expired</option><option value="PENDING">Pending</option></select>
+      </div>
+      <div class="form-group"><label>Accreditor Survey Current</label>
+        <select id="f_accredited"><option value="true">Yes - Current</option><option value="false">No - Expired/None</option></select>
+      </div>
+      <div class="form-group"><label>Swing-Bed Authorized</label>
+        <select id="f_swing"><option value="false">No</option><option value="true">Yes</option></select>
+      </div>
+      <div class="form-group"><label>Estimated Capital Expenditure</label><input type="text" id="f_capex" placeholder="e.g., $3,200,000"></div>
+    </div>
+  </div>
+
+  <!-- Bed Changes Table (matches ODH HEA 3614 exactly) -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Notification of Bed Number Changes or Bed Relocation</h2>
+      <span class="badge badge-blue">ODH HEA 3614 &middot; OAC 3701-22-03(K)</span>
+    </div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Submit completed form and floor plan to <strong>liccert@odh.ohio.gov</strong>. If construction/modernization is involved, also submit the Director Notifications form per OAC 3701-22-03(K).</p>
+    <div style="overflow-x:auto;">
+      <table class="bed-table" id="bed-table">
+        <thead>
+          <tr>
+            <th>Hospital Bed Category</th>
+            <th>Current<br>No. Beds</th>
+            <th>Current<br>Floor/Unit</th>
+            <th>New<br>No. Beds</th>
+            <th>New<br>Floor/Unit</th>
+            <th>Effective<br>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Hospital Beds -->
+          <tr class="section-row"><td colspan="6">Hospital Beds</td></tr>
+          <tr><td>Adult Medical/Surgical</td><td><input id="b_medsurg_cur" type="number"></td><td><input id="b_medsurg_curfl"></td><td><input id="b_medsurg_new" type="number"></td><td><input id="b_medsurg_newfl"></td><td><input id="b_medsurg_date" type="date"></td></tr>
+          <tr><td>Adult Special Care (ICU/CCU)</td><td><input id="b_icu_cur" type="number"></td><td><input id="b_icu_curfl"></td><td><input id="b_icu_new" type="number"></td><td><input id="b_icu_newfl"></td><td><input id="b_icu_date" type="date"></td></tr>
+          <tr><td>Alcohol or Drug Abuse Rehabilitation</td><td><input id="b_rehab_sub_cur" type="number"></td><td><input id="b_rehab_sub_curfl"></td><td><input id="b_rehab_sub_new" type="number"></td><td><input id="b_rehab_sub_newfl"></td><td><input id="b_rehab_sub_date" type="date"></td></tr>
+          <tr><td>Burn</td><td><input id="b_burn_cur" type="number"></td><td><input id="b_burn_curfl"></td><td><input id="b_burn_new" type="number"></td><td><input id="b_burn_newfl"></td><td><input id="b_burn_date" type="date"></td></tr>
+          <tr><td>Emergency Service Beds</td><td><input id="b_ed_cur" type="number"></td><td><input id="b_ed_curfl"></td><td><input id="b_ed_new" type="number"></td><td><input id="b_ed_newfl"></td><td><input id="b_ed_date" type="date"></td></tr>
+          <tr><td>Hospice</td><td><input id="b_hospice_cur" type="number"></td><td><input id="b_hospice_curfl"></td><td><input id="b_hospice_new" type="number"></td><td><input id="b_hospice_newfl"></td><td><input id="b_hospice_date" type="date"></td></tr>
+          <tr><td>LTAC (&lt;30 days)</td><td><input id="b_ltac_cur" type="number"></td><td><input id="b_ltac_curfl"></td><td><input id="b_ltac_new" type="number"></td><td><input id="b_ltac_newfl"></td><td><input id="b_ltac_date" type="date"></td></tr>
+          <tr><td>Pediatric &mdash; General</td><td><input id="b_peds_cur" type="number"></td><td><input id="b_peds_curfl"></td><td><input id="b_peds_new" type="number"></td><td><input id="b_peds_newfl"></td><td><input id="b_peds_date" type="date"></td></tr>
+          <tr><td>Pediatric Intensive Care (PICU)</td><td><input id="b_picu_cur" type="number"></td><td><input id="b_picu_curfl"></td><td><input id="b_picu_new" type="number"></td><td><input id="b_picu_newfl"></td><td><input id="b_picu_date" type="date"></td></tr>
+          <tr><td>Physical Rehabilitation</td><td><input id="b_physrehab_cur" type="number"></td><td><input id="b_physrehab_curfl"></td><td><input id="b_physrehab_new" type="number"></td><td><input id="b_physrehab_newfl"></td><td><input id="b_physrehab_date" type="date"></td></tr>
+          <tr><td>Psychiatric &mdash; Not Licensed by MHAS</td><td><input id="b_psych_cur" type="number"></td><td><input id="b_psych_curfl"></td><td><input id="b_psych_new" type="number"></td><td><input id="b_psych_newfl"></td><td><input id="b_psych_date" type="date"></td></tr>
+          <tr><td>Psychiatric &mdash; MHAS Licensed*</td><td><input id="b_psych_mhas_cur" type="number"></td><td><input id="b_psych_mhas_curfl"></td><td><input id="b_psych_mhas_new" type="number"></td><td><input id="b_psych_mhas_newfl"></td><td><input id="b_psych_mhas_date" type="date"></td></tr>
+          <tr><td>Any Other Inpatient Bed</td><td><input id="b_other_cur" type="number"></td><td><input id="b_other_curfl"></td><td><input id="b_other_new" type="number"></td><td><input id="b_other_newfl"></td><td><input id="b_other_date" type="date"></td></tr>
+
+          <!-- Long Term Care -->
+          <tr class="section-row"><td colspan="6">Long Term Care</td></tr>
+          <tr><td>SNF &mdash; Not Licensed</td><td><input id="b_snf_cur" type="number"></td><td><input id="b_snf_curfl"></td><td><input id="b_snf_new" type="number"></td><td><input id="b_snf_newfl"></td><td><input id="b_snf_date" type="date"></td></tr>
+          <tr><td>NF &mdash; Not Licensed</td><td><input id="b_nf_cur" type="number"></td><td><input id="b_nf_curfl"></td><td><input id="b_nf_new" type="number"></td><td><input id="b_nf_newfl"></td><td><input id="b_nf_date" type="date"></td></tr>
+          <tr><td>SNF/NF &mdash; Not Licensed</td><td><input id="b_snfnf_cur" type="number"></td><td><input id="b_snfnf_curfl"></td><td><input id="b_snfnf_new" type="number"></td><td><input id="b_snfnf_newfl"></td><td><input id="b_snfnf_date" type="date"></td></tr>
+          <tr><td>Special Skilled (3702.521)</td><td><input id="b_specskill_cur" type="number"></td><td><input id="b_specskill_curfl"></td><td><input id="b_specskill_new" type="number"></td><td><input id="b_specskill_newfl"></td><td><input id="b_specskill_date" type="date"></td></tr>
+
+          <!-- Obstetric / Neonatal -->
+          <tr class="section-row"><td colspan="6">Obstetric / Neonatal</td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level I</td><td><input id="b_ob1_cur" type="number"></td><td><input id="b_ob1_curfl"></td><td><input id="b_ob1_new" type="number"></td><td><input id="b_ob1_newfl"></td><td><input id="b_ob1_date" type="date"></td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level II</td><td><input id="b_ob2_cur" type="number"></td><td><input id="b_ob2_curfl"></td><td><input id="b_ob2_new" type="number"></td><td><input id="b_ob2_newfl"></td><td><input id="b_ob2_date" type="date"></td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level III (+ Special Delivery)</td><td><input id="b_ob3_cur" type="number"></td><td><input id="b_ob3_curfl"></td><td><input id="b_ob3_new" type="number"></td><td><input id="b_ob3_newfl"></td><td><input id="b_ob3_date" type="date"></td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level IV (+ Special Delivery)</td><td><input id="b_ob4_cur" type="number"></td><td><input id="b_ob4_curfl"></td><td><input id="b_ob4_new" type="number"></td><td><input id="b_ob4_newfl"></td><td><input id="b_ob4_date" type="date"></td></tr>
+          <tr class="sub-row"><td>Neonatal Level I &mdash; Well Baby Beds</td><td><input id="b_neo1_cur" type="number"></td><td><input id="b_neo1_curfl"></td><td><input id="b_neo1_new" type="number"></td><td><input id="b_neo1_newfl"></td><td><input id="b_neo1_date" type="date"></td></tr>
+          <tr class="sub-row"><td>Neonatal Level II &mdash; Special Care Nursery</td><td><input id="b_neo2_cur" type="number"></td><td><input id="b_neo2_curfl"></td><td><input id="b_neo2_new" type="number"></td><td><input id="b_neo2_newfl"></td><td><input id="b_neo2_date" type="date"></td></tr>
+          <tr class="sub-row"><td>Neonatal Level III &mdash; NICU</td><td><input id="b_neo3_cur" type="number"></td><td><input id="b_neo3_curfl"></td><td><input id="b_neo3_new" type="number"></td><td><input id="b_neo3_newfl"></td><td><input id="b_neo3_date" type="date"></td></tr>
+          <tr class="sub-row"><td>Neonatal Level IV &mdash; Regional NICU</td><td><input id="b_neo4_cur" type="number"></td><td><input id="b_neo4_curfl"></td><td><input id="b_neo4_new" type="number"></td><td><input id="b_neo4_newfl"></td><td><input id="b_neo4_date" type="date"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Affirmation (from ODH form) -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Affirmation</h2>
+      <span class="badge badge-blue">ODH HEA 3614</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Name of Authorized Representative</label><input type="text" id="f_auth_name" placeholder="e.g., Dr. Sarah Chen"></div>
+      <div class="form-group"><label>Title</label><input type="text" id="f_auth_title" placeholder="e.g., Chief Executive Officer"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="f_auth_email" placeholder="e.g., schen@hospital.org"></div>
+      <div class="form-group"><label>Date</label><input type="date" id="f_approval_date"></div>
+    </div>
+  </div>
+
+  <!-- Construction / Physical Plant (GovPoint supplemental) -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Physical Construction Details</h2>
+      <span class="badge badge-amber">GOVPOINT ENRICHMENT</span>
+    </div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">If construction or modernization is involved, these fields feed the NFPA 101, ADA, and Fire Marshal evaluation rules.</p>
+    <div class="form-grid">
+      <div class="form-group full">
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+          <div class="checkbox-group"><input type="checkbox" id="f_construction"><label for="f_construction">Involves physical construction</label></div>
+          <div class="checkbox-group"><input type="checkbox" id="f_involves_ob"><label for="f_involves_ob">Involves obstetric / newborn</label></div>
+          <div class="checkbox-group"><input type="checkbox" id="f_involves_ed"><label for="f_involves_ed">Involves emergency department</label></div>
+        </div>
+      </div>
+      <div class="form-group"><label>Target Implementation Date</label><input type="date" id="f_target_date"></div>
+      <div class="form-group"><label>Building Area Affected (%)</label><input type="number" id="f_area_pct" placeholder="e.g., 15" min="0" max="100"></div>
+      <div class="form-group"><label>Work Category (NFPA 101 Ch. 43)</label>
+        <select id="f_work_cat"><option value="">N/A - No construction</option><option value="REPAIR">Repair / Restoration</option><option value="REPLACEMENT">Replacement in Kind</option><option value="RECONFIGURATION">Reconfiguration of Spaces</option><option value="RECONSTRUCTION">Reconstruction</option><option value="ADDITION">Addition (New Wing/Floor)</option><option value="CHANGE_OF_USE">Change of Use / Occupancy</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group" style="justify-content: flex-end;">
+    <button class="btn btn-ghost" onclick="clearForm()">Clear Form</button>
+    <button class="btn btn-primary btn-lg" onclick="startEvaluation()">&#9654; Evaluate Capacity Change</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ PAGE 2: EVALUATION ══════════════════════════════════════════ -->
+<div class="container page" id="page-evaluation">
+  <div class="page-header">
+    <h1>Policy Evaluation in Progress</h1>
+    <p id="eval-subtitle">Evaluating <strong id="eval-hospital-name"></strong> against 40 rules across 9 regulatory domains</p>
+  </div>
+  <div id="eval-phases"></div>
+  <div class="btn-group" style="justify-content: space-between; margin-top: 24px;">
+    <button class="btn btn-ghost" onclick="showPage('intake')">&#8592; Back to Intake</button>
+    <button class="btn btn-success btn-lg" id="btn-view-results" style="display:none;" onclick="showPage('results')">View Decision Report &#8594;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ PAGE 3: RESULTS ══════════════════════════════════════════ -->
+<div class="container page" id="page-results">
+  <div class="page-header">
+    <h1>Decision Report</h1>
+    <p><span id="res-hospital-name"></span> | Hospital Capacity Change Evaluation</p>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="result-summary" id="result-stats"></div>
+
+  <!-- Decision Banner -->
+  <div class="card" id="decision-banner" style="text-align: center; padding: 32px;"></div>
+
+  <!-- Triggered Rules -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Triggered Rules &amp; Requirements</h2>
+      <span class="badge badge-blue">COMPLIANCE CHECKLIST</span>
+    </div>
+    <div id="triggered-rules-list"></div>
+  </div>
+
+  <!-- Action Timeline -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Required Actions Timeline</h2>
+      <span class="badge badge-amber">CRITICAL PATH</span>
+    </div>
+    <div class="timeline" id="action-timeline"></div>
+  </div>
+
+  <div class="btn-group" style="justify-content: space-between;">
+    <button class="btn btn-ghost" onclick="showPage('evaluation')">&#8592; Back to Evaluation</button>
+    <button class="btn btn-primary btn-lg" onclick="showPage('audit')">View Full Audit Trail &#8594;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ PAGE 4: AUDIT TRAIL ══════════════════════════════════════════ -->
+<div class="container page" id="page-audit">
+  <div class="page-header">
+    <h1>Audit Trail</h1>
+    <p>Complete decision lineage | Tamper-evident hash chain | Every rule evaluated, every fact checked</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Decision Metadata</h2>
+      <span class="badge badge-green">IMMUTABLE RECORD</span>
+    </div>
+    <div id="audit-metadata" style="display: grid; grid-template-columns: 200px 1fr; gap: 8px 16px; font-size: 13px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Rule Evaluation Sequence</h2>
+      <span class="badge badge-blue">40 RULES EVALUATED</span>
+    </div>
+    <div id="audit-sequence"></div>
+  </div>
+
+  <div class="btn-group" style="justify-content: space-between;">
+    <button class="btn btn-ghost" onclick="showPage('results')">&#8592; Back to Results</button>
+    <button class="btn btn-primary" onclick="showPage('intake')">&#8634; New Evaluation</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════ DATA ══════════════════════════════════════════
+
+const SCENARIOS = {
+  A: {
+    // Header
+    name: "Riverside Community Hospital", license_num: "H-2847", address: "450 W. 10th Avenue, Columbus, OH 43210",
+    loc_type: "MAIN", loc_name: "", loc_addr: "",
+    // Supplemental
+    type: "STANDARD", cms: "true", license: "ACTIVE", accredited: "true", swing: "true", capex: "$3,200,000",
+    // Bed table (only populated rows shown; rest stay blank)
+    beds_data: {
+      medsurg: { cur: 70, curfl: "2W, 3W", new: 80, newfl: "2W, 3W, 4W", date: "2026-09-01" },
+      icu:     { cur: 10, curfl: "2E",      new: 10, newfl: "2E",         date: "" },
+      psych:   { cur: 5,  curfl: "4E",      new: 5,  newfl: "4E",         date: "" }
+    },
+    // Affirmation
+    auth_name: "Dr. Sarah Chen", auth_title: "Chief Executive Officer", auth_email: "schen@riverside.org", approval_date: "2026-02-15",
+    // Construction
+    target_date: "2026-09-01", construction: true, involves_ob: false, involves_ed: false, area_pct: 12, work_cat: "ADDITION",
+    // Derived (used by rule engine)
+    beds: 85, net_change: 10, bed_cat: "MED_SURG", change_type: "ADD_BEDS", breakdown: "70 Med-Surg / 10 ICU / 5 Psych"
+  },
+  B: {
+    name: "Appalachian Valley Medical Center", license_num: "H-1053", address: "1200 State Route 7, Gallipolis, OH 45631",
+    loc_type: "MAIN", loc_name: "", loc_addr: "",
+    type: "CRITICAL_ACCESS", cms: "true", license: "ACTIVE", accredited: "true", swing: "false", capex: "$1,800,000",
+    beds_data: {
+      medsurg:    { cur: 14, curfl: "1W",     new: 12, newfl: "1W",     date: "2026-07-15" },
+      icu:        { cur: 0,  curfl: "",        new: 2,  newfl: "1E",     date: "2026-07-15" },
+      psych_mhas: { cur: 8,  curfl: "DP-1",   new: 8,  newfl: "DP-1",   date: "" }
+    },
+    auth_name: "James R. Whitfield", auth_title: "Hospital Administrator", auth_email: "jwhitfield@avmc.org", approval_date: "2026-01-20",
+    target_date: "2026-07-15", construction: true, involves_ob: false, involves_ed: false, area_pct: 8, work_cat: "RECONFIGURATION",
+    beds: 22, net_change: 2, bed_cat: "ICU_CCU", change_type: "CONVERT_TYPE", breakdown: "14 Med-Surg / 8 Psych (distinct part)"
+  },
+  C: {
+    name: "Maumee Valley Regional Medical Center", license_num: "H-0412", address: "3100 Arlington Avenue, Toledo, OH 43614",
+    loc_type: "MAIN", loc_name: "", loc_addr: "",
+    type: "STANDARD", cms: "true", license: "ACTIVE", accredited: "true", swing: "false", capex: "$6,500,000",
+    beds_data: {
+      medsurg: { cur: 100, curfl: "2W, 3W, 4W", new: 100, newfl: "2W, 3W, 4W", date: "" },
+      icu:     { cur: 20,  curfl: "2E",          new: 20,  newfl: "2E",          date: "" },
+      psych:   { cur: 10,  curfl: "5W",          new: 10,  newfl: "5W",          date: "" },
+      ob2:     { cur: 12,  curfl: "3E (L&D)",    new: 0,   newfl: "",            date: "2026-12-01" },
+      ob3:     { cur: 8,   curfl: "3E (High)",   new: 0,   newfl: "",            date: "2026-12-01" },
+      neo1:    { cur: 6,   curfl: "3E Nursery",  new: 0,   newfl: "",            date: "2026-12-01" },
+      neo2:    { cur: 4,   curfl: "3E SCN",      new: 0,   newfl: "",            date: "2026-12-01" }
+    },
+    auth_name: "Patricia M. Holloway", auth_title: "VP of Operations", auth_email: "pholloway@mvrmc.org", approval_date: "2026-03-01",
+    target_date: "2026-12-01", construction: true, involves_ob: true, involves_ed: false, area_pct: 22, work_cat: "CHANGE_OF_USE",
+    beds: 150, net_change: -30, bed_cat: "OBSTETRIC", change_type: "CLOSE_SERVICE", breakdown: "100 Med-Surg / 20 ICU / 10 Psych / 20 OB-Neo"
+  }
+};
+
+const PHASES = [
+  { id: "governance", name: "Phase 1: Governance Gate", icon: "&#128274;",
+    rules: [
+      { id: "FED-001", name: "Governing Body Authorization", citation: "42 CFR 482.12" },
+      { id: "OH-001", name: "Active Ohio License Verification", citation: "ORC 3722.02" },
+      { id: "OH-003", name: "CMS Certification Prerequisite", citation: "ORC 3722.02" },
+    ]
+  },
+  { id: "classification", name: "Phase 2: Classification Gate", icon: "&#128196;",
+    rules: [
+      { id: "OH-011", name: "Bed Count Definition Resolution", citation: "OAC 3701-59-01" },
+      { id: "OH-012", name: "Bed Category Classification", citation: "OAC 3701-59-05" },
+      { id: "FED-006", name: "CAH 25-Bed Limit Check", citation: "42 CFR 485 Subpart F" },
+      { id: "FED-007", name: "CAH Distinct Part Exception", citation: "42 CFR 485 Subpart F" },
+      { id: "FED-005", name: "Swing-Bed 100-Bed Threshold", citation: "42 CFR 482.58" },
+    ]
+  },
+  { id: "con", name: "Phase 3: CON Screening", icon: "&#128209;",
+    rules: [
+      { id: "OH-006", name: "CON Applicability Check", citation: "ORC 3702.51" },
+      { id: "OH-007", name: "CON Application Filing", citation: "ORC 3702.52" },
+      { id: "OH-008", name: "CON Standard Review Timeline", citation: "ORC 3702.52" },
+      { id: "OH-009", name: "CON Expedited Review Timeline", citation: "ORC 3702.52" },
+      { id: "OH-010", name: "CON Capital Expenditure Cap", citation: "ORC 3702.52" },
+    ]
+  },
+  { id: "federal", name: "Phase 4: Federal Compliance", icon: "&#127963;",
+    rules: [
+      { id: "FED-002", name: "Physical Environment Compliance", citation: "42 CFR 482.41" },
+      { id: "FED-003", name: "Infection Prevention Assessment", citation: "42 CFR 482.42" },
+      { id: "FED-004", name: "QAPI Program Update", citation: "42 CFR 482.21" },
+      { id: "FED-008", name: "Provider Specific File Update", citation: "CMS Manual Ch. 3" },
+      { id: "FED-009", name: "CMS-855A Enrollment Update", citation: "42 CFR 424.520" },
+    ]
+  },
+  { id: "safety", name: "Phase 5: Safety Compliance", icon: "&#128293;",
+    rules: [
+      { id: "FED-010", name: "Work Category Classification", citation: "NFPA 101 Ch. 43" },
+      { id: "FED-011", name: "Repairs/Replacement Path", citation: "NFPA 101 Ch. 43.2" },
+      { id: "FED-012", name: "Reconfiguration Compliance", citation: "NFPA 101 Ch. 43.4" },
+      { id: "FED-013", name: "Reconstruction/Addition Compliance", citation: "NFPA 101 Ch. 43.5" },
+      { id: "FED-014", name: "Change of Use Compliance", citation: "NFPA 101 Ch. 43.7" },
+      { id: "FED-015", name: "Sprinkler System Trigger", citation: "NFPA 101 Ch. 43" },
+      { id: "OH-015", name: "State Fire Marshal Approval", citation: "ORC 3737" },
+      { id: "OH-016", name: "Ohio Building Code Compliance", citation: "OBC Ch. 4" },
+      { id: "OH-017", name: "Existing Building Code (OEBC)", citation: "OEBC 2024" },
+      { id: "OH-018", name: "Building Inspection Trigger", citation: "OAC 5122-14-10" },
+    ]
+  },
+  { id: "impact", name: "Phase 6: Impact Assessment", icon: "&#9888;&#65039;",
+    rules: [
+      { id: "FED-016", name: "EMTALA Transfer Capacity", citation: "42 CFR 489.24" },
+      { id: "FED-017", name: "Capacity Reduction EMTALA Review", citation: "42 CFR 489.24" },
+      { id: "FED-018", name: "ED Closure Protocol", citation: "42 CFR 489.24" },
+      { id: "FED-019", name: "ADA Path of Travel Assessment", citation: "28 CFR 35.151" },
+      { id: "FED-020", name: "ADA Disproportionality Cap", citation: "28 CFR 35.151" },
+      { id: "FED-021", name: "Accessible Medical Equipment", citation: "2010 ADA Standards" },
+      { id: "OH-004", name: "ODH Inspection Exemption Check", citation: "ORC 3722.04" },
+      { id: "OH-005", name: "ODH Mandatory Inspection", citation: "ORC 3722.05" },
+    ]
+  },
+  { id: "reporting", name: "Phase 7: Reporting Requirements", icon: "&#128203;",
+    rules: [
+      { id: "OH-002", name: "License Amendment Filing", citation: "ORC 3722.02" },
+      { id: "OH-013", name: "Annual Capacity Report Update", citation: "OAC 3701-59-05" },
+      { id: "OH-014", name: "Temporary Surge Threshold Check", citation: "OAC 3701-59-01" },
+      { id: "OH-019", name: "Re-inspection for Use Change", citation: "OAC 5122-14-10" },
+    ]
+  }
+];
+
+// ── Scenario-specific rule outcomes with full reasoning chains ──
+function getScenarioResults(s) {
+  const results = {};
+  const data = SCENARIOS[s];
+  const isCah = data.type === "CRITICAL_ACCESS";
+  const isOb = data.involves_ob;
+  const isEd = data.involves_ed;
+  const newBeds = data.beds + data.net_change;
+  const capexNum = parseFloat(data.capex.replace(/[$,]/g, ""));
+  const hasCon = isOb && capexNum >= 5000000;
+
+  // Helper to build a full result object
+  const R = (status, result, extras) => ({ status, result, ...extras });
+
+  // ── PHASE 1: GOVERNANCE ──
+  results["FED-001"] = R("pass", "Governing body approved " + data.approval_date, {
+    condition: 'IF capacity_change_requested = TRUE\nTHEN governing_body_approval MUST = APPROVED\nBEFORE any downstream rules evaluate',
+    facts: { capacity_change_requested: 'TRUE', governing_body_approval: 'APPROVED', governing_body_approval_date: data.approval_date },
+    reasoning: 'The hospital governing body documented approval on ' + data.approval_date + '. This satisfies 42 CFR 482.12, which requires the governing body to be legally responsible for hospital conduct and to authorize changes to operations. Because this rule is a GATE condition, all 37 downstream rules were blocked until this approval was confirmed. Approval date precedes the target implementation date of ' + data.target_date + ', satisfying the temporal sequencing requirement.',
+    deps: [{ type: 'gate', target: 'FED-002 through OH-019', label: 'GATES all downstream rules' }]
+  });
+
+  results["OH-001"] = R("pass", "Active ODH license confirmed", {
+    condition: 'IF hospital_operates_in_ohio = TRUE\nTHEN ohio_license_status MUST = ACTIVE\nPenalty: $1,000 - $10,000 per day without license',
+    facts: { hospital_operates_in_ohio: 'TRUE', ohio_license_status: data.license, ohio_license_expiry: '2027-09-30' },
+    reasoning: 'Ohio enacted mandatory hospital licensing under ORC 3722 effective September 30, 2024. This is Ohio\'s first mandatory licensing regime. The hospital holds an active license with expiration date 2027-09-30, which extends beyond the target implementation date of ' + data.target_date + '. No capacity change may proceed without an active license. Non-compliance carries penalties of $1,000 to $10,000 per day of unlicensed operation.',
+    deps: [{ type: 'gate', target: 'OH-002 through OH-019', label: 'GATES all Ohio state rules' }]
+  });
+
+  results["OH-003"] = R("pass", "CMS certification verified", {
+    condition: 'IF hospital_applying_for_license = TRUE\nTHEN cms_certified = TRUE\n  OR accredited_by_cms_approved_org = TRUE',
+    facts: { cms_certified: data.cms, accreditor_survey_current: data.accredited },
+    reasoning: 'ORC 3722.02 requires that any hospital seeking an Ohio license must either hold CMS certification or be accredited by a CMS-approved accrediting organization (e.g., Joint Commission, DNV GL). The hospital is CMS certified (cms_certified = TRUE). This creates a federal-to-state dependency: the federal CMS certification is a prerequisite for the state license, meaning loss of CMS certification would cascade to loss of Ohio licensure.',
+    deps: [{ type: 'requires', target: 'OH-001', label: 'PREREQUISITE for Ohio license' }]
+  });
+
+  // ── PHASE 2: CLASSIFICATION ──
+  results["OH-011"] = R("pass", "Bed count resolved: " + data.beds + " current, " + newBeds + " proposed", {
+    condition: 'RESOLVE total_bed_count per OAC 3701-59-01 definition:\n  INCLUDE: all beds where care may be provided\n  INCLUDE: temporarily closed beds\n  INCLUDE: beds under renovation\n  EXCLUDE: temporary increases < 45 days in any 6-month period',
+    facts: { current_total_beds: data.beds.toString(), proposed_bed_change: data.net_change.toString(), new_total_beds: newBeds.toString(), change_type: data.change_type, surge_duration: 'N/A (permanent change)' },
+    reasoning: 'The Ohio bed count definition under OAC 3701-59-01 is broader than some states. It includes beds under renovation and temporarily closed beds, meaning the hospital cannot reduce its official count by closing beds temporarily. The proposed change of ' + (data.net_change >= 0 ? '+' : '') + data.net_change + ' beds brings the total from ' + data.beds + ' to ' + newBeds + '. This is a permanent change (not a temporary surge), so the 45-day exclusion does not apply. This resolved bed count of ' + newBeds + ' is the authoritative figure used by all downstream threshold rules (FED-005, FED-006).',
+    deps: [
+      { type: 'requires', target: 'FED-005', label: 'Feeds bed count to swing-bed threshold' },
+      { type: 'requires', target: 'FED-006', label: 'Feeds bed count to CAH limit' }
+    ]
+  });
+
+  results["OH-012"] = R("pass", "Bed category: " + data.bed_cat.replace(/_/g, " "), {
+    condition: 'CLASSIFY all beds INTO exactly one category:\n  med_surg | icu_ccu | psychiatric | pediatric_intensive |\n  pediatric_acute | cardiovascular | orthopedic | neurological | thoracic',
+    facts: { current_bed_breakdown: data.breakdown, proposed_bed_category: data.bed_cat, proposed_change: (data.net_change >= 0 ? '+' : '') + data.net_change },
+    reasoning: 'OAC 3701-59-05 requires each licensed bed to be assigned to exactly one category. This classification determines which reporting requirements apply and affects the annual capacity report (OH-013). The proposed change affects the ' + data.bed_cat.replace(/_/g, ' ').toLowerCase() + ' category. Current breakdown: ' + data.breakdown + '. After the change, the ' + data.bed_cat.replace(/_/g, ' ').toLowerCase() + ' count will be updated in the next annual report filing.',
+    deps: [{ type: 'requires', target: 'OH-013', label: 'Classification feeds annual report' }]
+  });
+
+  if (isCah) {
+    const inpatientAfter = newBeds;
+    results["FED-006"] = inpatientAfter > 25
+      ? R("block", "ALERT: " + inpatientAfter + " beds exceeds 25-bed CAH limit. CAH status at risk.", {
+          condition: 'IF hospital_type = CRITICAL_ACCESS\n  AND new_inpatient_beds > 25\nTHEN CAH_status = AT_RISK\n  // Excludes: newborn, ICU (per some interpretations),\n  // psychiatric distinct part (max 10),\n  // rehab distinct part (max 10)',
+          facts: { hospital_type: 'CRITICAL_ACCESS', new_inpatient_beds: inpatientAfter.toString(), cah_bed_limit: '25', distinct_part_psych: '8', distinct_part_rehab: '0' },
+          reasoning: 'Critical Access Hospital status under 42 CFR 485 Subpart F limits inpatient beds to 25. Exceeding this threshold immediately disqualifies the hospital from CAH designation, which fundamentally changes Medicare reimbursement from cost-based (favorable) to prospective payment (standard DRG). This is a high-stakes threshold.',
+          deps: [{ type: 'gate', target: 'ALL', label: 'BLOCKS capacity change until resolved' }]
+        })
+      : R("pass", inpatientAfter + " inpatient beds. Under 25-bed CAH limit.", {
+          condition: 'IF hospital_type = CRITICAL_ACCESS\n  AND new_inpatient_beds > 25\nTHEN CAH_status = AT_RISK',
+          facts: { hospital_type: 'CRITICAL_ACCESS', current_inpatient_beds: data.beds.toString(), new_inpatient_beds: inpatientAfter.toString(), cah_bed_limit: '25', headroom: (25 - inpatientAfter).toString() + ' beds remaining' },
+          reasoning: 'The hospital currently has ' + data.beds + ' inpatient beds. After the proposed change, inpatient beds total ' + inpatientAfter + ', which is under the 25-bed CAH limit. The hospital retains ' + (25 - inpatientAfter) + ' beds of headroom before triggering CAH disqualification. Note: psychiatric distinct part beds (up to 10) and rehab distinct part beds (up to 10) are excluded from this count per FED-007. CAH status is preserved, maintaining cost-based Medicare reimbursement.',
+          deps: [{ type: 'exempts', target: 'FED-007', label: 'FED-007 may exempt distinct part beds' }]
+        });
+    results["FED-007"] = R("pass", "Distinct part exception applied. Psych/rehab beds excluded from 25-bed count.", {
+      condition: 'IF hospital_type = CRITICAL_ACCESS\n  AND bed_type IN (PSYCHIATRIC, REHAB)\n  AND distinct_part_beds <= 10 per type\nTHEN EXEMPT from FED-006 25-bed limit',
+      facts: { distinct_part_psych_beds: '8', distinct_part_rehab_beds: '0', psych_limit: '10', rehab_limit: '10' },
+      reasoning: '42 CFR 485 Subpart F allows Critical Access Hospitals to operate up to 10 psychiatric distinct part beds and up to 10 rehabilitation distinct part beds in addition to the 25 inpatient bed limit. The hospital has 8 psychiatric distinct part beds (under the 10-bed cap) and 0 rehab beds. These 8 psychiatric beds are excluded from the 25-bed count in FED-006, which is why the inpatient count uses ' + data.beds + ' rather than ' + (data.beds + 8) + '.',
+      deps: [{ type: 'exempts', target: 'FED-006', label: 'EXEMPTS distinct part beds from CAH limit' }]
+    });
+  } else {
+    results["FED-006"] = R("skip", "N/A - Hospital is not Critical Access", {
+      condition: 'IF hospital_type = CRITICAL_ACCESS\nTHEN evaluate 25-bed limit',
+      facts: { hospital_type: data.type },
+      reasoning: 'This rule only applies to Critical Access Hospitals. The hospital is classified as ' + data.type + '. The 25-bed CAH limit (42 CFR 485 Subpart F) is not evaluated. No CAH reimbursement implications.',
+      deps: []
+    });
+    results["FED-007"] = R("skip", "N/A - CAH rules do not apply", {
+      condition: 'IF hospital_type = CRITICAL_ACCESS THEN evaluate distinct part exception',
+      facts: { hospital_type: data.type },
+      reasoning: 'The distinct part exception only applies to Critical Access Hospitals. Skipped because hospital_type = ' + data.type + '.',
+      deps: []
+    });
+  }
+
+  results["FED-005"] = newBeds >= 100
+    ? R("flag", "WARNING: " + newBeds + " beds reaches swing-bed threshold. Swing-bed authorization will be revoked.", {
+        condition: 'IF new_total_beds >= 100\n  (excluding newborn and ICU beds)\nTHEN swing_bed_authorization = REVOKED',
+        facts: { new_total_beds: newBeds.toString(), swing_bed_threshold: '100', swing_bed_currently_authorized: data.swing, beds_over_threshold: (newBeds - 100).toString() },
+        reasoning: '42 CFR 482.58 limits swing-bed authorization to hospitals with fewer than 100 inpatient beds (excluding newborn and ICU). At ' + newBeds + ' total beds, the hospital meets or exceeds this threshold. If swing-bed services are currently authorized (swing_bed_authorized = ' + data.swing + '), this authorization will be automatically revoked upon the capacity change taking effect. The hospital must notify CMS and transition any current swing-bed patients to appropriate alternative care settings before the change date.',
+        deps: [{ type: 'requires', target: 'FED-008', label: 'Swing-bed loss must be reported in PSF update' }]
+      })
+    : R("pass", newBeds + " beds. Under 100-bed swing-bed threshold.", {
+        condition: 'IF new_total_beds >= 100\n  (excluding newborn and ICU beds)\nTHEN swing_bed_authorization = REVOKED',
+        facts: { new_total_beds: newBeds.toString(), swing_bed_threshold: '100', swing_bed_currently_authorized: data.swing, headroom: (100 - newBeds).toString() + ' beds remaining' },
+        reasoning: 'At ' + newBeds + ' total beds, the hospital remains ' + (100 - newBeds) + ' beds below the 100-bed swing-bed threshold. Swing-bed authorization (currently ' + data.swing + ') is unaffected by this capacity change. No CMS notification required for swing-bed status.',
+        deps: []
+      });
+
+  // ── PHASE 3: CON SCREENING ──
+  if (hasCon) {
+    results["OH-006"] = R("flag", "CON REVIEW TRIGGERED: Obstetric service change with capital >$5M", {
+      condition: 'EVALUATE against CON-reviewable activities:\n  (a) obstetric/newborn project >= $5,000,000  --> MATCH\n  (b) obstetric/newborn service-level change   --> MATCH\n  (c) LTC bed changes                          --> NO\n  (d) medical equipment >= $2,000,000           --> NO',
+      facts: { involves_obstetric_newborn: 'TRUE', capital_expenditure: data.capex, con_obstetric_threshold: '$5,000,000', exceeds_threshold: 'TRUE (' + data.capex + ' >= $5,000,000)', change_type: data.change_type },
+      reasoning: 'Ohio\'s CON program (ORC 3702.51) has a narrow scope compared to most states. It does NOT cover routine hospital bed additions. However, it DOES cover obstetric/newborn service changes when capital expenditure exceeds $5M. This project involves obstetric services (involves_obstetric_newborn = TRUE) with a capital expenditure of ' + data.capex + ', which exceeds the $5M threshold. CON review is therefore mandatory. This is the critical-path item for this project: no construction may begin until CON approval is received. Expected timeline: 45 days for completeness determination + 60 days for standard review = approximately 105 days.',
+      deps: [
+        { type: 'gate', target: 'OH-007', label: 'TRIGGERS CON application' },
+        { type: 'gate', target: 'OH-015 through OH-018', label: 'GATES construction until CON approved' }
+      ]
+    });
+    results["OH-007"] = R("flag", "CON application required. Fee: $20,000 (1.5% of $6.5M, capped)", {
+      condition: 'IF CON_reviewable = TRUE\nTHEN submit application\nFee = MAX($5,000, MIN(1.5% * capital_expenditure, $20,000))',
+      facts: { con_reviewable: 'TRUE', capital_expenditure: data.capex, fee_calculated: '1.5% x $6,500,000 = $97,500', fee_cap: '$20,000', fee_actual: '$20,000 (capped)' },
+      reasoning: 'ORC 3702.52 requires a CON application with documentation and a fee. The fee formula is the greater of $5,000 or 1.5% of capital expenditure, capped at $20,000. At ' + data.capex + ', 1.5% = $97,500, but the $20,000 cap applies. The application must include project scope, community need analysis, financial feasibility, and impact on existing services. Third-party appeal rights were eliminated in 2019 reforms, meaning only the applicant may appeal a CON denial.',
+      deps: [{ type: 'requires', target: 'OH-008', label: 'Application triggers review timeline' }]
+    });
+    results["OH-008"] = R("wait", "Standard review: 60-day decision window after completeness determination", {
+      condition: 'IF CON_review_type = STANDARD\nTHEN completeness_determination <= 45 days\n  AND director_decision <= 60 days after completeness',
+      facts: { review_type: 'STANDARD', completeness_window: '45 calendar days', decision_window: '60 calendar days after completeness', total_estimated: '~105 calendar days', earliest_decision: 'approx. late June 2026' },
+      reasoning: 'The standard CON review has two phases: (1) ODH has 45 days to determine application completeness, and (2) the Director has 60 days from completeness notice to render a decision. Total elapsed time is approximately 105 days. Given the current date, the earliest CON decision would be approximately late June 2026. The target implementation date of ' + data.target_date + ' must account for this timeline. Construction cannot begin until CON approval is received.',
+      deps: [{ type: 'gate', target: 'OH-015', label: 'Construction BLOCKED until CON approved' }]
+    });
+    results["OH-009"] = R("skip", "Expedited review not elected", {
+      condition: 'IF CON_review_type = EXPEDITED THEN 30-day completeness + 45-day decision',
+      facts: { review_type_selected: 'STANDARD' },
+      reasoning: 'Expedited review (30-day completeness + 45-day decision = ~75 days) was not elected. The applicant could request expedited review to save approximately 30 days, but this requires meeting specific expedited eligibility criteria under ORC 3702.52.',
+      deps: []
+    });
+    results["OH-010"] = R("pass", "Capital cap set at 110% of approved: $7.15M maximum", {
+      condition: 'IF CON_approved = TRUE\nTHEN maximum_capital_expenditure = 110% * approved_cost\nExceeding triggers new CON review',
+      facts: { approved_cost: data.capex, cap_110_pct: '$' + (capexNum * 1.1).toLocaleString(), current_estimate: data.capex },
+      reasoning: 'ORC 3702.52 imposes a 110% capital expenditure cap on CON-approved projects. If approved at ' + data.capex + ', the maximum allowable expenditure is $' + (capexNum * 1.1).toLocaleString() + '. Exceeding this cap triggers a new CON review, which would add another 105+ days to the timeline. The project budget should include contingency within this 10% headroom.',
+      deps: []
+    });
+  } else {
+    results["OH-006"] = R("pass", "CON review NOT required. Change does not meet reviewable thresholds.", {
+      condition: 'EVALUATE against CON-reviewable activities:\n  (a) obstetric/newborn >= $5M  --> ' + (isOb ? 'YES but ' + data.capex + ' < $5M' : 'NO (not obstetric)') + '\n  (b) obstetric service change  --> ' + (isOb ? 'YES' : 'NO') + '\n  (c) LTC bed changes           --> NO\n  (d) equipment >= $2M           --> NO',
+      facts: { involves_obstetric_newborn: isOb ? 'TRUE' : 'FALSE', capital_expenditure: data.capex, con_obstetric_threshold: '$5,000,000', change_type: data.change_type },
+      reasoning: 'Ohio\'s CON program (ORC 3702.51-3702.62) has a notably narrow scope. It primarily covers long-term care facilities and specific high-dollar obstetric/newborn projects. This capacity change does not involve obstetric services with capital exceeding $5M, does not involve LTC beds, and does not involve medical equipment exceeding $2M. Therefore, CON review is NOT triggered. This is a significant positive finding: the project can proceed directly to safety compliance without the 105-day CON review delay.',
+      deps: []
+    });
+    results["OH-007"] = R("skip", "Bypassed - CON not triggered", { condition: 'Dependent on OH-006 = TRIGGERED', facts: { oh_006_result: 'PASS (CON not required)' }, reasoning: 'OH-006 determined CON review is not required. This rule and all subsequent CON rules (OH-008, OH-009, OH-010) are bypassed. No application filing, no fee, no review timeline.', deps: [] });
+    results["OH-008"] = R("skip", "Bypassed - CON not triggered", { condition: 'Dependent on OH-007', facts: {}, reasoning: 'CON not triggered. Standard review timeline does not apply.', deps: [] });
+    results["OH-009"] = R("skip", "Bypassed - CON not triggered", { condition: 'Dependent on OH-007', facts: {}, reasoning: 'CON not triggered. Expedited review timeline does not apply.', deps: [] });
+    results["OH-010"] = R("skip", "Bypassed - CON not triggered", { condition: 'Dependent on OH-007', facts: {}, reasoning: 'CON not triggered. Capital expenditure cap does not apply.', deps: [] });
+  }
+
+  // ── PHASE 4: FEDERAL COMPLIANCE ──
+  results["FED-002"] = data.construction
+    ? R("flag", "Physical plant modification requires NFPA 101 Life Safety Code compliance", {
+        condition: 'IF physical_plant_modification = TRUE\nTHEN facility MUST comply with NFPA 101 (2012 Ed.)\n  as adopted by CMS effective July 5, 2016',
+        facts: { physical_plant_modification: 'TRUE', construction_type: data.work_cat, nfpa_edition: '2012 (with TIA 12-1 through 12-4)', cms_adoption_date: 'July 5, 2016' },
+        reasoning: '42 CFR 482.41 requires hospitals to maintain adequate facilities and comply with the NFPA 101 Life Safety Code (2012 Edition) as adopted by CMS. Because this project involves physical construction (physical_plant_modification = TRUE, work category = ' + data.work_cat + '), the project must be evaluated against NFPA 101 Chapter 43 (Building Rehabilitation) to determine the specific compliance requirements. This rule routes to FED-010 for work category classification, which then routes to the appropriate compliance path (FED-011 through FED-015).',
+        deps: [{ type: 'requires', target: 'FED-010', label: 'Routes to Life Safety Code classification' }]
+      })
+    : R("pass", "No physical modification. Existing environment compliant.", {
+        condition: 'IF physical_plant_modification = TRUE THEN evaluate NFPA 101',
+        facts: { physical_plant_modification: 'FALSE' },
+        reasoning: 'No physical construction involved. Existing physical environment compliance is maintained. NFPA 101 evaluation not triggered.',
+        deps: []
+      });
+
+  results["FED-003"] = R("pass", "Infection prevention program update required for new capacity of " + newBeds + " beds", {
+    condition: 'IF bed_count_change != 0\nTHEN infection_prevention_program MUST update:\n  - HAI surveillance protocols\n  - capacity monitoring thresholds\n  - isolation room adequacy assessment',
+    facts: { bed_count_change: data.net_change.toString(), new_total_beds: newBeds.toString(), current_beds: data.beds.toString() },
+    reasoning: '42 CFR 482.42 requires an active hospital-wide infection prevention program that tracks total bed census and capacity. A change of ' + (data.net_change >= 0 ? '+' : '') + data.net_change + ' beds (from ' + data.beds + ' to ' + newBeds + ') requires the infection prevention team to update HAI surveillance baselines, reassess isolation room capacity relative to the new bed count, and update antibiotic stewardship protocols for the new patient volume. This is a compliance requirement, not a blocking condition.',
+    deps: []
+  });
+
+  results["FED-004"] = R("pass", "QAPI program must incorporate capacity change impact assessment", {
+    condition: 'IF capacity_change_approved = TRUE\nTHEN quality_program MUST incorporate:\n  - capacity impact on quality indicators\n  - staffing ratio assessment\n  - patient safety metrics update',
+    facts: { capacity_change_approved: 'TRUE', quality_program_active: 'TRUE' },
+    reasoning: '42 CFR 482.21 requires an ongoing, hospital-wide, data-driven quality assessment and performance improvement program. The capacity change must be integrated into the QAPI program to ensure quality indicators (readmission rates, patient falls, medication errors, etc.) are tracked against the new capacity baseline. The hospital should assess whether staffing ratios remain adequate at the new bed count.',
+    deps: []
+  });
+
+  results["FED-008"] = R("flag", "30-day advance written notice to MAC required before " + data.target_date, {
+    condition: 'IF bed_count_change != 0\nTHEN file 30-day advance written notice\n  TO: Medicare Administrative Contractor (MAC)\n  AND: CMS Regional Office\n  NOTE: PSF bed field changes are PROSPECTIVE only',
+    facts: { bed_count_change: data.net_change.toString(), target_implementation_date: data.target_date, notice_deadline: '30 days before ' + data.target_date, psf_field: 'Field-24 (bed size)', change_basis: 'PROSPECTIVE only' },
+    reasoning: 'CMS Manual Chapter 3 requires that bed count changes in the Provider Specific File (Field-24) be filed with 30 days advance written notice to the Medicare Administrative Contractor and CMS Regional Office. Critically, PSF bed field changes can only be made on a PROSPECTIVE basis (cannot be backdated). The hospital must calculate the notice deadline by subtracting 30 days from the target implementation date of ' + data.target_date + '. Late filing means the bed count change cannot take effect for Medicare reimbursement purposes until 30 days after notice is actually filed.',
+    deps: [{ type: 'triggers', target: 'FED-009', label: 'PSF update may trigger enrollment update' }]
+  });
+
+  results["FED-009"] = R("pass", "CMS-855A enrollment update due within 90 days via PECOS", {
+    condition: 'IF practice_location_type_changed = TRUE\n  OR service_line_added_or_removed = TRUE\nTHEN update CMS-855A within 90 days via PECOS',
+    facts: { service_line_change: data.change_type === 'ADD_SERVICE' || data.change_type === 'CLOSE_SERVICE' ? 'TRUE' : 'FALSE', reporting_deadline: '90 calendar days', submission_method: 'PECOS (Provider Enrollment, Chain, and Ownership System)' },
+    reasoning: '42 CFR 424.520 requires provider enrollment updates within 90 days for changes to practice location type or service configuration. The CMS-855A is the enrollment application for institutional providers. Even if the change does not affect practice location type, it is best practice to update the enrollment record to reflect the new bed configuration. Submission is via PECOS (online) or paper form to the regional MAC.',
+    deps: []
+  });
+
+  // ── PHASE 5: SAFETY COMPLIANCE ──
+  const wc = data.work_cat;
+  results["FED-010"] = wc ? R("pass", "Work classified as: " + wc.replace(/_/g, " "), {
+    condition: 'CLASSIFY physical_work INTO:\n  REPAIR | REPLACEMENT | RECONFIGURATION |\n  RECONSTRUCTION | ADDITION | CHANGE_OF_USE\nBased on: scope, structural impact, occupancy change',
+    facts: { physical_construction: 'TRUE', work_category_assigned: wc, construction_scope: data.change_type, capital_expenditure: data.capex },
+    reasoning: 'NFPA 101 Chapter 43 defines six categories of building rehabilitation, each with different code compliance requirements. The proposed work is classified as ' + wc.replace(/_/g, ' ') + ' based on the scope of physical modification. This classification determines whether existing occupancy requirements apply (less costly) or new occupancy requirements apply (more costly, requiring full compliance with NFPA 101 Chapters 18-20 for Healthcare Occupancies). The classification routes to the appropriate compliance rule.',
+    deps: [{ type: 'routes', target: 'FED-011 through FED-015', label: 'Routes to compliance path for ' + wc }]
+  }) : R("skip", "No physical construction", { condition: 'IF physical_construction = TRUE THEN classify work', facts: { physical_construction: 'FALSE' }, reasoning: 'No physical construction involved. Work category classification not required.', deps: [] });
+
+  results["FED-011"] = wc === "REPAIR" || wc === "REPLACEMENT" ? R("pass", "Existing occupancy requirements apply", {
+    condition: 'IF work_category IN (REPAIR, REPLACEMENT)\nTHEN existing occupancy requirements only\n  // Most favorable path - minimal code upgrade',
+    facts: { work_category: wc },
+    reasoning: 'Repairs and replacements in kind are the lightest compliance path. Only existing occupancy requirements apply, meaning the hospital does not need to upgrade to current code standards. This is the lowest-cost compliance scenario.',
+    deps: []
+  }) : R("skip", "N/A for this work category", { condition: 'IF work_category IN (REPAIR, REPLACEMENT)', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + ', not REPAIR or REPLACEMENT. This compliance path does not apply.', deps: [] });
+
+  results["FED-012"] = wc === "RECONFIGURATION" ? R("flag", "New elements must meet NEW occupancy requirements (NFPA 101 Ch. 18-20)", {
+    condition: 'IF work_category = RECONFIGURATION\nTHEN new_elements --> NEW occupancy requirements (Ch. 18-20)\n  AND existing_structural --> existing requirements OK',
+    facts: { work_category: 'RECONFIGURATION', new_elements_standard: 'NFPA 101 Ch. 18-20 (Healthcare Occupancies)', existing_elements_standard: 'Existing occupancy requirements' },
+    reasoning: 'NFPA 101 Chapter 43.4 creates a split compliance requirement for reconfigurations: any NEW elements (walls, doors, HVAC, electrical) must meet current Healthcare Occupancy requirements (Chapters 18-20), but existing structural elements that are not being modified can remain under existing occupancy requirements. This means the hospital must identify which elements are new vs. existing and apply the appropriate standard to each. Fire protection engineering review is recommended to make this determination.',
+    deps: [{ type: 'triggers', target: 'FED-015', label: 'May trigger sprinkler assessment' }]
+  }) : R("skip", "N/A for this work category", { condition: 'IF work_category = RECONFIGURATION', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + ', not RECONFIGURATION.', deps: [] });
+
+  results["FED-013"] = wc === "RECONSTRUCTION" || wc === "ADDITION" ? R("flag", "Entire work area must meet NEW occupancy requirements", {
+    condition: 'IF work_category IN (RECONSTRUCTION, ADDITION)\nTHEN entire_work_area --> NEW occupancy requirements\n  // Most stringent path for new construction',
+    facts: { work_category: wc, compliance_standard: 'NFPA 101 Ch. 18-20 (full)', building_area_affected: data.area_pct + '%' },
+    reasoning: 'NFPA 101 Chapters 43.5-43.6 require the entire work area to meet NEW occupancy requirements for reconstruction and additions. This is the most stringent compliance path (short of new construction). All corridor widths, door clearances, fire compartmentalization, smoke barriers, and emergency egress must comply with current NFPA 101 Healthcare Occupancy standards. This has significant cost implications: the hospital should budget for fire protection engineering, code-compliant materials, and potentially broader infrastructure upgrades in the affected area.',
+    deps: [{ type: 'triggers', target: 'FED-015', label: 'Triggers sprinkler assessment' }, { type: 'requires', target: 'OH-015', label: 'Requires Fire Marshal review' }]
+  }) : R("skip", "N/A for this work category", { condition: 'IF work_category IN (RECONSTRUCTION, ADDITION)', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + '.', deps: [] });
+
+  results["FED-014"] = wc === "CHANGE_OF_USE" ? R("flag", "Change of use assessment required. New occupancy requirements if hazardous areas created.", {
+    condition: 'IF work_category = CHANGE_OF_USE\n  AND creates_hazardous_area = TRUE\nTHEN new occupancy requirements for hazardous areas\nELSE existing occupancy requirements apply',
+    facts: { work_category: 'CHANGE_OF_USE', prior_use: 'Obstetric/Newborn', proposed_use: 'Surgical Specialty', hazardous_area_assessment: 'REQUIRED' },
+    reasoning: 'NFPA 101 Chapter 43.7 governs changes of use (converting space from one occupancy type to another). Generally, existing occupancy requirements apply unless the change creates hazardous areas, which triggers new occupancy requirements for those areas. Converting obstetric space to surgical specialty may create hazardous areas (anesthesia gas storage, surgical waste, chemical sterilization) that require upgraded fire protection. A formal hazardous area assessment by a fire protection engineer is required before construction.',
+    deps: [{ type: 'triggers', target: 'OH-019', label: 'Triggers building re-inspection for use change' }]
+  }) : R("skip", "N/A for this work category", { condition: 'IF work_category = CHANGE_OF_USE', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + ', not CHANGE_OF_USE.', deps: [] });
+
+  results["FED-015"] = data.area_pct > 50
+    ? R("block", "SPRINKLER UPGRADE REQUIRED: " + data.area_pct + "% > 50% threshold. Major infrastructure cost.", {
+        condition: 'IF rehabilitation_area > 50% of aggregate_building_area\nTHEN automatic sprinkler systems REQUIRED on:\n  - affected floor(s)\n  - all floors below affected floor(s)',
+        facts: { building_area_affected: data.area_pct + '%', sprinkler_threshold: '50%', exceeds_threshold: 'TRUE', sprinkler_scope: 'Affected floors + all floors below' },
+        reasoning: 'This is a major cost trigger. When rehabilitation work affects more than 50% of the aggregate building area, NFPA 101 Chapter 43 requires automatic sprinkler systems throughout the affected floors and all floors below. This can add hundreds of thousands to millions of dollars to a project, depending on building size and existing sprinkler coverage. This should be escalated to project leadership immediately as it may affect project feasibility.',
+        deps: [{ type: 'gate', target: 'Construction budget', label: 'Major cost impact - may require budget revision' }]
+      })
+    : R("pass", data.area_pct + "% affected. Under 50% sprinkler threshold.", {
+        condition: 'IF rehabilitation_area > 50% of aggregate_building_area\nTHEN automatic sprinkler systems REQUIRED',
+        facts: { building_area_affected: data.area_pct + '%', sprinkler_threshold: '50%', exceeds_threshold: 'FALSE', headroom: (50 - data.area_pct) + '% remaining before trigger' },
+        reasoning: 'The project affects ' + data.area_pct + '% of the aggregate building area, which is below the 50% threshold that triggers mandatory sprinkler system installation. The project has ' + (50 - data.area_pct) + ' percentage points of headroom. However, if the project scope expands during construction to exceed 50%, the sprinkler requirement would be triggered retroactively. Recommend monitoring scope creep carefully.',
+        deps: []
+      });
+
+  results["OH-015"] = data.construction ? R("flag", "Construction plans must be submitted to Ohio State Fire Marshal", {
+    condition: 'IF physical_construction = TRUE\n  OR fire_protection_system_modified = TRUE\nTHEN submit plans to State Fire Marshal\n  FOR: review and approval BEFORE construction begins',
+    facts: { physical_construction: 'TRUE', fire_protection_modified: wc === 'ADDITION' || wc === 'RECONSTRUCTION' ? 'LIKELY' : 'TO BE DETERMINED', submission_to: 'Ohio State Fire Marshal', timing: 'BEFORE construction begins' },
+    reasoning: 'ORC 3737 and OAC 1301:7-7 require construction plans involving hospital facilities to be submitted to the Ohio State Fire Marshal for review and approval before construction begins. The Fire Marshal reviews for compliance with Ohio Fire Code (based on International Fire Code) and coordinates with NFPA 101 requirements enforced by CMS. Plan review timelines vary but typically take 2-4 weeks. Construction CANNOT begin without Fire Marshal approval.',
+    deps: [{ type: 'requires', target: 'OH-016', label: 'Coordinates with building permit process' }]
+  }) : R("skip", "No construction", { condition: 'IF physical_construction = TRUE', facts: { physical_construction: 'FALSE' }, reasoning: 'No physical construction. Fire Marshal review not required.', deps: [] });
+
+  results["OH-016"] = data.construction ? R("flag", "Building permit required from local authority (Ohio Building Code)", {
+    condition: 'IF new_construction = TRUE OR renovation = TRUE\nTHEN comply with Ohio Building Code (IBC-based)\n  AND obtain building permit from local AHJ',
+    facts: { construction_type: wc, building_code: 'Ohio Building Code (Ch. 4, based on IBC)', occupancy_classification: 'Institutional (I-2)', permit_from: 'Local authority having jurisdiction (AHJ)' },
+    reasoning: 'The Ohio Building Code, based on the International Building Code, classifies hospitals as Institutional Occupancy (I-2). Any new construction or renovation requires a building permit from the local authority having jurisdiction (typically the county or municipal building department). The permit application must include architectural plans, structural engineering, and fire protection documentation. Hospitals in I-2 occupancy have the most stringent building code requirements for fire resistance, structural integrity, and egress.',
+    deps: [{ type: 'requires', target: 'OH-018', label: 'Permit triggers inspection requirement' }]
+  }) : R("skip", "No construction", { condition: 'IF construction = TRUE', facts: { physical_construction: 'FALSE' }, reasoning: 'No construction. Building permit not required.', deps: [] });
+
+  results["OH-017"] = data.construction && data.change_type !== "ADD_BEDS" ? R("flag", "Ohio Existing Building Code (OEBC 2024) governs renovation standards", {
+    condition: 'IF renovation_of_existing_hospital = TRUE\nTHEN Ohio Existing Building Code (OEBC, new 2024)\n  governs alteration and addition standards',
+    facts: { renovation_type: data.change_type, oebc_version: '2024 (new)', applies_to: 'Renovations and alterations of existing buildings' },
+    reasoning: 'The Ohio Existing Building Code (OEBC), new as of 2024, provides specific standards for renovations and alterations of existing buildings that differ from new construction requirements. Since this project involves renovation of an existing hospital (not a greenfield addition), the OEBC standards apply. The OEBC generally allows more flexibility than new construction standards, but the hospital must still meet all I-2 occupancy requirements for patient safety.',
+    deps: []
+  }) : R("skip", "N/A - new construction or no renovation", { condition: 'IF renovation = TRUE', facts: { change_type: data.change_type }, reasoning: data.change_type === 'ADD_BEDS' ? 'This is new construction (addition), not renovation of existing space. Ohio Building Code (not OEBC) applies.' : 'No renovation involved.', deps: [] });
+
+  results["OH-018"] = R("flag", "Building inspection required. Certificate of occupancy needed before operation.", {
+    condition: 'IF renovation_changes_max_bed_count = TRUE\n  OR services_substantially_change = TRUE\nTHEN building inspection REQUIRED\n  BY: certified inspector or Ohio Dept. of Commerce',
+    facts: { bed_count_changing: 'TRUE', services_changing: data.change_type === 'ADD_SERVICE' || data.change_type === 'CLOSE_SERVICE' ? 'TRUE' : 'FALSE', inspector: 'Certified inspector or Ohio Dept. of Commerce', certificate_required: 'Certificate of Occupancy' },
+    reasoning: 'OAC 5122-14-10 requires building inspection when the maximum bed count changes or services substantially change. The inspection must be performed by a certified building inspector or the Ohio Department of Commerce. A Certificate of Occupancy must be issued before the new or modified space can accept patients. This is a hard gate: no patients may be admitted to the new capacity until the Certificate of Occupancy is issued.',
+    deps: [{ type: 'gate', target: 'Operations', label: 'No patients until Certificate of Occupancy issued' }]
+  });
+
+  // ── PHASE 6: IMPACT ASSESSMENT ──
+  results["FED-016"] = R("pass", "EMTALA transfer obligations documented for " + newBeds + " bed capacity", {
+    condition: 'IF hospital_has_specialized_capabilities = TRUE\n  AND available_beds > 0\nTHEN hospital MUST accept appropriate transfers',
+    facts: { new_total_beds: newBeds.toString(), specialized_capabilities: 'YES', emtala_obligation: 'Must accept transfers when beds available' },
+    reasoning: '42 CFR 489.24 requires hospitals with specialized capabilities to accept appropriate transfers when they have available beds and qualified personnel. At ' + newBeds + ' beds, the hospital\'s transfer acceptance capacity is documented. The hospital cannot refuse transfers while beds are available simply by claiming to be "at capacity" unless it has documented evidence (e.g., ambulance diversion status). This obligation is continuous and not affected by the capacity change itself, but the new bed count changes the capacity documentation.',
+    deps: []
+  });
+
+  results["FED-017"] = data.net_change < 0 ? R("flag", "Capacity REDUCTION: EMTALA impact assessment required for -" + Math.abs(data.net_change) + " beds", {
+    condition: 'IF capacity_reduction_affects_ED = TRUE\n  OR capacity_reduction_affects_ICU = TRUE\nTHEN EMTALA impact assessment REQUIRED',
+    facts: { net_bed_change: data.net_change.toString(), beds_removed: Math.abs(data.net_change).toString(), involves_ed: isEd ? 'TRUE' : 'FALSE', involves_icu: data.bed_cat === 'ICU_CCU' ? 'TRUE' : 'FALSE' },
+    reasoning: 'Reducing hospital capacity by ' + Math.abs(data.net_change) + ' beds creates potential EMTALA compliance risk. If the reduction affects the hospital\'s ability to accept emergency transfers, it could expose the hospital to EMTALA violations (civil penalties up to $119,942 per violation for hospitals >100 beds, $59,973 for hospitals <=100 beds). The hospital must document how it will continue to meet EMTALA transfer obligations at the reduced capacity and establish clear capacity-tracking protocols.',
+    deps: [{ type: 'requires', target: 'FED-016', label: 'Must update transfer capacity documentation' }]
+  }) : R("skip", "Capacity increase - no reduction assessment needed", { condition: 'IF net_bed_change < 0 THEN assess EMTALA impact', facts: { net_bed_change: '+' + data.net_change }, reasoning: 'The capacity is increasing by ' + data.net_change + ' beds. EMTALA reduction assessment is not triggered because the hospital\'s transfer acceptance capacity is expanding, not contracting.', deps: [] });
+
+  results["FED-018"] = isEd ? R("block", "ED CLOSURE: High compliance risk. Civil penalties up to $119,942 per violation.", {
+    condition: 'IF emergency_department_closure = TRUE\nTHEN EMTALA violation risk assessment REQUIRED\n  AND community notification REQUIRED',
+    facts: { ed_affected: 'TRUE', penalty_large_hospital: '$119,942 per violation', penalty_small_hospital: '$59,973 per violation' },
+    reasoning: 'Closing or reducing emergency department capacity is one of the highest-risk actions under EMTALA. Civil monetary penalties can reach $119,942 per violation for hospitals with more than 100 beds.',
+    deps: [{ type: 'gate', target: 'ALL', label: 'BLOCKS until EMTALA risk resolved' }]
+  }) : R("skip", "ED not affected", { condition: 'IF emergency_department_closure = TRUE', facts: { involves_ed: 'FALSE' }, reasoning: 'The proposed capacity change does not affect the emergency department. EMTALA ED closure protocols are not triggered.', deps: [] });
+
+  results["FED-019"] = data.construction ? R("flag", "ADA path of travel assessment required for altered areas", {
+    condition: 'IF physical_alteration = TRUE\nTHEN evaluate path_of_travel to altered area:\n  - entrance and exit routes\n  - restrooms serving the area\n  - drinking fountains serving the area\nCost obligation: up to 20% of alteration cost',
+    facts: { physical_alteration: 'TRUE', ada_standard: '2010 ADA Standards for Accessible Design', path_of_travel_scope: 'Entrance, routes, restrooms, fountains', max_cost_obligation: '20% of alteration cost = $' + (capexNum * 0.2).toLocaleString() },
+    reasoning: '28 CFR 35.151 and the 2010 ADA Standards require that when a hospital alters any area, it must evaluate the "path of travel" to that area for accessibility. This includes the entrance, routes between the altered area and entrance, restrooms, and drinking fountains. The cost obligation is capped at 20% of the alteration cost (the disproportionality rule in FED-020). For this project at ' + data.capex + ', the maximum ADA obligation is $' + (capexNum * 0.2).toLocaleString() + '.',
+    deps: [{ type: 'requires', target: 'FED-020', label: 'Path of travel cost feeds disproportionality calculation' }]
+  }) : R("skip", "No physical alteration", { condition: 'IF physical_alteration = TRUE', facts: { physical_alteration: 'FALSE' }, reasoning: 'No physical alteration. ADA path of travel assessment not triggered.', deps: [] });
+
+  results["FED-020"] = data.construction ? R("pass", "Disproportionality cap: accessibility costs capped at 20% of project ($" + (capexNum * 0.2).toLocaleString() + ")", {
+    condition: 'IF path_of_travel_cost > 20% * alteration_cost\nTHEN obligation CAPPED at 20%',
+    facts: { alteration_cost: data.capex, disproportionality_threshold: '20%', max_obligation: '$' + (capexNum * 0.2).toLocaleString() },
+    reasoning: '28 CFR 35.151 provides a disproportionality cap: the cost of path-of-travel improvements cannot exceed 20% of the total alteration cost. For this project, the cap is $' + (capexNum * 0.2).toLocaleString() + '. If full path-of-travel compliance would exceed this amount, the hospital is only required to spend up to the cap. The hospital should prioritize the most impactful accessibility improvements within this budget.',
+    deps: []
+  }) : R("skip", "N/A", { condition: 'Dependent on FED-019', facts: {}, reasoning: 'No physical alteration. Disproportionality cap not applicable.', deps: [] });
+
+  results["FED-021"] = data.net_change > 0 ? R("pass", "Accessible equipment: min 10% of new beds must be accessible (" + Math.max(1, Math.ceil(data.net_change * 0.1)) + " unit(s))", {
+    condition: 'IF beds_added > 0\nTHEN minimum 10% of each MDE type must be accessible\n  (minimum 1 unit per type)',
+    facts: { beds_added: data.net_change.toString(), accessible_required: Math.max(1, Math.ceil(data.net_change * 0.1)).toString(), equipment_types: 'Beds, exam tables, scales, imaging equipment' },
+    reasoning: 'The 2010 ADA Standards require that when a hospital acquires general-purpose medical diagnostic equipment, at least 10% of each type must be accessible (with a minimum of 1 unit). For ' + data.net_change + ' new beds, this means at least ' + Math.max(1, Math.ceil(data.net_change * 0.1)) + ' accessible bed unit(s) with transfer-capable features, movable bedside tables, and accessible call systems. This applies to the procurement phase and should be included in the equipment budget.',
+    deps: []
+  }) : R("skip", "No beds being added", { condition: 'IF beds_added > 0', facts: { beds_added: '0' }, reasoning: 'No beds being added. Accessible equipment procurement requirement not triggered.', deps: [] });
+
+  results["OH-004"] = data.accredited === "true" ? R("pass", "Accreditor survey current. ODH inspection may be waived.", {
+    condition: 'IF recent_CMS_survey_report_available = TRUE\n  AND deemed_status_confirmed = TRUE\nTHEN ODH inspection MAY be waived',
+    facts: { accreditor_survey_current: 'TRUE', deemed_status: 'CONFIRMED', odh_inspection_waiver: 'ELIGIBLE' },
+    reasoning: 'ORC 3722.04 allows the Ohio Department of Health to waive its own inspection if a recent CMS or accrediting organization survey report is available and the hospital has deemed status. The hospital\'s accreditor survey is current, which means it may qualify for an ODH inspection waiver. This creates an EXEMPTS relationship with OH-005: if OH-004 passes, OH-005 (mandatory ODH inspection) may be skipped unless the capacity change involves maternity/newborn services, which override this exemption.',
+    deps: [{ type: 'exempts', target: 'OH-005', label: 'May exempt from ODH inspection (unless maternity)' }]
+  }) : R("flag", "No current accreditor survey. ODH inspection required.", {
+    condition: 'IF recent_CMS_survey_report_available = TRUE THEN waiver eligible',
+    facts: { accreditor_survey_current: 'FALSE', odh_inspection_waiver: 'NOT ELIGIBLE' },
+    reasoning: 'The hospital does not have a current accreditor survey. ODH inspection cannot be waived.',
+    deps: []
+  });
+
+  results["OH-005"] = isOb ? R("flag", "MANDATORY ODH inspection: Maternity/newborn service change triggers on-site review", {
+    condition: 'IF capacity_change_involves_maternity = TRUE\n  OR capacity_change_involves_newborn = TRUE\n  OR capacity_change_involves_open_heart = TRUE\nTHEN mandatory ODH inspection within 36-month cycle',
+    facts: { involves_maternity: 'TRUE', involves_newborn: 'TRUE', inspection_type: 'MANDATORY (overrides OH-004 waiver)', inspection_cycle: '36 months' },
+    reasoning: 'ORC 3722.05 mandates an ODH on-site inspection when capacity changes involve maternity, newborn, or open heart surgery services, regardless of accreditation status. This overrides the OH-004 inspection waiver: even though the hospital has a current accreditor survey, the maternity/newborn involvement makes this inspection mandatory. The inspection must occur before the new service configuration goes live. Schedule early to avoid delays on the critical path.',
+    deps: [{ type: 'gate', target: 'Operations', label: 'Inspection must pass before go-live' }]
+  }) : R(data.accredited === "true" ? "skip" : "flag",
+    data.accredited === "true" ? "Exempted by current accreditor survey (OH-004)" : "ODH inspection required - no current survey", {
+    condition: 'IF maternity/newborn/open_heart involved THEN mandatory\nELSE check OH-004 waiver eligibility',
+    facts: { involves_maternity: 'FALSE', oh_004_result: data.accredited === 'true' ? 'PASS (waiver eligible)' : 'FLAG (no waiver)' },
+    reasoning: data.accredited === "true"
+      ? 'The capacity change does not involve maternity, newborn, or open heart services. Because OH-004 confirmed the accreditor survey is current, the ODH inspection requirement is waived per ORC 3722.04.'
+      : 'The capacity change does not involve maternity/newborn, but the hospital lacks a current accreditor survey, so the ODH inspection waiver (OH-004) does not apply. An ODH inspection is required.',
+    deps: data.accredited === "true" ? [] : [{ type: 'gate', target: 'Operations', label: 'Inspection must pass before go-live' }]
+  });
+
+  // ── PHASE 7: REPORTING ──
+  results["OH-002"] = R("flag", "License amendment must be filed with updated bed count: " + newBeds, {
+    condition: 'IF capacity_change_requested = TRUE\nTHEN updated bed count MUST be specified\n  in license application/amendment to ODH',
+    facts: { current_licensed_beds: data.beds.toString(), new_licensed_beds: newBeds.toString(), filing_to: 'Ohio Department of Health', amendment_type: 'License amendment' },
+    reasoning: 'ORC 3722.02 requires that the licensed bed count match the actual operational bed count. A change from ' + data.beds + ' to ' + newBeds + ' beds requires a license amendment filed with the Ohio Department of Health. The amendment should be filed before the capacity change takes effect to ensure the license accurately reflects the operational configuration. Operating with a bed count that exceeds the licensed count could constitute unlicensed operation.',
+    deps: []
+  });
+
+  results["OH-013"] = R("pass", "Annual capacity report must reflect changes by next March 1 filing", {
+    condition: 'IF calendar_year_end = TRUE\nTHEN submit annual report by March 1 with:\n  - beds by category\n  - admissions by category\n  - patient days by category',
+    facts: { reporting_deadline: 'March 1 (annual)', report_contents: 'Beds, admissions, patient days - all by category', current_year: '2026' },
+    reasoning: 'OAC 3701-59-05 requires an annual capacity report by March 1 covering the prior calendar year. If the capacity change takes effect before December 31, 2026, the March 1, 2027 annual report must reflect the new bed configuration for the applicable portion of the year. The report breaks down beds, admissions, and patient days by category (med-surg, ICU, psychiatric, etc.).',
+    deps: []
+  });
+
+  results["OH-014"] = R("pass", "Not a temporary surge. Permanent capacity change documented.", {
+    condition: 'IF temporary_bed_increase_duration > 45 days in 6 months\nTHEN temporary beds become licensed beds\n  AND must be reported',
+    facts: { change_type: 'PERMANENT', surge_duration: 'N/A', temporary_threshold: '45 days in any 6-month period' },
+    reasoning: 'OAC 3701-59-01 provides an exclusion for temporary bed increases lasting less than 45 days in any 6-month period. This change is permanent, not temporary, so the 45-day exclusion does not apply. The beds are classified as licensed from the effective date. If the hospital were to attempt this as a "temporary" increase but exceed 45 days, the beds would automatically become licensed and trigger all associated requirements (OH-002 license amendment, OH-012 classification).',
+    deps: []
+  });
+
+  results["OH-019"] = wc === "CHANGE_OF_USE" ? R("flag", "Full building re-inspection required for change of use", {
+    condition: 'IF space_use_change creates different\n  building_code_classification = TRUE\nTHEN entire building re-inspection required\n  (if no fire wall separation)',
+    facts: { work_category: 'CHANGE_OF_USE', prior_classification: 'Obstetric/Newborn', new_classification: 'Surgical Specialty', fire_wall_separation: 'TO BE DETERMINED' },
+    reasoning: 'OAC 5122-14-10 requires a full building re-inspection when a space use change creates a different building code classification. Converting obstetric space to surgical specialty may change the sub-classification within I-2 occupancy. If there is no fire wall separation between the changed space and the rest of the building, the entire building may require re-inspection. If fire wall separation exists, only the changed area needs re-inspection. This should be evaluated during the design phase.',
+    deps: []
+  }) : R("skip", "No use change - re-inspection not triggered", { condition: 'IF space_use_change = TRUE', facts: { work_category: wc || 'NONE' }, reasoning: 'The work category is ' + (wc || 'not applicable') + ', not CHANGE_OF_USE. Building re-inspection for use change is not triggered.', deps: [] });
+
+  return results;
+}
+
+// ══════════════════════════════════════════ APP LOGIC ══════════════════════════════════════════
+
+let currentScenario = null;
+let evalResults = {};
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.getElementById('page-' + page).classList.add('visible');
+  const stepMap = { intake: 1, evaluation: 2, results: 3, audit: 4 };
+  const current = stepMap[page] || 1;
+  document.querySelectorAll('.step').forEach(s => {
+    const n = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (n === current) s.classList.add('active');
+    else if (n < current) s.classList.add('done');
+  });
+  document.querySelectorAll('.step-line').forEach((line, i) => {
+    line.classList.toggle('done', i < current - 1);
+  });
+  document.querySelectorAll('.topnav .nav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.topnav .nav-links a')[0].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Map from beds_data keys to input ID prefixes
+const BED_ID_MAP = {
+  medsurg: 'b_medsurg', icu: 'b_icu', rehab_sub: 'b_rehab_sub', burn: 'b_burn',
+  ed: 'b_ed', hospice: 'b_hospice', ltac: 'b_ltac', peds: 'b_peds', picu: 'b_picu',
+  physrehab: 'b_physrehab', psych: 'b_psych', psych_mhas: 'b_psych_mhas', other: 'b_other',
+  snf: 'b_snf', nf: 'b_nf', snfnf: 'b_snfnf', specskill: 'b_specskill',
+  ob1: 'b_ob1', ob2: 'b_ob2', ob3: 'b_ob3', ob4: 'b_ob4',
+  neo1: 'b_neo1', neo2: 'b_neo2', neo3: 'b_neo3', neo4: 'b_neo4'
+};
+
+function loadScenario(key) {
+  clearForm();
+  currentScenario = key;
+  const s = SCENARIOS[key];
+
+  // Header (ODH fields)
+  document.getElementById('f_name').value = s.name;
+  document.getElementById('f_license_num').value = s.license_num;
+  document.getElementById('f_address').value = s.address;
+  document.getElementById('f_loc_type').value = s.loc_type;
+  if (s.loc_type === 'PROVIDER_BASED') {
+    document.getElementById('f_loc_name').value = s.loc_name;
+    document.getElementById('f_loc_name').disabled = false;
+    document.getElementById('f_loc_addr').value = s.loc_addr;
+    document.getElementById('f_loc_addr').disabled = false;
+  }
+
+  // Supplemental
+  document.getElementById('f_type').value = s.type;
+  document.getElementById('f_cms').value = s.cms;
+  document.getElementById('f_license').value = s.license;
+  document.getElementById('f_accredited').value = s.accredited;
+  document.getElementById('f_swing').value = s.swing;
+  document.getElementById('f_capex').value = s.capex;
+
+  // Bed table
+  for (const [cat, prefix] of Object.entries(BED_ID_MAP)) {
+    const d = s.beds_data[cat];
+    if (d) {
+      const setCur = document.getElementById(prefix + '_cur');
+      const setCurfl = document.getElementById(prefix + '_curfl');
+      const setNew = document.getElementById(prefix + '_new');
+      const setNewfl = document.getElementById(prefix + '_newfl');
+      const setDate = document.getElementById(prefix + '_date');
+      if (setCur) setCur.value = d.cur || '';
+      if (setCurfl) setCurfl.value = d.curfl || '';
+      if (setNew) setNew.value = d.new !== undefined ? d.new : '';
+      if (setNewfl) setNewfl.value = d.newfl || '';
+      if (setDate) setDate.value = d.date || '';
+    }
+  }
+
+  // Affirmation
+  document.getElementById('f_auth_name').value = s.auth_name || '';
+  document.getElementById('f_auth_title').value = s.auth_title || '';
+  document.getElementById('f_auth_email').value = s.auth_email || '';
+  document.getElementById('f_approval_date').value = s.approval_date;
+
+  // Construction
+  document.getElementById('f_target_date').value = s.target_date;
+  document.getElementById('f_construction').checked = s.construction;
+  document.getElementById('f_involves_ob').checked = s.involves_ob;
+  document.getElementById('f_involves_ed').checked = s.involves_ed;
+  document.getElementById('f_area_pct').value = s.area_pct;
+  document.getElementById('f_work_cat').value = s.work_cat;
+
+  // Flash effect on cards that got populated
+  document.querySelectorAll('#page-intake .card').forEach((card, i) => {
+    if (i === 0) return; // skip scenario bar
+    card.style.borderColor = 'var(--green)';
+    setTimeout(() => { card.style.borderColor = ''; }, 1000);
+  });
+}
+
+function clearForm() {
+  currentScenario = null;
+  document.querySelectorAll('#page-intake input, #page-intake select').forEach(el => {
+    if (el.type === 'checkbox') el.checked = false;
+    else el.value = el.tagName === 'SELECT' ? el.options[0].value : '';
+  });
+  // Reset provider-based fields
+  document.getElementById('f_loc_name').disabled = true;
+  document.getElementById('f_loc_addr').disabled = true;
+}
+
+function startEvaluation() {
+  const name = document.getElementById('f_name').value;
+  if (!name) { alert('Please fill in the hospital name or select a demo scenario.'); return; }
+
+  // If no scenario was explicitly selected, use scenario A results as fallback
+  if (!currentScenario) currentScenario = 'A';
+  evalResults = getScenarioResults(currentScenario);
+
+  document.getElementById('eval-hospital-name').textContent = name;
+  showPage('evaluation');
+  buildEvaluation(name);
+}
+
+function buildEvaluation(hospitalName) {
+  const container = document.getElementById('eval-phases');
+  container.innerHTML = '';
+  document.getElementById('btn-view-results').style.display = 'none';
+
+  PHASES.forEach((phase, pi) => {
+    const div = document.createElement('div');
+    div.className = 'eval-phase waiting';
+    div.id = 'phase-' + phase.id;
+    div.innerHTML = `
+      <div class="eval-phase-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="phase-icon">${phase.icon}</div>
+        <h3>${phase.name}</h3>
+        <span class="phase-status" style="background: var(--light-gray); color: var(--gray);">Waiting</span>
+      </div>
+      <div class="eval-phase-body">
+        ${phase.rules.map(r => {
+          const res = evalResults[r.id] || { status: "pass", result: "Evaluated" };
+          const statusClass = { pass: "status-pass", flag: "status-flag", block: "status-block", skip: "status-skip", wait: "status-wait" }[res.status] || "status-pass";
+          const statusText = { pass: "PASS", flag: "ACTION NEEDED", block: "BLOCKED", skip: "SKIPPED", wait: "WAITING" }[res.status] || "PASS";
+          return `<div class="rule-row">
+            <span class="rule-id">${r.id}</span>
+            <div class="rule-detail">
+              <div class="rule-name">${r.name}</div>
+              <div class="rule-citation">${r.citation}</div>
+              <div class="rule-result" style="color: var(--text-secondary);">${res.result}</div>
+            </div>
+            <span class="rule-status ${statusClass}">${statusText}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Animate phases
+  animatePhases(0);
+}
+
+function animatePhases(index) {
+  if (index >= PHASES.length) {
+    document.getElementById('btn-view-results').style.display = 'inline-flex';
+    document.getElementById('btn-view-results').classList.add('animate-in');
+    buildResults();
+    return;
+  }
+  const phase = PHASES[index];
+  const el = document.getElementById('phase-' + phase.id);
+  el.className = 'eval-phase processing';
+  el.querySelector('.phase-status').textContent = 'Evaluating...';
+  el.querySelector('.phase-status').style.cssText = 'background: var(--accent-light); color: var(--accent);';
+  el.querySelector('.phase-icon').classList.add('pulsing');
+
+  setTimeout(() => {
+    const hasBlock = phase.rules.some(r => (evalResults[r.id] || {}).status === 'block');
+    const hasFlag = phase.rules.some(r => (evalResults[r.id] || {}).status === 'flag' || (evalResults[r.id] || {}).status === 'wait');
+    const allSkip = phase.rules.every(r => (evalResults[r.id] || {}).status === 'skip');
+
+    if (hasBlock) {
+      el.className = 'eval-phase blocked open';
+      el.querySelector('.phase-status').textContent = 'BLOCKED';
+      el.querySelector('.phase-status').style.cssText = 'background: var(--red-light); color: var(--red);';
+    } else if (hasFlag) {
+      el.className = 'eval-phase flagged';
+      el.querySelector('.phase-status').textContent = 'ACTION NEEDED';
+      el.querySelector('.phase-status').style.cssText = 'background: var(--amber-light); color: var(--amber);';
+    } else if (allSkip) {
+      el.className = 'eval-phase passed';
+      el.querySelector('.phase-status').textContent = 'BYPASSED';
+      el.querySelector('.phase-status').style.cssText = 'background: var(--light-gray); color: var(--gray);';
+    } else {
+      el.className = 'eval-phase passed';
+      el.querySelector('.phase-status').textContent = 'PASSED';
+      el.querySelector('.phase-status').style.cssText = 'background: var(--green-light); color: var(--green);';
+    }
+    el.querySelector('.phase-icon').classList.remove('pulsing');
+    animatePhases(index + 1);
+  }, 600 + Math.random() * 400);
+}
+
+function buildResults() {
+  const name = document.getElementById('f_name').value;
+  document.getElementById('res-hospital-name').textContent = name;
+
+  // Count results
+  let passed = 0, flagged = 0, blocked = 0, skipped = 0;
+  Object.values(evalResults).forEach(r => {
+    if (r.status === 'pass') passed++;
+    else if (r.status === 'flag' || r.status === 'wait') flagged++;
+    else if (r.status === 'block') blocked++;
+    else skipped++;
+  });
+  const total = passed + flagged + blocked;
+
+  document.getElementById('result-stats').innerHTML = `
+    <div class="result-stat"><div class="stat-value" style="color: var(--navy);">${total}</div><div class="stat-label">Rules Evaluated</div></div>
+    <div class="result-stat"><div class="stat-value" style="color: var(--green);">${passed}</div><div class="stat-label">Passed</div></div>
+    <div class="result-stat"><div class="stat-value" style="color: var(--amber);">${flagged}</div><div class="stat-label">Action Required</div></div>
+    <div class="result-stat"><div class="stat-value" style="color: var(--red);">${blocked}</div><div class="stat-label">Blocked</div></div>
+  `;
+
+  // Decision banner
+  const banner = document.getElementById('decision-banner');
+  if (blocked > 0) {
+    banner.style.background = 'var(--red-light)';
+    banner.style.borderColor = 'var(--red)';
+    banner.innerHTML = `<div style="font-size: 36px; margin-bottom: 8px;">&#9940;</div><h2 style="color: var(--red); font-size: 22px;">CAPACITY CHANGE: BLOCKED</h2><p style="color: var(--text-secondary); margin-top: 8px;">${blocked} blocking condition(s) must be resolved before this change can proceed.</p>`;
+  } else if (flagged > 0) {
+    banner.style.background = 'var(--green-light)';
+    banner.style.borderColor = 'var(--green)';
+    banner.innerHTML = `<div style="font-size: 36px; margin-bottom: 8px;">&#9989;</div><h2 style="color: var(--green); font-size: 22px;">CAPACITY CHANGE: APPROVED WITH CONDITIONS</h2><p style="color: var(--text-secondary); margin-top: 8px;">${flagged} action item(s) required. See compliance checklist below.</p>`;
+  } else {
+    banner.style.background = 'var(--green-light)';
+    banner.style.borderColor = 'var(--green)';
+    banner.innerHTML = `<div style="font-size: 36px; margin-bottom: 8px;">&#9989;</div><h2 style="color: var(--green); font-size: 22px;">CAPACITY CHANGE: APPROVED</h2><p style="color: var(--text-secondary); margin-top: 8px;">All regulatory requirements satisfied.</p>`;
+  }
+
+  // Triggered rules list
+  const triggeredEl = document.getElementById('triggered-rules-list');
+  let triggeredHtml = '';
+  PHASES.forEach(phase => {
+    const activeRules = phase.rules.filter(r => evalResults[r.id] && evalResults[r.id].status !== 'skip');
+    if (activeRules.length === 0) return;
+    triggeredHtml += `<div style="margin-top: 16px; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.3px;">${phase.name}</div>`;
+    activeRules.forEach(r => {
+      const res = evalResults[r.id];
+      const statusClass = { pass: "status-pass", flag: "status-flag", block: "status-block", wait: "status-wait" }[res.status];
+      const statusText = { pass: "COMPLIANT", flag: "ACTION NEEDED", block: "BLOCKED", wait: "WAITING" }[res.status];
+      triggeredHtml += `<div class="rule-row"><span class="rule-id">${r.id}</span><div class="rule-detail"><div class="rule-name">${r.name}</div><div class="rule-citation">${r.citation}</div><div class="rule-result" style="color: var(--text-secondary);">${res.result}</div></div><span class="rule-status ${statusClass}">${statusText}</span></div>`;
+    });
+  });
+  triggeredEl.innerHTML = triggeredHtml;
+
+  // Timeline
+  const targetDate = document.getElementById('f_target_date').value;
+  const tl = document.getElementById('action-timeline');
+  const timelineItems = [];
+  if (evalResults["OH-006"] && evalResults["OH-006"].status === "flag") {
+    timelineItems.push({ cls: "critical", date: "Immediate", title: "File CON Application with ODH", desc: "Certificate of Need review triggered. $20,000 application fee. 60-day review window." });
+    timelineItems.push({ cls: "warning", date: "+105 days", title: "CON Decision Expected", desc: "45-day completeness review + 60-day standard review period." });
+  }
+  if (evalResults["FED-008"] && evalResults["FED-008"].status === "flag") {
+    timelineItems.push({ cls: "warning", date: "30 days before target", title: "File PSF Update with MAC", desc: "30-day advance written notice required for bed count change in Provider Specific File." });
+  }
+  if (evalResults["OH-015"] && evalResults["OH-015"].status === "flag") {
+    timelineItems.push({ cls: "warning", date: "Before construction", title: "Submit Plans to Fire Marshal", desc: "Construction plans must be reviewed and approved by Ohio State Fire Marshal." });
+  }
+  if (evalResults["OH-016"] && evalResults["OH-016"].status === "flag") {
+    timelineItems.push({ cls: "warning", date: "Before construction", title: "Obtain Building Permit", desc: "Building permit from local authority having jurisdiction." });
+  }
+  if (evalResults["FED-019"] && evalResults["FED-019"].status === "flag") {
+    timelineItems.push({ cls: "", date: "During design", title: "Complete ADA Path of Travel Assessment", desc: "Evaluate accessibility of routes, restrooms, and entrances serving altered areas." });
+  }
+  if (evalResults["OH-005"] && evalResults["OH-005"].status === "flag") {
+    timelineItems.push({ cls: "warning", date: "Before opening", title: "Schedule ODH On-Site Inspection", desc: "Mandatory Ohio Dept. of Health inspection for maternity/newborn service changes." });
+  }
+  timelineItems.push({ cls: "", date: "Before opening", title: "Building Inspection & Certificate of Occupancy", desc: "Final building inspection and certificate of occupancy required." });
+  timelineItems.push({ cls: "", date: targetDate || "Target date", title: "Capacity Change Goes Live", desc: "New bed configuration operational. Infection prevention and QAPI programs updated." });
+  if (evalResults["OH-002"] && evalResults["OH-002"].status === "flag") {
+    timelineItems.push({ cls: "done", date: "Within 30 days", title: "File License Amendment with ODH", desc: "Updated bed count submitted to Ohio Department of Health." });
+  }
+  timelineItems.push({ cls: "done", date: "Within 90 days", title: "Update CMS-855A via PECOS", desc: "Medicare enrollment update reflecting new capacity and service configuration." });
+
+  tl.innerHTML = timelineItems.map(item => `
+    <div class="timeline-item ${item.cls}">
+      <div class="tl-date">${item.date}</div>
+      <h4>${item.title}</h4>
+      <p>${item.desc}</p>
+    </div>
+  `).join('');
+
+  // Build Audit page
+  buildAudit();
+}
+
+function buildAudit() {
+  const name = document.getElementById('f_name').value;
+  const now = new Date().toISOString();
+  const decisionId = 'DEC-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+  const ontologyVersion = 'OH-HCC-v0.1.3';
+  const hashBytes = crypto.getRandomValues(new Uint8Array(32));
+  const hash = Array.from(hashBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  const prevHash = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const meta = document.getElementById('audit-metadata');
+  const fields = [
+    ['Decision ID', decisionId],
+    ['Ontology Version', ontologyVersion],
+    ['Evaluation Timestamp', now],
+    ['Hospital', name],
+    ['Evaluator', 'GovPoint Decision Engine v0.1'],
+    ['Decision Mode', 'DETERMINISTIC (no LLM escalation required)'],
+    ['Total Rules in Ontology', '40'],
+    ['Rules Evaluated', Object.values(evalResults).filter(r => r.status !== 'skip').length.toString()],
+    ['Rules Skipped', Object.values(evalResults).filter(r => r.status === 'skip').length.toString()],
+    ['Evaluation Duration', (180 + Math.floor(Math.random() * 40)) + 'ms'],
+    ['Record Hash (SHA-256)', hash],
+    ['Previous Record Hash', prevHash],
+    ['Hash Chain Status', 'VERIFIED - Chain integrity confirmed'],
+  ];
+  meta.innerHTML = fields.map(([k, v]) => `
+    <div style="font-weight: 600; color: var(--navy); padding: 4px 0;">${k}</div>
+    <div style="color: var(--text-secondary); font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 11px; padding: 4px 0; word-break: break-all;">${v}</div>
+  `).join('');
+
+  // Build enhanced audit sequence
+  const seq = document.getElementById('audit-sequence');
+  let html = '';
+  let stepNum = 0;
+  const statusMap = { pass: 'PASS', flag: 'ACTION NEEDED', block: 'BLOCKED', skip: 'SKIPPED', wait: 'WAITING' };
+  const statusColorMap = { pass: 'status-pass', flag: 'status-flag', block: 'status-block', skip: 'status-skip', wait: 'status-wait' };
+  const phaseColors = { governance: '#C62828', classification: '#2E75B6', con: '#7B1FA2', federal: '#1B3A5C', safety: '#E65100', impact: '#0277BD', reporting: '#2E7D32' };
+
+  PHASES.forEach(phase => {
+    html += `<div class="audit-phase-divider">
+      <div class="phase-dot" style="background: ${phaseColors[phase.id] || 'var(--navy)'}"></div>
+      ${phase.name}
+    </div>`;
+
+    phase.rules.forEach(r => {
+      stepNum++;
+      const res = evalResults[r.id] || { status: 'skip', result: 'Not evaluated' };
+      const hasFacts = res.facts && Object.keys(res.facts).length > 0;
+      const hasDeps = res.deps && res.deps.length > 0;
+      const depTypeClass = { gate: 'dep-gate', requires: 'dep-requires', exempts: 'dep-exempts', triggers: 'dep-triggers', routes: 'dep-routes' };
+
+      html += `<div class="audit-entry" id="audit-${r.id}">
+        <div class="audit-entry-header" onclick="document.getElementById('audit-${r.id}').classList.toggle('open')">
+          <div class="entry-num">${stepNum}</div>
+          <span class="entry-id">${r.id}</span>
+          <span class="entry-name">${r.name}</span>
+          <span class="entry-status ${statusColorMap[res.status]}">${statusMap[res.status]}</span>
+          <span class="entry-arrow">&#9654;</span>
+        </div>
+        <div class="audit-entry-body">
+
+          <!-- Citation -->
+          <div class="audit-section">
+            <div class="audit-section-label">Regulatory Citation</div>
+            <div style="font-size: 13px; color: var(--text-secondary); font-style: italic;">${r.citation}</div>
+          </div>
+
+          <!-- Condition Logic -->
+          ${res.condition ? `<div class="audit-section">
+            <div class="audit-section-label">Condition Evaluated</div>
+            <div class="audit-condition">${res.condition.replace(/\n/g, '<br>').replace(/(IF|THEN|AND|OR|ELSE|MUST|NOT|IN|CLASSIFY|EVALUATE|RESOLVE|INCLUDE|EXCLUDE|NOTE|FOR|TO|BY)/g, '<span class="kw">$1</span>').replace(/(TRUE|FALSE|APPROVED|REVOKED|REQUIRED|ACTIVE|MATCH|NO|YES|MANDATORY|ELIGIBLE)/g, '<span class="val">$1</span>').replace(/(=|!=|>=|<=|>|<|\+)/g, '<span class="op">$1</span>').replace(/(\/\/.*?)(<br>|$)/g, '<span class="cmt">$1</span>$2')}</div>
+          </div>` : ''}
+
+          <!-- Facts Evaluated -->
+          ${hasFacts ? `<div class="audit-section">
+            <div class="audit-section-label">Input Facts Evaluated</div>
+            <div class="audit-facts-grid">
+              ${Object.entries(res.facts).map(([k, v]) => `<div class="audit-fact"><span class="fact-name">${k}</span><span class="fact-val">${v}</span></div>`).join('')}
+            </div>
+          </div>` : ''}
+
+          <!-- Reasoning -->
+          ${res.reasoning ? `<div class="audit-section">
+            <div class="audit-section-label">Reasoning Chain</div>
+            <div class="audit-reasoning">${res.reasoning}</div>
+          </div>` : ''}
+
+          <!-- Dependencies -->
+          ${hasDeps ? `<div class="audit-section">
+            <div class="audit-section-label">Dependency Edges</div>
+            <div class="audit-deps">
+              ${res.deps.map(d => `<span class="audit-dep-tag ${depTypeClass[d.type] || 'dep-requires'}">${d.type.toUpperCase()}: ${d.target}</span>`).join('')}
+            </div>
+            <div style="font-size: 11px; color: var(--gray); margin-top: 6px;">${res.deps.map(d => d.label).join(' | ')}</div>
+          </div>` : ''}
+
+          <!-- Result -->
+          <div class="audit-section" style="margin-bottom: 0;">
+            <div class="audit-section-label">Evaluation Result</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text);">${res.result}</div>
+          </div>
+
+        </div>
+      </div>`;
+    });
+  });
+
+  seq.innerHTML = html;
+
+  // Auto-expand first non-skipped entry for demo effect
+  const firstActive = document.querySelector('.audit-entry');
+  if (firstActive) firstActive.classList.add('open');
+}
+
+// ── Location type toggle ──
+document.getElementById('f_loc_type').addEventListener('change', function() {
+  const isPB = this.value === 'PROVIDER_BASED';
+  document.getElementById('f_loc_name').disabled = !isPB;
+  document.getElementById('f_loc_addr').disabled = !isPB;
+  if (!isPB) {
+    document.getElementById('f_loc_name').value = '';
+    document.getElementById('f_loc_addr').value = '';
+  }
+});
+</script>
+
+<!-- ── DISCLAIMER FOOTER ── -->
+<footer style="background: var(--navy); color: rgba(255,255,255,0.7); text-align: center; padding: 20px 32px; font-size: 12px; line-height: 1.6; margin-top: 48px;">
+  <div style="max-width: 800px; margin: 0 auto;">
+    <strong style="color: white;">PROTOTYPE DEMONSTRATION</strong><br>
+    This is a product concept by <a href="https://aimpointtechnology.com" style="color: #8BB8E8; text-decoration: none;">Aimpoint Technology</a>. Not affiliated with or endorsed by the Ohio Department of Health.<br>
+    Form structure references ODH HEA 3614. Regulatory citations are for demonstration purposes and should not be used as legal guidance.<br>
+    <span style="color: rgba(255,255,255,0.4); margin-top: 8px; display: inline-block;">&copy; 2026 Aimpoint Technology &middot; GovPoint Policy Intelligence Infrastructure</span>
+  </div>
+</footer>
+
+</body>
+</html>

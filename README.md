@@ -23,4 +23,4 @@ This is a product concept by Aimpoint Technology. Not affiliated with or endorse
 
 ---
 
-(c) 2026 Aimpoint Technology
+© 2026 Aimpoint Technology
