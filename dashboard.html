@@ -79,6 +79,14 @@
   .tenant-option .tenant-name { color: var(--navy); font-weight: 600; }
   .tenant-option .tenant-detail { font-size: 11px; color: var(--text-secondary); }
 
+  /* ── DASHBOARD FILTER ── */
+  .dash-filter { display: flex; align-items: center; gap: 10px; }
+  .dash-filter-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px; }
+  .dash-filter-pills { display: flex; gap: 4px; background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 3px; }
+  .dash-pill { padding: 6px 14px; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
+  .dash-pill:hover { color: var(--navy); background: var(--light-gray); }
+  .dash-pill.active { background: var(--accent); color: white; }
+
   /* ── MAIN CONTENT ── */
   .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
 
@@ -241,8 +249,20 @@
 </nav>
 
 <div class="container">
-  <div class="page-title">Analytics Dashboard</div>
-  <div class="page-subtitle">Real-time regulatory ontology health monitoring</div>
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+    <div>
+      <div class="page-title">Analytics Dashboard</div>
+      <div class="page-subtitle" id="dashSubtitle">Hospital Licensing — Ohio Department of Health</div>
+    </div>
+    <div class="dash-filter">
+      <span class="dash-filter-label">Showing:</span>
+      <div class="dash-filter-pills" id="dashFilterPills">
+        <button class="dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
+        <button class="dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">All Tenant Programs</button>
+        <button class="dash-pill" data-filter="all" onclick="setDashFilter('all')">All Programs</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Summary Cards -->
   <div class="summary-grid" id="summaryGrid">
@@ -421,6 +441,17 @@
     'user-101': { name: 'Maria Torres', initials: 'MT', role: 'Publisher' }
   };
 
+  // ── DASHBOARD FILTER ─────────────────────────────────────────
+  let dashFilter = 'current'; // 'current', 'tenant', 'all'
+
+  function setDashFilter(mode) {
+    dashFilter = mode;
+    document.querySelectorAll('.dash-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === mode);
+    });
+    loadDashboardData();
+  }
+
   // ── PROGRAM SWITCHER ──────────────────────────────────────────
   function switchProgram(programId) {
     currentProgram = programId;
@@ -515,13 +546,29 @@
   async function loadDashboardData() {
     try {
       const config = PROGRAM_CONFIG[currentProgram];
-      // Fetch all required data in parallel, with tenant and program filtering
+
+      // Build filters based on dashboard filter mode
+      let rulesFilters = {};
+      let auditFilters = {};
+      let userFilters = {};
+
+      if (dashFilter === 'current') {
+        rulesFilters = { tenant_id: config.tenant, program_id: currentProgram };
+        auditFilters = { tenant_id: config.tenant };
+        userFilters = { tenant_id: config.tenant };
+      } else if (dashFilter === 'tenant') {
+        rulesFilters = { tenant_id: config.tenant };
+        auditFilters = { tenant_id: config.tenant };
+        userFilters = { tenant_id: config.tenant };
+      }
+      // 'all' = no filters
+
       const [rules, conditions, dependencies, auditLog, users] = await Promise.all([
-        supabase.query('rules', { select: '*', limit: 1000, filters: { tenant_id: config.tenant, program_id: currentProgram } }),
-        supabase.query('rule_conditions', { select: '*', limit: 1000 }),
-        supabase.query('rule_dependencies', { select: '*', limit: 1000 }),
-        supabase.query('audit_log', { select: '*', limit: 10, order: ['timestamp', 'desc'], filters: { tenant_id: config.tenant } }),
-        supabase.query('users', { select: '*', limit: 1000, filters: { tenant_id: config.tenant } })
+        supabase.query('rules', { select: '*', limit: 2000, filters: rulesFilters }),
+        supabase.query('rule_conditions', { select: '*', limit: 5000 }),
+        supabase.query('rule_dependencies', { select: '*', limit: 2000 }),
+        supabase.query('audit_log', { select: '*', limit: 10, order: ['timestamp', 'desc'], filters: auditFilters }),
+        supabase.query('users', { select: '*', limit: 1000, filters: userFilters })
       ]);
 
       dashboardData.rules = rules || [];
@@ -540,6 +587,16 @@
       }
 
       // Render dashboard
+      // Update subtitle to reflect filter
+      const subtitle = document.getElementById('dashSubtitle');
+      if (dashFilter === 'current') {
+        subtitle.textContent = `${config.programName} — ${config.name}`;
+      } else if (dashFilter === 'tenant') {
+        subtitle.textContent = `All programs — ${config.name}`;
+      } else {
+        subtitle.textContent = 'All tenants · All programs';
+      }
+
       renderSummaryCards();
       renderCharts();
       renderActivityTable();
