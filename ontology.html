@@ -1322,6 +1322,92 @@
     to { transform: translateY(0); opacity: 1; }
   }
 
+  /* ── WORKFLOW RAIL ── */
+  .workflow-rail {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: 10px;
+  }
+  .workflow-stage {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 2px;
+    background: var(--slds-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--slds-border);
+    white-space: nowrap;
+  }
+  .workflow-stage.stage-completed { background: #D4EDDA; color: var(--slds-success); border-color: #b7dfbf; }
+  .workflow-stage.stage-current-draft { background: #FFF3D8; color: var(--slds-warning); border-color: #f0c77a; }
+  .workflow-stage.stage-current-review { background: #E7D4F5; color: var(--slds-purple); border-color: #c9a8e8; }
+  .workflow-stage.stage-current-active { background: #D4EDDA; color: var(--slds-success); border-color: var(--slds-success); }
+  .workflow-stage.stage-current-sunset { background: #F8D7DA; color: var(--slds-error); border-color: #e8a8a8; }
+  .workflow-rail-arrow { color: #C8C8C8; font-size: 12px; padding: 0 2px; }
+
+  /* ── CITATION CHIP ── */
+  .citation-chip {
+    font-size: 11px;
+    color: var(--slds-blue);
+    background: rgba(1, 118, 211, 0.08);
+    border: 1px solid rgba(1, 118, 211, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: all;
+  }
+  .citation-chip:empty { display: none; }
+  .citation-chip-sm {
+    font-size: 10px;
+    color: var(--slds-blue);
+    background: rgba(1, 118, 211, 0.07);
+    border: 1px solid rgba(1, 118, 211, 0.2);
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ── PENDING APPS BADGE ── */
+  .pending-apps-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 8px;
+    background: rgba(1, 118, 211, 0.1);
+    color: var(--slds-blue);
+    border: 1px solid rgba(1, 118, 211, 0.2);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── RULE TYPE FILTER CHIPS ── */
+  .type-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .type-chip {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--slds-border);
+    background: var(--slds-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .type-chip:hover { border-color: var(--slds-blue); color: var(--slds-blue); }
+  .type-chip.active { background: var(--slds-blue); color: white; border-color: var(--slds-blue); }
+
   /* Tooltip */
   .tooltip {
     position: relative;
@@ -1838,7 +1924,17 @@
 
     <!-- Search -->
     <div class="sidebar-search">
-      <input type="text" id="searchInput" placeholder="Search rules..." class="slds-input">
+      <input type="text" id="searchInput" placeholder="Search rules, citations..." class="slds-input">
+    </div>
+
+    <!-- Rule Type Filter Chips -->
+    <div class="type-filter-chips" id="typeFilterChips">
+      <button class="type-chip active" data-type="ALL" onclick="setTypeFilter('ALL')">All</button>
+      <button class="type-chip" data-type="GATE" onclick="setTypeFilter('GATE')">Gate</button>
+      <button class="type-chip" data-type="FILTER" onclick="setTypeFilter('FILTER')">Filter</button>
+      <button class="type-chip" data-type="CALC" onclick="setTypeFilter('CALC')">Calc</button>
+      <button class="type-chip" data-type="ROUTE" onclick="setTypeFilter('ROUTE')">Route</button>
+      <button class="type-chip" data-type="INFO" onclick="setTypeFilter('INFO')">Info</button>
     </div>
 
     <!-- Action Buttons -->
@@ -1859,15 +1955,16 @@
     <div class="detail-header" id="detailHeader" style="display: none;">
       <div>
         <div class="detail-title" id="detailTitle"></div>
-        <div class="detail-meta">
-          <span id="detailStatus"></span>
+        <div id="workflowRail"></div>
+        <div class="detail-meta" style="margin-top: 8px;">
+          <span id="detailCitation" class="citation-chip"></span>
           <span id="detailProgram"></span>
           <span id="detailVersion"></span>
         </div>
       </div>
-      <div class="detail-actions">
-        <button class="slds-button slds-button_neutral" id="simulateBtn">Simulate Impact</button>
-        <button class="primary slds-button slds-button_brand" id="submitBtn">Submit for Review</button>
+      <div class="detail-actions" id="detailActions">
+        <button class="slds-button slds-button_neutral" onclick="triggerSimulate()">Simulate Impact</button>
+        <button class="slds-button slds-button_neutral" style="border-color: var(--slds-blue); color: var(--slds-blue);" onclick="openTestModal()">▶ Test Rule</button>
       </div>
     </div>
 
@@ -2009,6 +2106,49 @@
           <span class="tooltiptext">AI model is configurable per tenant — supports Claude, GPT-4, Gemini, Llama, and custom models</span>
         </span>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pre-flight Save Modal -->
+<div class="impact-modal" id="preflightModal">
+  <div class="impact-content">
+    <span class="impact-close" id="preflightClose">✕</span>
+    <h2 class="impact-title">Confirm Changes</h2>
+    <div class="impact-section">
+      <div class="impact-section-title">Changes to be saved</div>
+      <div id="preflightChanges"></div>
+    </div>
+    <div class="impact-section" id="preflightDepsSection">
+      <div class="impact-section-title">Rules depending on this one</div>
+      <div id="preflightDeps"></div>
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--slds-border);">
+      <button id="preflightCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
+      <button id="preflightConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Test Rule Modal -->
+<div class="impact-modal" id="testRuleModal">
+  <div class="impact-content" style="max-width: 560px;">
+    <span class="impact-close" id="testRuleClose">✕</span>
+    <h2 class="impact-title">Test This Rule</h2>
+    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Enter sample values to verify same facts → same outcome.</p>
+    <div id="testRuleModalContent"></div>
+  </div>
+</div>
+
+<!-- Review Diff Modal -->
+<div class="impact-modal" id="reviewDiffModal">
+  <div class="impact-content" style="max-width: 600px;">
+    <span class="impact-close" id="reviewDiffClose">✕</span>
+    <h2 class="impact-title">Review Proposed Changes</h2>
+    <div id="reviewDiffContent"></div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--slds-border);">
+      <button id="rejectRuleBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-error); color: var(--slds-error); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Reject — Return to Draft</button>
+      <button id="approveRuleBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-success); color: white; border-radius: 2px; cursor: pointer;">Approve — Activate Rule</button>
     </div>
   </div>
 </div>
@@ -2246,6 +2386,18 @@ document.addEventListener('click', (e) => {
 // ── STATE ────────────────────────────────────────────────────
 let currentRule = null;   // full rule object from Supabase
 let rules = [];           // all rules for current program
+let activeTypeFilter = 'ALL';
+let preflightPendingAction = null;
+
+// ── PENDING APPLICATIONS (demo data keyed by rule_id) ────────
+const PENDING_APPS = {
+  'OH-001': 14, 'OH-002': 9,  'OH-003': 22, 'OH-004': 5,  'OH-005': 17,
+  'OH-006': 3,  'OH-007': 11, 'OH-008': 8,  'OH-009': 6,  'OH-010': 2,
+  'OH-011': 19, 'OH-012': 7,  'OH-013': 4,  'OH-014': 12, 'OH-015': 1,
+  'OH-016': 18, 'OH-017': 3,  'OH-018': 25, 'OH-019': 9,  'OH-020': 6,
+  'SNAP-001': 847, 'SNAP-002': 312, 'SNAP-003': 203, 'SNAP-004': 156,
+  'NH-001': 4, 'NH-002': 7, 'NH-003': 2
+};
 
 // ── INITIALIZE — wait for Supabase data ──────────────────────
 async function init() {
@@ -2328,20 +2480,48 @@ async function loadWhatsChanged() {
 function renderRulesList() {
   const container = document.getElementById('rulesList');
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const today = new Date();
 
-  const filtered = rules.filter(r =>
-    r.name.toLowerCase().includes(searchTerm) ||
-    r.rule_id.toLowerCase().includes(searchTerm) ||
-    (r.description || '').toLowerCase().includes(searchTerm)
-  );
+  const filtered = rules.filter(r => {
+    const matchesSearch =
+      r.name.toLowerCase().includes(searchTerm) ||
+      r.rule_id.toLowerCase().includes(searchTerm) ||
+      (r.description || '').toLowerCase().includes(searchTerm) ||
+      (r.citation || '').toLowerCase().includes(searchTerm);
+    const matchesType = activeTypeFilter === 'ALL' || r.rule_type === activeTypeFilter;
+    return matchesSearch && matchesType;
+  });
 
-  container.innerHTML = filtered.map(rule => `
-    <div class="rule-card ${rule.rule_id === currentRule?.rule_id ? 'active' : ''}" data-id="${rule.rule_id}">
-      <div class="rule-name">${rule.rule_id}</div>
-      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">${rule.name}</div>
-      <span class="rule-status slds-badge ${rule.status}" style="font-size: 11px;">${rule.status.toUpperCase()}</span>
-    </div>
-  `).join('');
+  container.innerHTML = filtered.map(rule => {
+    const pending = PENDING_APPS[rule.rule_id];
+    const pendingBadge = pending
+      ? `<span class="pending-apps-badge">${pending} active</span>`
+      : '';
+    const citationChip = rule.citation
+      ? `<span class="citation-chip-sm">${rule.citation}</span>`
+      : '';
+    let effectiveBadge = '';
+    if (rule.effective_date) {
+      const eff = new Date(rule.effective_date);
+      if (eff > today) {
+        effectiveBadge = `<span style="font-size:10px;color:var(--slds-warning);font-weight:600;">Eff. ${eff.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`;
+      }
+    }
+    return `
+      <div class="rule-card ${rule.rule_id === currentRule?.rule_id ? 'active' : ''}" data-id="${rule.rule_id}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div class="rule-name">${rule.rule_id}</div>
+          ${pendingBadge}
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">${rule.name}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+          <span class="rule-status slds-badge ${rule.status}" style="font-size:11px;">${rule.status.toUpperCase()}</span>
+          ${citationChip}
+          ${effectiveBadge}
+        </div>
+      </div>
+    `;
+  }).join('');
 
   container.querySelectorAll('.rule-card').forEach(card => {
     card.addEventListener('click', () => selectRule(card.dataset.id));
@@ -2373,9 +2553,25 @@ async function renderDetailPanel() {
   document.getElementById('noSelection').style.display = 'none';
 
   document.getElementById('detailTitle').textContent = currentRule.name;
-  document.getElementById('detailStatus').textContent = `Status: ${currentRule.status.toUpperCase()}`;
-  document.getElementById('detailProgram').textContent = `Program: Hospital Licensing`;
+  document.getElementById('workflowRail').innerHTML = renderWorkflowRail(currentRule.status);
+  document.getElementById('detailCitation').textContent = currentRule.citation || '';
+  document.getElementById('detailProgram').textContent = `Program: ${PROGRAM_CONFIG[currentProgram].programName}`;
   document.getElementById('detailVersion').textContent = `v${currentRule.version}`;
+
+  // Dynamic action buttons based on status
+  const actionsEl = document.getElementById('detailActions');
+  const s = currentRule.status;
+  let actionBtns = `
+    <button class="slds-button slds-button_neutral" onclick="triggerSimulate()">Simulate Impact</button>
+    <button class="slds-button slds-button_neutral" style="border-color:var(--slds-blue);color:var(--slds-blue);" onclick="openTestModal()">▶ Test Rule</button>`;
+  if (s === 'draft') {
+    actionBtns += `<button class="slds-button slds-button_brand" onclick="transitionStatus('review')">Submit for Review</button>`;
+  } else if (s === 'review') {
+    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-purple);color:var(--slds-purple);" onclick="openReviewDiff()">Review Changes</button>`;
+  } else if (s === 'active') {
+    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-warning);color:var(--slds-warning);" onclick="transitionStatus('sunset')">Sunset Rule</button>`;
+  }
+  actionsEl.innerHTML = actionBtns;
 
   // Fetch related data in parallel
   const [conditions, deps, versions, comments, auditLog] = await Promise.all([
@@ -2680,6 +2876,40 @@ function setupEventListeners() {
     _on('exportJson', 'click', () => { showToast(`Exported ${rules.length} rules to ontology-export.json`); });
     _on('exportPdf', 'click', () => { showToast(`Exported ${rules.length} rules to ontology-export.pdf`); });
   }
+
+  // ── Pre-flight modal wiring ──────────────────────────────
+  _on('preflightConfirmBtn', 'click', executeSave);
+  _on('preflightCancelBtn', 'click', () => document.getElementById('preflightModal')?.classList.remove('active'));
+  _on('preflightClose', 'click', () => document.getElementById('preflightModal')?.classList.remove('active'));
+  _on('testRuleClose', 'click', () => document.getElementById('testRuleModal')?.classList.remove('active'));
+  _on('reviewDiffClose', 'click', () => document.getElementById('reviewDiffModal')?.classList.remove('active'));
+
+  // ── j/k keyboard navigation ──────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target || {}).tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.key !== 'j' && e.key !== 'k') return;
+    e.preventDefault();
+
+    const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const visibleRules = rules.filter(r => {
+      const matchSearch = r.name.toLowerCase().includes(searchTerm) || r.rule_id.toLowerCase().includes(searchTerm);
+      const matchType = activeTypeFilter === 'ALL' || r.rule_type === activeTypeFilter;
+      return matchSearch && matchType;
+    });
+    if (visibleRules.length === 0) return;
+
+    const currentIdx = currentRule ? visibleRules.findIndex(r => r.rule_id === currentRule.rule_id) : -1;
+    const nextIdx = e.key === 'j'
+      ? Math.min(visibleRules.length - 1, currentIdx + 1)
+      : Math.max(0, currentIdx - 1);
+    if (nextIdx === currentIdx) return;
+    selectRule(visibleRules[nextIdx].rule_id);
+    setTimeout(() => {
+      const card = document.querySelector(`.rule-card[data-id="${visibleRules[nextIdx].rule_id}"]`);
+      if (card) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 120);
+  });
 }
 
 function resetUploadModal() {
@@ -2723,76 +2953,99 @@ function simulateUpload() {
   }, 1500);
 }
 
-// ── WRITE-BACK: Save Rule to Supabase ─────────────────────────
+// ── WRITE-BACK: Save Rule — collect changes, show pre-flight ──
 async function saveRule() {
   if (!currentRule) return;
+
+  // Collect form values from the Overview tab
+  const overview = document.getElementById('overviewContent');
+  if (!overview) return;
+
+  const fields = {};
+  const labels = overview.querySelectorAll('div[style*="font-weight: 700"]');
+  labels.forEach((label) => {
+    const key = label.textContent.trim();
+    const parent = label.parentElement;
+    const input = parent.querySelector('input, textarea, select');
+    if (!input) return;
+    const val = input.value.trim();
+    switch (key) {
+      case 'NAME': fields.name = val; break;
+      case 'DESCRIPTION': fields.description = val; break;
+      case 'CITATION': fields.citation = val; break;
+      case 'JURISDICTION': fields.jurisdiction = val; break;
+      case 'STATUS': fields.status = val; break;
+      case 'RULE TYPE': fields.rule_type = val.split(' —')[0]; break;
+      case 'PRIORITY': fields.priority = val.split(' —')[0]; break;
+      case 'PHASE': fields.phase = val; break;
+      case 'CLASSIFICATION': fields.classification = val; break;
+      case 'EFFECTIVE DATE': fields.effective_date = val || null; break;
+      case 'SUNSET DATE': fields.sunset_date = val || null; break;
+    }
+  });
+
+  const changes = [];
+  for (const [k, v] of Object.entries(fields)) {
+    if (currentRule[k] !== v && v !== undefined) {
+      const displayKey = k.replace(/_/g, ' ').toUpperCase();
+      changes.push({ key: k, label: displayKey, from: currentRule[k], to: v });
+    }
+  }
+
+  if (changes.length === 0) {
+    showToast('No changes to save');
+    return;
+  }
+
+  // Populate and show pre-flight modal
+  const deps = await lexipoint.getDependencies(currentRule.rule_id);
+
+  document.getElementById('preflightChanges').innerHTML = changes.map(c =>
+    `<div class="impact-item"><strong>${c.label}:</strong> <span style="color:var(--slds-error);text-decoration:line-through;">${c.from || '(none)'}</span> → <span style="color:var(--slds-success);">${c.to}</span></div>`
+  ).join('');
+
+  const depsEl = document.getElementById('preflightDeps');
+  if (deps.dependedOnBy.length > 0) {
+    depsEl.innerHTML = deps.dependedOnBy.map(d =>
+      `<div class="impact-item">→ <strong>${d.sourceRule?.rule_id || d.rule_id}</strong> ${d.sourceRule?.name || ''}</div>`
+    ).join('');
+  } else {
+    depsEl.innerHTML = '<div class="impact-item" style="color:var(--text-secondary);">No other rules depend on this one.</div>';
+  }
+
+  preflightPendingAction = { fields, changes: changes.map(c => `${c.label}: "${c.from}" → "${c.to}"`) };
+  document.getElementById('preflightModal').classList.add('active');
+}
+
+// ── WRITE-BACK: Execute Save (called from pre-flight confirm) ──
+async function executeSave() {
+  const pending = preflightPendingAction;
+  if (!pending || !currentRule) return;
+  const { fields, changes } = pending;
+  preflightPendingAction = null;
+  document.getElementById('preflightModal').classList.remove('active');
+
   const btn = document.getElementById('saveRuleBtn');
-  btn.textContent = 'Saving...';
-  btn.disabled = true;
+  if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
 
   try {
-    // Collect form values from the Overview tab
-    const overview = document.getElementById('overviewContent');
-    const inputs = overview.querySelectorAll('input, textarea, select');
-
-    // Map fields by label order: NAME, DESCRIPTION, CITATION, JURISDICTION, STATUS,
-    // RULE TYPE, PRIORITY, PHASE, CLASSIFICATION, EFFECTIVE DATE, SUNSET DATE
-    const fields = {};
-    const labels = overview.querySelectorAll('div[style*="font-weight: 700"]');
-    labels.forEach((label, i) => {
-      const key = label.textContent.trim();
-      const parent = label.parentElement;
-      const input = parent.querySelector('input, textarea, select');
-      if (!input) return;
-      const val = input.value.trim();
-      switch (key) {
-        case 'NAME': fields.name = val; break;
-        case 'DESCRIPTION': fields.description = val; break;
-        case 'CITATION': fields.citation = val; break;
-        case 'JURISDICTION': fields.jurisdiction = val; break;
-        case 'STATUS': fields.status = val; break;
-        case 'RULE TYPE': fields.rule_type = val.split(' —')[0]; break;
-        case 'PRIORITY': fields.priority = val.split(' —')[0]; break;
-        case 'PHASE': fields.phase = val; break;
-        case 'CLASSIFICATION': fields.classification = val; break;
-        case 'EFFECTIVE DATE': fields.effective_date = val || null; break;
-        case 'SUNSET DATE': fields.sunset_date = val || null; break;
-      }
-    });
-
-    // Build changes summary for audit log
-    const changes = [];
-    for (const [k, v] of Object.entries(fields)) {
-      if (currentRule[k] !== v && v !== undefined) {
-        changes.push(`${k}: "${currentRule[k]}" → "${v}"`);
-      }
-    }
-
-    if (changes.length === 0) {
-      showToast('No changes to save');
-      btn.textContent = 'Save Changes';
-      btn.disabled = false;
-      return;
-    }
-
-    // Save to database
+    const config = PROGRAM_CONFIG[currentProgram];
     const updated = await lexipoint.updateRule(currentRule.rule_id, fields);
-
-    // Write audit log entry
     await lexipoint.addAuditEntry(
-      'ohio-odh', 'user-001', 'publisher', 'edit_rule',
-      'rule', currentRule.rule_id,
-      changes.join('; ')
+      config.tenant, config.userId, 'publisher', 'edit_rule',
+      'rule', currentRule.rule_id, changes.join('; ')
     );
 
-    // Refresh local state
     currentRule = updated;
-    rules = await lexipoint.getRules('hosp-licensing');
+    rules = await lexipoint.getRules(currentProgram);
+    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
+    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
     renderRulesList();
+    renderWorkspaceTabs();
 
-    // Update header
     document.getElementById('detailTitle').textContent = updated.name;
-    document.getElementById('detailStatus').textContent = `Status: ${updated.status.toUpperCase()}`;
+    document.getElementById('workflowRail').innerHTML = renderWorkflowRail(updated.status);
+    document.getElementById('detailCitation').textContent = updated.citation || '';
     document.getElementById('detailVersion').textContent = `v${updated.version}`;
 
     showToast(`Saved ${changes.length} change${changes.length > 1 ? 's' : ''} to ${updated.rule_id}`);
@@ -2801,8 +3054,136 @@ async function saveRule() {
     console.error('[Save] Failed:', e);
   }
 
-  btn.textContent = 'Save Changes';
-  btn.disabled = false;
+  if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+}
+
+// ── WORKFLOW RAIL RENDERER ────────────────────────────────────
+function renderWorkflowRail(status) {
+  const stages = [
+    { key: 'draft',  label: 'Draft' },
+    { key: 'review', label: 'In Review' },
+    { key: 'active', label: 'Active' },
+    { key: 'sunset', label: 'Sunset' }
+  ];
+  const currentIdx = stages.findIndex(s => s.key === status);
+  let html = '<div class="workflow-rail">';
+  stages.forEach((stage, i) => {
+    if (i > 0) html += '<span class="workflow-rail-arrow">›</span>';
+    let cls = 'workflow-stage';
+    if (i < currentIdx) cls += ' stage-completed';
+    else if (i === currentIdx) cls += ` stage-current-${stage.key}`;
+    const icon = i < currentIdx ? '✓ ' : i === currentIdx ? '● ' : '';
+    html += `<span class="${cls}">${icon}${stage.label}</span>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// ── STATUS TRANSITION ────────────────────────────────────────
+async function transitionStatus(newStatus) {
+  if (!currentRule) return;
+  const config = PROGRAM_CONFIG[currentProgram];
+  const actionMap = { review: 'submit_for_review', active: 'approve', draft: 'reject', sunset: 'sunset' };
+  try {
+    await lexipoint.updateRule(currentRule.rule_id, { status: newStatus });
+    await lexipoint.addAuditEntry(
+      config.tenant, config.userId, 'publisher', actionMap[newStatus] || 'status_change',
+      'rule', currentRule.rule_id,
+      `Status changed from ${currentRule.status} to ${newStatus}`
+    );
+    lexipoint.clearCache();
+    currentRule = await lexipoint.getRule(currentRule.rule_id);
+    rules = await lexipoint.getRules(currentProgram);
+    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
+    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
+    renderRulesList();
+    renderWorkspaceTabs();
+    document.getElementById('reviewDiffModal')?.classList.remove('active');
+    await renderDetailPanel();
+    showToast(`Rule ${currentRule.rule_id} moved to ${newStatus.toUpperCase()}`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[Transition] Failed:', e);
+  }
+}
+
+// ── SIMULATE IMPACT (global trigger from onclick) ─────────────
+async function triggerSimulate() {
+  if (!currentRule) return;
+  const deps = await lexipoint.getDependencies(currentRule.rule_id);
+  const modal = document.getElementById('impactModal');
+  if (modal) modal.classList.add('active');
+  const title = document.getElementById('impactTitle');
+  if (title) title.textContent = `Impact Analysis: ${currentRule.name}`;
+  const direct = document.getElementById('impactDirect');
+  if (direct) direct.innerHTML = deps.dependsOn.length > 0
+    ? deps.dependsOn.map(d => `<div class="impact-item">✓ ${d.targetRule?.rule_id || d.depends_on} — ${d.targetRule?.name || ''}</div>`).join('')
+    : '<div class="impact-item" style="color:var(--text-secondary);">No direct impacts found</div>';
+  const indirect = document.getElementById('impactIndirect');
+  if (indirect) indirect.innerHTML = deps.dependedOnBy.length > 0
+    ? deps.dependedOnBy.map(d => `<div class="impact-item">→ ${d.sourceRule?.rule_id || d.rule_id} — ${d.sourceRule?.name || ''}</div>`).join('')
+    : '<div class="impact-item" style="color:var(--text-secondary);">No indirect impacts found</div>';
+  const conflicts = document.getElementById('impactConflicts');
+  if (conflicts) conflicts.innerHTML = `<div class="impact-item">⚠ Run full simulation to detect conflicts</div>`;
+}
+
+// ── TEST RULE MODAL ──────────────────────────────────────────
+function openTestModal() {
+  if (!currentRule) return;
+  const modal = document.getElementById('testRuleModal');
+  if (!modal) return;
+  const content = document.getElementById('testRuleModalContent');
+  cbRenderTestPanel(content);
+  modal.classList.add('active');
+}
+
+// ── REVIEW DIFF MODAL ────────────────────────────────────────
+async function openReviewDiff() {
+  if (!currentRule) return;
+  const modal = document.getElementById('reviewDiffModal');
+  if (!modal) return;
+
+  const versions = await lexipoint.getVersionHistory(currentRule.rule_id);
+  const latest = versions[0];
+  const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}); } catch(e) { return d; } };
+
+  let html = `<div style="margin-bottom:16px;padding:10px 14px;background:#E7D4F5;border-radius:4px;font-size:12px;color:var(--slds-purple);font-weight:600;">
+    This rule is awaiting approval. Review changes below then approve or reject.
+  </div>`;
+
+  if (latest && latest.diff) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Most recent change</div>`;
+    html += `<div class="diff-panel" style="margin-bottom:12px;">
+      <div><span class="diff-remove">${latest.diff.field}: ${latest.diff.old || '(none)'}</span> → <span class="diff-add">${latest.diff.new}</span></div>
+    </div>`;
+    html += `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:16px;">Changed on ${fmtDate(latest.changed_at)} · v${latest.version}</div>`;
+  } else if (latest) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Version ${latest.version} — ${fmtDate(latest.changed_at)}</div>`;
+    html += `<div style="font-size:12px;color:var(--text);margin-bottom:16px;padding:10px;background:var(--slds-bg);border-radius:4px;">${latest.change_summary || 'No change summary available.'}</div>`;
+  } else {
+    html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">No version history available.</div>`;
+  }
+
+  html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Current rule snapshot</div>
+  <div style="font-size:12px;color:var(--text);padding:12px;background:var(--slds-bg);border-radius:4px;">
+    <strong>Name:</strong> ${currentRule.name}<br>
+    <strong>Citation:</strong> ${currentRule.citation || 'None'}<br>
+    <strong>Priority:</strong> ${currentRule.priority} &nbsp; <strong>Type:</strong> ${currentRule.rule_type}
+  </div>`;
+
+  document.getElementById('reviewDiffContent').innerHTML = html;
+  document.getElementById('approveRuleBtn').onclick = () => transitionStatus('active');
+  document.getElementById('rejectRuleBtn').onclick = () => transitionStatus('draft');
+  modal.classList.add('active');
+}
+
+// ── RULE TYPE FILTER ─────────────────────────────────────────
+function setTypeFilter(type) {
+  activeTypeFilter = type;
+  document.querySelectorAll('.type-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === type);
+  });
+  renderRulesList();
 }
 
 // ── WRITE-BACK: Discard Changes ───────────────────────────────
@@ -4193,14 +4574,34 @@ async function renderDependencyGraph() {
       .attr('aria-label', d => `Rule ${d.id}: ${d.name}, status ${d.status}`)
       .on('mouseenter', (e, d) => {
         const tooltip = document.getElementById('d3Tooltip');
-        tooltip.innerHTML = `<strong style="font-size:13px;">${d.id}</strong><br><span style="font-size:12px;">${d.name}</span><br><span style="font-size:12px; text-transform:uppercase; font-weight:600;">${d.status}</span>`;
+        const pendingCount = PENDING_APPS[d.id] ? ` · ${PENDING_APPS[d.id]} active applications` : '';
+        tooltip.innerHTML = `<strong style="font-size:13px;">${d.id}</strong><br><span style="font-size:12px;">${d.name}</span><br><span style="font-size:12px;text-transform:uppercase;font-weight:600;">${d.status}</span><span style="font-size:11px;color:rgba(255,255,255,0.75);">${pendingCount}</span><br><span style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px;display:block;">Click to open rule</span>`;
         const rect = svg.node().getBoundingClientRect();
-        tooltip.style.left = (e.pageX - rect.left + 10) + 'px';
-        tooltip.style.top = (e.pageY - rect.top - 20) + 'px';
+        tooltip.style.left = (e.pageX - rect.left + 14) + 'px';
+        tooltip.style.top = (e.pageY - rect.top - 24) + 'px';
         tooltip.classList.add('show');
+        // Highlight connected nodes and links, dim everything else
+        const connectedIds = new Set([d.id]);
+        links.forEach(l => {
+          const srcId = typeof l.source === 'object' ? l.source.id : l.source;
+          const tgtId = typeof l.target === 'object' ? l.target.id : l.target;
+          if (srcId === d.id || tgtId === d.id) { connectedIds.add(srcId); connectedIds.add(tgtId); }
+        });
+        node.style('opacity', n => connectedIds.has(n.id) ? 1 : 0.15);
+        node.attr('stroke-width', n => n.id === d.id ? 4 : 2);
+        link.style('opacity', l => {
+          const srcId = typeof l.source === 'object' ? l.source.id : l.source;
+          const tgtId = typeof l.target === 'object' ? l.target.id : l.target;
+          return (srcId === d.id || tgtId === d.id) ? 0.9 : 0.05;
+        });
+        svg.select('#d3-instruction').style('opacity', 0);
       })
       .on('mouseleave', () => {
         document.getElementById('d3Tooltip').classList.remove('show');
+        node.style('opacity', 1);
+        node.attr('stroke-width', 2);
+        link.style('opacity', 0.5);
+        svg.select('#d3-instruction').style('opacity', 1);
       })
       .on('click', (e, d) => {
         e.stopPropagation();
@@ -4233,6 +4634,18 @@ async function renderDependencyGraph() {
       .attr('stroke-width', 3)
       .attr('stroke-linejoin', 'round')
       .text(d => d.id);
+
+    // Instructional overlay text (bottom of graph)
+    svg.append('text')
+      .attr('id', 'd3-instruction')
+      .attr('x', width / 2)
+      .attr('y', height - 16)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '12px')
+      .attr('fill', '#9CA3AF')
+      .attr('pointer-events', 'none')
+      .attr('font-family', "'Salesforce Sans', 'Inter', -apple-system, sans-serif")
+      .text('Hover to highlight connections · Click to open rule · Scroll to zoom');
 
     // Add zoom
     const zoom = d3.zoom().on('zoom', (e) => {
