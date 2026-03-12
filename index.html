@@ -87,6 +87,14 @@
   .badge-green { background: #E8F5E9; color: var(--slds-success); }
   .badge-amber { background: #FFF3E0; color: var(--slds-warning); }
   .badge-red { background: #FDEDEF; color: var(--slds-error); }
+  .live-rule-badge { display: inline-block; font-size: 10px; font-weight: 700; background: var(--slds-blue); color: white; padding: 1px 7px; border-radius: 10px; letter-spacing: 0.3px; margin-left: 6px; vertical-align: middle; }
+  .live-ontology-notice { background: #E8F3FF; border: 1px solid var(--slds-blue); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
+  .live-ontology-notice .lo-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .live-ontology-notice .lo-title { font-weight: 700; color: var(--slds-blue); font-size: 13px; }
+  .live-ontology-notice .lo-detail { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .live-ontology-notice .lo-change { display: inline-block; margin-top: 4px; font-size: 12px; }
+  .lo-old { color: var(--gray); text-decoration: line-through; }
+  .lo-new { color: var(--slds-blue); font-weight: 700; }
 
   /* ── FORMS (SLDS Style) ── */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
@@ -576,6 +584,9 @@
   <!-- Summary Stats -->
   <div class="result-summary" id="result-stats"></div>
 
+  <!-- Live Ontology Banner (shown when CAP rules overrode hardcoded results) -->
+  <div id="live-ontology-banner"></div>
+
   <!-- Decision Banner -->
   <article class="slds-card" id="decision-banner" style="text-align: center; padding: 32px;">
     <div class="slds-card__body slds-card__body_inner"></div>
@@ -737,6 +748,126 @@ async function fetchRulesFromSupabase() {
   }
 }
 
+// ══════════════════════════════════════════ LIVE RULE OVERLAY ══════════════════════════════════════════
+
+// Maps Ontology Manager rule IDs to evaluation rule IDs.
+// OH-009 "CON Capital Expenditure Threshold" drives OH-006 (CON Applicability Check).
+// OH-020 "Swing Bed Authorization Threshold" drives FED-005 (Swing-Bed 100-Bed Threshold).
+// When these rules' conditions (edited in the Ontology Manager) evaluate differently
+// than the hardcoded result, the status is overridden and marked as a live rule.
+const CAP_RULE_MAP = {
+  'OH-009': { evalId: 'OH-006', triggeredStatus: 'flag' }, // CON Threshold → CON Applicability Check
+  'OH-020': { evalId: 'FED-005', triggeredStatus: 'flag' }, // Swing Bed Threshold → Swing-Bed Check
+};
+
+// Tracks which evaluation rules were overridden by live DB conditions this run.
+// Populated by getScenarioResults(), read by buildEvaluation() and buildResults().
+let liveRuleOverrides = {};
+
+// Builds evaluation context from scenario data — maps form fields to DB condition field names.
+// Includes both the "ideal" field names (for future use) and the actual DB field names
+// used by OH-009 and OH-020 conditions as they exist in Supabase.
+function buildCapContext(data) {
+  const newBeds  = data.beds + data.net_change;
+  const capexNum = parseFloat(data.capex.replace(/[$,]/g, ''));
+  return {
+    // Ideal eval-specific names (for future CAP rules):
+    capital_expenditure:   capexNum,
+    total_beds_proposed:   newBeds,
+    net_bed_change:        data.net_change,
+    facility_class:        data.type,
+    involves_obstetric:    data.involves_ob ? 'true' : 'false',
+    construction_required: data.construction ? 'true' : 'false',
+    work_category:         data.work_cat,
+    swing_bed_authorized:  data.swing === 'true' ? 'true' : 'false',
+    // Aliases matching EXISTING DB condition field names (OH-009, OH-020):
+    project_cost:          capexNum,      // OH-009 condition 1 — maps to capital expenditure
+    bed_change:            data.net_change, // OH-009 condition 2 — maps to net bed change
+    telehealth_beds:       newBeds,       // OH-020 condition 1 — maps to total beds proposed
+    patient_satisfaction:  0,             // OH-020 condition 2 — always below threshold (4.0), prevents trigger
+  };
+}
+
+// Evaluates a single rule_conditions row against the evaluation context.
+// Returns true/false/null (null = cannot evaluate — field not in context).
+function evalCapCondition(cond, ctx) {
+  const rawVal = ctx[cond.field];
+  if (rawVal === undefined || rawVal === null) return null;
+
+  const ctxStr  = String(rawVal).toLowerCase();
+  const condStr = String(cond.value).toLowerCase();
+  const ctxNum  = Number(rawVal);
+  const condNum = Number(cond.value);
+
+  switch (cond.operator) {
+    case '=': case '==': return ctxStr === condStr;
+    case '!=':           return ctxStr !== condStr;
+    case '>':            return ctxNum > condNum;
+    case '>=':           return ctxNum >= condNum;
+    case '<':            return ctxNum < condNum;
+    case '<=':           return ctxNum <= condNum;
+    case 'CONTAINS': case 'contains': return ctxStr.includes(condStr);
+    case 'starts_with':  return ctxStr.startsWith(condStr);
+    default:             return null; // unknown operator — skip
+  }
+}
+
+// Fetches the live ontology rules (OH-009, OH-020) from Supabase, then merges
+// any localStorage overrides written by the Ontology Manager's condition builder.
+// localStorage takes precedence over DB conditions when the user has saved condition edits.
+async function fetchCapRulesFromSupabase() {
+  try {
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
+    const liveIds = Object.keys(CAP_RULE_MAP); // ['OH-009', 'OH-020']
+    const ids = liveIds.map(id => `"${id}"`).join(',');
+
+    const rulesResp = await fetch(
+      `${SUPABASE_URL}/rest/v1/rules?rule_id=in.(${ids})&status=eq.active&select=*`,
+      { headers }
+    );
+    const rules = await rulesResp.json();
+    if (!Array.isArray(rules) || rules.length === 0) return { rules: [], conditions: [] };
+
+    // Fetch conditions from Supabase as baseline
+    const condsResp = await fetch(
+      `${SUPABASE_URL}/rest/v1/rule_conditions?rule_id=in.(${ids})&select=*`,
+      { headers }
+    );
+    let conditions = await condsResp.json();
+    if (!Array.isArray(conditions)) conditions = [];
+
+    // Merge in localStorage overrides (set when user saves in Ontology Manager).
+    // localStorage conditions fully replace the DB conditions for that rule.
+    for (const rule of rules) {
+      const localKey = `lp_live_conds_${rule.rule_id}`;
+      const localConds = localStorage.getItem(localKey);
+      if (localConds) {
+        try {
+          const parsed = JSON.parse(localConds);
+          conditions = conditions.filter(c => c.rule_id !== rule.rule_id);
+          parsed.forEach((c, i) => conditions.push({
+            rule_id:    rule.rule_id,
+            order:      i + 1,
+            field:      c.field,
+            operator:   c.operator,
+            value:      c.value,
+            value_type: c.value_type || 'string',
+            _fromLocal: true
+          }));
+          console.log(`[LexiPoint] Using localStorage conditions for ${rule.rule_id}:`, parsed);
+        } catch (e) {
+          console.warn(`[LexiPoint] Could not parse localStorage conditions for ${rule.rule_id}:`, e);
+        }
+      }
+    }
+
+    return { rules, conditions };
+  } catch (e) {
+    console.warn('fetchCapRulesFromSupabase failed:', e);
+    return { rules: [], conditions: [] };
+  }
+}
+
 // ══════════════════════════════════════════ DATA ══════════════════════════════════════════
 
 const SCENARIOS = {
@@ -862,11 +993,71 @@ const PHASES = [
   }
 ];
 
-// ──── getScenarioResults: hardcoded-first for demo accuracy ────
-// Uses battle-tested hardcoded logic for correct results.
-// Supabase connection is used by Ontology Manager and Dashboard.
+// ──── getScenarioResults: hardcoded baseline + live ontology overlay ────
+// Runs the rich hardcoded evaluation for full facts/reasoning/deps output.
+// Then fetches active CAP-* rules from Supabase and re-evaluates their
+// conditions against the scenario. Where the live DB result differs from
+// hardcoded, the status is overridden and marked as a live rule.
+// This is the determinism demo: edit a condition in the Ontology Manager,
+// re-run an application, and watch the outcome change.
 async function getScenarioResults(s) {
-  return getScenarioResultsHardcoded(s);
+  const hardcoded = getScenarioResultsHardcoded(s);
+  liveRuleOverrides = {};
+
+  try {
+    const { rules: capRules, conditions: capConditions } = await fetchCapRulesFromSupabase();
+    if (!capRules || capRules.length === 0) return hardcoded;
+
+    const data = SCENARIOS[s];
+    const ctx  = buildCapContext(data);
+
+    for (const capRule of capRules) {
+      const mapping = CAP_RULE_MAP[capRule.rule_id];
+      if (!mapping) continue;
+
+      const conds = capConditions
+        .filter(c => c.rule_id === capRule.rule_id)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+      if (conds.length === 0) continue;
+
+      // Evaluate all conditions as AND logic (all must be satisfied to trigger).
+      let allSatisfied = true;
+      let unevaluable  = false;
+      for (const cond of conds) {
+        const result = evalCapCondition(cond, ctx);
+        if (result === null) { unevaluable = true; break; }
+        if (!result) { allSatisfied = false; break; }
+      }
+      if (unevaluable) continue;
+
+      const liveStatus      = allSatisfied ? mapping.triggeredStatus : 'pass';
+      const hardcodedStatus = (hardcoded[mapping.evalId] || {}).status;
+
+      // Only override when the live result differs from hardcoded.
+      if (liveStatus !== hardcodedStatus) {
+        const condSummary = conds.map(c => `${c.field} ${c.operator} ${c.value}`).join(' AND ');
+        liveRuleOverrides[mapping.evalId] = {
+          capRuleId:       capRule.rule_id,
+          capRuleName:     capRule.name,
+          liveStatus,
+          hardcodedStatus,
+          condSummary,
+          conds,
+        };
+        hardcoded[mapping.evalId] = {
+          ...hardcoded[mapping.evalId],
+          status: liveStatus,
+          result: allSatisfied
+            ? `[Live Ontology] ${capRule.name}: threshold met (${condSummary})`
+            : `[Live Ontology] ${capRule.name}: conditions not met`,
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Live rule overlay failed, using hardcoded results:', e);
+  }
+
+  return hardcoded;
 }
 
 // ──── Future: database-driven evaluation (kept for reference) ────
@@ -1487,6 +1678,15 @@ function buildEvaluation(hospitalName) {
   container.innerHTML = '';
   document.getElementById('btn-view-results').style.display = 'none';
 
+  // Update subtitle to show live rule count if any overrides are active
+  const liveCount = Object.keys(liveRuleOverrides).length;
+  const subtitleEl = document.getElementById('eval-subtitle');
+  if (subtitleEl) {
+    subtitleEl.innerHTML = liveCount > 0
+      ? `Evaluating <strong>${hospitalName}</strong> against 40 rules across 9 regulatory domains &nbsp;<span style="background:var(--slds-blue);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;">${liveCount} LIVE RULE${liveCount > 1 ? 'S' : ''} ACTIVE</span>`
+      : `Evaluating <strong>${hospitalName}</strong> against 40 rules across 9 regulatory domains`;
+  }
+
   PHASES.forEach((phase, pi) => {
     const div = document.createElement('div');
     div.className = 'eval-phase waiting';
@@ -1502,10 +1702,14 @@ function buildEvaluation(hospitalName) {
           const res = evalResults[r.id] || { status: "pass", result: "Evaluated" };
           const statusClass = { pass: "status-pass", flag: "status-flag", block: "status-block", skip: "status-skip", wait: "status-wait" }[res.status] || "status-pass";
           const statusText = { pass: "PASS", flag: "ACTION NEEDED", block: "BLOCKED", skip: "SKIPPED", wait: "WAITING" }[res.status] || "PASS";
+          const override = liveRuleOverrides[r.id];
+          const liveBadge = override
+            ? `<span class="live-rule-badge" title="Live rule: ${override.capRuleId} — ${override.condSummary}">LIVE</span>`
+            : '';
           return `<div class="rule-row">
             <span class="rule-id">${r.id}</span>
             <div class="rule-detail">
-              <div class="rule-name">${r.name}</div>
+              <div class="rule-name">${r.name}${liveBadge}</div>
               <div class="rule-citation">${r.citation}</div>
               <div class="rule-result" style="color: var(--text-secondary);">${res.result}</div>
             </div>
@@ -1583,6 +1787,34 @@ function buildResults() {
     <div class="result-stat"><div class="stat-value" style="color: var(--red);">${blocked}</div><div class="stat-label">Blocked</div></div>
   `;
 
+  // Live ontology banner
+  const loBanner = document.getElementById('live-ontology-banner');
+  if (loBanner) {
+    const liveCount = Object.keys(liveRuleOverrides).length;
+    if (liveCount > 0) {
+      const changeLines = Object.entries(liveRuleOverrides).map(([evalId, info]) => {
+        const fromLabel = info.hardcodedStatus.toUpperCase();
+        const toLabel   = info.liveStatus.toUpperCase();
+        const toColor   = info.liveStatus === 'block' ? 'var(--slds-error)' : info.liveStatus === 'flag' ? 'var(--slds-warning)' : 'var(--slds-success)';
+        return `<span style="margin-right:16px;"><strong>${evalId}</strong>: <span class="lo-old">${fromLabel}</span> → <strong style="color:${toColor}">${toLabel}</strong> <span style="color:var(--gray);font-size:11px;">(${info.capRuleId}: ${info.condSummary})</span></span>`;
+      }).join('');
+      loBanner.innerHTML = `
+        <div class="live-ontology-notice">
+          <div class="lo-icon">&#128994;</div>
+          <div>
+            <div class="lo-title">Live Ontology: ${liveCount} rule${liveCount > 1 ? 's' : ''} from the current ontology changed this evaluation</div>
+            <div class="lo-detail lo-change">${changeLines}</div>
+            <div style="font-size:11px;color:var(--gray);margin-top:6px;">
+              These outcomes reflect active conditions in the LexiPoint Ontology Manager.
+              <a href="ontology.html" style="color:var(--slds-blue);">Edit rules in Ontology Manager →</a>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      loBanner.innerHTML = '';
+    }
+  }
+
   // Decision banner
   const banner = document.getElementById('decision-banner');
   if (blocked > 0) {
@@ -1610,7 +1842,9 @@ function buildResults() {
       const res = evalResults[r.id];
       const statusClass = { pass: "status-pass", flag: "status-flag", block: "status-block", wait: "status-wait" }[res.status];
       const statusText = { pass: "COMPLIANT", flag: "ACTION NEEDED", block: "BLOCKED", wait: "WAITING" }[res.status];
-      triggeredHtml += `<div class="rule-row"><span class="rule-id">${r.id}</span><div class="rule-detail"><div class="rule-name">${r.name}</div><div class="rule-citation">${r.citation}</div><div class="rule-result" style="color: var(--text-secondary);">${res.result}</div></div><span class="rule-status ${statusClass}">${statusText}</span></div>`;
+      const override = liveRuleOverrides[r.id];
+      const liveBadge = override ? `<span class="live-rule-badge" title="${override.capRuleId}: ${override.condSummary}">LIVE</span>` : '';
+      triggeredHtml += `<div class="rule-row"><span class="rule-id">${r.id}</span><div class="rule-detail"><div class="rule-name">${r.name}${liveBadge}</div><div class="rule-citation">${r.citation}</div><div class="rule-result" style="color: var(--text-secondary);">${res.result}</div></div><span class="rule-status ${statusClass}">${statusText}</span></div>`;
     });
   });
   triggeredEl.innerHTML = triggeredHtml;
@@ -1678,6 +1912,13 @@ function buildAudit() {
     ['Rules Evaluated', Object.values(evalResults).filter(r => r.status !== 'skip').length.toString()],
     ['Rules Skipped', Object.values(evalResults).filter(r => r.status === 'skip').length.toString()],
     ['Evaluation Duration', (180 + Math.floor(Math.random() * 40)) + 'ms'],
+    ['Live Rules Applied', (() => {
+      const liveCount = Object.keys(liveRuleOverrides).length;
+      if (liveCount === 0) return '0 — hardcoded baseline used';
+      return Object.entries(liveRuleOverrides).map(([id, info]) =>
+        `${id} overridden by ${info.capRuleId} (${info.hardcodedStatus} → ${info.liveStatus})`
+      ).join('; ');
+    })()],
     ['Record Hash (SHA-256)', hash],
     ['Previous Record Hash', prevHash],
     ['Hash Chain Status', 'VERIFIED - Chain integrity confirmed'],

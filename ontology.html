@@ -3049,6 +3049,28 @@ async function executeSave() {
     document.getElementById('detailVersion').textContent = `v${updated.version}`;
 
     showToast(`Saved ${changes.length} change${changes.length > 1 ? 's' : ''} to ${updated.rule_id}`);
+
+    // ── Live Evaluation Bridge ──────────────────────────────────────
+    // Save current condition builder state to localStorage so the New Request
+    // evaluation engine picks up any condition changes immediately (no DB required).
+    // This is how editing a rule in the Ontology Manager deterministically affects
+    // evaluation outcomes in the New Request form.
+    if (cbState && cbState.groups) {
+      try {
+        const liveConds = cbState.groups.flatMap(g =>
+          g.conditions.map(c => ({
+            field:      c.field,
+            operator:   c.operator,
+            value:      String(c.value),
+            value_type: c.value_type || 'string'
+          }))
+        );
+        localStorage.setItem(`lp_live_conds_${currentRule.rule_id}`, JSON.stringify(liveConds));
+        console.log(`[LexiPoint] Live conditions saved for ${currentRule.rule_id}:`, liveConds);
+      } catch (e) {
+        console.warn('[LexiPoint] Could not save live conditions to localStorage:', e);
+      }
+    }
   } catch (e) {
     showToast(`Error: ${e.message}`);
     console.error('[Save] Failed:', e);
@@ -3355,7 +3377,19 @@ const CB_FIELDS = {
     { value: 'compliance_score', label: 'Compliance Score', type: 'number' },
     { value: 'staff_ratio', label: 'Staff-to-Patient Ratio', type: 'number' },
     { value: 'emergency_capable', label: 'Emergency Capable', type: 'boolean' },
-    { value: 'orc_chapter', label: 'ORC Chapter', type: 'text' }
+    { value: 'orc_chapter', label: 'ORC Chapter', type: 'text' },
+    // ── Capacity Change Evaluation Fields (drive live evaluation in New Request) ──
+    // These field names map directly to the evaluation context in the New Request form.
+    // Editing conditions using these fields and saving will immediately change evaluation outcomes.
+    { value: 'project_cost',       label: 'Capital Expenditure ($)',   type: 'number' },  // OH-009
+    { value: 'bed_change',         label: 'Net Bed Change',            type: 'number' },  // OH-009
+    { value: 'telehealth_beds',    label: 'Total Beds Proposed',       type: 'number' },  // OH-020
+    { value: 'capital_expenditure',label: 'Capital Expenditure (alt)', type: 'number' },
+    { value: 'total_beds_proposed',label: 'Total Beds Proposed (alt)', type: 'number' },
+    { value: 'net_bed_change',     label: 'Net Bed Change (alt)',      type: 'number' },
+    { value: 'facility_class',     label: 'Facility Class',            type: 'text' },
+    { value: 'involves_obstetric', label: 'Involves Obstetric/Newborn',type: 'boolean' },
+    { value: 'construction_required', label: 'Construction Required',  type: 'boolean' }
   ],
   'snap': [
     { value: 'household_size', label: 'Household Size', type: 'number' },

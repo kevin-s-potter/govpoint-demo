@@ -748,6 +748,191 @@
   .action-badge.accept_ai_suggestion { background: #F3EDFD; color: var(--slds-purple); }
   .action-badge.add_comment { background: #E8EFF8; color: var(--slds-blue-brand); }
 
+  /* -- REFRESH BAR -- */
+  .refresh-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--slds-text-label);
+  }
+
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--slds-border);
+    border-radius: var(--slds-radius);
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slds-blue-brand);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s;
+  }
+
+  .refresh-btn:hover { background: #E8F4FD; }
+
+  /* -- METRIC DELTA -- */
+  .metric-delta {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .metric-delta.positive { color: var(--slds-success); }
+  .metric-delta.negative { color: var(--slds-error); }
+  .metric-delta.neutral  { color: var(--slds-text-label); }
+
+  /* -- SLA INDICATOR -- */
+  .sla-bar-wrap {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--slds-border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--slds-bg-alt);
+  }
+
+  .sla-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slds-text-dark);
+    white-space: nowrap;
+  }
+
+  .sla-track {
+    flex: 1;
+    height: 8px;
+    background: var(--slds-border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .sla-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s;
+  }
+
+  .sla-pct {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    min-width: 80px;
+    text-align: right;
+  }
+
+  /* -- TREND CHART -- */
+  .trend-chart-wrap { position: relative; padding: 8px 0 0; }
+
+  .trend-bars-area {
+    position: relative;
+    height: 160px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .trend-grid-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--slds-border);
+    pointer-events: none;
+  }
+
+  .trend-avg-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    border-top: 2px dashed var(--slds-warning);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .trend-avg-label {
+    position: absolute;
+    right: 0;
+    top: -18px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--slds-warning);
+    background: var(--slds-white);
+    padding: 0 4px;
+  }
+
+  .trend-bar-col {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    min-width: 0;
+    height: 100%;
+  }
+
+  @keyframes trendBarGrow {
+    from { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+    to   { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+  }
+
+  .trend-bar {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    cursor: pointer;
+    position: relative;
+    transition: filter 0.15s;
+    animation: trendBarGrow 0.35s ease-out both;
+  }
+
+  .trend-bar-col:hover .trend-bar { filter: brightness(1.18); }
+  .trend-bar-col:hover .trend-tooltip { display: block; }
+
+  .trend-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--slds-navy-dark);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .trend-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--slds-navy-dark);
+  }
+
+  .trend-x-labels {
+    display: flex;
+    gap: 4px;
+    margin-top: 5px;
+  }
+
+  .trend-x-label {
+    flex: 1;
+    text-align: center;
+    font-size: 9px;
+    color: var(--slds-text-label);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
   /* -- RESPONSIVE -- */
   @media (max-width: 1200px) {
     .metrics-row { grid-template-columns: repeat(4, 1fr); }
@@ -857,6 +1042,10 @@
         <p class="page-subtitle" id="pageSubtitle">Analytics and metrics for Hospital Licensing</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <div class="refresh-bar">
+          <span id="lastRefreshed"></span>
+          <button class="refresh-btn" onclick="refreshDashboard()">&#x21BB; Refresh</button>
+        </div>
         <div class="dash-filter">
           <span class="dash-filter-label">Scope</span>
           <div class="dash-filter-pills">
@@ -883,21 +1072,25 @@
         <div class="metric-icon">&#x1F4CB;</div>
         <div class="metric-number" id="totalRules">-</div>
         <div class="metric-label">Total Rules</div>
+        <div class="metric-delta neutral" id="deltaTotalRules"></div>
       </div>
       <div class="slds-box metric-card mc-active">
         <div class="metric-icon">&check;</div>
         <div class="metric-number" id="activeRules">-</div>
         <div class="metric-label">Active</div>
+        <div class="metric-delta neutral" id="deltaActiveRules"></div>
       </div>
       <div class="slds-box metric-card mc-draft">
         <div class="metric-icon">&#x270E;</div>
         <div class="metric-number" id="draftRules">-</div>
         <div class="metric-label">Draft</div>
+        <div class="metric-delta neutral" id="deltaDraftRules"></div>
       </div>
       <div class="slds-box metric-card mc-review">
         <div class="metric-icon">&#x1F441;</div>
         <div class="metric-number" id="reviewRules">-</div>
         <div class="metric-label">In Review</div>
+        <div class="metric-delta neutral" id="deltaReviewRules"></div>
       </div>
       <div class="slds-box metric-card mc-conditions">
         <div class="metric-icon">&#x2699;</div>
@@ -1014,6 +1207,7 @@
   let cachedAuditEntries = [];
   let cachedUsersMap = {};
   let cachedRules = [];
+  let isRefreshing = false;
 
   const PROGRAM_CONFIG = {
     'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 23 },
@@ -1114,6 +1308,26 @@
   }
 
   // ============================================================
+  //  REFRESH
+  // ============================================================
+  async function refreshDashboard() {
+    if (isRefreshing) return;
+    isRefreshing = true;
+    const btn = document.querySelector('.refresh-btn');
+    if (btn) { btn.textContent = '↻ Refreshing…'; btn.disabled = true; }
+    await loadDashboardData();
+    isRefreshing = false;
+    if (btn) { btn.innerHTML = '&#x21BB; Refresh'; btn.disabled = false; }
+  }
+
+  function updateRefreshTimestamp() {
+    const el = document.getElementById('lastRefreshed');
+    if (!el) return;
+    const now = new Date();
+    el.textContent = 'Updated ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ============================================================
   //  LOAD DASHBOARD DATA
   // ============================================================
   async function loadDashboardData() {
@@ -1153,7 +1367,19 @@
     cachedUsersMap = usersMap;
     cachedRules = rules;
 
-    renderMetricCards(rules, conditions, deps);
+    // Compute 7-day deltas from audit_log
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentAudit = auditEntries.filter(e => new Date(e.timestamp) > sevenDaysAgo);
+    const deltas = {
+      total:  rules.filter(r => r.created_at && new Date(r.created_at) > sevenDaysAgo).length,
+      active: recentAudit.filter(e => e.action === 'approve' || e.action === 'publish').length,
+      draft:  recentAudit.filter(e => e.action === 'create_draft').length,
+      review: recentAudit.filter(e => e.action === 'submit_for_review').length
+    };
+
+    updateRefreshTimestamp();
+    renderMetricCards(rules, conditions, deps, deltas);
     renderCharts(rules);
     const filtered = getDateFilteredEntries();
     renderActivityTrend(filtered);
@@ -1164,7 +1390,7 @@
   // ============================================================
   //  METRIC CARDS
   // ============================================================
-  function renderMetricCards(rules, conditions, deps) {
+  function renderMetricCards(rules, conditions, deps, deltas = {}) {
     const total = rules.length;
     const statusCounts = { active: 0, draft: 0, review: 0 };
 
@@ -1184,6 +1410,27 @@
 
     const healthPct = total > 0 ? Math.round((statusCounts.active / total) * 100) : 0;
     document.getElementById('healthPct').textContent = healthPct + '%';
+
+    // Render deltas
+    setDelta('deltaTotalRules',  deltas.total,  true);
+    setDelta('deltaActiveRules', deltas.active, true);
+    setDelta('deltaDraftRules',  deltas.draft,  false);
+    setDelta('deltaReviewRules', deltas.review, false);
+  }
+
+  function setDelta(id, value, positiveIsGood) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!value || value === 0) {
+      el.textContent = 'No change this week';
+      el.className = 'metric-delta neutral';
+      return;
+    }
+    const isPositive = value > 0;
+    const arrow = isPositive ? '▲' : '▼';
+    el.textContent = `${arrow} ${Math.abs(value)} this week`;
+    const good = positiveIsGood ? isPositive : !isPositive;
+    el.className = `metric-delta ${good ? 'positive' : 'negative'}`;
   }
 
   // ============================================================
@@ -1338,6 +1585,7 @@
       chart.innerHTML = '<div style="text-align:center;padding:32px;color:var(--slds-text-label);font-size:13px;">No activity in this period.</div>';
       return;
     }
+
     // Group by day for 7/30d, by week for 90d/all
     const useWeeks = (dateFilter === 0 || dateFilter === 90);
     const groups = {};
@@ -1351,21 +1599,55 @@
       }
       groups[key] = (groups[key] || 0) + 1;
     });
+
     const sorted = Object.entries(groups).sort((a,b) => a[0].localeCompare(b[0]));
     const maxBars = useWeeks ? 12 : (dateFilter === 7 ? 7 : 30);
     const visible = sorted.slice(-maxBars);
     const maxVal = Math.max(...visible.map(([,v]) => v), 1);
+    const avgVal = visible.reduce((s, [,v]) => s + v, 0) / Math.max(visible.length, 1);
+    const avgPct = (avgVal / maxVal) * 100;
+
+    // Color by intensity: low=light blue, mid=brand blue, high=navy
+    function barColor(count) {
+      const t = count / maxVal;
+      if (t > 0.66) return { top: '#032D60', bot: '#0176D3' };
+      if (t > 0.33) return { top: '#0176D3', bot: '#5BA8E5' };
+      return { top: '#5BA8E5', bot: '#BFD9F5' };
+    }
+
+    // Only show every Nth x-label to avoid crowding
+    const labelEvery = visible.length > 20 ? 4 : visible.length > 10 ? 2 : 1;
+
     chart.innerHTML = `
-      <div style="display:flex;align-items:flex-end;gap:3px;height:120px;padding:4px 0;">
-        ${visible.map(([date, count]) => {
-          const pct = (count / maxVal) * 100;
-          const label = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {month:'short',day:'numeric'});
-          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;">
-            <div style="font-size:9px;color:var(--slds-text-label);font-weight:600;line-height:1;">${count > 0 ? count : ''}</div>
-            <div style="width:100%;background:var(--slds-blue-brand);border-radius:2px 2px 0 0;height:${Math.max(pct,3)}%;transition:height 0.3s;"></div>
-            <div style="font-size:8px;color:var(--slds-text-label);white-space:nowrap;overflow:hidden;max-width:100%;text-align:center;">${label}</div>
-          </div>`;
-        }).join('')}
+      <div class="trend-chart-wrap">
+        <div class="trend-bars-area">
+          <div class="trend-grid-line" style="bottom:75%;"></div>
+          <div class="trend-grid-line" style="bottom:50%;"></div>
+          <div class="trend-grid-line" style="bottom:25%;"></div>
+          <div class="trend-avg-line" style="bottom:${avgPct}%;">
+            <span class="trend-avg-label">avg ${Math.round(avgVal)}</span>
+          </div>
+          ${visible.map(([date, count], i) => {
+            const pct = Math.max((count / maxVal) * 100, 2);
+            const c = barColor(count);
+            const delay = (i / visible.length * 0.25).toFixed(2);
+            const label = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            const tooltipText = `${label} &nbsp;·&nbsp; ${count} event${count !== 1 ? 's' : ''}`;
+            return `<div class="trend-bar-col">
+              <div class="trend-bar" style="height:${pct}%; background: linear-gradient(to top, ${c.bot}, ${c.top}); animation-delay:${delay}s;">
+                <div class="trend-tooltip">${tooltipText}</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="trend-x-labels">
+          ${visible.map(([date], i) => {
+            const label = (i % labelEvery === 0)
+              ? new Date(date + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'})
+              : '';
+            return `<div class="trend-x-label">${label}</div>`;
+          }).join('')}
+        </div>
       </div>
     `;
   }
@@ -1384,7 +1666,21 @@
       return;
     }
     const now = new Date();
+    const SLA_DAYS = 14;
+    const withinSla = reviewRules.filter(r => {
+      if (!r.updated_at) return true;
+      return Math.floor((now - new Date(r.updated_at)) / 86400000) <= SLA_DAYS;
+    }).length;
+    const slaPct = reviewRules.length > 0 ? Math.round((withinSla / reviewRules.length) * 100) : 100;
+    const slaColor = slaPct >= 80 ? 'var(--slds-success)' : slaPct >= 50 ? 'var(--slds-warning)' : 'var(--slds-error)';
     el.innerHTML = `
+      <div class="sla-bar-wrap">
+        <div class="sla-label">14-Day Review SLA</div>
+        <div class="sla-track">
+          <div class="sla-fill" style="width:${slaPct}%; background:${slaColor};"></div>
+        </div>
+        <div class="sla-pct" style="color:${slaColor};">${withinSla} of ${reviewRules.length} on track (${slaPct}%)</div>
+      </div>
       <table class="data-table slds-table slds-table_cell-buffer slds-table_bordered" style="width:100%;">
         <thead><tr>
           <th style="width:90px;">Rule</th>
