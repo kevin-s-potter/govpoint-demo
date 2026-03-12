@@ -629,42 +629,116 @@
     letter-spacing: 0.5px;
   }
 
-  /* Condition Editor */
+  /* ── Enhanced Condition Builder ────────────────────────────── */
+  .cb-layout { display: flex; gap: 16px; min-height: 420px; }
+  .cb-main { flex: 1; min-width: 0; }
+  .cb-sidebar { width: 320px; flex-shrink: 0; background: var(--slds-bg); border-radius: 4px; border: 1px solid var(--slds-border); overflow-y: auto; max-height: 600px; }
+
+  /* Toolbar */
+  .cb-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .cb-toolbar-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Logic Groups */
+  .cb-group { border: 2px solid var(--slds-border); border-radius: 4px; padding: 12px; margin-bottom: 12px; background: #fff; position: relative; }
+  .cb-group.cb-group-and { border-left: 4px solid var(--slds-blue); }
+  .cb-group.cb-group-or { border-left: 4px solid #DD7A01; }
+  .cb-group-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .cb-group-toggle { display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid var(--slds-border); }
+  .cb-group-toggle button { padding: 4px 12px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; background: #fff; color: var(--text-secondary); transition: all 0.15s; }
+  .cb-group-toggle button.active-and { background: var(--slds-blue); color: #fff; }
+  .cb-group-toggle button.active-or { background: #DD7A01; color: #fff; }
+  .cb-group-actions { margin-left: auto; display: flex; gap: 4px; }
+
+  /* Condition Rows */
   .condition-row {
     display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-    padding: 12px;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 10px 12px;
     background: var(--slds-bg);
-    border-radius: 2px;
+    border-radius: 4px;
     align-items: center;
+    border: 1px solid transparent;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
+  .condition-row:hover { border-color: var(--slds-border); }
+  .condition-row.cb-editing { border-color: var(--slds-blue); box-shadow: 0 0 0 2px rgba(1,118,211,0.1); background: #fff; }
+  .condition-row.cb-ai-suggestion { border: 1px dashed var(--slds-blue); background: rgba(1,118,211,0.04); }
+  .condition-row.cb-conflict { border-color: var(--slds-error); background: rgba(186,5,23,0.03); }
 
   .condition-row select,
   .condition-row input {
-    padding: 8px 12px;
+    padding: 6px 10px;
     border: 1px solid var(--slds-border);
-    border-radius: 2px;
+    border-radius: 4px;
     font-size: 12px;
     font-family: inherit;
+    background: #fff;
   }
-
   .condition-row select:focus,
   .condition-row input:focus {
     outline: none;
     border-color: var(--slds-blue);
     box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1);
   }
+  .condition-row .cb-field-select { min-width: 140px; }
+  .condition-row .cb-op-select { min-width: 80px; }
+  .condition-row .cb-value-input { flex: 1; min-width: 100px; }
+  .condition-row .cb-type-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--slds-bg); color: var(--text-secondary); border: 1px solid var(--slds-border); white-space: nowrap; }
 
-  .condition-row button {
-    padding: 6px 12px;
-    font-size: 11px;
-    background: var(--slds-error);
-    color: white;
-    border: none;
-    border-radius: 2px;
-    cursor: pointer;
-  }
+  .cb-row-actions { display: flex; gap: 4px; }
+  .cb-row-actions button { padding: 4px 8px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; }
+  .cb-btn-remove { background: var(--slds-error); color: #fff; }
+  .cb-btn-remove:hover { background: #8C030E; }
+  .cb-btn-edit { background: var(--slds-blue); color: #fff; }
+  .cb-btn-edit:hover { background: #014486; }
+  .cb-btn-accept { background: var(--slds-success); color: #fff; }
+  .cb-btn-reject { background: var(--slds-border); color: var(--text); }
+  .cb-btn-sm { padding: 4px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; }
+
+  /* Logic tree preview */
+  .cb-logic-preview { background: var(--slds-bg); border-radius: 4px; padding: 12px; margin-top: 12px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.6; color: var(--slds-navy); border: 1px solid var(--slds-border); white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow-y: auto; }
+  .cb-logic-keyword { color: var(--slds-blue); font-weight: 700; }
+  .cb-logic-field { color: var(--slds-navy); font-weight: 600; }
+  .cb-logic-value { color: var(--slds-success); }
+  .cb-logic-op { color: var(--slds-error); font-weight: 600; }
+
+  /* AI Sidebar */
+  .cb-sidebar-header { padding: 12px 16px; border-bottom: 1px solid var(--slds-border); display: flex; align-items: center; gap: 8px; }
+  .cb-sidebar-header h4 { font-size: 13px; font-weight: 700; color: var(--slds-navy); margin: 0; }
+  .cb-sidebar-tabs { display: flex; border-bottom: 1px solid var(--slds-border); }
+  .cb-sidebar-tab { flex: 1; padding: 8px 4px; font-size: 11px; font-weight: 600; text-align: center; cursor: pointer; border: none; background: none; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .cb-sidebar-tab:hover { color: var(--slds-navy); }
+  .cb-sidebar-tab.active { color: var(--slds-blue); border-bottom-color: var(--slds-blue); }
+  .cb-sidebar-content { padding: 12px 16px; }
+
+  .cb-suggestion-card { padding: 10px 12px; background: #fff; border: 1px solid var(--slds-border); border-radius: 4px; margin-bottom: 8px; }
+  .cb-suggestion-card.cb-s-conflict { border-left: 3px solid var(--slds-error); }
+  .cb-suggestion-card.cb-s-gap { border-left: 3px solid #DD7A01; }
+  .cb-suggestion-card.cb-s-suggestion { border-left: 3px solid var(--slds-blue); }
+  .cb-suggestion-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .cb-suggestion-text { font-size: 12px; color: var(--text); line-height: 1.5; margin-bottom: 8px; }
+  .cb-suggestion-actions { display: flex; gap: 6px; }
+  .cb-suggestion-field { font-weight: 600; color: var(--slds-navy); }
+
+  /* Test Panel */
+  .cb-test-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .cb-test-row label { font-size: 12px; font-weight: 600; color: var(--slds-navy); min-width: 120px; }
+  .cb-test-row input, .cb-test-row select { flex: 1; padding: 6px 10px; border: 1px solid var(--slds-border); border-radius: 4px; font-size: 12px; }
+  .cb-test-result { padding: 10px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+  .cb-test-pass { background: rgba(46,132,74,0.1); color: #2E844A; border: 1px solid #2E844A; }
+  .cb-test-fail { background: rgba(186,5,23,0.08); color: var(--slds-error); border: 1px solid var(--slds-error); }
+  .cb-test-detail { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 400; }
+
+  /* Coverage meter */
+  .cb-coverage { margin-top: 12px; }
+  .cb-coverage-bar { height: 8px; background: var(--slds-border); border-radius: 4px; overflow: hidden; margin: 6px 0; }
+  .cb-coverage-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .cb-coverage-label { font-size: 11px; color: var(--text-secondary); display: flex; justify-content: space-between; }
+
+  /* Human override banner */
+  .cb-override-banner { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(1,118,211,0.06); border: 1px solid rgba(1,118,211,0.2); border-radius: 4px; margin-bottom: 12px; font-size: 12px; color: var(--slds-navy); }
+  .cb-override-banner .cb-icon { font-size: 16px; flex-shrink: 0; }
 
   /* Dependency Cards */
   .dep-card {
@@ -1817,10 +1891,37 @@
         <div id="overviewContent"></div>
       </div>
 
-      <!-- Condition Editor Tab -->
+      <!-- Condition Editor Tab — Enhanced Logic Builder -->
       <div class="tab-pane" data-pane="conditions">
-        <h3>Structured Conditions</h3>
-        <div id="conditionEditor"></div>
+        <div class="cb-override-banner">
+          <span class="cb-icon">🛡️</span>
+          <span><strong>Human-in-the-loop:</strong> AI suggestions are advisory only. You have full control to accept, reject, or override any recommendation.</span>
+        </div>
+        <div class="cb-layout">
+          <div class="cb-main">
+            <div class="cb-toolbar">
+              <span class="cb-toolbar-label">Logic Builder</span>
+              <button class="slds-button slds-button_neutral cb-btn-sm" onclick="cbAddCondition()">+ Condition</button>
+              <button class="slds-button slds-button_neutral cb-btn-sm" onclick="cbAddGroup()">+ Group</button>
+              <button class="slds-button slds-button_neutral cb-btn-sm" onclick="cbExpandAll()">Expand All</button>
+              <span style="margin-left: auto; font-size: 11px; color: var(--text-secondary);" id="cbConditionCount"></span>
+            </div>
+            <div id="conditionEditor"></div>
+            <div id="cbLogicPreview" class="cb-logic-preview" style="display:none;"></div>
+          </div>
+          <div class="cb-sidebar" id="cbSidebar">
+            <div class="cb-sidebar-header">
+              <span>✨</span>
+              <h4>AI Assistant</h4>
+            </div>
+            <div class="cb-sidebar-tabs">
+              <button class="cb-sidebar-tab active" data-stab="suggestions" onclick="cbSwitchSidebarTab('suggestions')">Suggestions</button>
+              <button class="cb-sidebar-tab" data-stab="test" onclick="cbSwitchSidebarTab('test')">Test</button>
+              <button class="cb-sidebar-tab" data-stab="coverage" onclick="cbSwitchSidebarTab('coverage')">Coverage</button>
+            </div>
+            <div class="cb-sidebar-content" id="cbSidebarContent"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Dependencies Tab -->
@@ -2388,20 +2489,8 @@ async function renderDetailPanel() {
     </div>
   `;
 
-  // ── CONDITIONS TAB — from rule_conditions table ─────────────
-  document.getElementById('conditionEditor').innerHTML = `
-    ${conditions.map(c => `
-      <div class="condition-row">
-        <span style="font-weight: 600; color: var(--slds-navy); min-width: 140px;">${c.field}</span>
-        <span style="font-weight: 600; color: var(--slds-error); min-width: 40px; text-align: center;">${c.operator}</span>
-        <span style="flex: 1;">${c.value}</span>
-        <span style="font-size: 11px; color: var(--text-secondary); min-width: 60px;">${c.value_type}</span>
-        <button style="cursor: pointer;">Remove</button>
-      </div>
-    `).join('')}
-    ${conditions.length === 0 ? '<div style="color: var(--text-secondary); font-size: 13px;">No conditions defined yet.</div>' : ''}
-    <button style="padding: 8px 16px; background: var(--slds-blue); color: white; border: none; border-radius: 2px; cursor: pointer; margin-top: 12px;">+ Add Condition</button>
-  `;
+  // ── CONDITIONS TAB — Enhanced Logic Builder ─────────────────
+  cbInitialize(conditions, currentRule);
 
   // ── DEPENDENCIES TAB — with focused D3 graph (Feature 3) ───────
   await renderFocusedDependencyGraph(currentRule.rule_id);
@@ -2857,6 +2946,753 @@ function renderWorkspaceTabs() {
 }
 
 // ── D3 DEPENDENCY GRAPH (Feature 1) ──────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// ██  ENHANCED CONDITION BUILDER                             ██
+// ══════════════════════════════════════════════════════════════
+
+// ── Condition Builder State ─────────────────────────────────
+let cbState = {
+  groups: [],        // array of { id, logic: 'AND'|'OR', conditions: [...] }
+  rule: null,        // current rule reference
+  rawConditions: [], // original DB conditions
+  nextId: 1,
+  sidebarTab: 'suggestions',
+  aiSuggestions: [],
+  testCases: [],
+  lastTestResult: null
+};
+
+// Field definitions per program (extensible)
+const CB_FIELDS = {
+  'hosp-licensing': [
+    { value: 'bed_count', label: 'Bed Count', type: 'number' },
+    { value: 'licensed', label: 'Licensed', type: 'boolean' },
+    { value: 'license_status', label: 'License Status', type: 'text' },
+    { value: 'facility_type', label: 'Facility Type', type: 'text' },
+    { value: 'accreditation_body', label: 'Accreditation Body', type: 'text' },
+    { value: 'inspection_date', label: 'Last Inspection Date', type: 'date' },
+    { value: 'compliance_score', label: 'Compliance Score', type: 'number' },
+    { value: 'staff_ratio', label: 'Staff-to-Patient Ratio', type: 'number' },
+    { value: 'emergency_capable', label: 'Emergency Capable', type: 'boolean' },
+    { value: 'orc_chapter', label: 'ORC Chapter', type: 'text' }
+  ],
+  'snap': [
+    { value: 'household_size', label: 'Household Size', type: 'number' },
+    { value: 'gross_income', label: 'Gross Monthly Income', type: 'number' },
+    { value: 'net_income', label: 'Net Monthly Income', type: 'number' },
+    { value: 'resource_limit', label: 'Resource Limit', type: 'number' },
+    { value: 'citizenship_status', label: 'Citizenship Status', type: 'text' },
+    { value: 'work_requirement', label: 'Work Requirement Met', type: 'boolean' },
+    { value: 'elderly_disabled', label: 'Elderly/Disabled Member', type: 'boolean' }
+  ],
+  'nursing-home': [
+    { value: 'bed_count', label: 'Bed Count', type: 'number' },
+    { value: 'licensed', label: 'Licensed', type: 'boolean' },
+    { value: 'administrator_licensed', label: 'Administrator Licensed', type: 'boolean' },
+    { value: 'nurse_staffing_ratio', label: 'Nurse Staffing Ratio', type: 'number' },
+    { value: 'deficiency_count', label: 'Deficiency Count', type: 'number' },
+    { value: 'fire_safety_compliant', label: 'Fire Safety Compliant', type: 'boolean' }
+  ]
+};
+
+const CB_OPERATORS = {
+  number: [
+    { value: '>=', label: '>=' }, { value: '<=', label: '<=' },
+    { value: '=', label: '=' }, { value: '!=', label: '!=' },
+    { value: '>', label: '>' }, { value: '<', label: '<' }
+  ],
+  text: [
+    { value: '=', label: 'equals' }, { value: '!=', label: 'not equals' },
+    { value: 'contains', label: 'contains' }, { value: 'starts_with', label: 'starts with' }
+  ],
+  boolean: [
+    { value: '=', label: 'is' }
+  ],
+  date: [
+    { value: '>=', label: 'on or after' }, { value: '<=', label: 'on or before' },
+    { value: '=', label: 'equals' }, { value: '>', label: 'after' }, { value: '<', label: 'before' }
+  ]
+};
+
+// ── Initialize Condition Builder ────────────────────────────
+function cbInitialize(conditions, rule) {
+  cbState.rule = rule;
+  cbState.rawConditions = conditions;
+  cbState.nextId = 1;
+  cbState.aiSuggestions = [];
+  cbState.testCases = [];
+  cbState.lastTestResult = null;
+
+  // Convert flat conditions into a single AND group
+  if (conditions.length > 0) {
+    cbState.groups = [{
+      id: cbState.nextId++,
+      logic: 'AND',
+      conditions: conditions.map(c => ({
+        id: cbState.nextId++,
+        field: c.field,
+        operator: c.operator,
+        value: c.value,
+        valueType: c.value_type || 'text',
+        editing: false,
+        source: 'db'
+      }))
+    }];
+  } else {
+    cbState.groups = [{
+      id: cbState.nextId++,
+      logic: 'AND',
+      conditions: []
+    }];
+  }
+
+  // Generate AI suggestions
+  cbGenerateAISuggestions(rule, conditions);
+
+  // Render
+  cbRender();
+  cbSwitchSidebarTab('suggestions');
+}
+
+// ── Main Render ─────────────────────────────────────────────
+function cbRender() {
+  const editor = document.getElementById('conditionEditor');
+  const totalConditions = cbState.groups.reduce((sum, g) => sum + g.conditions.length, 0);
+  document.getElementById('cbConditionCount').textContent = `${totalConditions} condition${totalConditions !== 1 ? 's' : ''} in ${cbState.groups.length} group${cbState.groups.length !== 1 ? 's' : ''}`;
+
+  let html = '';
+  cbState.groups.forEach((group, gi) => {
+    const logicClass = group.logic === 'AND' ? 'cb-group-and' : 'cb-group-or';
+    html += `<div class="cb-group ${logicClass}" data-group-id="${group.id}">`;
+    html += `<div class="cb-group-header">`;
+    html += `<div class="cb-group-toggle">
+      <button class="${group.logic === 'AND' ? 'active-and' : ''}" onclick="cbToggleGroupLogic(${group.id}, 'AND')">AND</button>
+      <button class="${group.logic === 'OR' ? 'active-or' : ''}" onclick="cbToggleGroupLogic(${group.id}, 'OR')">OR</button>
+    </div>`;
+    html += `<span style="font-size:11px;color:var(--text-secondary);">Group ${gi + 1}</span>`;
+    html += `<div class="cb-group-actions">`;
+    html += `<button class="cb-btn-sm" style="background:var(--slds-blue);color:#fff;" onclick="cbAddConditionToGroup(${group.id})">+ Condition</button>`;
+    if (cbState.groups.length > 1) {
+      html += `<button class="cb-btn-sm cb-btn-remove" onclick="cbRemoveGroup(${group.id})">Remove Group</button>`;
+    }
+    html += `</div></div>`;
+
+    if (group.conditions.length === 0) {
+      html += `<div style="color:var(--text-secondary);font-size:12px;padding:16px;text-align:center;">No conditions in this group. Click "+ Condition" to add one.</div>`;
+    }
+
+    group.conditions.forEach((cond, ci) => {
+      const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+      const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
+      const operators = CB_OPERATORS[fieldDef.type] || CB_OPERATORS.text;
+      const extraClass = cond.editing ? 'cb-editing' : (cond.source === 'ai' ? 'cb-ai-suggestion' : '');
+
+      if (cond.editing) {
+        // Editable row
+        html += `<div class="condition-row ${extraClass}">`;
+        html += `<select class="cb-field-select slds-select" onchange="cbUpdateField(${group.id}, ${cond.id}, this.value)">
+          <option value="">-- Field --</option>
+          ${fields.map(f => `<option value="${f.value}" ${f.value === cond.field ? 'selected' : ''}>${f.label}</option>`).join('')}
+        </select>`;
+        html += `<select class="cb-op-select slds-select" onchange="cbUpdateOp(${group.id}, ${cond.id}, this.value)">
+          ${operators.map(o => `<option value="${o.value}" ${o.value === cond.operator ? 'selected' : ''}>${o.label}</option>`).join('')}
+        </select>`;
+        if (fieldDef.type === 'boolean') {
+          html += `<select class="cb-value-input slds-select" onchange="cbUpdateValue(${group.id}, ${cond.id}, this.value)">
+            <option value="true" ${cond.value === 'true' ? 'selected' : ''}>True</option>
+            <option value="false" ${cond.value === 'false' ? 'selected' : ''}>False</option>
+          </select>`;
+        } else {
+          html += `<input class="cb-value-input slds-input" type="${fieldDef.type === 'number' ? 'number' : fieldDef.type === 'date' ? 'date' : 'text'}" value="${cond.value}" onchange="cbUpdateValue(${group.id}, ${cond.id}, this.value)" placeholder="Enter value..." />`;
+        }
+        html += `<span class="cb-type-badge">${fieldDef.type}</span>`;
+        html += `<div class="cb-row-actions">
+          <button class="cb-btn-sm cb-btn-edit" onclick="cbToggleEdit(${group.id}, ${cond.id})">Done</button>
+          <button class="cb-btn-sm cb-btn-remove" onclick="cbRemoveCondition(${group.id}, ${cond.id})">✕</button>
+        </div>`;
+        html += `</div>`;
+      } else if (cond.source === 'ai') {
+        // AI suggestion row — accept/reject
+        html += `<div class="condition-row cb-ai-suggestion">`;
+        html += `<span style="font-size:12px;color:var(--slds-blue);font-weight:600;">✨ AI:</span>`;
+        html += `<span style="font-weight:600;color:var(--slds-navy);min-width:120px;">${fieldDef.label || cond.field}</span>`;
+        html += `<span style="font-weight:600;color:var(--slds-error);min-width:40px;text-align:center;">${cond.operator}</span>`;
+        html += `<span style="flex:1;">${cond.value}</span>`;
+        html += `<span class="cb-type-badge">${cond.valueType}</span>`;
+        html += `<div class="cb-row-actions">
+          <button class="cb-btn-sm cb-btn-accept" onclick="cbAcceptAI(${group.id}, ${cond.id})">Accept</button>
+          <button class="cb-btn-sm cb-btn-reject" onclick="cbRemoveCondition(${group.id}, ${cond.id})">Reject</button>
+        </div>`;
+        html += `</div>`;
+      } else {
+        // Read-only display row
+        html += `<div class="condition-row ${extraClass}">`;
+        if (ci > 0) {
+          html += `<span style="font-size:11px;font-weight:700;color:${group.logic === 'AND' ? 'var(--slds-blue)' : '#DD7A01'};min-width:32px;">${group.logic}</span>`;
+        } else {
+          html += `<span style="font-size:11px;font-weight:700;color:var(--text-secondary);min-width:32px;">IF</span>`;
+        }
+        html += `<span style="font-weight:600;color:var(--slds-navy);min-width:120px;">${fieldDef.label || cond.field}</span>`;
+        html += `<span style="font-weight:600;color:var(--slds-error);min-width:40px;text-align:center;">${cond.operator}</span>`;
+        html += `<span style="flex:1;">${cond.value}</span>`;
+        html += `<span class="cb-type-badge">${cond.valueType}</span>`;
+        html += `<div class="cb-row-actions">
+          <button class="cb-btn-sm cb-btn-edit" onclick="cbToggleEdit(${group.id}, ${cond.id})">Edit</button>
+          <button class="cb-btn-sm cb-btn-remove" onclick="cbRemoveCondition(${group.id}, ${cond.id})">✕</button>
+        </div>`;
+        html += `</div>`;
+      }
+    });
+
+    html += `</div>`;
+  });
+
+  editor.innerHTML = html;
+
+  // Update logic preview
+  cbRenderLogicPreview();
+}
+
+// ── Logic Tree Preview ──────────────────────────────────────
+function cbRenderLogicPreview() {
+  const preview = document.getElementById('cbLogicPreview');
+  const allConditions = cbState.groups.reduce((sum, g) => sum + g.conditions.filter(c => c.source !== 'ai').length, 0);
+  if (allConditions === 0) {
+    preview.style.display = 'none';
+    return;
+  }
+  preview.style.display = 'block';
+
+  const groupStrings = cbState.groups.map(group => {
+    const accepted = group.conditions.filter(c => c.source !== 'ai');
+    if (accepted.length === 0) return null;
+    const condStrings = accepted.map(c =>
+      `<span class="cb-logic-field">${c.field}</span> <span class="cb-logic-op">${c.operator}</span> <span class="cb-logic-value">${c.value}</span>`
+    );
+    if (condStrings.length === 1) return condStrings[0];
+    return `(${condStrings.join(` <span class="cb-logic-keyword">${group.logic}</span> `)})`;
+  }).filter(Boolean);
+
+  if (groupStrings.length === 0) {
+    preview.style.display = 'none';
+    return;
+  }
+
+  const combined = groupStrings.length === 1 ? groupStrings[0] :
+    groupStrings.join(`\n<span class="cb-logic-keyword">AND</span>\n`);
+
+  preview.innerHTML = `<div style="font-size:10px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;">Logic Expression</div>${combined}`;
+}
+
+// ── Group & Condition CRUD ──────────────────────────────────
+function cbAddCondition() {
+  if (cbState.groups.length === 0) {
+    cbState.groups.push({ id: cbState.nextId++, logic: 'AND', conditions: [] });
+  }
+  const group = cbState.groups[0];
+  group.conditions.push({
+    id: cbState.nextId++, field: '', operator: '=', value: '', valueType: 'text', editing: true, source: 'user'
+  });
+  cbRender();
+}
+
+function cbAddGroup() {
+  cbState.groups.push({
+    id: cbState.nextId++, logic: 'OR', conditions: [{
+      id: cbState.nextId++, field: '', operator: '=', value: '', valueType: 'text', editing: true, source: 'user'
+    }]
+  });
+  cbRender();
+}
+
+function cbAddConditionToGroup(groupId) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  group.conditions.push({
+    id: cbState.nextId++, field: '', operator: '=', value: '', valueType: 'text', editing: true, source: 'user'
+  });
+  cbRender();
+}
+
+function cbRemoveCondition(groupId, condId) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  group.conditions = group.conditions.filter(c => c.id !== condId);
+  cbRender();
+}
+
+function cbRemoveGroup(groupId) {
+  cbState.groups = cbState.groups.filter(g => g.id !== groupId);
+  if (cbState.groups.length === 0) {
+    cbState.groups.push({ id: cbState.nextId++, logic: 'AND', conditions: [] });
+  }
+  cbRender();
+}
+
+function cbToggleGroupLogic(groupId, logic) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (group) { group.logic = logic; cbRender(); }
+}
+
+function cbToggleEdit(groupId, condId) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  const cond = group.conditions.find(c => c.id === condId);
+  if (cond) { cond.editing = !cond.editing; cbRender(); }
+}
+
+function cbUpdateField(groupId, condId, val) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  const cond = group.conditions.find(c => c.id === condId);
+  if (!cond) return;
+  cond.field = val;
+  const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+  const fieldDef = fields.find(f => f.value === val);
+  if (fieldDef) {
+    cond.valueType = fieldDef.type;
+    const ops = CB_OPERATORS[fieldDef.type];
+    if (ops && !ops.find(o => o.value === cond.operator)) {
+      cond.operator = ops[0].value;
+    }
+    if (fieldDef.type === 'boolean' && cond.value !== 'true' && cond.value !== 'false') {
+      cond.value = 'true';
+    }
+  }
+  cbRender();
+}
+
+function cbUpdateOp(groupId, condId, val) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  const cond = group.conditions.find(c => c.id === condId);
+  if (cond) { cond.operator = val; }
+}
+
+function cbUpdateValue(groupId, condId, val) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  const cond = group.conditions.find(c => c.id === condId);
+  if (cond) { cond.value = val; cbRenderLogicPreview(); }
+}
+
+function cbAcceptAI(groupId, condId) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  const cond = group.conditions.find(c => c.id === condId);
+  if (cond) { cond.source = 'user'; cbRender(); }
+}
+
+function cbExpandAll() {
+  cbState.groups.forEach(g => g.conditions.forEach(c => { c.editing = true; }));
+  cbRender();
+}
+
+// ── AI Suggestions Engine ───────────────────────────────────
+function cbGenerateAISuggestions(rule, existingConditions) {
+  // Simulated AI analysis based on rule text and existing conditions
+  const suggestions = [];
+  const existingFields = existingConditions.map(c => c.field);
+
+  // Rule-specific AI suggestions
+  const ruleHints = {
+    'OH-001': {
+      suggestions: [
+        { type: 'suggestion', field: 'orc_chapter', operator: '=', value: '3702', valueType: 'text',
+          reason: 'Source text references "Chapter 3702 of the Revised Code" as the licensing authority.' },
+        { type: 'suggestion', field: 'facility_type', operator: '=', value: 'hospital', valueType: 'text',
+          reason: 'Rule applies specifically to hospital facilities per source text.' }
+      ],
+      conflicts: [],
+      gaps: [
+        { text: 'Source text mentions "license issued by the director of health" but no condition validates the issuing authority.', field: 'license_authority' },
+        { text: 'No condition checks license expiration date, though ongoing compliance is implied by "shall maintain."', field: 'license_expiration' }
+      ]
+    },
+    'OH-002': {
+      suggestions: [
+        { type: 'suggestion', field: 'accreditation_body', operator: '=', value: 'Joint Commission', valueType: 'text',
+          reason: 'Source references Joint Commission accreditation as a compliance pathway.' },
+        { type: 'suggestion', field: 'inspection_date', operator: '>=', value: '2024-01-01', valueType: 'date',
+          reason: 'Annual inspection requirement implies most recent inspection must be within the last year.' }
+      ],
+      conflicts: [
+        { text: 'Condition "bed_count >= 25" may conflict with the separate critical access hospital exception (≤25 beds). Consider adding facility_type exclusion.', fields: ['bed_count', 'facility_type'] }
+      ],
+      gaps: [
+        { text: 'Source mentions "continuous compliance monitoring" but no condition implements a periodic review schedule.', field: 'review_frequency' }
+      ]
+    },
+    'OH-003': {
+      suggestions: [
+        { type: 'suggestion', field: 'emergency_capable', operator: '=', value: 'true', valueType: 'boolean',
+          reason: 'Rule requires emergency department capability per source text.' },
+        { type: 'suggestion', field: 'staff_ratio', operator: '>=', value: '1.5', valueType: 'number',
+          reason: 'Staffing guidelines in source text recommend minimum 1.5 nurses per patient in acute care.' }
+      ],
+      conflicts: [],
+      gaps: [
+        { text: 'Source references "24-hour physician coverage" but no condition validates physician staffing levels.', field: 'physician_coverage' }
+      ]
+    }
+  };
+
+  const hints = ruleHints[rule.rule_id] || {
+    suggestions: [
+      { type: 'suggestion', field: existingFields.includes('licensed') ? 'compliance_score' : 'licensed',
+        operator: existingFields.includes('licensed') ? '>=' : '=',
+        value: existingFields.includes('licensed') ? '80' : 'true',
+        valueType: existingFields.includes('licensed') ? 'number' : 'boolean',
+        reason: 'Standard compliance verification recommended for this rule type.' }
+    ],
+    conflicts: existingConditions.length > 3 ? [
+      { text: 'Multiple conditions on similar fields may create overlapping or contradictory requirements. Review for logical consistency.', fields: existingFields.slice(0, 2) }
+    ] : [],
+    gaps: [
+      { text: 'Consider adding a temporal condition (date-based) to establish when this rule takes effect or expires.', field: 'effective_date' }
+    ]
+  };
+
+  cbState.aiSuggestions = {
+    suggestions: hints.suggestions.filter(s => !existingFields.includes(s.field)),
+    conflicts: hints.conflicts,
+    gaps: hints.gaps
+  };
+}
+
+// ── Sidebar Tab Switching ───────────────────────────────────
+function cbSwitchSidebarTab(tab) {
+  cbState.sidebarTab = tab;
+  document.querySelectorAll('.cb-sidebar-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.stab === tab);
+  });
+
+  const content = document.getElementById('cbSidebarContent');
+  if (tab === 'suggestions') cbRenderSuggestions(content);
+  else if (tab === 'test') cbRenderTestPanel(content);
+  else if (tab === 'coverage') cbRenderCoverage(content);
+}
+
+// ── Suggestions Panel ───────────────────────────────────────
+function cbRenderSuggestions(container) {
+  const ai = cbState.aiSuggestions;
+  let html = '';
+
+  // Conflicts first (highest priority)
+  if (ai.conflicts && ai.conflicts.length > 0) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--slds-error);margin-bottom:8px;text-transform:uppercase;">⚠ Conflicts Detected</div>`;
+    ai.conflicts.forEach(c => {
+      html += `<div class="cb-suggestion-card cb-s-conflict">
+        <div class="cb-suggestion-label" style="color:var(--slds-error);">Conflict</div>
+        <div class="cb-suggestion-text">${c.text}</div>
+        ${c.fields ? `<div style="font-size:11px;color:var(--text-secondary);">Affected: ${c.fields.map(f => `<span class="cb-suggestion-field">${f}</span>`).join(', ')}</div>` : ''}
+      </div>`;
+    });
+  }
+
+  // Gap analysis
+  if (ai.gaps && ai.gaps.length > 0) {
+    html += `<div style="font-size:11px;font-weight:700;color:#DD7A01;margin:12px 0 8px;text-transform:uppercase;">📋 Gap Analysis</div>`;
+    ai.gaps.forEach(g => {
+      html += `<div class="cb-suggestion-card cb-s-gap">
+        <div class="cb-suggestion-label" style="color:#DD7A01;">Gap</div>
+        <div class="cb-suggestion-text">${g.text}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;">Missing field: <span class="cb-suggestion-field">${g.field}</span></div>
+      </div>`;
+    });
+  }
+
+  // Suggested conditions
+  if (ai.suggestions && ai.suggestions.length > 0) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--slds-blue);margin:12px 0 8px;text-transform:uppercase;">💡 Suggested Conditions</div>`;
+    ai.suggestions.forEach((s, i) => {
+      html += `<div class="cb-suggestion-card cb-s-suggestion">
+        <div class="cb-suggestion-label" style="color:var(--slds-blue);">Suggestion</div>
+        <div style="font-size:12px;font-weight:600;color:var(--slds-navy);margin-bottom:4px;">${s.field} ${s.operator} ${s.value}</div>
+        <div class="cb-suggestion-text">${s.reason}</div>
+        <div class="cb-suggestion-actions">
+          <button class="cb-btn-sm cb-btn-accept" onclick="cbApplySuggestion(${i})">Accept</button>
+          <button class="cb-btn-sm cb-btn-reject" onclick="cbDismissSuggestion(${i})">Dismiss</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  if (!ai.conflicts?.length && !ai.gaps?.length && !ai.suggestions?.length) {
+    html = `<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:13px;">
+      <div style="font-size:32px;margin-bottom:8px;">✅</div>
+      No issues detected. Conditions look well-structured.
+    </div>`;
+  }
+
+  html += `<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--slds-border);">
+    <button class="slds-button slds-button_neutral cb-btn-sm" style="width:100%;text-align:center;" onclick="cbRefreshAI()">🔄 Re-analyze Conditions</button>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+function cbApplySuggestion(index) {
+  const s = cbState.aiSuggestions.suggestions[index];
+  if (!s) return;
+  // Add as AI-sourced condition to first group
+  if (cbState.groups.length === 0) {
+    cbState.groups.push({ id: cbState.nextId++, logic: 'AND', conditions: [] });
+  }
+  cbState.groups[0].conditions.push({
+    id: cbState.nextId++, field: s.field, operator: s.operator, value: s.value,
+    valueType: s.valueType, editing: false, source: 'ai'
+  });
+  cbState.aiSuggestions.suggestions.splice(index, 1);
+  cbRender();
+  cbSwitchSidebarTab('suggestions');
+}
+
+function cbDismissSuggestion(index) {
+  cbState.aiSuggestions.suggestions.splice(index, 1);
+  cbSwitchSidebarTab('suggestions');
+}
+
+function cbRefreshAI() {
+  if (cbState.rule) {
+    const currentConditions = [];
+    cbState.groups.forEach(g => g.conditions.filter(c => c.source !== 'ai').forEach(c => currentConditions.push(c)));
+    cbGenerateAISuggestions(cbState.rule, currentConditions);
+    cbSwitchSidebarTab('suggestions');
+  }
+}
+
+// ── Test Panel ──────────────────────────────────────────────
+function cbRenderTestPanel(container) {
+  const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+  const usedFields = new Set();
+  cbState.groups.forEach(g => g.conditions.forEach(c => { if (c.field && c.source !== 'ai') usedFields.add(c.field); }));
+
+  let html = `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin-bottom:10px;text-transform:uppercase;">Test with Sample Data</div>`;
+  html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Enter values to test whether a record would pass or fail the conditions.</div>`;
+
+  if (usedFields.size === 0) {
+    html += `<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:13px;">Add conditions first to enable testing.</div>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  usedFields.forEach(fieldName => {
+    const fieldDef = fields.find(f => f.value === fieldName) || { label: fieldName, type: 'text' };
+    const existing = cbState.testCases.find(t => t.field === fieldName);
+    const val = existing ? existing.value : '';
+    html += `<div class="cb-test-row">
+      <label>${fieldDef.label}</label>
+      ${fieldDef.type === 'boolean'
+        ? `<select onchange="cbSetTestValue('${fieldName}', this.value)"><option value="true" ${val === 'true' ? 'selected' : ''}>True</option><option value="false" ${val === 'false' ? 'selected' : ''}>False</option></select>`
+        : `<input type="${fieldDef.type === 'number' ? 'number' : fieldDef.type === 'date' ? 'date' : 'text'}" value="${val}" onchange="cbSetTestValue('${fieldName}', this.value)" placeholder="${fieldDef.type}" />`
+      }
+    </div>`;
+  });
+
+  html += `<button class="slds-button slds-button_brand cb-btn-sm" style="width:100%;margin-top:8px;padding:8px;" onclick="cbRunTest()">▶ Run Test</button>`;
+
+  if (cbState.lastTestResult) {
+    const r = cbState.lastTestResult;
+    html += `<div class="cb-test-result ${r.pass ? 'cb-test-pass' : 'cb-test-fail'}">
+      ${r.pass ? '✅ PASS' : '❌ FAIL'} — ${r.summary}
+      <div class="cb-test-detail">${r.details.join('<br>')}</div>
+    </div>`;
+  }
+
+  html += `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--slds-border);">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;">Quick Presets</div>
+    <button class="slds-button slds-button_neutral cb-btn-sm" style="margin-bottom:4px;width:100%;" onclick="cbLoadPreset('passing')">Load Passing Example</button>
+    <button class="slds-button slds-button_neutral cb-btn-sm" style="width:100%;" onclick="cbLoadPreset('failing')">Load Failing Example</button>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+function cbSetTestValue(field, value) {
+  const existing = cbState.testCases.find(t => t.field === field);
+  if (existing) { existing.value = value; }
+  else { cbState.testCases.push({ field, value }); }
+}
+
+function cbRunTest() {
+  const results = [];
+  let allGroupsPassed = true;
+
+  cbState.groups.forEach((group, gi) => {
+    const accepted = group.conditions.filter(c => c.source !== 'ai' && c.field);
+    if (accepted.length === 0) return;
+
+    const condResults = accepted.map(cond => {
+      const testCase = cbState.testCases.find(t => t.field === cond.field);
+      const testVal = testCase ? testCase.value : '';
+      if (!testVal && testVal !== '0') return { cond, pass: false, reason: `No test value for "${cond.field}"` };
+
+      let pass = false;
+      const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+      const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
+
+      if (fieldDef.type === 'number') {
+        const a = parseFloat(testVal), b = parseFloat(cond.value);
+        if (cond.operator === '>=') pass = a >= b;
+        else if (cond.operator === '<=') pass = a <= b;
+        else if (cond.operator === '>') pass = a > b;
+        else if (cond.operator === '<') pass = a < b;
+        else if (cond.operator === '=') pass = a === b;
+        else if (cond.operator === '!=') pass = a !== b;
+      } else if (fieldDef.type === 'boolean') {
+        pass = (testVal.toLowerCase() === cond.value.toLowerCase());
+      } else {
+        const a = testVal.toLowerCase(), b = cond.value.toLowerCase();
+        if (cond.operator === '=') pass = a === b;
+        else if (cond.operator === '!=') pass = a !== b;
+        else if (cond.operator === 'contains') pass = a.includes(b);
+        else if (cond.operator === 'starts_with') pass = a.startsWith(b);
+      }
+      return { cond, pass, reason: pass ? `${cond.field} ${cond.operator} ${cond.value} → ✅` : `${cond.field}: "${testVal}" does not satisfy ${cond.operator} "${cond.value}" → ❌` };
+    });
+
+    const groupPass = group.logic === 'AND'
+      ? condResults.every(r => r.pass)
+      : condResults.some(r => r.pass);
+
+    if (!groupPass) allGroupsPassed = false;
+    results.push(...condResults.map(r => r.reason));
+  });
+
+  cbState.lastTestResult = {
+    pass: allGroupsPassed,
+    summary: allGroupsPassed ? 'All conditions satisfied.' : 'One or more conditions failed.',
+    details: results
+  };
+
+  cbSwitchSidebarTab('test');
+}
+
+function cbLoadPreset(type) {
+  const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+  cbState.testCases = [];
+
+  cbState.groups.forEach(g => g.conditions.filter(c => c.source !== 'ai' && c.field).forEach(cond => {
+    const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
+    let val;
+    if (type === 'passing') {
+      if (fieldDef.type === 'number') {
+        const num = parseFloat(cond.value) || 0;
+        if (cond.operator === '>=' || cond.operator === '>') val = String(num + 10);
+        else if (cond.operator === '<=' || cond.operator === '<') val = String(num - 10);
+        else val = cond.value;
+      } else if (fieldDef.type === 'boolean') {
+        val = cond.value;
+      } else {
+        val = cond.value;
+      }
+    } else {
+      if (fieldDef.type === 'number') {
+        const num = parseFloat(cond.value) || 0;
+        if (cond.operator === '>=' || cond.operator === '>') val = String(num - 10);
+        else if (cond.operator === '<=' || cond.operator === '<') val = String(num + 10);
+        else val = String(num + 1);
+      } else if (fieldDef.type === 'boolean') {
+        val = cond.value === 'true' ? 'false' : 'true';
+      } else {
+        val = 'INVALID_' + cond.value;
+      }
+    }
+    if (!cbState.testCases.find(t => t.field === cond.field)) {
+      cbState.testCases.push({ field: cond.field, value: val });
+    }
+  }));
+
+  cbSwitchSidebarTab('test');
+}
+
+// ── Coverage Panel ──────────────────────────────────────────
+function cbRenderCoverage(container) {
+  const rule = cbState.rule;
+  if (!rule) { container.innerHTML = '<div style="padding:16px;color:var(--text-secondary);">No rule selected.</div>'; return; }
+
+  const accepted = [];
+  cbState.groups.forEach(g => g.conditions.filter(c => c.source !== 'ai' && c.field).forEach(c => accepted.push(c)));
+
+  // Source text mapping (simulated analysis)
+  const sourceMapping = {
+    'OH-001': {
+      text: 'A hospital shall maintain a minimum capacity of not less than 25 licensed beds and shall operate under a license issued by the director of health.',
+      phrases: [
+        { text: 'minimum capacity of not less than 25 licensed beds', field: 'bed_count', covered: accepted.some(c => c.field === 'bed_count') },
+        { text: 'shall operate under a license', field: 'licensed', covered: accepted.some(c => c.field === 'licensed') },
+        { text: 'license issued by the director of health', field: 'license_authority', covered: accepted.some(c => c.field === 'license_authority') },
+        { text: 'hospital', field: 'facility_type', covered: accepted.some(c => c.field === 'facility_type') }
+      ]
+    },
+    'OH-002': {
+      text: 'The hospital shall be duly licensed and maintain accreditation from a recognized body. Annual inspections are required for continued operation.',
+      phrases: [
+        { text: 'duly licensed', field: 'licensed', covered: accepted.some(c => c.field === 'licensed') },
+        { text: 'maintain accreditation from a recognized body', field: 'accreditation_body', covered: accepted.some(c => c.field === 'accreditation_body') },
+        { text: 'Annual inspections', field: 'inspection_date', covered: accepted.some(c => c.field === 'inspection_date') },
+        { text: 'continued operation', field: 'license_status', covered: accepted.some(c => c.field === 'license_status') }
+      ]
+    },
+    'OH-003': {
+      text: 'The facility must demonstrate emergency department capability with adequate physician and nursing staff coverage at all times.',
+      phrases: [
+        { text: 'emergency department capability', field: 'emergency_capable', covered: accepted.some(c => c.field === 'emergency_capable') },
+        { text: 'adequate physician staff', field: 'physician_coverage', covered: accepted.some(c => c.field === 'physician_coverage') },
+        { text: 'nursing staff coverage', field: 'staff_ratio', covered: accepted.some(c => c.field === 'staff_ratio') },
+        { text: 'at all times', field: 'coverage_hours', covered: accepted.some(c => c.field === 'coverage_hours') }
+      ]
+    }
+  };
+
+  const mapping = sourceMapping[rule.rule_id] || {
+    text: rule.rule_text || 'Source text not available for AI mapping.',
+    phrases: accepted.map(c => ({ text: c.field, field: c.field, covered: true }))
+  };
+
+  const coveredCount = mapping.phrases.filter(p => p.covered).length;
+  const totalPhrases = mapping.phrases.length;
+  const pct = totalPhrases > 0 ? Math.round((coveredCount / totalPhrases) * 100) : 0;
+  const barColor = pct >= 80 ? '#2E844A' : pct >= 50 ? '#DD7A01' : '#BA0517';
+
+  let html = `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin-bottom:10px;text-transform:uppercase;">Source Coverage Analysis</div>`;
+
+  html += `<div class="cb-coverage">
+    <div class="cb-coverage-label"><span>Validation Score</span><span style="font-weight:700;color:${barColor};">${pct}%</span></div>
+    <div class="cb-coverage-bar"><div class="cb-coverage-fill" style="width:${pct}%;background:${barColor};"></div></div>
+    <div class="cb-coverage-label"><span>${coveredCount} of ${totalPhrases} key phrases covered</span></div>
+  </div>`;
+
+  html += `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin:16px 0 8px;text-transform:uppercase;">Source Text Mapping</div>`;
+  html += `<div style="font-size:12px;line-height:1.8;color:var(--text);background:#fff;padding:12px;border-radius:4px;border:1px solid var(--slds-border);">`;
+
+  mapping.phrases.forEach(p => {
+    const style = p.covered
+      ? 'background:rgba(46,132,74,0.15);padding:1px 4px;border-radius:2px;border-bottom:2px solid #2E844A;cursor:help;'
+      : 'background:rgba(186,5,23,0.1);padding:1px 4px;border-radius:2px;border-bottom:2px dashed #BA0517;cursor:help;';
+    const icon = p.covered ? '✅' : '❌';
+    html += `<span style="${style}" title="${p.covered ? 'Covered by: ' + p.field : 'NOT COVERED — needs condition for: ' + p.field}">${icon} ${p.text}</span> `;
+  });
+
+  html += `</div>`;
+
+  // Uncovered phrases call-out
+  const uncovered = mapping.phrases.filter(p => !p.covered);
+  if (uncovered.length > 0) {
+    html += `<div style="margin-top:12px;padding:10px 12px;background:rgba(186,5,23,0.05);border:1px solid rgba(186,5,23,0.15);border-radius:4px;">
+      <div style="font-size:11px;font-weight:700;color:var(--slds-error);margin-bottom:6px;">Uncovered Requirements</div>
+      ${uncovered.map(u => `<div style="font-size:12px;color:var(--text);margin-bottom:4px;">• "${u.text}" → <span class="cb-suggestion-field">${u.field}</span></div>`).join('')}
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ██  END CONDITION BUILDER                                  ██
+// ══════════════════════════════════════════════════════════════
+
 async function renderDependencyGraph() {
   const svg = d3.select('#dependencyGraph');
   if (!svg.node()) return;
