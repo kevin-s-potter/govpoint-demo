@@ -514,7 +514,96 @@
   </div>
 </div>
 
-<script src="data/api.js"></script>
+<script>
+// ── GOVPOINT SUPABASE API ────────────────────────────────────
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+
+class GovPointAPI {
+  constructor() {
+    this._cache = {};
+    this.ready = this._prefetch();
+  }
+  async _query(table, params = '') {
+    const cacheKey = `${table}?${params}`;
+    if (this._cache[cacheKey]) return this._cache[cacheKey];
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${params}`;
+    const res = await fetch(url, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) { console.error(`[GovPoint API] ${table} query failed: ${res.status}`); return []; }
+    const data = await res.json();
+    this._cache[cacheKey] = data;
+    return data;
+  }
+  async _prefetch() {
+    try {
+      await Promise.all([
+        this._query('rules', 'select=*&order=rule_id'),
+        this._query('users', 'select=*'),
+        this._query('programs', 'select=*'),
+        this._query('user_roles', 'select=*'),
+        this._query('rule_conditions', 'select=*&order=rule_id,"order"'),
+        this._query('notifications', 'select=*&order=created_at.desc')
+      ]);
+      const rules = this._cache['rules?select=*&order=rule_id'] || [];
+      console.log(`[GovPoint API] Connected to Supabase — loaded ${rules.length} rules`);
+    } catch (e) { console.error('[GovPoint API] Prefetch failed:', e); }
+    return this;
+  }
+  clearCache() { this._cache = {}; }
+  async getUser(userId) {
+    const users = await this._query('users', 'select=*');
+    return users.find(u => u.user_id === userId) || null;
+  }
+  async getRules(programId = 'hosp-licensing') {
+    const all = await this._query('rules', 'select=*&order=rule_id');
+    return all.filter(r => r.program_id === programId);
+  }
+  async getRule(ruleId) {
+    const all = await this._query('rules', 'select=*&order=rule_id');
+    return all.find(r => r.rule_id === ruleId) || null;
+  }
+  async getConditions(ruleId) {
+    const all = await this._query('rule_conditions', 'select=*&order=rule_id,"order"');
+    return all.filter(c => c.rule_id === ruleId).sort((a, b) => a.order - b.order);
+  }
+  async getDependencies(ruleId) {
+    const deps = await this._query('rule_dependencies', 'select=*');
+    const dependsOn = deps.filter(d => d.rule_id === ruleId);
+    const dependedOnBy = deps.filter(d => d.depends_on === ruleId);
+    for (const d of dependsOn) { d.targetRule = await this.getRule(d.depends_on); }
+    for (const d of dependedOnBy) { d.sourceRule = await this.getRule(d.rule_id); }
+    return { dependsOn, dependedOnBy };
+  }
+  async getVersionHistory(ruleId) {
+    const all = await this._query('rule_versions', 'select=*&order=changed_at.desc');
+    return all.filter(v => v.rule_id === ruleId);
+  }
+  async getComments(ruleId) {
+    const all = await this._query('comments', 'select=*&order=created_at');
+    const filtered = all.filter(c => c.rule_id === ruleId);
+    for (const c of filtered) { c.user = await this.getUser(c.user_id); }
+    return filtered;
+  }
+  async getAuditLog(ruleId = null, tenantId = 'ohio-odh') {
+    const all = await this._query('audit_log', 'select=*&order=timestamp.desc');
+    let logs = all.filter(a => a.tenant_id === tenantId);
+    if (ruleId) { logs = logs.filter(a => a.target_id === ruleId); }
+    for (const a of logs) { a.user = a.user_id ? await this.getUser(a.user_id) : null; }
+    return logs;
+  }
+  async getNotifications(userId = 'user-001') {
+    const all = await this._query('notifications', 'select=*&order=created_at.desc');
+    return all.filter(n => n.user_id === userId);
+  }
+  async getUnreadCount(userId = 'user-001') {
+    const notifs = await this.getNotifications(userId);
+    return notifs.filter(n => !n.read).length;
+  }
+}
+const govpoint = new GovPointAPI();
+</script>
 <script>
 // ── STATE ────────────────────────────────────────────────────
 let currentRule = null;   // full rule object from Supabase
