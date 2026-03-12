@@ -433,7 +433,7 @@
     border-radius: 4px;
     border: 1px solid var(--slds-border);
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow: auto;
   }
 
   .audit-table {
@@ -517,9 +517,20 @@
     color: var(--slds-text-secondary);
   }
 
-  .action-badge.comment {
+  .action-badge.comment,
+  .action-badge.add_comment {
     background: #E8EFF8;
     color: var(--slds-brand);
+  }
+
+  .action-badge.edit_rule {
+    background: #E8EFF8;
+    color: var(--slds-brand-dark);
+  }
+
+  .action-badge.accept_ai_suggestion {
+    background: #F3EDFD;
+    color: var(--slds-purple);
   }
 
   .role-badge {
@@ -764,11 +775,14 @@
       <div class="slds-form-element__control">
       <select class="filter-select slds-select" id="filterAction">
         <option value="">All Actions</option>
+        <option value="edit_rule">Edit Rule</option>
         <option value="edit_conditions">Edit Conditions</option>
+        <option value="accept_ai_suggestion">Accept AI Suggestion</option>
         <option value="approve">Approve</option>
         <option value="submit_for_review">Submit for Review</option>
         <option value="create_draft">Create Draft</option>
         <option value="publish">Publish</option>
+        <option value="add_comment">Add Comment</option>
         <option value="login">Login</option>
         <option value="view">View</option>
       </select>
@@ -830,7 +844,7 @@
           <th style="width: 100px;">User</th>
           <th style="width: 100px;">Target</th>
           <th>Detail</th>
-          <th style="width: 100px;">IP Address</th>
+          <th style="width: 110px;">Session ID</th>
         </tr>
       </thead>
       <tbody id="auditTableBody">
@@ -989,7 +1003,7 @@
   // ── STATS ──
   function updateStats() {
     document.getElementById('statTotal').textContent = filteredEntries.length;
-    document.getElementById('statEdits').textContent = filteredEntries.filter(e => e.action === 'edit_conditions' || e.action === 'edit').length;
+    document.getElementById('statEdits').textContent = filteredEntries.filter(e => ['edit_conditions', 'edit', 'edit_rule'].includes(e.action)).length;
     document.getElementById('statReviews').textContent = filteredEntries.filter(e => e.action === 'submit_for_review').length;
     document.getElementById('statApprovals').textContent = filteredEntries.filter(e => e.action === 'approve').length;
     document.getElementById('statPublishes').textContent = filteredEntries.filter(e => e.action === 'publish').length;
@@ -1022,7 +1036,7 @@
           <td>${userName}</td>
           <td>${targetDisplay}</td>
           <td>${e.detail || '—'}</td>
-          <td style="font-family: monospace; font-size: 11px; color: var(--slds-text-secondary);">${e.ip_address || '—'}</td>
+          <td style="font-family: monospace; font-size: 11px; color: var(--slds-text-secondary);">${sessionId(e)}</td>
         </tr>`;
       }).join('');
     }
@@ -1037,6 +1051,15 @@
 
   function prevPage() { if (currentPage > 0) { currentPage--; renderTable(); } }
   function nextPage() { const totalPages = Math.ceil(filteredEntries.length / PAGE_SIZE); if (currentPage < totalPages - 1) { currentPage++; renderTable(); } }
+
+  // Derive a short session token from the audit_id for display purposes
+  function sessionId(e) {
+    const src = e.audit_id || e.user_id || '';
+    let hash = 0;
+    for (let i = 0; i < src.length; i++) { hash = ((hash << 5) - hash) + src.charCodeAt(i); hash |= 0; }
+    const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+    return src ? `SID-${hex.slice(0, 4)}-${hex.slice(4)}` : '—';
+  }
 
   // ── KEYBOARD ──
   document.getElementById('filterSearch').addEventListener('keydown', (e) => {
