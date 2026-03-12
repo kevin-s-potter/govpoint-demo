@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovPoint | Analytics Dashboard</title>
+<style>
+  :root {
+    --navy: #003366;
+    --navy-deep: #0E3F75;
+    --accent: #14499E;
+    --accent-light: #E8EFF8;
+    --ohio-red: #C41230;
+    --ohio-red-light: #FDEDEF;
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --amber: #D84315;
+    --amber-light: #FFF3E0;
+    --red: #C41230;
+    --red-light: #FDEDEF;
+    --purple: #7B1FA2;
+    --purple-light: #F3E5F5;
+    --gray: #4E4D4D;
+    --light-gray: #F2F2F2;
+    --border: #D0D5DD;
+    --white: #FFFFFF;
+    --text: #1A1A2E;
+    --text-secondary: #4A5568;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 6px;
+    --radius-lg: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--light-gray); color: var(--text); line-height: 1.6; }
+
+  /* ── STATE BANNER ── */
+  .state-banner { background: var(--light-gray); padding: 4px 32px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .state-banner a { color: var(--ohio-red); text-decoration: none; font-weight: 600; }
+
+  /* ── NAV ── */
+  .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
+  .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+
+  .topnav .nav-spacer { margin-left: auto; }
+  .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
+  .topnav .nav-links { display: flex; gap: 24px; }
+  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
+  .topnav .nav-links a:hover { color: var(--ohio-red); }
+  .topnav .nav-links a.active { color: var(--ohio-red); }
+
+  .role-indicator { display: flex; align-items: center; gap: 12px; }
+  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .role-text { font-size: 13px; line-height: 1.4; }
+  .role-text .user-name { color: var(--navy); font-weight: 600; }
+  .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
+
+  /* ── MAIN CONTENT ── */
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+
+  .page-title { font-size: 28px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .page-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .summary-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; box-shadow: var(--shadow); }
+  .summary-card:hover { box-shadow: var(--shadow-lg); }
+  .summary-number { font-size: 36px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .summary-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── CHARTS SECTION ── */
+  .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-bottom: 32px; }
+  .chart-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); }
+  .chart-card:hover { box-shadow: var(--shadow-lg); }
+  .chart-title { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+
+  /* Bar Chart Styles */
+  .bar-chart { display: flex; flex-direction: column; gap: 16px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { width: 100px; font-size: 12px; font-weight: 600; color: var(--text); text-align: right; flex-shrink: 0; }
+  .bar-container { flex: 1; height: 32px; background: var(--light-gray); border-radius: var(--radius); overflow: hidden; position: relative; display: flex; align-items: center; }
+  .bar-fill { height: 100%; background: var(--accent); display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-size: 11px; font-weight: 700; color: white; transition: all 0.3s ease; }
+  .bar-value { min-width: 35px; text-align: right; font-size: 12px; font-weight: 700; color: var(--text); }
+
+  /* Status Colors */
+  .bar-active { background: var(--green); }
+  .bar-draft { background: var(--amber); }
+  .bar-review { background: var(--purple); }
+  .bar-sunset { background: var(--red); }
+
+  /* ── ACTIVITY TABLE ── */
+  .activity-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); }
+  .activity-section h2 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+  .activity-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .activity-table th { background: var(--light-gray); padding: 12px; text-align: left; font-weight: 700; color: var(--navy); border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .activity-table td { padding: 14px 12px; border-bottom: 1px solid var(--border); }
+  .activity-table tbody tr:hover { background: var(--light-gray); }
+  .activity-timestamp { color: var(--text-secondary); font-family: monospace; font-size: 11px; }
+  .activity-user { font-weight: 600; color: var(--navy); }
+  .activity-action { color: var(--text); font-weight: 500; }
+  .activity-target { color: var(--accent); font-weight: 600; }
+  .activity-detail { color: var(--text-secondary); font-size: 11px; }
+
+  /* ── DATA SOURCE FOOTER ── */
+  .data-source { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-top: 32px; justify-content: center; padding-top: 24px; border-top: 1px solid var(--border); }
+  .data-source-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; }
+
+  /* ── LOADING STATE ── */
+  .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+  @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .summary-card.loading { opacity: 0.6; }
+  .chart-card.loading { opacity: 0.6; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .container { padding: 24px; }
+    .summary-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .topnav { padding: 0 16px; }
+    .state-banner { padding: 4px 16px; }
+    .summary-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; }
+    .page-title { font-size: 22px; }
+    .charts-grid { gap: 16px; }
+    .chart-card { padding: 16px; }
+    .bar-label { width: 80px; font-size: 11px; }
+    .summary-number { font-size: 28px; }
+    .activity-table { font-size: 11px; }
+    .activity-table td { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="state-banner">
+  <span>Ohio Revised Code Ontology System</span>
+  <span style="margin-left: auto;"><a href="#">Documentation</a> · <a href="#">Support</a></span>
+</div>
+
+<nav class="topnav">
+  <div class="logo">
+    <span class="ohio-mark">⟨°⟩</span>
+    <span>GovPoint</span>
+  </div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-links">
+    <a href="index.html">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+  </div>
+
+  <div class="nav-controls">
+    <div class="role-indicator">
+      <div class="avatar-circle">SC</div>
+      <div class="role-text">
+        <div class="user-name">Sarah Chen</div>
+        <div class="user-role">Publisher | Hospital Licensing</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-title">Analytics Dashboard</div>
+  <div class="page-subtitle">Real-time regulatory ontology health monitoring</div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid" id="summaryGrid">
+    <div class="summary-card loading">
+      <div class="summary-number">—</div>
+      <div class="summary-label">Total Rules</div>
+    </div>
+    <div class="summary-card loading">
+      <div class="summary-number">—</div>
+      <div class="summary-label">Active Rules</div>
+    </div>
+    <div class="summary-card loading">
+      <div class="summary-number">—</div>
+      <div class="summary-label">Draft Rules</div>
+    </div>
+    <div class="summary-card loading">
+      <div class="summary-number">—</div>
+      <div class="summary-label">In Review</div>
+    </div>
+    <div class="summary-card loading">
+      <div class="summary-number">—</div>
+      <div class="summary-label">Total Conditions</div>
+    </div>
+    <div class="summary-card loading">
+      <div class="summary-number">—</div>
+      <div class="summary-label">Total Dependencies</div>
+    </div>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    <!-- Rules by Status -->
+    <div class="chart-card loading">
+      <div class="chart-title">Rules by Status</div>
+      <div class="bar-chart" id="statusChart">
+        <div class="bar-row">
+          <div class="bar-label">Active</div>
+          <div class="bar-container"><div class="bar-fill bar-active" style="width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Draft</div>
+          <div class="bar-container"><div class="bar-fill bar-draft" style="width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">In Review</div>
+          <div class="bar-container"><div class="bar-fill bar-review" style="width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Sunset</div>
+          <div class="bar-container"><div class="bar-fill bar-sunset" style="width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules by Jurisdiction -->
+    <div class="chart-card loading">
+      <div class="chart-title">Rules by Jurisdiction</div>
+      <div class="bar-chart" id="jurisdictionChart">
+        <div class="bar-row">
+          <div class="bar-label">Ohio</div>
+          <div class="bar-container"><div class="bar-fill" style="background: var(--accent); width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Federal</div>
+          <div class="bar-container"><div class="bar-fill" style="background: var(--navy-deep); width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules by Type -->
+    <div class="chart-card loading">
+      <div class="chart-title">Rules by Type</div>
+      <div class="bar-chart" id="typeChart">
+        <div class="bar-row">
+          <div class="bar-label">GATE</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #2196F3; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">ROUTE</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #FF9800; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">INFO</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #4CAF50; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">FILTER</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #9C27B0; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">CALC</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #F44336; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules by Phase -->
+    <div class="chart-card loading">
+      <div class="chart-title">Rules by Phase</div>
+      <div class="bar-chart" id="phaseChart">
+        <div class="bar-row">
+          <div class="bar-label">Licensing</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #FF6B6B; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Compliance</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #4ECDC4; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">App Processing</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #FFE66D; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Verification</div>
+          <div class="bar-container"><div class="bar-fill" style="background: #95E1D3; width: 0%;"></div></div>
+          <div class="bar-value">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="activity-section">
+    <h2>Recent Activity</h2>
+    <table class="activity-table">
+      <thead>
+        <tr>
+          <th style="width: 140px;">Timestamp</th>
+          <th style="width: 100px;">User</th>
+          <th style="width: 120px;">Action</th>
+          <th style="width: 100px;">Target</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody id="activityTableBody">
+        <tr>
+          <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-secondary);">Loading activity...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Data Source -->
+  <div class="data-source">
+    <div class="data-source-dot"></div>
+    <span>Live data from Supabase PostgreSQL — <span id="ruleCount">0</span> rules loaded</span>
+  </div>
+</div>
+
+<script>
+  // Supabase Configuration
+  const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+
+  // Supabase client
+  class SupabaseClient {
+    constructor(url, key) {
+      this.url = url;
+      this.key = key;
+    }
+
+    async query(table, options = {}) {
+      let query = `${this.url}/rest/v1/${table}?`;
+      const params = new URLSearchParams();
+
+      if (options.select) params.append('select', options.select);
+      if (options.filters) {
+        Object.entries(options.filters).forEach(([key, value]) => {
+          params.append(key, `eq.${value}`);
+        });
+      }
+      if (options.limit) params.append('limit', options.limit);
+      if (options.order) {
+        const [col, direction] = options.order;
+        params.append('order', `${col}.${direction}`);
+      }
+
+      try {
+        const response = await fetch(query + params.toString(), {
+          headers: {
+            'Authorization': `Bearer ${this.key}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          console.error(`Query error for ${table}:`, response.status, response.statusText);
+          return [];
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error(`Error querying ${table}:`, error);
+        return [];
+      }
+    }
+  }
+
+  const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Dashboard State
+  let dashboardData = {
+    rules: [],
+    conditions: [],
+    dependencies: [],
+    auditLog: [],
+    users: new Map()
+  };
+
+  // Load data on page load
+  async function loadDashboardData() {
+    try {
+      // Fetch all required data in parallel
+      const [rules, conditions, dependencies, auditLog, users] = await Promise.all([
+        supabase.query('rules', { select: '*', limit: 1000 }),
+        supabase.query('rule_conditions', { select: '*', limit: 1000 }),
+        supabase.query('rule_dependencies', { select: '*', limit: 1000 }),
+        supabase.query('audit_log', { select: '*', limit: 10, order: ['timestamp', 'desc'] }),
+        supabase.query('users', { select: '*', limit: 1000 })
+      ]);
+
+      dashboardData.rules = rules || [];
+      dashboardData.conditions = conditions || [];
+      dashboardData.dependencies = dependencies || [];
+      dashboardData.auditLog = auditLog || [];
+
+      // Build user map for quick lookup
+      if (users) {
+        users.forEach(user => {
+          dashboardData.users.set(user.user_id, user);
+        });
+      }
+
+      // Render dashboard
+      renderSummaryCards();
+      renderCharts();
+      renderActivityTable();
+      removeLoadingStates();
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  }
+
+  function renderSummaryCards() {
+    const rules = dashboardData.rules;
+    const conditions = dashboardData.conditions;
+    const dependencies = dashboardData.dependencies;
+
+    const totalRules = rules.length;
+    const activeRules = rules.filter(r => r.status === 'ACTIVE').length;
+    const draftRules = rules.filter(r => r.status === 'DRAFT').length;
+    const reviewRules = rules.filter(r => r.status === 'IN_REVIEW').length;
+    const totalConditions = conditions.length;
+    const totalDependencies = dependencies.length;
+
+    const cards = [
+      { number: totalRules, label: 'Total Rules' },
+      { number: activeRules, label: 'Active Rules' },
+      { number: draftRules, label: 'Draft Rules' },
+      { number: reviewRules, label: 'In Review' },
+      { number: totalConditions, label: 'Total Conditions' },
+      { number: totalDependencies, label: 'Total Dependencies' }
+    ];
+
+    const grid = document.getElementById('summaryGrid');
+    grid.innerHTML = cards.map(card => `
+      <div class="summary-card">
+        <div class="summary-number">${card.number}</div>
+        <div class="summary-label">${card.label}</div>
+      </div>
+    `).join('');
+
+    // Update rule count in footer
+    document.getElementById('ruleCount').textContent = totalRules;
+  }
+
+  function renderCharts() {
+    const rules = dashboardData.rules;
+
+    // Rules by Status
+    const statusCounts = {
+      ACTIVE: rules.filter(r => r.status === 'ACTIVE').length,
+      DRAFT: rules.filter(r => r.status === 'DRAFT').length,
+      IN_REVIEW: rules.filter(r => r.status === 'IN_REVIEW').length,
+      SUNSET: rules.filter(r => r.status === 'SUNSET').length
+    };
+
+    renderStatusChart(statusCounts);
+
+    // Rules by Jurisdiction
+    const jurisdictionCounts = {
+      Ohio: rules.filter(r => r.jurisdiction === 'Ohio').length,
+      Federal: rules.filter(r => r.jurisdiction === 'Federal').length
+    };
+
+    renderJurisdictionChart(jurisdictionCounts);
+
+    // Rules by Type
+    const typeCounts = {
+      GATE: rules.filter(r => r.rule_type === 'GATE').length,
+      ROUTE: rules.filter(r => r.rule_type === 'ROUTE').length,
+      INFO: rules.filter(r => r.rule_type === 'INFO').length,
+      FILTER: rules.filter(r => r.rule_type === 'FILTER').length,
+      CALC: rules.filter(r => r.rule_type === 'CALC').length
+    };
+
+    renderTypeChart(typeCounts);
+
+    // Rules by Phase
+    const phaseCounts = {
+      LICENSING: rules.filter(r => r.phase === 'LICENSING').length,
+      COMPLIANCE: rules.filter(r => r.phase === 'COMPLIANCE').length,
+      APPLICATION_PROCESSING: rules.filter(r => r.phase === 'APPLICATION_PROCESSING').length,
+      REPORTING_VERIFICATION: rules.filter(r => r.phase === 'REPORTING_VERIFICATION').length
+    };
+
+    renderPhaseChart(phaseCounts);
+  }
+
+  function renderStatusChart(counts) {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const chart = document.getElementById('statusChart');
+
+    chart.innerHTML = [
+      { label: 'Active', value: counts.ACTIVE, className: 'bar-active' },
+      { label: 'Draft', value: counts.DRAFT, className: 'bar-draft' },
+      { label: 'In Review', value: counts.IN_REVIEW, className: 'bar-review' },
+      { label: 'Sunset', value: counts.SUNSET, className: 'bar-sunset' }
+    ].map(item => `
+      <div class="bar-row">
+        <div class="bar-label">${item.label}</div>
+        <div class="bar-container">
+          <div class="bar-fill ${item.className}" style="width: ${total > 0 ? (item.value / total * 100) : 0}%;">${item.value > 0 ? item.value : ''}</div>
+        </div>
+        <div class="bar-value">${item.value}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderJurisdictionChart(counts) {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const chart = document.getElementById('jurisdictionChart');
+
+    chart.innerHTML = [
+      { label: 'Ohio', value: counts.Ohio, style: 'background: var(--accent);' },
+      { label: 'Federal', value: counts.Federal, style: 'background: var(--navy-deep);' }
+    ].map(item => `
+      <div class="bar-row">
+        <div class="bar-label">${item.label}</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="${item.style} width: ${total > 0 ? (item.value / total * 100) : 0}%;">${item.value > 0 ? item.value : ''}</div>
+        </div>
+        <div class="bar-value">${item.value}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderTypeChart(counts) {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const chart = document.getElementById('typeChart');
+    const colors = {
+      GATE: '#2196F3',
+      ROUTE: '#FF9800',
+      INFO: '#4CAF50',
+      FILTER: '#9C27B0',
+      CALC: '#F44336'
+    };
+
+    chart.innerHTML = Object.entries(counts).map(([type, value]) => `
+      <div class="bar-row">
+        <div class="bar-label">${type}</div>
+        <div class="bar-container">
+          <div class="bar-fill" style="background: ${colors[type]}; width: ${total > 0 ? (value / total * 100) : 0}%;">${value > 0 ? value : ''}</div>
+        </div>
+        <div class="bar-value">${value}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderPhaseChart(counts) {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const chart = document.getElementById('phaseChart');
+    const colors = {
+      LICENSING: '#FF6B6B',
+      COMPLIANCE: '#4ECDC4',
+      APPLICATION_PROCESSING: '#FFE66D',
+      REPORTING_VERIFICATION: '#95E1D3'
+    };
+
+    const items = [
+      { label: 'Licensing', key: 'LICENSING' },
+      { label: 'Compliance', key: 'COMPLIANCE' },
+      { label: 'App Processing', key: 'APPLICATION_PROCESSING' },
+      { label: 'Verification', key: 'REPORTING_VERIFICATION' }
+    ];
+
+    chart.innerHTML = items.map(item => {
+      const value = counts[item.key];
+      return `
+        <div class="bar-row">
+          <div class="bar-label">${item.label}</div>
+          <div class="bar-container">
+            <div class="bar-fill" style="background: ${colors[item.key]}; width: ${total > 0 ? (value / total * 100) : 0}%;">${value > 0 ? value : ''}</div>
+          </div>
+          <div class="bar-value">${value}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderActivityTable() {
+    const tbody = document.getElementById('activityTableBody');
+    const auditLog = dashboardData.auditLog;
+
+    if (auditLog.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--text-secondary);">No activity recorded yet</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = auditLog.map(entry => {
+      const user = dashboardData.users.get(entry.user_id);
+      const userName = user ? user.display_name : 'Unknown User';
+      const timestamp = new Date(entry.timestamp).toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      return `
+        <tr>
+          <td class="activity-timestamp">${timestamp}</td>
+          <td class="activity-user">${userName}</td>
+          <td class="activity-action">${formatAction(entry.action)}</td>
+          <td class="activity-target">${entry.target_id || '—'}</td>
+          <td class="activity-detail">${entry.detail || '—'}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function formatAction(action) {
+    const actions = {
+      'CREATE': 'Created',
+      'UPDATE': 'Updated',
+      'DELETE': 'Deleted',
+      'SUBMIT': 'Submitted',
+      'APPROVE': 'Approved',
+      'REJECT': 'Rejected',
+      'PUBLISH': 'Published',
+      'ARCHIVE': 'Archived'
+    };
+    return actions[action] || action;
+  }
+
+  function removeLoadingStates() {
+    document.querySelectorAll('.loading').forEach(el => {
+      el.classList.remove('loading');
+    });
+  }
+
+  // Initialize dashboard
+  loadDashboardData();
+</script>
+
+</body>
+</html>

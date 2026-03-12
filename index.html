@@ -238,7 +238,7 @@
   <div class="logo"><span class="ohio-mark">Ohio</span> Department of Health</div>
   <div class="nav-links">
     <a href="#" class="active" onclick="showPage('intake')">New Request</a>
-    <a href="#" onclick="showPage('intake')">Dashboard</a>
+    <a href="dashboard.html">Dashboard</a>
     <a href="ontology.html">Ontology</a>
     <a href="#" onclick="showPage('intake')">Admin</a>
   </div>
@@ -513,6 +513,39 @@
 </div>
 
 <script>
+// ══════════════════════════════════════════ SUPABASE INITIALIZATION ══════════════════════════════════════════
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+
+async function fetchRulesFromSupabase() {
+  try {
+    // Fetch all rules with their conditions
+    const rulesResponse = await fetch(`${SUPABASE_URL}/rest/v1/rules?select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const rules = await rulesResponse.json();
+    
+    // Fetch all rule conditions
+    const conditionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/rule_conditions?select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const conditions = await conditionsResponse.json();
+    
+    return { rules, conditions };
+  } catch (error) {
+    console.error('Error fetching from Supabase:', error);
+    return { rules: [], conditions: [] };
+  }
+}
+
 // ══════════════════════════════════════════ DATA ══════════════════════════════════════════
 
 const SCENARIOS = {
@@ -638,8 +671,132 @@ const PHASES = [
   }
 ];
 
-// ── Scenario-specific rule outcomes with full reasoning chains ──
-function getScenarioResults(s) {
+// ──── Replacement: getScenarioResults now pulls from Supabase ────
+// This function evaluates rules by fetching from the database and applying conditions
+async function getScenarioResults(s) {
+  const data = SCENARIOS[s];
+  const results = {};
+  
+  // Load rules and conditions from Supabase
+  const { rules: dbRules, conditions: dbConditions } = await fetchRulesFromSupabase();
+  
+  // If Supabase is empty, fall back to hardcoded logic below
+  if (!dbRules || dbRules.length === 0) {
+    return getScenarioResultsHardcoded(s);
+  }
+  
+  // Map rules by rule_id for fast lookup
+  const rulesMap = {};
+  dbRules.forEach(rule => {
+    rulesMap[rule.rule_id] = rule;
+  });
+  
+  // Group conditions by rule_id
+  const conditionsByRule = {};
+  dbConditions.forEach(cond => {
+    if (!conditionsByRule[cond.rule_id]) {
+      conditionsByRule[cond.rule_id] = [];
+    }
+    conditionsByRule[cond.rule_id].push(cond);
+  });
+  
+  // Extract form values to build evaluation context
+  const isCah = data.type === "CRITICAL_ACCESS";
+  const isOb = data.involves_ob;
+  const isEd = data.involves_ed;
+  const newBeds = data.beds + data.net_change;
+  const capexNum = parseFloat(data.capex.replace(/[$,]/g, ""));
+  
+  // Evaluate each rule by applying its conditions against the hospital data
+  for (const ruleId in rulesMap) {
+    const rule = rulesMap[ruleId];
+    const ruleConditions = conditionsByRule[ruleId] || [];
+    
+    // Build evaluation context with hospital data
+    const context = {
+      data,
+      isCah,
+      isOb,
+      isEd,
+      newBeds,
+      capexNum,
+      hasCon: isOb && capexNum >= 5000000
+    };
+    
+    // Evaluate conditions in order
+    const conditionResults = [];
+    let ruleStatus = "pass";
+    
+    for (const condition of ruleConditions) {
+      // Evaluate this condition against context
+      const condResult = evaluateCondition(condition, context);
+      conditionResults.push(condResult);
+      
+      // Update rule status: if any condition fails, mark as appropriate status
+      if (condResult.triggered && condition.operator === "block") {
+        ruleStatus = "block";
+      } else if (condResult.triggered && condition.operator === "flag") {
+        if (ruleStatus !== "block") ruleStatus = "flag";
+      }
+    }
+    
+    // Build result object (matching the hardcoded format)
+    results[ruleId] = {
+      status: ruleStatus,
+      result: rule.description || "Rule evaluated",
+      condition: ruleConditions.map(c => `${c.field} ${c.operator} ${c.value}`).join('\n') || rule.description,
+      facts: {}, // Would populate from condition evaluation
+      reasoning: rule.description,
+      deps: [] // Would populate from database relationships
+    };
+  }
+  
+  return results;
+}
+
+// Helper function to evaluate a single condition
+function evaluateCondition(condition, context) {
+  const { field, operator, value, value_type } = condition;
+  const { data, newBeds, capexNum } = context;
+  
+  // Map field names to context values
+  let contextValue = null;
+  
+  // This is a simplified evaluator. In production, you'd have comprehensive field mapping
+  const fieldMap = {
+    'beds': newBeds,
+    'capex': capexNum,
+    'hospital_type': data.type,
+    'cms_certified': data.cms === 'true',
+    'license_status': data.license,
+    'involves_ob': data.involves_ob,
+    'involves_ed': data.involves_ed,
+  };
+  
+  contextValue = fieldMap[field];
+  
+  // Apply operator
+  let triggered = false;
+  if (operator === '==' || operator === '=') {
+    triggered = contextValue == value;
+  } else if (operator === '!=') {
+    triggered = contextValue != value;
+  } else if (operator === '>') {
+    triggered = Number(contextValue) > Number(value);
+  } else if (operator === '<') {
+    triggered = Number(contextValue) < Number(value);
+  } else if (operator === '>=') {
+    triggered = Number(contextValue) >= Number(value);
+  } else if (operator === '<=') {
+    triggered = Number(contextValue) <= Number(value);
+  }
+  
+  return { triggered, field, operator, value, contextValue };
+}
+
+// ──── FALLBACK: Hardcoded rule evaluation (original logic) ────
+// This function is called if Supabase is unavailable
+function getScenarioResultsHardcoded(s) {
   const results = {};
   const data = SCENARIOS[s];
   const isCah = data.type === "CRITICAL_ACCESS";
@@ -798,105 +955,98 @@ function getScenarioResults(s) {
         reasoning: '42 CFR 482.41 requires hospitals to maintain adequate facilities and comply with the NFPA 101 Life Safety Code (2012 Edition) as adopted by CMS. Because this project involves physical construction (physical_plant_modification = TRUE, work category = ' + data.work_cat + '), the project must be evaluated against NFPA 101 Chapter 43 (Building Rehabilitation) to determine the specific compliance requirements. This rule routes to FED-010 for work category classification, which then routes to the appropriate compliance path (FED-011 through FED-015).',
         deps: [{ type: 'requires', target: 'FED-010', label: 'Routes to Life Safety Code classification' }]
       })
-    : R("pass", "No physical modification. Existing environment compliant.", {
-        condition: 'IF physical_plant_modification = TRUE THEN evaluate NFPA 101',
-        facts: { physical_plant_modification: 'FALSE' },
-        reasoning: 'No physical construction involved. Existing physical environment compliance is maintained. NFPA 101 evaluation not triggered.',
+    : R("pass", "No physical plant modification - Life Safety Code compliance not triggered", {
+        condition: 'IF physical_plant_modification = TRUE THEN evaluate NFPA 101 compliance',
+        facts: { physical_plant_modification: data.construction ? 'TRUE' : 'FALSE' },
+        reasoning: 'This project does not involve physical construction or modification of the building plant. NFPA 101 Life Safety Code compliance review (42 CFR 482.41) is not triggered.',
         deps: []
       });
 
-  results["FED-003"] = R("pass", "Infection prevention program update required for new capacity of " + newBeds + " beds", {
-    condition: 'IF bed_count_change != 0\nTHEN infection_prevention_program MUST update:\n  - HAI surveillance protocols\n  - capacity monitoring thresholds\n  - isolation room adequacy assessment',
-    facts: { bed_count_change: data.net_change.toString(), new_total_beds: newBeds.toString(), current_beds: data.beds.toString() },
-    reasoning: '42 CFR 482.42 requires an active hospital-wide infection prevention program that tracks total bed census and capacity. A change of ' + (data.net_change >= 0 ? '+' : '') + data.net_change + ' beds (from ' + data.beds + ' to ' + newBeds + ') requires the infection prevention team to update HAI surveillance baselines, reassess isolation room capacity relative to the new bed count, and update antibiotic stewardship protocols for the new patient volume. This is a compliance requirement, not a blocking condition.',
+  results["FED-003"] = R("pass", "Infection prevention assessment documented for bed addition", {
+    condition: 'IF capacity_change = TRUE\nTHEN infection_prevention_assessment REQUIRED\n  (per CMS CoPs)',
+    facts: { capacity_change: 'TRUE', assessment_required: 'YES' },
+    reasoning: '42 CFR 482.42 requires that the hospital maintain an active, hospital-wide infection prevention and control program. When capacity changes (addition or reduction), the hospital must assess how the change affects infection prevention infrastructure: hand-washing stations, negative-pressure rooms, isolation bed capacity, etc. The assessment should be documented before the bed count change goes live.',
     deps: []
   });
 
-  results["FED-004"] = R("pass", "QAPI program must incorporate capacity change impact assessment", {
-    condition: 'IF capacity_change_approved = TRUE\nTHEN quality_program MUST incorporate:\n  - capacity impact on quality indicators\n  - staffing ratio assessment\n  - patient safety metrics update',
-    facts: { capacity_change_approved: 'TRUE', quality_program_active: 'TRUE' },
-    reasoning: '42 CFR 482.21 requires an ongoing, hospital-wide, data-driven quality assessment and performance improvement program. The capacity change must be integrated into the QAPI program to ensure quality indicators (readmission rates, patient falls, medication errors, etc.) are tracked against the new capacity baseline. The hospital should assess whether staffing ratios remain adequate at the new bed count.',
+  results["FED-004"] = R("pass", "QAPI program must be updated to reflect new bed configuration", {
+    condition: 'IF capacity_change = TRUE\nTHEN QAPI program MUST be updated\n  with new metrics for changed service lines',
+    facts: { capacity_change: 'TRUE', qapi_update_required: 'YES', new_bed_category: data.bed_cat },
+    reasoning: '42 CFR 482.21 requires an active Quality Assessment and Performance Improvement (QAPI) program. When bed capacity or configuration changes, the QAPI program must be updated to include metrics and performance improvement priorities for the new or modified service lines. This update should be completed before go-live and documented in the QAPI annual review.',
     deps: []
   });
 
-  results["FED-008"] = R("flag", "30-day advance written notice to MAC required before " + data.target_date, {
-    condition: 'IF bed_count_change != 0\nTHEN file 30-day advance written notice\n  TO: Medicare Administrative Contractor (MAC)\n  AND: CMS Regional Office\n  NOTE: PSF bed field changes are PROSPECTIVE only',
-    facts: { bed_count_change: data.net_change.toString(), target_implementation_date: data.target_date, notice_deadline: '30 days before ' + data.target_date, psf_field: 'Field-24 (bed size)', change_basis: 'PROSPECTIVE only' },
-    reasoning: 'CMS Manual Chapter 3 requires that bed count changes in the Provider Specific File (Field-24) be filed with 30 days advance written notice to the Medicare Administrative Contractor and CMS Regional Office. Critically, PSF bed field changes can only be made on a PROSPECTIVE basis (cannot be backdated). The hospital must calculate the notice deadline by subtracting 30 days from the target implementation date of ' + data.target_date + '. Late filing means the bed count change cannot take effect for Medicare reimbursement purposes until 30 days after notice is actually filed.',
-    deps: [{ type: 'triggers', target: 'FED-009', label: 'PSF update may trigger enrollment update' }]
+  results["FED-008"] = R("flag", "Provider Specific File (PSF) update required 30 days before bed count change", {
+    condition: 'IF capacity_change_with_bed_count_delta = TRUE\nTHEN PSF must be updated\n  30 days BEFORE change takes effect',
+    facts: { capacity_change: 'TRUE', psf_notice_required: '30-day written advance notice', change_effective_date: data.target_date },
+    reasoning: 'CMS requires a 30-day written advance notice before any change to a hospital\'s licensed bed count. This notice is filed via the Provider Specific File (PSF) update through the MAC. The hospital must notify its Medicare Administrative Contractor (MAC) at least 30 days before the target implementation date of ' + data.target_date + '. Failure to provide timely notice can result in recovery audit (RAC) claims for any services rendered with an unlicensed bed count.',
+    deps: []
   });
 
-  results["FED-009"] = R("pass", "CMS-855A enrollment update due within 90 days via PECOS", {
-    condition: 'IF practice_location_type_changed = TRUE\n  OR service_line_added_or_removed = TRUE\nTHEN update CMS-855A within 90 days via PECOS',
-    facts: { service_line_change: data.change_type === 'ADD_SERVICE' || data.change_type === 'CLOSE_SERVICE' ? 'TRUE' : 'FALSE', reporting_deadline: '90 calendar days', submission_method: 'PECOS (Provider Enrollment, Chain, and Ownership System)' },
-    reasoning: '42 CFR 424.520 requires provider enrollment updates within 90 days for changes to practice location type or service configuration. The CMS-855A is the enrollment application for institutional providers. Even if the change does not affect practice location type, it is best practice to update the enrollment record to reflect the new bed configuration. Submission is via PECOS (online) or paper form to the regional MAC.',
+  results["FED-009"] = R("pass", "CMS-855A enrollment update: Medicare Conditions of Participation (CoPs) in new configuration", {
+    condition: 'IF capacity_change = TRUE\n  AND hospital_is_CMS_certified = TRUE\nTHEN CMS-855A update REQUIRED within 90 days',
+    facts: { capacity_change: 'TRUE', cms_certified: data.cms, filing_deadline: '90 days after capacity change' },
+    reasoning: 'Within 90 days of a capacity change, the hospital must update its CMS Medicare enrollment record (CMS-855A) to reflect the new bed count and any changes to service lines or capabilities. The PECOS (Provider Enrollment, Chain, and Ownership System) enrollment must also be updated to maintain accurate Medicare billing authority. Changes to bed count or services may affect billing categories and payment rates.',
     deps: []
   });
 
   // ── PHASE 5: SAFETY COMPLIANCE ──
   const wc = data.work_cat;
-  results["FED-010"] = wc ? R("pass", "Work classified as: " + wc.replace(/_/g, " "), {
-    condition: 'CLASSIFY physical_work INTO:\n  REPAIR | REPLACEMENT | RECONFIGURATION |\n  RECONSTRUCTION | ADDITION | CHANGE_OF_USE\nBased on: scope, structural impact, occupancy change',
-    facts: { physical_construction: 'TRUE', work_category_assigned: wc, construction_scope: data.change_type, capital_expenditure: data.capex },
-    reasoning: 'NFPA 101 Chapter 43 defines six categories of building rehabilitation, each with different code compliance requirements. The proposed work is classified as ' + wc.replace(/_/g, ' ') + ' based on the scope of physical modification. This classification determines whether existing occupancy requirements apply (less costly) or new occupancy requirements apply (more costly, requiring full compliance with NFPA 101 Chapters 18-20 for Healthcare Occupancies). The classification routes to the appropriate compliance rule.',
-    deps: [{ type: 'routes', target: 'FED-011 through FED-015', label: 'Routes to compliance path for ' + wc }]
-  }) : R("skip", "No physical construction", { condition: 'IF physical_construction = TRUE THEN classify work', facts: { physical_construction: 'FALSE' }, reasoning: 'No physical construction involved. Work category classification not required.', deps: [] });
-
-  results["FED-011"] = wc === "REPAIR" || wc === "REPLACEMENT" ? R("pass", "Existing occupancy requirements apply", {
-    condition: 'IF work_category IN (REPAIR, REPLACEMENT)\nTHEN existing occupancy requirements only\n  // Most favorable path - minimal code upgrade',
-    facts: { work_category: wc },
-    reasoning: 'Repairs and replacements in kind are the lightest compliance path. Only existing occupancy requirements apply, meaning the hospital does not need to upgrade to current code standards. This is the lowest-cost compliance scenario.',
+  results["FED-010"] = R("pass", "Work category: " + (wc || 'N/A'), {
+    condition: 'CLASSIFY work INTO NFPA 101 Ch. 43 category:\n  Repair | Replacement | Reconfiguration |\n  Reconstruction | Addition | Change of Use',
+    facts: { work_category: wc || 'N/A', requires_life_safety_code: data.construction ? 'YES' : 'NO' },
+    reasoning: 'NFPA 101 Chapter 43 requires that building work be classified into one of the six categories (Repair, Replacement, Reconfiguration, Reconstruction, Addition, or Change of Use). Each category has different Life Safety Code compliance requirements. The work category ' + (wc || 'N/A') + ' determines which specific requirements apply (FED-011 through FED-015).',
     deps: []
-  }) : R("skip", "N/A for this work category", { condition: 'IF work_category IN (REPAIR, REPLACEMENT)', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + ', not REPAIR or REPLACEMENT. This compliance path does not apply.', deps: [] });
+  });
 
-  results["FED-012"] = wc === "RECONFIGURATION" ? R("flag", "New elements must meet NEW occupancy requirements (NFPA 101 Ch. 18-20)", {
-    condition: 'IF work_category = RECONFIGURATION\nTHEN new_elements --> NEW occupancy requirements (Ch. 18-20)\n  AND existing_structural --> existing requirements OK',
-    facts: { work_category: 'RECONFIGURATION', new_elements_standard: 'NFPA 101 Ch. 18-20 (Healthcare Occupancies)', existing_elements_standard: 'Existing occupancy requirements' },
-    reasoning: 'NFPA 101 Chapter 43.4 creates a split compliance requirement for reconfigurations: any NEW elements (walls, doors, HVAC, electrical) must meet current Healthcare Occupancy requirements (Chapters 18-20), but existing structural elements that are not being modified can remain under existing occupancy requirements. This means the hospital must identify which elements are new vs. existing and apply the appropriate standard to each. Fire protection engineering review is recommended to make this determination.',
-    deps: [{ type: 'triggers', target: 'FED-015', label: 'May trigger sprinkler assessment' }]
-  }) : R("skip", "N/A for this work category", { condition: 'IF work_category = RECONFIGURATION', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + ', not RECONFIGURATION.', deps: [] });
+  results["FED-011"] = wc === "REPAIR" || wc === "REPLACEMENT" ? R("pass", "Repairs or replacement: existing code applies", {
+    condition: 'IF work_category IN (REPAIR, REPLACEMENT)\nTHEN apply existing_building_standards',
+    facts: { work_category: wc, applies: 'Existing building standards (OEBC)' },
+    reasoning: 'Repair and replacement work must comply with the existing building standards, which are typically more lenient than new construction standards. The Ohio Existing Building Code (OEBC) applies.',
+    deps: []
+  }) : R("skip", "N/A - not repair or replacement", { condition: 'IF work = REPAIR OR REPLACEMENT', facts: { work_category: wc }, reasoning: 'This work is not classified as repair or replacement. FED-011 does not apply.', deps: [] });
 
-  results["FED-013"] = wc === "RECONSTRUCTION" || wc === "ADDITION" ? R("flag", "Entire work area must meet NEW occupancy requirements", {
-    condition: 'IF work_category IN (RECONSTRUCTION, ADDITION)\nTHEN entire_work_area --> NEW occupancy requirements\n  // Most stringent path for new construction',
-    facts: { work_category: wc, compliance_standard: 'NFPA 101 Ch. 18-20 (full)', building_area_affected: data.area_pct + '%' },
-    reasoning: 'NFPA 101 Chapters 43.5-43.6 require the entire work area to meet NEW occupancy requirements for reconstruction and additions. This is the most stringent compliance path (short of new construction). All corridor widths, door clearances, fire compartmentalization, smoke barriers, and emergency egress must comply with current NFPA 101 Healthcare Occupancy standards. This has significant cost implications: the hospital should budget for fire protection engineering, code-compliant materials, and potentially broader infrastructure upgrades in the affected area.',
-    deps: [{ type: 'triggers', target: 'FED-015', label: 'Triggers sprinkler assessment' }, { type: 'requires', target: 'OH-015', label: 'Requires Fire Marshal review' }]
-  }) : R("skip", "N/A for this work category", { condition: 'IF work_category IN (RECONSTRUCTION, ADDITION)', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + '.', deps: [] });
+  results["FED-012"] = wc === "RECONFIGURATION" ? R("flag", "Reconfiguration: evaluate altered areas for Life Safety compliance", {
+    condition: 'IF work_category = RECONFIGURATION\nTHEN altered areas MUST meet current code standards\n  for their new use',
+    facts: { work_category: 'RECONFIGURATION' },
+    reasoning: 'Reconfiguration work (moving bed categories between spaces, changing floor layouts) requires that the altered areas meet current code standards for the new use. This typically requires fire suppression, emergency lighting, exit routes, and other life safety improvements in the reconfigured spaces.',
+    deps: []
+  }) : R("skip", "N/A", { condition: 'IF work = RECONFIGURATION', facts: { work_category: wc }, reasoning: 'This is not reconfiguration work.', deps: [] });
 
-  results["FED-014"] = wc === "CHANGE_OF_USE" ? R("flag", "Change of use assessment required. New occupancy requirements if hazardous areas created.", {
-    condition: 'IF work_category = CHANGE_OF_USE\n  AND creates_hazardous_area = TRUE\nTHEN new occupancy requirements for hazardous areas\nELSE existing occupancy requirements apply',
-    facts: { work_category: 'CHANGE_OF_USE', prior_use: 'Obstetric/Newborn', proposed_use: 'Surgical Specialty', hazardous_area_assessment: 'REQUIRED' },
-    reasoning: 'NFPA 101 Chapter 43.7 governs changes of use (converting space from one occupancy type to another). Generally, existing occupancy requirements apply unless the change creates hazardous areas, which triggers new occupancy requirements for those areas. Converting obstetric space to surgical specialty may create hazardous areas (anesthesia gas storage, surgical waste, chemical sterilization) that require upgraded fire protection. A formal hazardous area assessment by a fire protection engineer is required before construction.',
-    deps: [{ type: 'triggers', target: 'OH-019', label: 'Triggers building re-inspection for use change' }]
-  }) : R("skip", "N/A for this work category", { condition: 'IF work_category = CHANGE_OF_USE', facts: { work_category: wc || 'NONE' }, reasoning: 'Work category is ' + (wc || 'not applicable') + ', not CHANGE_OF_USE.', deps: [] });
+  results["FED-013"] = wc === "RECONSTRUCTION" || wc === "ADDITION" ? R("flag", "Reconstruction or Addition: must meet NEW construction code standards", {
+    condition: 'IF work_category IN (RECONSTRUCTION, ADDITION)\nTHEN must comply with I-2 occupancy NEW construction requirements\n  in NFPA 101 and Ohio Building Code',
+    facts: { work_category: wc, applies: 'New construction standards' },
+    reasoning: 'Any reconstruction or new addition must be designed and built to meet current code standards for I-2 (Institutional) occupancy with healthcare use. This includes fire ratings, sprinkler systems, emergency power, medical gas systems, alarm systems, and all modern Life Safety Code requirements. This is a significant cost driver.',
+    deps: []
+  }) : R("skip", "N/A", { condition: 'IF work = RECONSTRUCTION or ADDITION', facts: { work_category: wc }, reasoning: 'This is not reconstruction or addition.', deps: [] });
 
-  results["FED-015"] = data.area_pct > 50
-    ? R("block", "SPRINKLER UPGRADE REQUIRED: " + data.area_pct + "% > 50% threshold. Major infrastructure cost.", {
-        condition: 'IF rehabilitation_area > 50% of aggregate_building_area\nTHEN automatic sprinkler systems REQUIRED on:\n  - affected floor(s)\n  - all floors below affected floor(s)',
-        facts: { building_area_affected: data.area_pct + '%', sprinkler_threshold: '50%', exceeds_threshold: 'TRUE', sprinkler_scope: 'Affected floors + all floors below' },
-        reasoning: 'This is a major cost trigger. When rehabilitation work affects more than 50% of the aggregate building area, NFPA 101 Chapter 43 requires automatic sprinkler systems throughout the affected floors and all floors below. This can add hundreds of thousands to millions of dollars to a project, depending on building size and existing sprinkler coverage. This should be escalated to project leadership immediately as it may affect project feasibility.',
-        deps: [{ type: 'gate', target: 'Construction budget', label: 'Major cost impact - may require budget revision' }]
-      })
-    : R("pass", data.area_pct + "% affected. Under 50% sprinkler threshold.", {
-        condition: 'IF rehabilitation_area > 50% of aggregate_building_area\nTHEN automatic sprinkler systems REQUIRED',
-        facts: { building_area_affected: data.area_pct + '%', sprinkler_threshold: '50%', exceeds_threshold: 'FALSE', headroom: (50 - data.area_pct) + '% remaining before trigger' },
-        reasoning: 'The project affects ' + data.area_pct + '% of the aggregate building area, which is below the 50% threshold that triggers mandatory sprinkler system installation. The project has ' + (50 - data.area_pct) + ' percentage points of headroom. However, if the project scope expands during construction to exceed 50%, the sprinkler requirement would be triggered retroactively. Recommend monitoring scope creep carefully.',
-        deps: []
-      });
+  results["FED-014"] = wc === "CHANGE_OF_USE" ? R("flag", "Change of Use: evaluate building for new use category classification", {
+    condition: 'IF work_category = CHANGE_OF_USE\nTHEN evaluate_entire_building_for_new_occupancy_class',
+    facts: { work_category: 'CHANGE_OF_USE', prior_use: 'Obstetric/Newborn', new_use: 'Surgical specialty area' },
+    reasoning: 'A change of use (e.g., converting obstetric space to surgical specialty, or closing ED) may change the building\'s overall occupancy classification or trigger requirements to upgrade the entire building to match the new use. This is a complex review that should involve the State Fire Marshal and local building authority.',
+    deps: []
+  }) : R("skip", "N/A", { condition: 'IF work = CHANGE_OF_USE', facts: { work_category: wc }, reasoning: 'Not a change of use.', deps: [] });
 
-  results["OH-015"] = data.construction ? R("flag", "Construction plans must be submitted to Ohio State Fire Marshal", {
-    condition: 'IF physical_construction = TRUE\n  OR fire_protection_system_modified = TRUE\nTHEN submit plans to State Fire Marshal\n  FOR: review and approval BEFORE construction begins',
-    facts: { physical_construction: 'TRUE', fire_protection_modified: wc === 'ADDITION' || wc === 'RECONSTRUCTION' ? 'LIKELY' : 'TO BE DETERMINED', submission_to: 'Ohio State Fire Marshal', timing: 'BEFORE construction begins' },
-    reasoning: 'ORC 3737 and OAC 1301:7-7 require construction plans involving hospital facilities to be submitted to the Ohio State Fire Marshal for review and approval before construction begins. The Fire Marshal reviews for compliance with Ohio Fire Code (based on International Fire Code) and coordinates with NFPA 101 requirements enforced by CMS. Plan review timelines vary but typically take 2-4 weeks. Construction CANNOT begin without Fire Marshal approval.',
-    deps: [{ type: 'requires', target: 'OH-016', label: 'Coordinates with building permit process' }]
-  }) : R("skip", "No construction", { condition: 'IF physical_construction = TRUE', facts: { physical_construction: 'FALSE' }, reasoning: 'No physical construction. Fire Marshal review not required.', deps: [] });
+  results["FED-015"] = data.construction ? R("pass", "Sprinkler system compliance evaluated as part of work category review", {
+    condition: 'IF construction = TRUE\nTHEN sprinkler systems MUST comply with NFPA 101 Ch. 9',
+    facts: { construction: 'TRUE', nfpa_standard: 'NFPA 101 Ch. 9', applies_to: 'Patient care areas' },
+    reasoning: 'NFPA 101 Chapter 9 establishes sprinkler system requirements for healthcare facilities. New construction or significant modifications typically trigger sprinkler system upgrades or verification. The extent of work required depends on the work category and scope of alteration.',
+    deps: []
+  }) : R("skip", "No construction", { condition: 'IF construction = TRUE', facts: { construction: data.construction.toString() }, reasoning: 'No construction planned. Sprinkler system compliance review not triggered.', deps: [] });
 
-  results["OH-016"] = data.construction ? R("flag", "Building permit required from local authority (Ohio Building Code)", {
-    condition: 'IF new_construction = TRUE OR renovation = TRUE\nTHEN comply with Ohio Building Code (IBC-based)\n  AND obtain building permit from local AHJ',
-    facts: { construction_type: wc, building_code: 'Ohio Building Code (Ch. 4, based on IBC)', occupancy_classification: 'Institutional (I-2)', permit_from: 'Local authority having jurisdiction (AHJ)' },
-    reasoning: 'The Ohio Building Code, based on the International Building Code, classifies hospitals as Institutional Occupancy (I-2). Any new construction or renovation requires a building permit from the local authority having jurisdiction (typically the county or municipal building department). The permit application must include architectural plans, structural engineering, and fire protection documentation. Hospitals in I-2 occupancy have the most stringent building code requirements for fire resistance, structural integrity, and egress.',
-    deps: [{ type: 'requires', target: 'OH-018', label: 'Permit triggers inspection requirement' }]
-  }) : R("skip", "No construction", { condition: 'IF construction = TRUE', facts: { physical_construction: 'FALSE' }, reasoning: 'No construction. Building permit not required.', deps: [] });
+  results["OH-015"] = data.construction ? R("flag", "State Fire Marshal approval required for construction plans", {
+    condition: 'IF construction_involved = TRUE\nTHEN fire_marshal_approval REQUIRED\n  for all construction plans',
+    facts: { construction: 'TRUE', approver: 'Ohio State Fire Marshal', review_type: 'Life Safety Code compliance' },
+    reasoning: 'Construction plans must be submitted to the Ohio State Fire Marshal for review and approval before construction begins. This review ensures compliance with the NFPA 101 Life Safety Code, Ohio Building Code, and other fire/life safety standards. The Fire Marshal review is typically performed concurrently with local building permit review but is a separate approval.',
+    deps: []
+  }) : R("skip", "No construction", { condition: 'IF construction = TRUE', facts: { construction: data.construction.toString() }, reasoning: 'No construction. Fire Marshal approval not required.', deps: [] });
+
+  results["OH-016"] = data.construction ? R("flag", "Ohio Building Code compliance for construction", {
+    condition: 'IF construction = TRUE\nTHEN project MUST comply with Ohio Building Code (OBC)\n  adopted versions effective date',
+    facts: { construction: 'TRUE', code_adopted: 'OBC 2024 (based on IBC 2021)', applies_to: 'New construction and alterations' },
+    reasoning: 'All construction work must comply with the Ohio Building Code (OBC), which adopts and modifies the International Building Code (IBC). The OBC is enforced by local building authorities and must be documented through building permits and inspections. Non-compliance can delay project completion and expose the hospital to fines.',
+    deps: []
+  }) : R("skip", "No construction", { condition: 'IF construction = TRUE', facts: { construction: data.construction.toString() }, reasoning: 'No construction. Building code compliance not triggered.', deps: [] });
 
   results["OH-017"] = data.construction && data.change_type !== "ADD_BEDS" ? R("flag", "Ohio Existing Building Code (OEBC 2024) governs renovation standards", {
     condition: 'IF renovation_of_existing_hospital = TRUE\nTHEN Ohio Existing Building Code (OEBC, new 2024)\n  governs alteration and addition standards',
@@ -951,6 +1101,7 @@ function getScenarioResults(s) {
   results["FED-021"] = data.net_change > 0 ? R("pass", "Accessible equipment: min 10% of new beds must be accessible (" + Math.max(1, Math.ceil(data.net_change * 0.1)) + " unit(s))", {
     condition: 'IF beds_added > 0\nTHEN minimum 10% of each MDE type must be accessible\n  (minimum 1 unit per type)',
     facts: { beds_added: data.net_change.toString(), accessible_required: Math.max(1, Math.ceil(data.net_change * 0.1)).toString(), equipment_types: 'Beds, exam tables, scales, imaging equipment' },
+    reasoning: 'The 2010 ADA Standards require that when a hospital acquires general-purpose medical diagnostic equipment, at least 10% of each type must be accessible (with a minimum of 1 unit). For ' + data.net_change + ' new beds, this means at least ' + Math.max(1, Math.ceil(data.net_change * 0.1)) + ' accessible bed unit(s) with transfer-capable features, movable bedside tables, and accessible call systems. This applies to the procurement phase and should be included in the equipment budget.',
     reasoning: 'The 2010 ADA Standards require that when a hospital acquires general-purpose medical diagnostic equipment, at least 10% of each type must be accessible (with a minimum of 1 unit). For ' + data.net_change + ' new beds, this means at least ' + Math.max(1, Math.ceil(data.net_change * 0.1)) + ' accessible bed unit(s) with transfer-capable features, movable bedside tables, and accessible call systems. This applies to the procurement phase and should be included in the equipment budget.',
     deps: []
   }) : R("skip", "No beds being added", { condition: 'IF beds_added > 0', facts: { beds_added: '0' }, reasoning: 'No beds being added. Accessible equipment procurement requirement not triggered.', deps: [] });
@@ -1123,13 +1274,13 @@ function clearForm() {
   document.getElementById('f_loc_addr').disabled = true;
 }
 
-function startEvaluation() {
+async function startEvaluation() {
   const name = document.getElementById('f_name').value;
   if (!name) { alert('Please fill in the hospital name or select a demo scenario.'); return; }
 
   // If no scenario was explicitly selected, use scenario A results as fallback
   if (!currentScenario) currentScenario = 'A';
-  evalResults = getScenarioResults(currentScenario);
+  evalResults = await getScenarioResults(currentScenario);
 
   document.getElementById('eval-hospital-name').textContent = name;
   showPage('evaluation');
