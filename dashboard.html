@@ -390,7 +390,7 @@
   /* -- METRIC CARDS (SLDS Pattern) -- */
   .metrics-row {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 16px;
     margin-bottom: 24px;
   }
@@ -426,6 +426,7 @@
   .metric-card.mc-review::before { background: var(--slds-purple); }
   .metric-card.mc-conditions::before { background: #0B827C; }
   .metric-card.mc-deps::before { background: var(--slds-blue-brand); }
+  .metric-card.mc-health::before { background: #0B827C; }
 
   .metric-icon {
     width: 36px;
@@ -444,6 +445,7 @@
   .mc-review .metric-icon { background: #F0E8FC; }
   .mc-conditions .metric-icon { background: #DFF5F4; }
   .mc-deps .metric-icon { background: #E8F4FD; }
+  .mc-health .metric-icon { background: #DFF5F4; }
 
   .metric-number {
     font-size: 28px;
@@ -742,10 +744,13 @@
   .action-badge.publish { background: #DFFDF0; color: var(--slds-success); }
   .action-badge.login { background: #F3F3F3; color: var(--slds-text-label); }
   .action-badge.comment { background: #E8EFF8; color: var(--slds-blue-brand); }
+  .action-badge.edit_rule { background: #E8EFF8; color: var(--slds-blue-dark); }
+  .action-badge.accept_ai_suggestion { background: #F3EDFD; color: var(--slds-purple); }
+  .action-badge.add_comment { background: #E8EFF8; color: var(--slds-blue-brand); }
 
   /* -- RESPONSIVE -- */
   @media (max-width: 1200px) {
-    .metrics-row { grid-template-columns: repeat(3, 1fr); }
+    .metrics-row { grid-template-columns: repeat(4, 1fr); }
     .charts-grid { grid-template-columns: 1fr; }
   }
 
@@ -851,12 +856,23 @@
         <h1 class="slds-page-header__title page-title">Dashboard</h1>
         <p class="page-subtitle" id="pageSubtitle">Analytics and metrics for Hospital Licensing</p>
       </div>
-      <div class="dash-filter">
-        <span class="dash-filter-label">Scope</span>
-        <div class="dash-filter-pills">
-          <button class="slds-button dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
-          <button class="slds-button dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">This Tenant</button>
-          <button class="slds-button dash-pill" data-filter="all" onclick="setDashFilter('all')">All Tenants</button>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <div class="dash-filter">
+          <span class="dash-filter-label">Scope</span>
+          <div class="dash-filter-pills">
+            <button class="slds-button dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
+            <button class="slds-button dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">This Tenant</button>
+            <button class="slds-button dash-pill" data-filter="all" onclick="setDashFilter('all')">All Tenants</button>
+          </div>
+        </div>
+        <div class="dash-filter">
+          <span class="dash-filter-label">Date Range</span>
+          <div class="dash-filter-pills">
+            <button class="slds-button dash-pill" data-days="7" onclick="setDateFilter(7)">7 Days</button>
+            <button class="slds-button dash-pill" data-days="30" onclick="setDateFilter(30)">30 Days</button>
+            <button class="slds-button dash-pill" data-days="90" onclick="setDateFilter(90)">90 Days</button>
+            <button class="slds-button dash-pill active" data-days="0" onclick="setDateFilter(0)">All Time</button>
+          </div>
         </div>
       </div>
     </div>
@@ -893,6 +909,11 @@
         <div class="metric-number" id="depCount">-</div>
         <div class="metric-label">Dependencies</div>
       </div>
+      <div class="slds-box metric-card mc-health">
+        <div class="metric-icon">&#x2713;</div>
+        <div class="metric-number" id="healthPct">-</div>
+        <div class="metric-label">Compliant</div>
+      </div>
     </div>
 
     <!-- CHARTS GRID -->
@@ -928,22 +949,36 @@
         <div class="hbar-chart" id="typeChart"></div>
       </article>
 
-      <!-- PHASE HORIZONTAL BAR -->
+      <!-- ACTIVITY TREND BAR CHART -->
       <article class="slds-card chart-card">
         <div class="chart-header">
-          <div class="chart-title">Rules by Phase</div>
-          <div class="chart-total" id="phaseTotal">0 total</div>
+          <div class="chart-title">Activity Trend</div>
+          <div class="chart-total" id="trendTotal">0 events</div>
         </div>
-        <div class="hbar-chart" id="phaseChart"></div>
+        <div id="trendChart"></div>
       </article>
 
     </div>
+
+    <!-- PENDING REVIEWS -->
+    <article class="slds-card chart-card" style="margin-bottom:16px;">
+      <div class="chart-header">
+        <div class="chart-title">Pending Reviews</div>
+        <div class="chart-total" id="pendingTotal"></div>
+      </div>
+      <div class="table-wrapper" id="pendingReviewsPanel">
+        <div style="text-align:center;padding:24px;color:var(--slds-text-label);font-size:13px;">Loading...</div>
+      </div>
+    </article>
 
     <!-- ACTIVITY TABLE -->
     <article class="slds-card chart-card">
       <div class="chart-header">
         <div class="chart-title">Recent Activity</div>
-        <div class="chart-total" id="activityTotal"></div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="chart-total" id="activityTotal"></div>
+          <a href="audit-log.html" style="font-size:12px;font-weight:600;color:var(--slds-blue-brand);text-decoration:none;">View Full Audit Log &rarr;</a>
+        </div>
       </div>
       <div class="table-wrapper">
         <table class="slds-table slds-table_cell-buffer slds-table_bordered data-table" id="activityTable">
@@ -975,6 +1010,10 @@
   // ============================================================
   let currentProgram = 'hosp-licensing';
   let dashFilter = 'current';          // current | tenant | all
+  let dateFilter = 0;
+  let cachedAuditEntries = [];
+  let cachedUsersMap = {};
+  let cachedRules = [];
 
   const PROGRAM_CONFIG = {
     'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 23 },
@@ -1055,53 +1094,71 @@
   }
 
   // ============================================================
+  //  DATE FILTER
+  // ============================================================
+  function setDateFilter(days) {
+    dateFilter = days;
+    document.querySelectorAll('[data-days]').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.days) === days);
+    });
+    const filtered = getDateFilteredEntries();
+    renderActivityTrend(filtered);
+    renderActivityTable(filtered, cachedUsersMap);
+  }
+
+  function getDateFilteredEntries() {
+    if (dateFilter === 0) return cachedAuditEntries;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - dateFilter);
+    return cachedAuditEntries.filter(e => new Date(e.timestamp) >= cutoff);
+  }
+
+  // ============================================================
   //  LOAD DASHBOARD DATA
   // ============================================================
   async function loadDashboardData() {
     const config = PROGRAM_CONFIG[currentProgram];
 
-    // Build filters based on dashFilter scope
     let rulesParams = 'select=*';
     if (dashFilter === 'current') {
       rulesParams += `&tenant_id=eq.${config.tenant}&program_id=eq.${currentProgram}`;
     } else if (dashFilter === 'tenant') {
       rulesParams += `&tenant_id=eq.${config.tenant}`;
     }
-    // 'all' = no filters
 
-    // Parallel fetch: rules, conditions, dependencies, audit_log
-    let conditionsParams = 'select=*';
-    let depsParams = 'select=*';
-    let auditParams = 'select=*&order=timestamp.desc&limit=20';
-    let usersParams = 'select=user_id,full_name';
-
-    if (dashFilter === 'current') {
-      conditionsParams += `&tenant_id=eq.${config.tenant}&program_id=eq.${currentProgram}`;
-      depsParams       += `&tenant_id=eq.${config.tenant}&program_id=eq.${currentProgram}`;
-      auditParams      += `&tenant_id=eq.${config.tenant}`;
-      usersParams      += `&tenant_id=eq.${config.tenant}`;
-    } else if (dashFilter === 'tenant') {
-      conditionsParams += `&tenant_id=eq.${config.tenant}`;
-      depsParams       += `&tenant_id=eq.${config.tenant}`;
-      auditParams      += `&tenant_id=eq.${config.tenant}`;
-      usersParams      += `&tenant_id=eq.${config.tenant}`;
+    let auditParams = 'select=*&order=timestamp.desc&limit=500';
+    let usersParams = 'select=user_id,display_name';
+    if (dashFilter === 'current' || dashFilter === 'tenant') {
+      auditParams  += `&tenant_id=eq.${config.tenant}`;
+      usersParams  += `&tenant_id=eq.${config.tenant}`;
     }
 
-    const [rules, conditions, deps, auditEntries, users] = await Promise.all([
+    const [rules, allConditions, allDeps, auditEntries, users] = await Promise.all([
       supaQuery('rules', rulesParams),
-      supaQuery('rule_conditions', conditionsParams),
-      supaQuery('rule_dependencies', depsParams),
+      supaQuery('rule_conditions', 'select=rule_id'),
+      supaQuery('rule_dependencies', 'select=rule_id'),
       supaQuery('audit_log', auditParams),
       supaQuery('users', usersParams)
     ]);
 
-    // Build user lookup
+    // Filter conditions/deps to scoped rules (these tables have no tenant_id/program_id)
+    const ruleIdSet = new Set(rules.map(r => r.rule_id));
+    const conditions = allConditions.filter(c => ruleIdSet.has(c.rule_id));
+    const deps = allDeps.filter(d => ruleIdSet.has(d.rule_id));
+
     const usersMap = {};
-    users.forEach(u => { usersMap[u.user_id] = u.full_name; });
+    users.forEach(u => { usersMap[u.user_id] = u.display_name; });
+
+    cachedAuditEntries = auditEntries;
+    cachedUsersMap = usersMap;
+    cachedRules = rules;
 
     renderMetricCards(rules, conditions, deps);
     renderCharts(rules);
-    renderActivityTable(auditEntries, usersMap);
+    const filtered = getDateFilteredEntries();
+    renderActivityTrend(filtered);
+    renderActivityTable(filtered, usersMap);
+    renderPendingReviews(rules);
   }
 
   // ============================================================
@@ -1124,6 +1181,9 @@
     document.getElementById('reviewRules').textContent = statusCounts.review;
     document.getElementById('conditionCount').textContent = conditions.length;
     document.getElementById('depCount').textContent = deps.length;
+
+    const healthPct = total > 0 ? Math.round((statusCounts.active / total) * 100) : 0;
+    document.getElementById('healthPct').textContent = healthPct + '%';
   }
 
   // ============================================================
@@ -1133,7 +1193,6 @@
     const statusCounts = {};
     const jurisdictionMap = {};
     const typeCounts = {};
-    const phaseCounts = {};
 
     rules.forEach(r => {
       // Status (normalize case for display)
@@ -1153,16 +1212,11 @@
       // Type
       const t = r.rule_type || r.type || 'General';
       typeCounts[t] = (typeCounts[t] || 0) + 1;
-
-      // Phase
-      const p = r.phase || r.lifecycle_phase || 'Active';
-      phaseCounts[p] = (phaseCounts[p] || 0) + 1;
     });
 
     renderStatusDonut(statusCounts);
     renderJurisdictionChart(jurisdictionMap);
     renderTypeChart(typeCounts);
-    renderPhaseChart(phaseCounts);
   }
 
   // -- DONUT CHART (Status) --
@@ -1276,29 +1330,84 @@
     }).join('');
   }
 
-  // -- HORIZONTAL BAR (Phase) --
-  function renderPhaseChart(counts) {
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    document.getElementById('phaseTotal').textContent = `${total} total`;
+  // -- ACTIVITY TREND BAR CHART --
+  function renderActivityTrend(entries) {
+    document.getElementById('trendTotal').textContent = `${entries.length} events`;
+    const chart = document.getElementById('trendChart');
+    if (entries.length === 0) {
+      chart.innerHTML = '<div style="text-align:center;padding:32px;color:var(--slds-text-label);font-size:13px;">No activity in this period.</div>';
+      return;
+    }
+    // Group by day for 7/30d, by week for 90d/all
+    const useWeeks = (dateFilter === 0 || dateFilter === 90);
+    const groups = {};
+    entries.forEach(e => {
+      const d = new Date(e.timestamp);
+      let key;
+      if (useWeeks) {
+        const s = new Date(d); s.setDate(d.getDate() - d.getDay()); key = s.toISOString().slice(0,10);
+      } else {
+        key = d.toISOString().slice(0,10);
+      }
+      groups[key] = (groups[key] || 0) + 1;
+    });
+    const sorted = Object.entries(groups).sort((a,b) => a[0].localeCompare(b[0]));
+    const maxBars = useWeeks ? 12 : (dateFilter === 7 ? 7 : 30);
+    const visible = sorted.slice(-maxBars);
+    const maxVal = Math.max(...visible.map(([,v]) => v), 1);
+    chart.innerHTML = `
+      <div style="display:flex;align-items:flex-end;gap:3px;height:120px;padding:4px 0;">
+        ${visible.map(([date, count]) => {
+          const pct = (count / maxVal) * 100;
+          const label = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {month:'short',day:'numeric'});
+          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;">
+            <div style="font-size:9px;color:var(--slds-text-label);font-weight:600;line-height:1;">${count > 0 ? count : ''}</div>
+            <div style="width:100%;background:var(--slds-blue-brand);border-radius:2px 2px 0 0;height:${Math.max(pct,3)}%;transition:height 0.3s;"></div>
+            <div style="font-size:8px;color:var(--slds-text-label);white-space:nowrap;overflow:hidden;max-width:100%;text-align:center;">${label}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
 
-    const palette = ['#0176D3', '#2E844A', '#DD7A01', '#9050E9', '#0B827C'];
-    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-
-    const chart = document.getElementById('phaseChart');
-    chart.innerHTML = sorted.map(([label, value], i) => {
-      const pct = total > 0 ? (value / total) * 100 : 0;
-      return `
-        <div class="hbar-row">
-          <div class="hbar-label">${label}</div>
-          <div class="hbar-track">
-            <div class="hbar-segment" style="width: ${pct}%; background: ${palette[i % palette.length]};">
-              ${pct > 15 ? Math.round(pct) + '%' : ''}
-            </div>
-          </div>
-          <div class="hbar-value">${value}</div>
-        </div>
-      `;
-    }).join('');
+  // ============================================================
+  //  PENDING REVIEWS
+  // ============================================================
+  function renderPendingReviews(rules) {
+    const reviewRules = rules
+      .filter(r => (r.status || '').toLowerCase() === 'review')
+      .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
+    const el = document.getElementById('pendingReviewsPanel');
+    document.getElementById('pendingTotal').textContent = `${reviewRules.length} pending`;
+    if (reviewRules.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--slds-text-label);font-size:13px;">No rules pending review.</div>';
+      return;
+    }
+    const now = new Date();
+    el.innerHTML = `
+      <table class="data-table slds-table slds-table_cell-buffer slds-table_bordered" style="width:100%;">
+        <thead><tr>
+          <th style="width:90px;">Rule</th>
+          <th>Name</th>
+          <th style="width:140px;">Citation</th>
+          <th style="width:110px;text-align:center;">Days Waiting</th>
+          <th style="width:80px;"></th>
+        </tr></thead>
+        <tbody>
+          ${reviewRules.map(r => {
+            const days = r.updated_at ? Math.floor((now - new Date(r.updated_at)) / 86400000) : null;
+            const urgent = days !== null && days > 7;
+            return `<tr>
+              <td><a href="ontology.html#${r.rule_id}" style="color:var(--slds-blue-brand);text-decoration:none;font-weight:600;">${r.rule_id}</a></td>
+              <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.name}</td>
+              <td style="font-size:12px;color:var(--slds-text-label);">${r.citation || '—'}</td>
+              <td style="text-align:center;font-weight:700;color:${urgent ? 'var(--slds-error)' : 'var(--slds-text-dark)'};">${days !== null ? days : '—'}</td>
+              <td><a href="ontology.html#${r.rule_id}" style="color:var(--slds-blue-brand);font-size:12px;font-weight:600;text-decoration:none;">Review &rarr;</a></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
   }
 
   // ============================================================
