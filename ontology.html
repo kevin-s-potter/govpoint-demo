@@ -318,18 +318,7 @@
       </div>
       <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Since your last login (Mar 8, 2026):</div>
       <div class="whats-changed-items">
-        <div class="change-item draft">
-          <span class="label draft">NEW</span>
-          <span class="change-item-text">OH-020 Telehealth Bed Equivalency — New draft submitted</span>
-        </div>
-        <div class="change-item active">
-          <span class="label active">UPDATED</span>
-          <span class="change-item-text">FED-003 CMS CoP Compliance — Updated conditions</span>
-        </div>
-        <div class="change-item sunset">
-          <span class="label sunset">SUNSET</span>
-          <span class="change-item-text">OH-009 CON Expedited Review — Effective Mar 1</span>
-        </div>
+        <div style="font-size: 12px; color: var(--text-secondary); padding: 8px;">Loading recent changes...</div>
       </div>
     </div>
 
@@ -664,8 +653,56 @@ async function init() {
   const badge = document.querySelector('.notification-badge');
   if (badge) badge.textContent = unread;
 
+  // Load What's Changed from audit_log
+  await loadWhatsChanged();
+
   renderRulesList();
   setupEventListeners();
+}
+
+// ── WHAT'S CHANGED (live from audit_log) ─────────────────────
+async function loadWhatsChanged() {
+  try {
+    const entries = await govpoint._query('audit_log', 'order=timestamp.desc&limit=10&action=neq.login&action=neq.view');
+    const rulesMap = {};
+    rules.forEach(r => { rulesMap[r.rule_id] = r; });
+
+    const actionLabels = {
+      'create_draft': { label: 'NEW', css: 'draft' },
+      'edit_conditions': { label: 'UPDATED', css: 'active' },
+      'submit_for_review': { label: 'REVIEW', css: 'review' },
+      'approve': { label: 'APPROVED', css: 'active' },
+      'publish': { label: 'PUBLISHED', css: 'active' },
+      'sunset': { label: 'SUNSET', css: 'sunset' },
+      'edit': { label: 'EDITED', css: 'active' },
+      'comment': { label: 'COMMENT', css: 'review' }
+    };
+
+    // Filter to rule-related entries and deduplicate by rule_id (show most recent per rule)
+    const seen = new Set();
+    const items = [];
+    for (const entry of entries) {
+      if (entry.target_type !== 'rule' || seen.has(entry.target_id)) continue;
+      seen.add(entry.target_id);
+      const rule = rulesMap[entry.target_id];
+      const ruleName = rule ? rule.name : entry.target_id;
+      const meta = actionLabels[entry.action] || { label: entry.action.toUpperCase(), css: 'active' };
+      items.push({ ruleId: entry.target_id, ruleName, detail: entry.detail, ...meta });
+      if (items.length >= 5) break;
+    }
+
+    const container = document.querySelector('.whats-changed-items');
+    if (container && items.length > 0) {
+      container.innerHTML = items.map(item => `
+        <div class="change-item ${item.css}" style="cursor:pointer" onclick="selectRule('${item.ruleId}')">
+          <span class="label ${item.css}">${item.label}</span>
+          <span class="change-item-text">${item.ruleId} ${item.ruleName} — ${item.detail}</span>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    console.error('[Ontology UI] Failed to load What\'s Changed:', e);
+  }
 }
 
 // ── SIDEBAR RULE LIST ────────────────────────────────────────

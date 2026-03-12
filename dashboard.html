@@ -462,9 +462,9 @@
     const dependencies = dashboardData.dependencies;
 
     const totalRules = rules.length;
-    const activeRules = rules.filter(r => r.status === 'ACTIVE').length;
-    const draftRules = rules.filter(r => r.status === 'DRAFT').length;
-    const reviewRules = rules.filter(r => r.status === 'IN_REVIEW').length;
+    const activeRules = rules.filter(r => r.status?.toLowerCase() === 'active').length;
+    const draftRules = rules.filter(r => r.status?.toLowerCase() === 'draft').length;
+    const reviewRules = rules.filter(r => r.status?.toLowerCase() === 'review').length;
     const totalConditions = conditions.length;
     const totalDependencies = dependencies.length;
 
@@ -494,10 +494,10 @@
 
     // Rules by Status
     const statusCounts = {
-      ACTIVE: rules.filter(r => r.status === 'ACTIVE').length,
-      DRAFT: rules.filter(r => r.status === 'DRAFT').length,
-      IN_REVIEW: rules.filter(r => r.status === 'IN_REVIEW').length,
-      SUNSET: rules.filter(r => r.status === 'SUNSET').length
+      Active: rules.filter(r => r.status?.toLowerCase() === 'active').length,
+      Draft: rules.filter(r => r.status?.toLowerCase() === 'draft').length,
+      'In Review': rules.filter(r => r.status?.toLowerCase() === 'review').length,
+      Sunset: rules.filter(r => r.status?.toLowerCase() === 'sunset').length
     };
 
     renderStatusChart(statusCounts);
