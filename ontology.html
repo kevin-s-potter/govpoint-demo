@@ -3280,7 +3280,17 @@ function cbAcceptAI(groupId, condId) {
   const group = cbState.groups.find(g => g.id === groupId);
   if (!group) return;
   const cond = group.conditions.find(c => c.id === condId);
-  if (cond) { cond.source = 'user'; cbRender(); }
+  if (cond) {
+    cond.source = 'user';
+    if (cbState.rule) {
+      govpoint.addAuditEntry(
+        'ohio-odh', 'user-001', 'publisher', 'accept_ai_suggestion',
+        'rule', cbState.rule.rule_id,
+        `AI suggestion accepted: ${cond.field} ${cond.operator} ${cond.value}`
+      );
+    }
+    cbRender();
+  }
 }
 
 function cbExpandAll() {
@@ -3435,15 +3445,25 @@ function cbRenderSuggestions(container) {
 function cbApplySuggestion(index) {
   const s = cbState.aiSuggestions.suggestions[index];
   if (!s) return;
-  // Add as AI-sourced condition to first group
+  // Add as accepted condition to first group
   if (cbState.groups.length === 0) {
     cbState.groups.push({ id: cbState.nextId++, logic: 'AND', conditions: [] });
   }
   cbState.groups[0].conditions.push({
     id: cbState.nextId++, field: s.field, operator: s.operator, value: s.value,
-    valueType: s.valueType, editing: false, source: 'ai'
+    valueType: s.valueType, editing: false, source: 'accepted'
   });
   cbState.aiSuggestions.suggestions.splice(index, 1);
+
+  // Log AI suggestion acceptance to audit trail
+  if (cbState.rule) {
+    govpoint.addAuditEntry(
+      'ohio-odh', 'user-001', 'publisher', 'accept_ai_suggestion',
+      'rule', cbState.rule.rule_id,
+      `AI suggestion accepted: ${s.field} ${s.operator} ${s.value}`
+    );
+  }
+
   cbRender();
   cbSwitchSidebarTab('suggestions');
 }
