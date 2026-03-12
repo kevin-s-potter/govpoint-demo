@@ -1,5 +1,5 @@
 {
-  "name": "lexipoint-demo",
+  "name": "govpoint-demo",
   "headers": [
     {
       "source": "/(.*)",
