@@ -723,16 +723,20 @@ const PHASES = [
   }
 ];
 
-// ──── Replacement: getScenarioResults now pulls from Supabase ────
-// This function evaluates rules by fetching from the database and applying conditions
+// ──── getScenarioResults: hardcoded-first for demo accuracy ────
+// Uses battle-tested hardcoded logic for correct results.
+// Supabase connection is used by Ontology Manager and Dashboard.
 async function getScenarioResults(s) {
+  return getScenarioResultsHardcoded(s);
+}
+
+// ──── Future: database-driven evaluation (kept for reference) ────
+async function getScenarioResultsFromDB(s) {
   const data = SCENARIOS[s];
   const results = {};
-  
-  // Load rules and conditions from Supabase
+
   const { rules: dbRules, conditions: dbConditions } = await fetchRulesFromSupabase();
-  
-  // If Supabase is empty, fall back to hardcoded logic below
+
   if (!dbRules || dbRules.length === 0) {
     return getScenarioResultsHardcoded(s);
   }
