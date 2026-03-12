@@ -514,53 +514,41 @@
   </div>
 </div>
 
+<script src="data/api.js"></script>
 <script>
-const RULES = [
-  { id: 'OH-001', name: 'Bed Capacity Minimum', status: 'active', program: 'Hospital Licensing', version: '2.1', conditions: ['beds >= 25', 'licensed_facility == true'] },
-  { id: 'OH-002', name: 'Emergency Department Staffing', status: 'active', program: 'Hospital Licensing', version: '1.8', conditions: ['ed_beds >= 10', 'physicians >= 1'] },
-  { id: 'OH-003', name: 'ICU Isolation Requirements', status: 'active', program: 'Hospital Licensing', version: '3.0', conditions: ['icu_beds > 0', 'isolation_rate >= 0.5'] },
-  { id: 'OH-004', name: 'Pharmacy Licensing', status: 'active', program: 'Hospital Licensing', version: '1.5', conditions: ['licensed_pharmacist == true', 'pharmacy_hours >= 16'] },
-  { id: 'OH-005', name: 'Infection Control Program', status: 'review', program: 'Hospital Licensing', version: '2.3', conditions: ['infection_control_committee == true', 'quarterly_audit == true'] },
-  { id: 'OH-006', name: 'Medical Records Management', status: 'active', program: 'Hospital Licensing', version: '1.9', conditions: ['digital_records == true', 'backup_frequency == daily'] },
-  { id: 'OH-007', name: 'Patient Safety Reporting', status: 'active', program: 'Hospital Licensing', version: '2.0', conditions: ['incident_reporting == true', 'response_time <= 24'] },
-  { id: 'OH-008', name: 'Quality Assurance Program', status: 'active', program: 'Hospital Licensing', version: '1.6', conditions: ['qa_committee == true', 'review_frequency == monthly'] },
-  { id: 'OH-009', name: 'CON Expedited Review', status: 'active', program: 'Hospital Licensing', version: '1.2', conditions: ['project_cost > 200000', 'bed_change <= 5'] },
-  { id: 'OH-010', name: 'Capital Equipment Reporting', status: 'active', program: 'Hospital Licensing', version: '1.0', conditions: ['equipment_cost > 50000', 'report_within_30_days == true'] },
-  { id: 'OH-011', name: 'Telemedicine Compliance', status: 'draft', program: 'Hospital Licensing', version: '1.0', conditions: ['telehealth_enabled == true', 'licensed_provider == true'] },
-  { id: 'OH-012', name: 'Surgical Suite Standards', status: 'active', program: 'Hospital Licensing', version: '2.1', conditions: ['surgical_suites >= 2', 'air_exchange_rate >= 25'] },
-  { id: 'OH-013', name: 'Laboratory Accreditation', status: 'active', program: 'Hospital Licensing', version: '1.7', conditions: ['clia_certified == true', 'proficiency_testing == true'] },
-  { id: 'OH-014', name: 'Radiology Department', status: 'active', program: 'Hospital Licensing', version: '2.0', conditions: ['radiologist_on_call == true', 'mri_available == true'] },
-  { id: 'OH-015', name: 'Fire Code Compliance', status: 'active', program: 'Hospital Licensing', version: '1.8', conditions: ['sprinkler_system == true', 'emergency_exits >= 3'] },
-  { id: 'OH-016', name: 'Nursing Staffing Ratios', status: 'active', program: 'Hospital Licensing', version: '2.2', conditions: ['rn_ratio >= 0.5', 'continuous_staffing == true'] },
-  { id: 'OH-017', name: 'Dietary Services', status: 'active', program: 'Hospital Licensing', version: '1.4', conditions: ['dietitian_licensed == true', 'menu_planning == quarterly'] },
-  { id: 'OH-018', name: 'Environmental Health & Safety', status: 'active', program: 'Hospital Licensing', version: '1.6', conditions: ['hazmat_training == annual', 'waste_disposal == compliant'] },
-  { id: 'OH-019', name: 'Patient Rights & Grievance', status: 'active', program: 'Hospital Licensing', version: '1.9', conditions: ['grievance_process == documented', 'response_time <= 14'] },
-  { id: 'OH-020', name: 'Telehealth Bed Equivalency', status: 'draft', program: 'Hospital Licensing', version: '1.1', conditions: ['telehealth_beds >= 5', 'patient_satisfaction >= 4.0'] },
-  { id: 'FED-001', name: 'CMS Conditions of Participation', status: 'active', program: 'Hospital Licensing', version: '3.1', conditions: ['medicare_participating == true', 'quality_score >= 85'] },
-  { id: 'FED-002', name: 'Medicaid Compliance - Rates', status: 'review', program: 'Hospital Licensing', version: '2.0', conditions: ['medicaid_enrolled == true', 'rate_review == annual'] },
-  { id: 'FED-003', name: 'CMS CoP Compliance', status: 'active', program: 'Hospital Licensing', version: '2.4', conditions: ['cms_surveyed == true', 'deficiencies <= 5'] }
-];
+// ── STATE ────────────────────────────────────────────────────
+let currentRule = null;   // full rule object from Supabase
+let rules = [];           // all rules for current program
 
-let currentRule = null;
-let rules = [...RULES];
+// ── INITIALIZE — wait for Supabase data ──────────────────────
+async function init() {
+  await govpoint.ready;
+  rules = await govpoint.getRules('hosp-licensing');
+  console.log(`[Ontology UI] ${rules.length} rules loaded from Supabase`);
 
-// Initialize
-function init() {
+  // Update notification badge from DB
+  const unread = await govpoint.getUnreadCount('user-001');
+  const badge = document.querySelector('.notification-badge');
+  if (badge) badge.textContent = unread;
+
   renderRulesList();
   setupEventListeners();
 }
 
+// ── SIDEBAR RULE LIST ────────────────────────────────────────
 function renderRulesList() {
   const container = document.getElementById('rulesList');
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
   const filtered = rules.filter(r =>
-    r.name.toLowerCase().includes(searchTerm) || r.id.toLowerCase().includes(searchTerm)
+    r.name.toLowerCase().includes(searchTerm) ||
+    r.rule_id.toLowerCase().includes(searchTerm) ||
+    (r.description || '').toLowerCase().includes(searchTerm)
   );
 
   container.innerHTML = filtered.map(rule => `
-    <div class="rule-card ${rule.id === currentRule?.id ? 'active' : ''}" data-id="${rule.id}">
-      <div class="rule-name">${rule.id}</div>
+    <div class="rule-card ${rule.rule_id === currentRule?.rule_id ? 'active' : ''}" data-id="${rule.rule_id}">
+      <div class="rule-name">${rule.rule_id}</div>
       <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">${rule.name}</div>
       <span class="rule-status ${rule.status}" style="font-size: 11px;">${rule.status.toUpperCase()}</span>
     </div>
@@ -571,13 +559,15 @@ function renderRulesList() {
   });
 }
 
-function selectRule(id) {
-  currentRule = rules.find(r => r.id === id);
+// ── SELECT RULE ──────────────────────────────────────────────
+async function selectRule(id) {
+  currentRule = await govpoint.getRule(id);
   renderRulesList();
-  renderDetailPanel();
+  await renderDetailPanel();
 }
 
-function renderDetailPanel() {
+// ── DETAIL PANEL — all data from Supabase ────────────────────
+async function renderDetailPanel() {
   if (!currentRule) return;
 
   document.getElementById('detailHeader').style.display = 'flex';
@@ -587,110 +577,93 @@ function renderDetailPanel() {
 
   document.getElementById('detailTitle').textContent = currentRule.name;
   document.getElementById('detailStatus').textContent = `Status: ${currentRule.status.toUpperCase()}`;
-  document.getElementById('detailProgram').textContent = `Program: ${currentRule.program}`;
+  document.getElementById('detailProgram').textContent = `Program: Hospital Licensing`;
   document.getElementById('detailVersion').textContent = `v${currentRule.version}`;
 
-  // Overview — editable fields
-  const ruleDescriptions = {
-    'OH-001': 'Hospital must maintain a minimum of 25 licensed beds to qualify for full hospital licensure under ORC § 3702.30.',
-    'OH-002': 'Emergency departments must maintain minimum physician staffing levels and bed counts per OAC 3701-59-01.',
-    'OH-003': 'ICU units must maintain isolation capacity of at least 50% of ICU beds per infection control standards.',
-    'OH-005': 'Hospitals must establish an infection control committee and conduct quarterly surveillance audits.',
-    'OH-011': 'Telehealth services must be provided by licensed practitioners with documented patient consent.',
-    'OH-020': 'Virtual bed equivalency for telehealth monitoring programs with minimum patient satisfaction thresholds.',
-    'FED-001': 'Medicare-participating hospitals must meet CMS Conditions of Participation with quality scores at or above 85%.',
-    'FED-002': 'Medicaid-enrolled hospitals must undergo annual rate review to maintain program participation.',
-    'FED-003': 'Hospitals must pass CMS survey with no more than 5 deficiencies to maintain deemed status.'
-  };
-  const ruleDesc = ruleDescriptions[currentRule.id] || `Rule definition and implementation guidelines for ${currentRule.name.toLowerCase()}.`;
-  const citationMap = {
-    'OH-001': 'ORC § 3702.30(A)(1)', 'OH-002': 'OAC 3701-59-01(B)', 'OH-003': 'OAC 3701-59-03(C)',
-    'OH-005': 'OAC 3701-59-05', 'OH-009': 'ORC § 3702.52(A)', 'OH-011': 'ORC § 3702.30(B)(2)',
-    'OH-020': 'ORC § 3702.30(B)(4)', 'FED-001': '42 CFR § 482.1', 'FED-002': '42 CFR § 447.253',
-    'FED-003': '42 CFR § 488.5'
-  };
-  const ruleCitation = citationMap[currentRule.id] || 'ORC § 3702.30';
-  const juris = currentRule.id.startsWith('FED') ? 'Federal' : 'Ohio';
-  const ruleType = currentRule.id === 'OH-009' ? 'ROUTE' : (currentRule.id === 'OH-010' ? 'INFO' : 'GATE');
-  const phase = currentRule.id.startsWith('FED') ? 'COMPLIANCE' : 'LICENSING';
+  // Fetch related data in parallel
+  const [conditions, deps, versions, comments, auditLog] = await Promise.all([
+    govpoint.getConditions(currentRule.rule_id),
+    govpoint.getDependencies(currentRule.rule_id),
+    govpoint.getVersionHistory(currentRule.rule_id),
+    govpoint.getComments(currentRule.rule_id),
+    govpoint.getAuditLog(currentRule.rule_id)
+  ]);
 
+  // ── OVERVIEW TAB — editable fields from DB ──────────────────
+  const r = currentRule;
   const fieldStyle = 'width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; background: var(--white); transition: border-color 0.2s, box-shadow 0.2s;';
   const fieldFocus = 'onfocus="this.style.borderColor=\'var(--accent)\';this.style.boxShadow=\'0 0 0 3px var(--accent-light)\'" onblur="this.style.borderColor=\'var(--border)\';this.style.boxShadow=\'none\'"';
+
+  const selOpt = (val, options) => options.map(o => {
+    const optVal = typeof o === 'object' ? o.value : o;
+    const optLabel = typeof o === 'object' ? o.label : o;
+    return `<option value="${optVal}" ${optVal === val ? 'selected' : ''}>${optLabel}</option>`;
+  }).join('');
 
   document.getElementById('overviewContent').innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">RULE ID</div>
-        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">${currentRule.id}</div>
+        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">${r.rule_id}</div>
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CURRENT VERSION</div>
-        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">v${currentRule.version}</div>
+        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">v${r.version}</div>
       </div>
       <div style="grid-column: 1 / -1;">
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">NAME</div>
-        <input type="text" value="${currentRule.name}" style="${fieldStyle}" ${fieldFocus} />
+        <input type="text" value="${r.name}" style="${fieldStyle}" ${fieldFocus} />
       </div>
       <div style="grid-column: 1 / -1;">
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">DESCRIPTION</div>
-        <textarea rows="3" style="${fieldStyle} resize: vertical;" ${fieldFocus}>${ruleDesc}</textarea>
+        <textarea rows="3" style="${fieldStyle} resize: vertical;" ${fieldFocus}>${r.description || ''}</textarea>
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CITATION</div>
-        <input type="text" value="${ruleCitation}" style="${fieldStyle}" ${fieldFocus} />
+        <input type="text" value="${r.citation || ''}" style="${fieldStyle}" ${fieldFocus} />
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">JURISDICTION</div>
-        <select style="${fieldStyle}">
-          <option ${juris === 'Ohio' ? 'selected' : ''}>Ohio</option>
-          <option ${juris === 'Federal' ? 'selected' : ''}>Federal</option>
-        </select>
+        <select style="${fieldStyle}">${selOpt(r.jurisdiction, ['Ohio', 'Federal', 'Local'])}</select>
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">STATUS</div>
-        <select style="${fieldStyle}">
-          <option ${currentRule.status === 'draft' ? 'selected' : ''}>Draft</option>
-          <option ${currentRule.status === 'review' ? 'selected' : ''}>Review</option>
-          <option ${currentRule.status === 'active' ? 'selected' : ''}>Active</option>
-          <option>Sunset</option>
-        </select>
+        <select style="${fieldStyle}">${selOpt(r.status, [
+          {value:'draft',label:'Draft'},{value:'review',label:'Review'},{value:'active',label:'Active'},{value:'sunset',label:'Sunset'}
+        ])}</select>
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">RULE TYPE</div>
-        <select style="${fieldStyle}">
-          <option ${ruleType === 'GATE' ? 'selected' : ''}>GATE — Must pass to proceed</option>
-          <option ${ruleType === 'FILTER' ? 'selected' : ''}>FILTER — Narrows eligibility</option>
-          <option ${ruleType === 'CALC' ? 'selected' : ''}>CALC — Computes a value</option>
-          <option ${ruleType === 'ROUTE' ? 'selected' : ''}>ROUTE — Determines pathway</option>
-          <option ${ruleType === 'INFO' ? 'selected' : ''}>INFO — Documentation requirement</option>
-        </select>
+        <select style="${fieldStyle}">${selOpt(r.rule_type, [
+          {value:'GATE',label:'GATE — Must pass to proceed'},{value:'FILTER',label:'FILTER — Narrows eligibility'},
+          {value:'CALC',label:'CALC — Computes a value'},{value:'ROUTE',label:'ROUTE — Determines pathway'},
+          {value:'INFO',label:'INFO — Documentation requirement'}
+        ])}</select>
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">PRIORITY</div>
-        <select style="${fieldStyle}">
-          <option selected>P1 — Critical</option>
-          <option>P2 — Required</option>
-          <option>P3 — Recommended</option>
-          <option>P4 — Informational</option>
-        </select>
+        <select style="${fieldStyle}">${selOpt(r.priority, [
+          {value:'P1',label:'P1 — Critical'},{value:'P2',label:'P2 — Required'},
+          {value:'P3',label:'P3 — Recommended'},{value:'P4',label:'P4 — Informational'}
+        ])}</select>
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">PHASE</div>
-        <select style="${fieldStyle}">
-          <option ${phase === 'LICENSING' ? 'selected' : ''}>LICENSING</option>
-          <option ${phase === 'COMPLIANCE' ? 'selected' : ''}>COMPLIANCE</option>
-          <option>APPLICATION_PROCESSING</option>
-          <option>REPORTING_VERIFICATION</option>
-          <option>RECERTIFICATION</option>
-        </select>
+        <select style="${fieldStyle}">${selOpt(r.phase, ['LICENSING','COMPLIANCE','APPLICATION_PROCESSING','REPORTING_VERIFICATION','RECERTIFICATION'])}</select>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CLASSIFICATION</div>
+        <select style="${fieldStyle}">${selOpt(r.classification, [
+          {value:'standard',label:'Standard'},{value:'restricted',label:'Restricted'},{value:'confidential',label:'Confidential'}
+        ])}</select>
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">EFFECTIVE DATE</div>
-        <input type="date" value="2024-01-01" style="${fieldStyle}" ${fieldFocus} />
+        <input type="date" value="${r.effective_date || ''}" style="${fieldStyle}" ${fieldFocus} />
       </div>
       <div>
         <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">SUNSET DATE</div>
-        <input type="date" value="" style="${fieldStyle}" ${fieldFocus} placeholder="None" />
+        <input type="date" value="${r.sunset_date || ''}" style="${fieldStyle}" ${fieldFocus} />
       </div>
     </div>
     <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border);">
@@ -699,69 +672,77 @@ function renderDetailPanel() {
     </div>
   `;
 
-  // Conditions
+  // ── CONDITIONS TAB — from rule_conditions table ─────────────
   document.getElementById('conditionEditor').innerHTML = `
-    ${currentRule.conditions.map((cond, i) => `
+    ${conditions.map(c => `
       <div class="condition-row">
-        <span style="flex: 1;">IF ${cond}</span>
+        <span style="font-weight: 600; color: var(--navy); min-width: 140px;">${c.field}</span>
+        <span style="font-weight: 600; color: var(--ohio-red); min-width: 40px; text-align: center;">${c.operator}</span>
+        <span style="flex: 1;">${c.value}</span>
+        <span style="font-size: 11px; color: var(--text-secondary); min-width: 60px;">${c.value_type}</span>
         <button style="cursor: pointer;">Remove</button>
       </div>
     `).join('')}
+    ${conditions.length === 0 ? '<div style="color: var(--text-secondary); font-size: 13px;">No conditions defined yet.</div>' : ''}
     <button style="padding: 8px 16px; background: var(--navy); color: white; border: none; border-radius: var(--radius); cursor: pointer; margin-top: 12px;">+ Add Condition</button>
   `;
 
-  // Dependencies
-  document.getElementById('dependenciesContent').innerHTML = `
-    <div class="dep-card impacts-other">
-      <div class="dep-card-title">FED-001 CMS Conditions of Participation</div>
-      <div class="dep-card-desc">This rule directly impacts emergency staffing requirements</div>
+  // ── DEPENDENCIES TAB — from rule_dependencies table ─────────
+  const depHtml = [];
+  for (const d of deps.dependsOn) {
+    const target = d.targetRule;
+    depHtml.push(`<div class="dep-card impacts-other">
+      <div class="dep-card-title">${target ? target.rule_id + ' ' + target.name : d.depends_on}</div>
+      <div class="dep-card-desc">${d.description || d.dependency_type}</div>
+    </div>`);
+  }
+  for (const d of deps.dependedOnBy) {
+    const source = d.sourceRule;
+    depHtml.push(`<div class="dep-card impacted-by">
+      <div class="dep-card-title">${source ? source.rule_id + ' ' + source.name : d.rule_id}</div>
+      <div class="dep-card-desc">${d.description || d.dependency_type} (depends on this rule)</div>
+    </div>`);
+  }
+  document.getElementById('dependenciesContent').innerHTML = depHtml.length > 0
+    ? depHtml.join('')
+    : '<div style="color: var(--text-secondary); font-size: 13px;">No dependencies mapped for this rule.</div>';
+
+  // ── VERSION HISTORY TAB — from rule_versions table ──────────
+  const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}); } catch(e) { return d; } };
+
+  document.getElementById('historyContent').innerHTML = versions.length > 0 ? versions.map((v, i) => `
+    <div class="version-item">
+      <div class="version-header">
+        <span class="version-num">v${v.version}</span>
+        <span class="version-date">${i === 0 ? 'Current • ' : ''}${fmtDate(v.changed_at)}</span>
+      </div>
+      <div class="version-details">${v.change_summary || 'No summary'}</div>
+      ${v.diff ? `<div class="diff-panel" style="margin-top: 8px;">
+        <div><span class="diff-remove">${v.diff.field}: ${v.diff.old || '(none)'}</span> → <span class="diff-add">${v.diff.new}</span></div>
+      </div>` : ''}
     </div>
-    <div class="dep-card impacted-by">
-      <div class="dep-card-title">OH-007 Patient Safety Reporting</div>
-      <div class="dep-card-desc">Updates to this rule affect incident tracking</div>
-    </div>
-    <div class="dep-card impacts-other">
-      <div class="dep-card-title">OH-016 Nursing Staffing Ratios</div>
-      <div class="dep-card-desc">Related rule with shared conditions on staffing</div>
+  `).join('') : `
+    <div class="version-item">
+      <div class="version-header">
+        <span class="version-num">v${r.version}</span>
+        <span class="version-date">Current</span>
+      </div>
+      <div class="version-details">Initial version</div>
     </div>
   `;
 
-  // History with Diff
-  document.getElementById('historyContent').innerHTML = `
-    <div class="version-item">
-      <div class="version-header">
-        <span class="version-num">v${currentRule.version}</span>
-        <span class="version-date">Current • Mar 10, 2026</span>
-      </div>
-      <div class="version-details">Updated by Sarah Chen (Publisher)</div>
-      <button style="margin-top: 8px; padding: 6px 12px; font-size: 12px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;">Compare →</button>
-    </div>
-    <div class="version-item">
-      <div class="version-header">
-        <span class="version-num">v${(parseFloat(currentRule.version) - 0.1).toFixed(1)}</span>
-        <span class="version-date">Previous • Mar 5, 2026</span>
-      </div>
-      <div class="version-details">Updated by James Miller (Reviewer)</div>
-    </div>
-    ${currentRule.version !== '1.0' ? `
-    <div class="diff-panel" style="display: none;">
-      <div><span class="diff-remove">net_bed_change threshold changed from ~~50~~ </span> → <span class="diff-add">**30**</span></div>
-    </div>
-    ` : ''}
-  `;
-
-  // Source View
+  // ── SOURCE VIEW TAB ─────────────────────────────────────────
   document.getElementById('sourceContent').innerHTML = `
     <div class="source-split">
       <div class="source-left">
-        ${currentRule.conditions.map((cond, i) => `
+        ${conditions.map(c => `
           <div class="condition-row">
-            <span style="flex: 1;">IF ${cond}</span>
+            <span style="flex: 1;">IF ${c.field} ${c.operator} ${c.value}</span>
           </div>
         `).join('')}
       </div>
       <div class="source-right">
-        <div class="source-citation">Source: ORC § 3702.30(A)(1)</div>
+        <div class="source-citation">Source: ${r.citation || 'No citation'}</div>
         <div class="source-text">
           A hospital shall maintain a minimum capacity of <span class="source-highlight">not less than 25 licensed beds</span> and shall operate under a license issued by the director of health. The hospital shall be duly licensed as a hospital under <span class="source-highlight">the provisions of Chapter 3702 of the Revised Code</span>. The hospital shall maintain compliance with all statutory requirements...
         </div>
@@ -769,42 +750,26 @@ function renderDetailPanel() {
     </div>
   `;
 
-  // Comments
+  // ── COMMENTS TAB — from comments table ──────────────────────
+  const avatarColors = { 'user-001': 'var(--accent)', 'user-002': 'var(--green)', 'user-003': 'var(--purple)' };
+  const roleMap = { 'user-001': 'Publisher', 'user-002': 'Reviewer', 'user-003': 'Viewer' };
+
   document.getElementById('commentsContent').innerHTML = `
     <div class="comments-thread">
-      <div class="comment">
-        <div class="comment-avatar">SC</div>
-        <div class="comment-body">
-          <div class="comment-header">
-            <span class="comment-author">Sarah Chen</span>
-            <span class="comment-role">Publisher</span>
-            <span class="comment-time">Mar 5, 2026</span>
+      ${comments.map(c => `
+        <div class="comment">
+          <div class="comment-avatar" style="background: ${avatarColors[c.user_id] || 'var(--accent)'};">${c.user?.avatar_initials || '??'}</div>
+          <div class="comment-body">
+            <div class="comment-header">
+              <span class="comment-author">${c.user?.display_name || 'Unknown'}</span>
+              <span class="comment-role">${roleMap[c.user_id] || ''}</span>
+              <span class="comment-time">${fmtDate(c.created_at)}</span>
+            </div>
+            <div class="comment-text">${c.body}</div>
           </div>
-          <div class="comment-text">Updated threshold from 50 to 30 beds based on 2026 ORC amendment</div>
         </div>
-      </div>
-      <div class="comment">
-        <div class="comment-avatar" style="background: var(--green);">JM</div>
-        <div class="comment-body">
-          <div class="comment-header">
-            <span class="comment-author">James Miller</span>
-            <span class="comment-role">Reviewer</span>
-            <span class="comment-time">Mar 6, 2026</span>
-          </div>
-          <div class="comment-text">Confirmed — matches the enrolled version of HB 247. Approved.</div>
-        </div>
-      </div>
-      <div class="comment">
-        <div class="comment-avatar" style="background: var(--purple);">LP</div>
-        <div class="comment-body">
-          <div class="comment-header">
-            <span class="comment-author">Lisa Park</span>
-            <span class="comment-role">Legal</span>
-            <span class="comment-time">Mar 7, 2026</span>
-          </div>
-          <div class="comment-text"><span class="mention">@Sarah</span> — note that this may interact with the federal CON exemption for critical access hospitals. Flagging for cross-reference.</div>
-        </div>
-      </div>
+      `).join('')}
+      ${comments.length === 0 ? '<div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">No comments yet.</div>' : ''}
     </div>
     <div class="add-comment">
       <textarea placeholder="Add a comment..."></textarea>
@@ -815,66 +780,30 @@ function renderDetailPanel() {
     </div>
   `;
 
-  // Audit Log
+  // ── AUDIT LOG TAB — from audit_log table ────────────────────
+  const fmtTS = (d) => { try { return new Date(d).toLocaleString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}); } catch(e) { return d; } };
+
   document.getElementById('auditContent').innerHTML = `
     <table class="audit-table">
       <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>User</th>
-          <th>Role</th>
-          <th>Action</th>
-          <th>Detail</th>
-        </tr>
+        <tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th><th>Detail</th></tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="audit-timestamp">Mar 10 14:32</td>
-          <td class="audit-user">Sarah Chen</td>
-          <td><span class="audit-role-badge">Publisher</span></td>
-          <td>Edited Conditions</td>
-          <td>Updated threshold parameter</td>
-        </tr>
-        <tr>
-          <td class="audit-timestamp">Mar 9 10:15</td>
-          <td class="audit-user">James Miller</td>
-          <td><span class="audit-role-badge">Reviewer</span></td>
-          <td>Approved</td>
-          <td>Moved to Active status</td>
-        </tr>
-        <tr>
-          <td class="audit-timestamp">Mar 8 09:22</td>
-          <td class="audit-user">Sarah Chen</td>
-          <td><span class="audit-role-badge">Publisher</span></td>
-          <td>Submitted for Review</td>
-          <td>Draft → Review workflow</td>
-        </tr>
-        <tr>
-          <td class="audit-timestamp">Mar 5 16:48</td>
-          <td class="audit-user">Sarah Chen</td>
-          <td><span class="audit-role-badge">Publisher</span></td>
-          <td>Created Draft</td>
-          <td>New rule drafted from ORC § 3702.30</td>
-        </tr>
-        <tr>
-          <td class="audit-timestamp">Mar 1 08:00</td>
-          <td class="audit-user">System</td>
-          <td><span class="audit-role-badge">Admin</span></td>
-          <td>Published</td>
-          <td>Rule published to production</td>
-        </tr>
-        <tr>
-          <td class="audit-timestamp">Feb 28 13:45</td>
-          <td class="audit-user">Audit Service</td>
-          <td><span class="audit-role-badge">Auditor</span></td>
-          <td>Viewed</td>
-          <td>Compliance audit review</td>
-        </tr>
+        ${auditLog.map(a => `
+          <tr>
+            <td class="audit-timestamp">${fmtTS(a.timestamp)}</td>
+            <td class="audit-user">${a.user?.display_name || a.role || 'System'}</td>
+            <td><span class="audit-role-badge">${(a.role || 'system').charAt(0).toUpperCase() + (a.role || 'system').slice(1)}</span></td>
+            <td>${(a.action || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+            <td>${a.detail || ''}</td>
+          </tr>
+        `).join('')}
+        ${auditLog.length === 0 ? '<tr><td colspan="5" style="color: var(--text-secondary);">No audit entries for this rule.</td></tr>' : ''}
       </tbody>
     </table>
   `;
 
-  // Tab switching
+  // ── TAB SWITCHING ──────────────────────────────────────────
   document.querySelectorAll('.detail-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
@@ -885,11 +814,10 @@ function renderDetailPanel() {
   });
 }
 
+// ── EVENT LISTENERS ──────────────────────────────────────────
 function setupEventListeners() {
-  // Search
   document.getElementById('searchInput').addEventListener('input', renderRulesList);
 
-  // Program Switcher
   document.getElementById('programSwitcher').addEventListener('click', function(e) {
     e.stopPropagation();
     this.classList.toggle('active');
@@ -898,7 +826,6 @@ function setupEventListeners() {
     document.getElementById('programSwitcher').classList.remove('active');
   });
 
-  // Notification Bell
   document.getElementById('notificationBell').addEventListener('click', function(e) {
     e.stopPropagation();
     this.classList.toggle('active');
@@ -907,53 +834,43 @@ function setupEventListeners() {
     document.getElementById('notificationBell').classList.remove('active');
   });
 
-  // What's Changed Dismiss
   document.querySelector('.whats-changed-dismiss').addEventListener('click', () => {
     document.getElementById('whatsChanged').style.display = 'none';
   });
 
-  // Import Button
   document.getElementById('importBtn').addEventListener('click', () => {
     document.getElementById('uploadModal').classList.add('active');
     resetUploadModal();
   });
 
-  // Upload Modal Close
   document.querySelector('.upload-close').addEventListener('click', () => {
     document.getElementById('uploadModal').classList.remove('active');
   });
 
-  // Upload Zone
   const uploadZone = document.getElementById('uploadZone');
   uploadZone.addEventListener('click', simulateUpload);
-  uploadZone.addEventListener('dragover', e => {
-    e.preventDefault();
-    uploadZone.classList.add('active');
-  });
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('active'); });
   uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('active'));
 
-  // Simulate Impact
-  document.getElementById('simulateBtn').addEventListener('click', () => {
+  document.getElementById('simulateBtn').addEventListener('click', async () => {
+    if (!currentRule) return;
+    const deps = await govpoint.getDependencies(currentRule.rule_id);
     document.getElementById('impactModal').classList.add('active');
     document.getElementById('impactTitle').textContent = `Impact Analysis: ${currentRule.name}`;
-    document.getElementById('impactDirect').innerHTML = `
-      <div class="impact-item">✓ FED-001 CMS CoP Compliance</div>
-      <div class="impact-item">✓ OH-007 Patient Safety Reporting</div>
-    `;
-    document.getElementById('impactIndirect').innerHTML = `
-      <div class="impact-item">→ OH-016 Nursing Staffing Ratios</div>
-      <div class="impact-item">→ OH-002 Emergency Department Staffing</div>
-    `;
-    document.getElementById('impactConflicts').innerHTML = `
-      <div class="impact-item">⚠ Potential threshold overlap with OH-009</div>
-    `;
+    document.getElementById('impactDirect').innerHTML = deps.dependsOn.length > 0
+      ? deps.dependsOn.map(d => `<div class="impact-item">✓ ${d.targetRule?.rule_id || d.depends_on} ${d.targetRule?.name || ''}</div>`).join('')
+      : '<div class="impact-item" style="color: var(--text-secondary);">No direct impacts found</div>';
+    document.getElementById('impactIndirect').innerHTML = deps.dependedOnBy.length > 0
+      ? deps.dependedOnBy.map(d => `<div class="impact-item">→ ${d.sourceRule?.rule_id || d.rule_id} ${d.sourceRule?.name || ''}</div>`).join('')
+      : '<div class="impact-item" style="color: var(--text-secondary);">No indirect impacts found</div>';
+    document.getElementById('impactConflicts').innerHTML = `<div class="impact-item">⚠ Run full simulation to detect conflicts</div>`;
   });
 
   document.getElementById('impactClose').addEventListener('click', () => {
     document.getElementById('impactModal').classList.remove('active');
   });
 
-  // Export buttons in sidebar footer
+  // Export buttons
   const footer = document.createElement('div');
   footer.style.cssText = 'display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);';
   footer.innerHTML = `
@@ -963,11 +880,10 @@ function setupEventListeners() {
   document.querySelector('.sidebar').appendChild(footer);
 
   document.getElementById('exportJson').addEventListener('click', () => {
-    showToast('Exported 24 rules to ontology-export.json');
+    showToast(`Exported ${rules.length} rules to ontology-export.json`);
   });
-
   document.getElementById('exportPdf').addEventListener('click', () => {
-    showToast('Exported 24 rules to ontology-export.pdf');
+    showToast(`Exported ${rules.length} rules to ontology-export.pdf`);
   });
 }
 
@@ -992,33 +908,21 @@ function simulateUpload() {
         <div class="draft-rule-citation">ORC § 3702.30(B)(2)</div>
         <div class="draft-rule-preview">IF telehealth_enabled AND licensed_provider THEN require_patient_consent</div>
         <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-high">High Confidence</span></div>
-        <div class="draft-actions">
-          <button class="accept">Accept</button>
-          <button>Edit</button>
-          <button>Reject</button>
-        </div>
+        <div class="draft-actions"><button class="accept">Accept</button><button>Edit</button><button>Reject</button></div>
       </div>
       <div class="draft-rule">
         <div class="draft-rule-name">Bed Capacity Verification</div>
         <div class="draft-rule-citation">ORC § 3702.30(A)(1)</div>
         <div class="draft-rule-preview">IF net_bed_change > 0 THEN require_con_approval</div>
         <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-high">High Confidence</span></div>
-        <div class="draft-actions">
-          <button class="accept">Accept</button>
-          <button>Edit</button>
-          <button>Reject</button>
-        </div>
+        <div class="draft-actions"><button class="accept">Accept</button><button>Edit</button><button>Reject</button></div>
       </div>
       <div class="draft-rule">
         <div class="draft-rule-name">Quality Metrics Reporting</div>
         <div class="draft-rule-citation">ORC § 3702.30(C)</div>
         <div class="draft-rule-preview">IF cms_surveyed THEN report_quality_metrics_quarterly</div>
         <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-medium">Medium Confidence</span></div>
-        <div class="draft-actions">
-          <button class="accept">Accept</button>
-          <button>Edit</button>
-          <button>Reject</button>
-        </div>
+        <div class="draft-actions"><button class="accept">Accept</button><button>Edit</button><button>Reject</button></div>
       </div>
     `;
   }, 1500);
