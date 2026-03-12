@@ -5,164 +5,447 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GovPoint | Analytics Dashboard</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
   :root {
     --navy: #003366;
     --navy-deep: #0E3F75;
-    --accent: #14499E;
-    --accent-light: #E8EFF8;
+    --accent: #0176D3;
+    --accent-hover: #014486;
+    --accent-light: #EBF5FF;
     --ohio-red: #C41230;
     --ohio-red-light: #FDEDEF;
-    --green: #2E7D32;
-    --green-light: #E8F5E9;
-    --amber: #D84315;
-    --amber-light: #FFF3E0;
-    --red: #C41230;
-    --red-light: #FDEDEF;
-    --purple: #7B1FA2;
-    --purple-light: #F3E5F5;
-    --gray: #4E4D4D;
-    --light-gray: #F2F2F2;
-    --border: #D0D5DD;
+    --green: #2E844A;
+    --green-light: #E3F3E8;
+    --amber: #DD7A01;
+    --amber-light: #FEF3E0;
+    --red: #BA0517;
+    --red-light: #FEE4E4;
+    --purple: #9050E9;
+    --purple-light: #F0E8FC;
+    --teal: #0B827C;
+    --teal-light: #E0F5F4;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
     --white: #FFFFFF;
-    --text: #1A1A2E;
-    --text-secondary: #4A5568;
-    --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-    --radius: 6px;
-    --radius-lg: 8px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--light-gray); color: var(--text); line-height: 1.6; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
 
   /* ── STATE BANNER ── */
-  .state-banner { background: var(--light-gray); padding: 4px 32px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
-  .state-banner a { color: var(--ohio-red); text-decoration: none; font-weight: 600; }
+  .state-banner { background: var(--gray-50); padding: 6px 32px; font-size: 11px; color: var(--gray-500); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--gray-200); letter-spacing: 0.2px; }
+  .state-banner a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .state-banner a:hover { text-decoration: underline; }
 
   /* ── NAV ── */
-  .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
-  .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
-  .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+  .topnav {
+    background: var(--white);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+  }
+  .topnav .logo { color: var(--navy); font-size: 20px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+  .topnav .logo .ohio-mark { color: var(--accent); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; }
 
   .topnav .nav-spacer { margin-left: auto; }
-  .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
-  .topnav .nav-links { display: flex; gap: 24px; }
-  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
-  .topnav .nav-links a:hover { color: var(--ohio-red); }
-  .topnav .nav-links a.active { color: var(--ohio-red); }
+  .topnav .nav-controls { display: flex; align-items: center; gap: 20px; }
+  .topnav .nav-links { display: flex; gap: 4px; }
+  .topnav .nav-links a {
+    color: var(--gray-600);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    transition: all 0.15s ease;
+  }
+  .topnav .nav-links a:hover { background: var(--gray-100); color: var(--gray-900); }
+  .topnav .nav-links a.active { background: var(--accent-light); color: var(--accent); }
 
-  .notification-bell { position: relative; cursor: pointer; font-size: 18px; margin-right: 16px; }
-  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--ohio-red, #C41230); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
+  .notification-bell { position: relative; cursor: pointer; font-size: 18px; padding: 6px; border-radius: var(--radius); transition: background 0.15s; }
+  .notification-bell:hover { background: var(--gray-100); }
+  .notification-badge { position: absolute; top: 0; right: 0; background: var(--ohio-red); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+  .notification-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); width: 340px; z-index: 200; overflow: hidden; }
   .notification-dropdown.show { display: block; }
-  .notification-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; line-height: 1.4; }
+  .notification-dropdown-header { padding: 12px 16px; font-size: 13px; font-weight: 700; color: var(--gray-800); border-bottom: 1px solid var(--gray-100); }
+  .notification-item { padding: 12px 16px; border-bottom: 1px solid var(--gray-50); font-size: 12px; line-height: 1.5; transition: background 0.1s; cursor: pointer; }
+  .notification-item:hover { background: var(--gray-50); }
   .notification-item:last-child { border-bottom: none; }
-  .notification-time { color: #888; font-size: 11px; margin-top: 4px; }
+  .notification-time { color: var(--gray-400); font-size: 11px; margin-top: 4px; }
 
-  .role-indicator { display: flex; align-items: center; gap: 12px; }
-  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
-  .role-text { font-size: 13px; line-height: 1.4; }
-  .role-text .user-name { color: var(--navy); font-weight: 600; }
-  .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
+  .role-indicator { display: flex; align-items: center; gap: 10px; padding-left: 16px; border-left: 1px solid var(--gray-200); }
+  .avatar-circle { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--navy)); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+  .role-text { font-size: 12px; line-height: 1.3; }
+  .role-text .user-name { color: var(--gray-800); font-weight: 600; }
+  .role-text .user-role { color: var(--gray-500); font-size: 11px; }
 
-  /* ── TENANT SWITCHER ── */
-  .tenant-switcher { position: relative; margin-left: 24px; }
-  .tenant-switcher-btn { background: var(--accent-light); color: var(--navy); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-  .tenant-switcher-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-  .tenant-switcher-dropdown { display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; z-index: 200; margin-top: 8px; overflow: hidden; }
+  /* ── PROGRAM SWITCHER ── */
+  .tenant-switcher { position: relative; margin-left: 20px; }
+  .tenant-switcher-btn {
+    background: var(--gray-50);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .tenant-switcher-btn:hover { background: var(--gray-100); border-color: var(--gray-300); }
+  .tenant-switcher-dropdown { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); min-width: 300px; z-index: 200; overflow: hidden; }
   .tenant-switcher-dropdown.show { display: block; }
-  .tenant-option { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 13px; transition: background 0.15s; }
+  .tenant-group-header { padding: 10px 16px; font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.8px; background: var(--gray-50); }
+  .tenant-option { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 13px; transition: all 0.1s; }
   .tenant-option:hover { background: var(--accent-light); }
-  .tenant-option.active { background: var(--accent-light); font-weight: 600; }
-  .tenant-option .tenant-check { width: 16px; color: var(--accent); font-weight: 700; }
+  .tenant-option.active { background: var(--accent-light); }
+  .tenant-option .tenant-check { width: 16px; color: var(--accent); font-weight: 700; font-size: 14px; }
   .tenant-option .tenant-info { flex: 1; }
-  .tenant-option .tenant-name { color: var(--navy); font-weight: 600; }
-  .tenant-option .tenant-detail { font-size: 11px; color: var(--text-secondary); }
-
-  /* ── DASHBOARD FILTER ── */
-  .dash-filter { display: flex; align-items: center; gap: 10px; }
-  .dash-filter-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px; }
-  .dash-filter-pills { display: flex; gap: 4px; background: var(--white); border: 1px solid var(--border); border-radius: 24px; padding: 3px; }
-  .dash-pill { padding: 6px 14px; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
-  .dash-pill:hover { color: var(--navy); background: var(--light-gray); }
-  .dash-pill.active { background: var(--accent); color: white; }
+  .tenant-option .tenant-name { color: var(--gray-800); font-weight: 600; font-size: 13px; }
+  .tenant-option .tenant-detail { font-size: 11px; color: var(--gray-500); margin-top: 1px; }
 
   /* ── MAIN CONTENT ── */
-  .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+  .container { max-width: 1440px; margin: 0 auto; padding: 24px 32px; }
 
-  .page-title { font-size: 28px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-  .page-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .page-title { font-size: 24px; font-weight: 800; color: var(--gray-900); letter-spacing: -0.5px; }
+  .page-subtitle { font-size: 13px; color: var(--gray-500); margin-top: 4px; font-weight: 500; }
 
-  /* ── SUMMARY CARDS ── */
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 32px; }
-  .summary-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; box-shadow: var(--shadow); }
-  .summary-card:hover { box-shadow: var(--shadow-lg); }
-  .summary-number { font-size: 36px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-  .summary-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* ── DASHBOARD FILTER ── */
+  .dash-filter { display: flex; align-items: center; gap: 8px; }
+  .dash-filter-label { font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+  .dash-filter-pills { display: flex; gap: 2px; background: var(--gray-100); border-radius: var(--radius); padding: 3px; }
+  .dash-pill {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: var(--gray-500);
+    transition: all 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .dash-pill:hover { color: var(--gray-700); }
+  .dash-pill.active { background: var(--white); color: var(--gray-800); box-shadow: var(--shadow-sm); }
 
-  /* ── CHARTS SECTION ── */
-  .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-bottom: 32px; }
-  .chart-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); }
-  .chart-card:hover { box-shadow: var(--shadow-lg); }
-  .chart-title { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+  /* ── METRIC CARDS ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+  }
+  .metric-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+  }
+  .metric-card.mc-total::before { background: var(--navy); }
+  .metric-card.mc-active::before { background: var(--green); }
+  .metric-card.mc-draft::before { background: var(--amber); }
+  .metric-card.mc-review::before { background: var(--purple); }
+  .metric-card.mc-conditions::before { background: var(--teal); }
+  .metric-card.mc-deps::before { background: var(--accent); }
 
-  /* Bar Chart Styles */
-  .bar-chart { display: flex; flex-direction: column; gap: 16px; }
-  .bar-row { display: flex; align-items: center; gap: 12px; }
-  .bar-label { width: 100px; font-size: 12px; font-weight: 600; color: var(--text); text-align: right; flex-shrink: 0; }
-  .bar-container { flex: 1; height: 32px; background: var(--light-gray); border-radius: var(--radius); overflow: hidden; position: relative; display: flex; align-items: center; }
-  .bar-fill { height: 100%; background: var(--accent); display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-size: 11px; font-weight: 700; color: white; transition: all 0.3s ease; }
-  .bar-value { min-width: 35px; text-align: right; font-size: 12px; font-weight: 700; color: var(--text); }
+  .metric-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  .mc-total .metric-icon { background: #E8EFF8; }
+  .mc-active .metric-icon { background: var(--green-light); }
+  .mc-draft .metric-icon { background: var(--amber-light); }
+  .mc-review .metric-icon { background: var(--purple-light); }
+  .mc-conditions .metric-icon { background: var(--teal-light); }
+  .mc-deps .metric-icon { background: var(--accent-light); }
 
-  /* Status Colors */
-  .bar-active { background: var(--green); }
-  .bar-draft { background: var(--amber); }
-  .bar-review { background: var(--purple); }
-  .bar-sunset { background: var(--red); }
+  .metric-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gray-900);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+  }
+  .metric-label {
+    font-size: 11px;
+    color: var(--gray-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  /* ── CHART CARDS ── */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
+  .chart-card:hover { box-shadow: var(--shadow-md); }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .chart-title { font-size: 14px; font-weight: 700; color: var(--gray-800); }
+  .chart-total { font-size: 11px; color: var(--gray-400); font-weight: 500; }
+
+  /* ── DONUT CHART (Status) ── */
+  .donut-layout { display: flex; align-items: center; gap: 32px; }
+  .donut-container { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
+  .donut-container svg { width: 160px; height: 160px; transform: rotate(-90deg); }
+  .donut-container circle { fill: none; stroke-linecap: round; }
+  .donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .donut-center-number { font-size: 28px; font-weight: 800; color: var(--gray-900); line-height: 1; letter-spacing: -0.5px; }
+  .donut-center-label { font-size: 10px; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 10px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-label { font-size: 13px; color: var(--gray-600); font-weight: 500; flex: 1; }
+  .legend-value { font-size: 14px; color: var(--gray-900); font-weight: 700; min-width: 30px; text-align: right; }
+  .legend-pct { font-size: 11px; color: var(--gray-400); font-weight: 500; min-width: 36px; text-align: right; }
+
+  /* ── HORIZONTAL BAR CHARTS (modern) ── */
+  .hbar-chart { display: flex; flex-direction: column; gap: 14px; }
+  .hbar-row { display: flex; align-items: center; gap: 12px; }
+  .hbar-label {
+    width: 110px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-700);
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hbar-track {
+    flex: 1;
+    height: 28px;
+    background: var(--gray-100);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .hbar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.5s ease;
+    min-width: 2px;
+  }
+  .hbar-value {
+    min-width: 38px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-800);
+  }
+
+  /* ── SEGMENTED BAR (Jurisdiction) ── */
+  .seg-bar-container { margin-top: 8px; }
+  .seg-bar {
+    display: flex;
+    height: 40px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--gray-100);
+  }
+  .seg-bar-fill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    transition: width 0.5s ease;
+    min-width: 40px;
+  }
+  .seg-legend { display: flex; gap: 24px; margin-top: 16px; justify-content: center; }
+  .seg-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gray-600); font-weight: 500; }
+  .seg-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+  .seg-legend-value { font-weight: 700; color: var(--gray-800); }
 
   /* ── ACTIVITY TABLE ── */
-  .activity-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); }
-  .activity-section h2 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
-  .activity-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .activity-table th { background: var(--light-gray); padding: 12px; text-align: left; font-weight: 700; color: var(--navy); border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .activity-table td { padding: 14px 12px; border-bottom: 1px solid var(--border); }
-  .activity-table tbody tr:hover { background: var(--light-gray); }
-  .activity-timestamp { color: var(--text-secondary); font-family: monospace; font-size: 11px; }
-  .activity-user { font-weight: 600; color: var(--navy); }
-  .activity-action { color: var(--text); font-weight: 500; }
+  .activity-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .activity-card:hover { box-shadow: var(--shadow-md); }
+  .activity-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .activity-card-title { font-size: 14px; font-weight: 700; color: var(--gray-800); }
+  .activity-card-link { font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .activity-card-link:hover { text-decoration: underline; }
+
+  .activity-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .activity-table th {
+    background: var(--gray-50);
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--gray-500);
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .activity-table td { padding: 12px 16px; border-bottom: 1px solid var(--gray-50); }
+  .activity-table tbody tr:hover { background: var(--gray-50); }
+  .activity-table tbody tr:last-child td { border-bottom: none; }
+  .activity-timestamp { color: var(--gray-500); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; }
+  .activity-user { font-weight: 600; color: var(--gray-800); }
+  .activity-action-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-create { background: var(--green-light); color: var(--green); }
+  .badge-edit { background: var(--accent-light); color: var(--accent); }
+  .badge-review { background: var(--purple-light); color: var(--purple); }
+  .badge-approve { background: var(--green-light); color: var(--green); }
+  .badge-login { background: var(--gray-100); color: var(--gray-500); }
+  .badge-default { background: var(--gray-100); color: var(--gray-600); }
   .activity-target { color: var(--accent); font-weight: 600; }
-  .activity-detail { color: var(--text-secondary); font-size: 11px; }
+  .activity-detail { color: var(--gray-500); font-size: 12px; }
 
   /* ── DATA SOURCE FOOTER ── */
-  .data-source { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-top: 32px; justify-content: center; padding-top: 24px; border-top: 1px solid var(--border); }
-  .data-source-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; }
+  .data-source {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-top: 24px;
+    justify-content: center;
+    padding-top: 20px;
+  }
+  .data-source-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 
   /* ── LOADING STATE ── */
-  .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+  .skeleton { background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
   @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-  .summary-card.loading { opacity: 0.6; }
+  .metric-card.loading { opacity: 0.6; }
   .chart-card.loading { opacity: 0.6; }
 
   /* ── RESPONSIVE ── */
-  @media (max-width: 1024px) {
-    .container { padding: 24px; }
-    .summary-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
-    .charts-grid { grid-template-columns: 1fr; }
+  @media (max-width: 1200px) {
+    .metrics-row { grid-template-columns: repeat(3, 1fr); }
   }
-
+  @media (max-width: 1024px) {
+    .container { padding: 20px; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .metrics-row { grid-template-columns: repeat(3, 1fr); }
+  }
   @media (max-width: 768px) {
     .container { padding: 16px; }
     .topnav { padding: 0 16px; }
     .state-banner { padding: 4px 16px; }
-    .summary-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; }
-    .page-title { font-size: 22px; }
-    .charts-grid { gap: 16px; }
-    .chart-card { padding: 16px; }
-    .bar-label { width: 80px; font-size: 11px; }
-    .summary-number { font-size: 28px; }
-    .activity-table { font-size: 11px; }
-    .activity-table td { padding: 10px 8px; }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .page-title { font-size: 20px; }
+    .charts-grid { gap: 12px; }
+    .donut-layout { flex-direction: column; gap: 20px; }
+    .donut-container { width: 140px; height: 140px; }
+    .donut-container svg { width: 140px; height: 140px; }
   }
 </style>
 </head>
@@ -175,18 +458,18 @@
 
 <nav class="topnav">
   <div class="logo">
-    <span class="ohio-mark">⟨°⟩</span>
+    <span class="ohio-mark">&#10216;°&#10217;</span>
     <span>GovPoint</span>
   </div>
 
   <div class="tenant-switcher">
     <button class="tenant-switcher-btn" onclick="document.querySelector('.tenant-switcher-dropdown').classList.toggle('show')">
-      <span id="tenantLabel">ODH · Hospital Licensing</span> <span style="font-size: 10px;">▼</span>
+      <span id="tenantLabel">ODH · Hospital Licensing</span> <span style="font-size: 10px; opacity: 0.6;">&#9660;</span>
     </button>
     <div class="tenant-switcher-dropdown">
-      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--light-gray);">Ohio Department of Health</div>
+      <div class="tenant-group-header">Ohio Department of Health</div>
       <div class="tenant-option active" data-program="hosp-licensing" onclick="switchProgram('hosp-licensing')">
-        <span class="tenant-check">✓</span>
+        <span class="tenant-check">&#10003;</span>
         <div class="tenant-info">
           <div class="tenant-name">Hospital Licensing</div>
           <div class="tenant-detail">HEA-3614 · 23 rules</div>
@@ -199,7 +482,7 @@
           <div class="tenant-detail">SNAP-OH · 183 rules</div>
         </div>
       </div>
-      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--light-gray); border-top: 1px solid var(--light-gray);">Kentucky CHFS</div>
+      <div class="tenant-group-header">Kentucky CHFS</div>
       <div class="tenant-option" data-program="nursing-home" onclick="switchProgram('nursing-home')">
         <span class="tenant-check"></span>
         <div class="tenant-info">
@@ -220,9 +503,10 @@
 
   <div class="nav-controls">
     <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
-      <span>🔔</span>
+      <span>&#128276;</span>
       <span class="notification-badge">3</span>
       <div class="notification-dropdown">
+        <div class="notification-dropdown-header">Notifications</div>
         <div class="notification-item">
           <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
           <div class="notification-time">2 hours ago</div>
@@ -249,13 +533,14 @@
 </nav>
 
 <div class="container">
-  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+  <!-- Page Header + Filter -->
+  <div class="page-header">
     <div>
       <div class="page-title">Analytics Dashboard</div>
       <div class="page-subtitle" id="dashSubtitle">Hospital Licensing — Ohio Department of Health</div>
     </div>
     <div class="dash-filter">
-      <span class="dash-filter-label">Showing:</span>
+      <span class="dash-filter-label">Scope:</span>
       <div class="dash-filter-pills" id="dashFilterPills">
         <button class="dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
         <button class="dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">All Tenant Programs</button>
@@ -264,162 +549,107 @@
     </div>
   </div>
 
-  <!-- Summary Cards -->
-  <div class="summary-grid" id="summaryGrid">
-    <div class="summary-card loading">
-      <div class="summary-number">—</div>
-      <div class="summary-label">Total Rules</div>
+  <!-- Metric Cards -->
+  <div class="metrics-row" id="metricsRow">
+    <div class="metric-card mc-total loading">
+      <div class="metric-icon">&#128209;</div>
+      <div class="metric-number">—</div>
+      <div class="metric-label">Total Rules</div>
     </div>
-    <div class="summary-card loading">
-      <div class="summary-number">—</div>
-      <div class="summary-label">Active Rules</div>
+    <div class="metric-card mc-active loading">
+      <div class="metric-icon">&#9989;</div>
+      <div class="metric-number">—</div>
+      <div class="metric-label">Active</div>
     </div>
-    <div class="summary-card loading">
-      <div class="summary-number">—</div>
-      <div class="summary-label">Draft Rules</div>
+    <div class="metric-card mc-draft loading">
+      <div class="metric-icon">&#9997;&#65039;</div>
+      <div class="metric-number">—</div>
+      <div class="metric-label">Draft</div>
     </div>
-    <div class="summary-card loading">
-      <div class="summary-number">—</div>
-      <div class="summary-label">In Review</div>
+    <div class="metric-card mc-review loading">
+      <div class="metric-icon">&#128269;</div>
+      <div class="metric-number">—</div>
+      <div class="metric-label">In Review</div>
     </div>
-    <div class="summary-card loading">
-      <div class="summary-number">—</div>
-      <div class="summary-label">Total Conditions</div>
+    <div class="metric-card mc-conditions loading">
+      <div class="metric-icon">&#9881;&#65039;</div>
+      <div class="metric-number">—</div>
+      <div class="metric-label">Conditions</div>
     </div>
-    <div class="summary-card loading">
-      <div class="summary-number">—</div>
-      <div class="summary-label">Total Dependencies</div>
+    <div class="metric-card mc-deps loading">
+      <div class="metric-icon">&#128279;</div>
+      <div class="metric-number">—</div>
+      <div class="metric-label">Dependencies</div>
     </div>
   </div>
 
   <!-- Charts Grid -->
   <div class="charts-grid">
-    <!-- Rules by Status -->
-    <div class="chart-card loading">
-      <div class="chart-title">Rules by Status</div>
-      <div class="bar-chart" id="statusChart">
-        <div class="bar-row">
-          <div class="bar-label">Active</div>
-          <div class="bar-container"><div class="bar-fill bar-active" style="width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">Draft</div>
-          <div class="bar-container"><div class="bar-fill bar-draft" style="width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">In Review</div>
-          <div class="bar-container"><div class="bar-fill bar-review" style="width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">Sunset</div>
-          <div class="bar-container"><div class="bar-fill bar-sunset" style="width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
+    <!-- Rules by Status (Donut) -->
+    <div class="chart-card loading" id="statusCard">
+      <div class="chart-header">
+        <div class="chart-title">Rules by Status</div>
+        <div class="chart-total" id="statusTotal"></div>
+      </div>
+      <div class="donut-layout">
+        <div class="donut-container" id="donutChart"></div>
+        <div class="donut-legend" id="donutLegend"></div>
       </div>
     </div>
 
-    <!-- Rules by Jurisdiction -->
-    <div class="chart-card loading">
-      <div class="chart-title">Rules by Jurisdiction</div>
-      <div class="bar-chart" id="jurisdictionChart">
-        <div class="bar-row">
-          <div class="bar-label">Ohio</div>
-          <div class="bar-container"><div class="bar-fill" style="background: var(--accent); width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">Federal</div>
-          <div class="bar-container"><div class="bar-fill" style="background: var(--navy-deep); width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
+    <!-- Rules by Jurisdiction (Segmented Bar) -->
+    <div class="chart-card loading" id="jurisdictionCard">
+      <div class="chart-header">
+        <div class="chart-title">Rules by Jurisdiction</div>
+        <div class="chart-total" id="jurisdictionTotal"></div>
       </div>
+      <div class="seg-bar-container" id="jurisdictionChart"></div>
     </div>
 
     <!-- Rules by Type -->
-    <div class="chart-card loading">
-      <div class="chart-title">Rules by Type</div>
-      <div class="bar-chart" id="typeChart">
-        <div class="bar-row">
-          <div class="bar-label">GATE</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #2196F3; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">ROUTE</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #FF9800; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">INFO</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #4CAF50; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">FILTER</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #9C27B0; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">CALC</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #F44336; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
+    <div class="chart-card loading" id="typeCard">
+      <div class="chart-header">
+        <div class="chart-title">Rules by Type</div>
+        <div class="chart-total" id="typeTotal"></div>
       </div>
+      <div class="hbar-chart" id="typeChart"></div>
     </div>
 
     <!-- Rules by Phase -->
-    <div class="chart-card loading">
-      <div class="chart-title">Rules by Phase</div>
-      <div class="bar-chart" id="phaseChart">
-        <div class="bar-row">
-          <div class="bar-label">Licensing</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #FF6B6B; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">Compliance</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #4ECDC4; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">App Processing</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #FFE66D; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">Verification</div>
-          <div class="bar-container"><div class="bar-fill" style="background: #95E1D3; width: 0%;"></div></div>
-          <div class="bar-value">0</div>
-        </div>
+    <div class="chart-card loading" id="phaseCard">
+      <div class="chart-header">
+        <div class="chart-title">Rules by Phase</div>
+        <div class="chart-total" id="phaseTotal"></div>
       </div>
+      <div class="hbar-chart" id="phaseChart"></div>
     </div>
   </div>
 
   <!-- Recent Activity -->
-  <div class="activity-section">
-    <h2>Recent Activity</h2>
+  <div class="activity-card">
+    <div class="activity-card-header">
+      <div class="activity-card-title">Recent Activity</div>
+      <a href="audit-log.html" class="activity-card-link">View full audit log &#8594;</a>
+    </div>
     <table class="activity-table">
       <thead>
         <tr>
           <th style="width: 140px;">Timestamp</th>
           <th style="width: 100px;">User</th>
-          <th style="width: 120px;">Action</th>
+          <th style="width: 130px;">Action</th>
           <th style="width: 100px;">Target</th>
           <th>Details</th>
         </tr>
       </thead>
       <tbody id="activityTableBody">
         <tr>
-          <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-secondary);">Loading activity...</td>
+          <td colspan="5" style="text-align: center; padding: 32px; color: var(--gray-400);">Loading activity...</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Data Source -->
+  <!-- Data Source Footer -->
   <div class="data-source">
     <div class="data-source-dot"></div>
     <span>Live data from Supabase PostgreSQL — <span id="ruleCount">0</span> rules loaded</span>
@@ -442,7 +672,7 @@
   };
 
   // ── DASHBOARD FILTER ─────────────────────────────────────────
-  let dashFilter = 'current'; // 'current', 'tenant', 'all'
+  let dashFilter = 'current';
 
   function setDashFilter(mode) {
     dashFilter = mode;
@@ -458,35 +688,33 @@
     const config = PROGRAM_CONFIG[programId];
     const user = USER_DISPLAY[config.userId];
 
-    // Update dropdown UI
-    document.getElementById('tenantLabel').textContent = `${config.abbr} · ${config.programName}`;
+    document.getElementById('tenantLabel').textContent = `${config.abbr} \u00B7 ${config.programName}`;
     document.querySelectorAll('.tenant-option').forEach(opt => {
       opt.classList.toggle('active', opt.dataset.program === programId);
-      opt.querySelector('.tenant-check').textContent = opt.dataset.program === programId ? '✓' : '';
+      opt.querySelector('.tenant-check').textContent = opt.dataset.program === programId ? '\u2713' : '';
     });
     document.querySelector('.tenant-switcher-dropdown').classList.remove('show');
 
-    // Update user indicator
     document.querySelector('.user-name').textContent = user.name;
     document.querySelector('.avatar-circle').textContent = user.initials;
     document.querySelector('.user-role').textContent = `${user.role} | ${config.programName}`;
 
-    // Reload dashboard data
     loadDashboardData();
   }
 
-  // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.tenant-switcher')) {
       document.querySelector('.tenant-switcher-dropdown')?.classList.remove('show');
     }
+    if (!e.target.closest('.notification-bell')) {
+      document.querySelector('.notification-dropdown')?.classList.remove('show');
+    }
   });
 
-  // Supabase Configuration
+  // ── SUPABASE ──────────────────────────────────────────────────
   const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
 
-  // Supabase client
   class SupabaseClient {
     constructor(url, key) {
       this.url = url;
@@ -533,7 +761,7 @@
 
   const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Dashboard State
+  // ── DASHBOARD STATE ───────────────────────────────────────────
   let dashboardData = {
     rules: [],
     conditions: [],
@@ -542,12 +770,11 @@
     users: new Map()
   };
 
-  // Load data on page load
+  // ── LOAD DATA ─────────────────────────────────────────────────
   async function loadDashboardData() {
     try {
       const config = PROGRAM_CONFIG[currentProgram];
 
-      // Build filters based on dashboard filter mode
       let rulesFilters = {};
       let auditFilters = {};
       let userFilters = {};
@@ -561,7 +788,6 @@
         auditFilters = { tenant_id: config.tenant };
         userFilters = { tenant_id: config.tenant };
       }
-      // 'all' = no filters
 
       const [rules, conditions, dependencies, auditLog, users] = await Promise.all([
         supabase.query('rules', { select: '*', limit: 2000, filters: rulesFilters }),
@@ -573,31 +799,28 @@
 
       dashboardData.rules = rules || [];
 
-      // Filter conditions and dependencies to only those matching the tenant's rules
       const ruleIds = new Set(dashboardData.rules.map(r => r.rule_id));
       dashboardData.conditions = (conditions || []).filter(c => ruleIds.has(c.rule_id));
       dashboardData.dependencies = (dependencies || []).filter(d => ruleIds.has(d.rule_id) || ruleIds.has(d.depends_on_rule_id));
       dashboardData.auditLog = auditLog || [];
 
-      // Build user map for quick lookup
       if (users) {
         users.forEach(user => {
           dashboardData.users.set(user.user_id, user);
         });
       }
 
-      // Render dashboard
-      // Update subtitle to reflect filter
+      // Update subtitle
       const subtitle = document.getElementById('dashSubtitle');
       if (dashFilter === 'current') {
-        subtitle.textContent = `${config.programName} — ${config.name}`;
+        subtitle.textContent = `${config.programName} \u2014 ${config.name}`;
       } else if (dashFilter === 'tenant') {
-        subtitle.textContent = `All programs — ${config.name}`;
+        subtitle.textContent = `All programs \u2014 ${config.name}`;
       } else {
-        subtitle.textContent = 'All tenants · All programs';
+        subtitle.textContent = 'All tenants \u00B7 All programs';
       }
 
-      renderSummaryCards();
+      renderMetricCards();
       renderCharts();
       renderActivityTable();
       removeLoadingStates();
@@ -606,7 +829,8 @@
     }
   }
 
-  function renderSummaryCards() {
+  // ── RENDER METRIC CARDS ───────────────────────────────────────
+  function renderMetricCards() {
     const rules = dashboardData.rules;
     const conditions = dashboardData.conditions;
     const dependencies = dashboardData.dependencies;
@@ -619,205 +843,310 @@
     const totalDependencies = dependencies.length;
 
     const cards = [
-      { number: totalRules, label: 'Total Rules' },
-      { number: activeRules, label: 'Active Rules' },
-      { number: draftRules, label: 'Draft Rules' },
-      { number: reviewRules, label: 'In Review' },
-      { number: totalConditions, label: 'Total Conditions' },
-      { number: totalDependencies, label: 'Total Dependencies' }
+      { number: totalRules, label: 'Total Rules', cls: 'mc-total', icon: '&#128209;' },
+      { number: activeRules, label: 'Active', cls: 'mc-active', icon: '&#9989;' },
+      { number: draftRules, label: 'Draft', cls: 'mc-draft', icon: '&#9997;&#65039;' },
+      { number: reviewRules, label: 'In Review', cls: 'mc-review', icon: '&#128269;' },
+      { number: totalConditions, label: 'Conditions', cls: 'mc-conditions', icon: '&#9881;&#65039;' },
+      { number: totalDependencies, label: 'Dependencies', cls: 'mc-deps', icon: '&#128279;' }
     ];
 
-    const grid = document.getElementById('summaryGrid');
+    const grid = document.getElementById('metricsRow');
     grid.innerHTML = cards.map(card => `
-      <div class="summary-card">
-        <div class="summary-number">${card.number}</div>
-        <div class="summary-label">${card.label}</div>
+      <div class="metric-card ${card.cls}">
+        <div class="metric-icon">${card.icon}</div>
+        <div class="metric-number">${card.number.toLocaleString()}</div>
+        <div class="metric-label">${card.label}</div>
       </div>
     `).join('');
 
-    // Update rule count in footer
     document.getElementById('ruleCount').textContent = totalRules;
   }
 
+  // ── RENDER CHARTS ─────────────────────────────────────────────
   function renderCharts() {
     const rules = dashboardData.rules;
 
-    // Rules by Status
+    // Status counts (keys match display names)
     const statusCounts = {
       Active: rules.filter(r => r.status?.toLowerCase() === 'active').length,
       Draft: rules.filter(r => r.status?.toLowerCase() === 'draft').length,
       'In Review': rules.filter(r => r.status?.toLowerCase() === 'review').length,
       Sunset: rules.filter(r => r.status?.toLowerCase() === 'sunset').length
     };
+    renderStatusDonut(statusCounts);
 
-    renderStatusChart(statusCounts);
+    // Jurisdiction counts — dynamically discover all jurisdictions
+    const jurisdictionMap = {};
+    rules.forEach(r => {
+      const j = r.jurisdiction || 'Unknown';
+      jurisdictionMap[j] = (jurisdictionMap[j] || 0) + 1;
+    });
+    renderJurisdictionChart(jurisdictionMap);
 
-    // Rules by Jurisdiction
-    const jurisdictionCounts = {
-      Ohio: rules.filter(r => r.jurisdiction === 'Ohio').length,
-      Federal: rules.filter(r => r.jurisdiction === 'Federal').length
-    };
-
-    renderJurisdictionChart(jurisdictionCounts);
-
-    // Rules by Type
-    const typeCounts = {
-      GATE: rules.filter(r => r.rule_type === 'GATE').length,
-      ROUTE: rules.filter(r => r.rule_type === 'ROUTE').length,
-      INFO: rules.filter(r => r.rule_type === 'INFO').length,
-      FILTER: rules.filter(r => r.rule_type === 'FILTER').length,
-      CALC: rules.filter(r => r.rule_type === 'CALC').length
-    };
-
+    // Type counts
+    const typeCounts = {};
+    rules.forEach(r => {
+      const t = r.rule_type || 'Other';
+      typeCounts[t] = (typeCounts[t] || 0) + 1;
+    });
     renderTypeChart(typeCounts);
 
-    // Rules by Phase
-    const phaseCounts = {
-      LICENSING: rules.filter(r => r.phase === 'LICENSING').length,
-      COMPLIANCE: rules.filter(r => r.phase === 'COMPLIANCE').length,
-      APPLICATION_PROCESSING: rules.filter(r => r.phase === 'APPLICATION_PROCESSING').length,
-      REPORTING_VERIFICATION: rules.filter(r => r.phase === 'REPORTING_VERIFICATION').length
+    // Phase counts
+    const phaseLabels = {
+      LICENSING: 'Licensing',
+      COMPLIANCE: 'Compliance',
+      APPLICATION_PROCESSING: 'App Processing',
+      REPORTING_VERIFICATION: 'Verification',
+      ELIGIBILITY_DETERMINATION: 'Eligibility',
+      BENEFIT_CALCULATION: 'Benefit Calc',
+      CASE_MANAGEMENT: 'Case Mgmt',
+      INTAKE: 'Intake',
+      QUALITY_CONTROL: 'Quality Control',
+      DOCUMENT_VERIFICATION: 'Doc Verification',
+      REPORTING: 'Reporting',
+      ADJUDICATION: 'Adjudication',
+      APPEALS: 'Appeals',
+      ENROLLMENT: 'Enrollment',
+      CERTIFICATION: 'Certification',
+      RECERTIFICATION: 'Recertification',
+      NOTICE: 'Notice',
+      OVERPAYMENT_RECOVERY: 'Overpayment'
     };
-
-    renderPhaseChart(phaseCounts);
+    const phaseCounts = {};
+    rules.forEach(r => {
+      const p = r.phase || 'Other';
+      phaseCounts[p] = (phaseCounts[p] || 0) + 1;
+    });
+    renderPhaseChart(phaseCounts, phaseLabels);
   }
 
-  function renderStatusChart(counts) {
+  // ── DONUT CHART (Status) ──────────────────────────────────────
+  function renderStatusDonut(counts) {
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    const chart = document.getElementById('statusChart');
+    document.getElementById('statusTotal').textContent = `${total} total`;
 
-    chart.innerHTML = [
-      { label: 'Active', value: counts.ACTIVE, className: 'bar-active' },
-      { label: 'Draft', value: counts.DRAFT, className: 'bar-draft' },
-      { label: 'In Review', value: counts.IN_REVIEW, className: 'bar-review' },
-      { label: 'Sunset', value: counts.SUNSET, className: 'bar-sunset' }
-    ].map(item => `
-      <div class="bar-row">
-        <div class="bar-label">${item.label}</div>
-        <div class="bar-container">
-          <div class="bar-fill ${item.className}" style="width: ${total > 0 ? (item.value / total * 100) : 0}%;">${item.value > 0 ? item.value : ''}</div>
-        </div>
-        <div class="bar-value">${item.value}</div>
+    const colors = {
+      Active: '#2E844A',
+      Draft: '#DD7A01',
+      'In Review': '#9050E9',
+      Sunset: '#BA0517'
+    };
+
+    const radius = 58;
+    const circumference = 2 * Math.PI * radius;
+    let offset = 0;
+    const segments = [];
+
+    Object.entries(counts).forEach(([label, value]) => {
+      if (value === 0) return;
+      const pct = value / total;
+      const len = circumference * pct;
+      segments.push({
+        label,
+        value,
+        pct,
+        color: colors[label],
+        dasharray: `${len} ${circumference - len}`,
+        dashoffset: -offset
+      });
+      offset += len;
+    });
+
+    const donutEl = document.getElementById('donutChart');
+    donutEl.innerHTML = `
+      <svg viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="${radius}" stroke="var(--gray-100)" stroke-width="16" />
+        ${segments.map(s => `
+          <circle cx="80" cy="80" r="${radius}" stroke="${s.color}" stroke-width="16"
+            stroke-dasharray="${s.dasharray}" stroke-dashoffset="${s.dashoffset}" />
+        `).join('')}
+      </svg>
+      <div class="donut-center">
+        <div class="donut-center-number">${total}</div>
+        <div class="donut-center-label">Rules</div>
+      </div>
+    `;
+
+    const legendEl = document.getElementById('donutLegend');
+    legendEl.innerHTML = Object.entries(counts).map(([label, value]) => `
+      <div class="legend-item">
+        <div class="legend-dot" style="background: ${colors[label]};"></div>
+        <div class="legend-label">${label}</div>
+        <div class="legend-value">${value}</div>
+        <div class="legend-pct">${total > 0 ? Math.round(value / total * 100) : 0}%</div>
       </div>
     `).join('');
   }
 
+  // ── SEGMENTED BAR (Jurisdiction) ──────────────────────────────
   function renderJurisdictionChart(counts) {
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    document.getElementById('jurisdictionTotal').textContent = `${total} total`;
+
+    const colors = {
+      Ohio: '#0176D3',
+      Federal: '#0E3F75',
+      Kentucky: '#C41230',
+      Local: '#2E844A'
+    };
+    const defaultColor = '#6B7280';
+
     const chart = document.getElementById('jurisdictionChart');
 
-    chart.innerHTML = [
-      { label: 'Ohio', value: counts.Ohio, style: 'background: var(--accent);' },
-      { label: 'Federal', value: counts.Federal, style: 'background: var(--navy-deep);' }
-    ].map(item => `
-      <div class="bar-row">
-        <div class="bar-label">${item.label}</div>
-        <div class="bar-container">
-          <div class="bar-fill" style="${item.style} width: ${total > 0 ? (item.value / total * 100) : 0}%;">${item.value > 0 ? item.value : ''}</div>
-        </div>
-        <div class="bar-value">${item.value}</div>
+    // Sort by value descending
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    chart.innerHTML = `
+      <div class="seg-bar">
+        ${sorted.map(([label, value]) => {
+          const pct = total > 0 ? (value / total * 100) : 0;
+          const color = colors[label] || defaultColor;
+          return `<div class="seg-bar-fill" style="width: ${pct}%; background: ${color};">${value}</div>`;
+        }).join('')}
       </div>
-    `).join('');
+      <div class="seg-legend">
+        ${sorted.map(([label, value]) => {
+          const color = colors[label] || defaultColor;
+          const pct = total > 0 ? Math.round(value / total * 100) : 0;
+          return `
+            <div class="seg-legend-item">
+              <div class="seg-legend-dot" style="background: ${color};"></div>
+              ${label}: <span class="seg-legend-value">${value}</span> (${pct}%)
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
   }
 
+  // ── HORIZONTAL BAR (Type) ─────────────────────────────────────
   function renderTypeChart(counts) {
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    document.getElementById('typeTotal').textContent = `${total} total`;
+
+    const colors = {
+      GATE: '#0176D3',
+      ROUTE: '#DD7A01',
+      INFO: '#2E844A',
+      FILTER: '#9050E9',
+      CALC: '#BA0517',
+      VALIDATION: '#0B827C',
+      TRANSFORM: '#C41230'
+    };
+    const defaultColor = '#6B7280';
+
     const chart = document.getElementById('typeChart');
-    const colors = {
-      GATE: '#2196F3',
-      ROUTE: '#FF9800',
-      INFO: '#4CAF50',
-      FILTER: '#9C27B0',
-      CALC: '#F44336'
-    };
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const maxVal = sorted.length > 0 ? sorted[0][1] : 1;
 
-    chart.innerHTML = Object.entries(counts).map(([type, value]) => `
-      <div class="bar-row">
-        <div class="bar-label">${type}</div>
-        <div class="bar-container">
-          <div class="bar-fill" style="background: ${colors[type]}; width: ${total > 0 ? (value / total * 100) : 0}%;">${value > 0 ? value : ''}</div>
-        </div>
-        <div class="bar-value">${value}</div>
-      </div>
-    `).join('');
-  }
-
-  function renderPhaseChart(counts) {
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    const chart = document.getElementById('phaseChart');
-    const colors = {
-      LICENSING: '#FF6B6B',
-      COMPLIANCE: '#4ECDC4',
-      APPLICATION_PROCESSING: '#FFE66D',
-      REPORTING_VERIFICATION: '#95E1D3'
-    };
-
-    const items = [
-      { label: 'Licensing', key: 'LICENSING' },
-      { label: 'Compliance', key: 'COMPLIANCE' },
-      { label: 'App Processing', key: 'APPLICATION_PROCESSING' },
-      { label: 'Verification', key: 'REPORTING_VERIFICATION' }
-    ];
-
-    chart.innerHTML = items.map(item => {
-      const value = counts[item.key];
+    chart.innerHTML = sorted.map(([type, value]) => {
+      const pct = maxVal > 0 ? (value / maxVal * 100) : 0;
+      const color = colors[type] || defaultColor;
       return `
-        <div class="bar-row">
-          <div class="bar-label">${item.label}</div>
-          <div class="bar-container">
-            <div class="bar-fill" style="background: ${colors[item.key]}; width: ${total > 0 ? (value / total * 100) : 0}%;">${value > 0 ? value : ''}</div>
+        <div class="hbar-row">
+          <div class="hbar-label">${type}</div>
+          <div class="hbar-track">
+            <div class="hbar-fill" style="background: ${color}; width: ${pct}%;">${value > 3 ? value : ''}</div>
           </div>
-          <div class="bar-value">${value}</div>
+          <div class="hbar-value">${value}</div>
         </div>
       `;
     }).join('');
   }
 
+  // ── HORIZONTAL BAR (Phase) ────────────────────────────────────
+  function renderPhaseChart(counts, labels) {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    document.getElementById('phaseTotal').textContent = `${total} total`;
+
+    const colors = [
+      '#0176D3', '#2E844A', '#DD7A01', '#9050E9', '#BA0517',
+      '#0B827C', '#C41230', '#14499E', '#6B7280', '#FF6B6B',
+      '#4ECDC4', '#FFE66D', '#95E1D3', '#F44336', '#2196F3',
+      '#FF9800', '#9C27B0', '#4CAF50'
+    ];
+
+    const chart = document.getElementById('phaseChart');
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const maxVal = sorted.length > 0 ? sorted[0][1] : 1;
+
+    // Show top 8 phases, group rest as "Other"
+    let displayItems = sorted;
+    if (sorted.length > 8) {
+      const top8 = sorted.slice(0, 8);
+      const restVal = sorted.slice(8).reduce((sum, [, v]) => sum + v, 0);
+      displayItems = [...top8, ['Other', restVal]];
+    }
+
+    chart.innerHTML = displayItems.map(([phase, value], i) => {
+      const pct = maxVal > 0 ? (value / maxVal * 100) : 0;
+      const color = colors[i % colors.length];
+      const label = labels[phase] || phase;
+      return `
+        <div class="hbar-row">
+          <div class="hbar-label">${label}</div>
+          <div class="hbar-track">
+            <div class="hbar-fill" style="background: ${color}; width: ${pct}%;">${value > 3 ? value : ''}</div>
+          </div>
+          <div class="hbar-value">${value}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── ACTIVITY TABLE ────────────────────────────────────────────
   function renderActivityTable() {
     const tbody = document.getElementById('activityTableBody');
     const auditLog = dashboardData.auditLog;
 
     if (auditLog.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--text-secondary);">No activity recorded yet</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--gray-400); font-size: 13px;">No activity recorded yet</td></tr>';
       return;
     }
 
     tbody.innerHTML = auditLog.map(entry => {
       const user = dashboardData.users.get(entry.user_id);
-      const userName = user ? user.display_name : 'Unknown User';
+      const userName = user ? user.display_name : 'Unknown';
       const timestamp = new Date(entry.timestamp).toLocaleString('en-US', {
         month: '2-digit',
         day: '2-digit',
         year: '2-digit',
         hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+        minute: '2-digit'
       });
 
       return `
         <tr>
           <td class="activity-timestamp">${timestamp}</td>
           <td class="activity-user">${userName}</td>
-          <td class="activity-action">${formatAction(entry.action)}</td>
-          <td class="activity-target">${entry.target_id || '—'}</td>
-          <td class="activity-detail">${entry.detail || '—'}</td>
+          <td>${formatActionBadge(entry.action)}</td>
+          <td class="activity-target">${entry.target_id || '\u2014'}</td>
+          <td class="activity-detail">${entry.detail || '\u2014'}</td>
         </tr>
       `;
     }).join('');
   }
 
-  function formatAction(action) {
-    const actions = {
-      'CREATE': 'Created',
-      'UPDATE': 'Updated',
-      'DELETE': 'Deleted',
-      'SUBMIT': 'Submitted',
-      'APPROVE': 'Approved',
-      'REJECT': 'Rejected',
-      'PUBLISH': 'Published',
-      'ARCHIVE': 'Archived'
+  function formatActionBadge(action) {
+    const map = {
+      'create_draft': { label: 'Created Draft', cls: 'badge-create' },
+      'submit_for_review': { label: 'Submitted', cls: 'badge-review' },
+      'edit_conditions': { label: 'Edited', cls: 'badge-edit' },
+      'approve': { label: 'Approved', cls: 'badge-approve' },
+      'publish': { label: 'Published', cls: 'badge-approve' },
+      'login': { label: 'Login', cls: 'badge-login' },
+      'CREATE': { label: 'Created', cls: 'badge-create' },
+      'UPDATE': { label: 'Updated', cls: 'badge-edit' },
+      'DELETE': { label: 'Deleted', cls: 'badge-default' },
+      'SUBMIT': { label: 'Submitted', cls: 'badge-review' },
+      'APPROVE': { label: 'Approved', cls: 'badge-approve' },
+      'REJECT': { label: 'Rejected', cls: 'badge-default' },
+      'PUBLISH': { label: 'Published', cls: 'badge-approve' },
+      'ARCHIVE': { label: 'Archived', cls: 'badge-default' }
     };
-    return actions[action] || action;
+    const m = map[action] || { label: action, cls: 'badge-default' };
+    return `<span class="activity-action-badge ${m.cls}">${m.label}</span>`;
   }
 
   function removeLoadingStates() {
@@ -826,7 +1155,7 @@
     });
   }
 
-  // Initialize dashboard
+  // ── INIT ──────────────────────────────────────────────────────
   loadDashboardData();
 </script>
 
