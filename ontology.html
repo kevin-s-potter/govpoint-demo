@@ -42,871 +42,904 @@
   .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
   .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
   .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+
+  /* Program Switcher */
+  .program-switcher { margin-left: 40px; position: relative; }
+  .program-switcher-btn { background: var(--accent-light); color: var(--navy); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+  .program-switcher-btn:hover { background: var(--accent); color: white; }
+  .program-switcher-dropdown { position: absolute; top: 100%; left: 0; margin-top: 8px; background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); min-width: 240px; display: none; z-index: 1000; }
+  .program-switcher.active .program-switcher-dropdown { display: block; }
+  .program-switcher-item { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; font-size: 13px; }
+  .program-switcher-item:last-child { border-bottom: none; }
+  .program-switcher-item:hover { background: var(--accent-light); }
+  .program-switcher-item.active { background: var(--accent-light); color: var(--navy); font-weight: 600; }
+  .program-switcher-item.disabled { color: var(--text-secondary); cursor: not-allowed; }
+  .program-switcher-item.disabled .coming-soon { font-size: 11px; color: var(--amber); margin-left: 8px; }
+
+  /* Nav spacer and right controls */
+  .topnav .nav-spacer { margin-left: auto; }
+  .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
+
+  /* Notification Bell */
+  .notification-bell { position: relative; cursor: pointer; font-size: 20px; }
+  .notification-badge { position: absolute; top: -6px; right: -6px; background: var(--red); color: white; font-size: 10px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .notification-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); min-width: 380px; display: none; z-index: 1000; max-height: 400px; overflow-y: auto; }
+  .notification-bell.active .notification-dropdown { display: block; }
+  .notification-item { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; font-size: 13px; }
+  .notification-item:last-child { border-bottom: none; }
+  .notification-item:hover { background: var(--light-gray); }
+  .notification-time { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* Role Indicator */
+  .role-indicator { display: flex; align-items: center; gap: 12px; }
+  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .role-text { font-size: 13px; line-height: 1.4; }
+  .role-text .user-name { color: var(--navy); font-weight: 600; }
+  .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
+
   .topnav .nav-links { margin-left: auto; display: flex; gap: 24px; }
   .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
   .topnav .nav-links a:hover, .topnav .nav-links a.active { color: var(--ohio-red); }
   .topnav .env-badge { margin-left: 24px; background: var(--ohio-red); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px; }
 
   /* ── LAYOUT ── */
-  .main-layout { display: grid; grid-template-columns: 380px 1fr; height: calc(100vh - 95px); overflow: hidden; }
-  .sidebar { background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-  .detail-panel { background: var(--light-gray); overflow-y: auto; padding: 24px; }
+  .container { display: flex; height: calc(100vh - 64px - 18px); }
+  .sidebar { width: 280px; background: var(--white); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px; }
+  .main { flex: 1; display: flex; flex-direction: column; }
 
-  /* ── SIDEBAR: SEARCH + FILTERS ── */
-  .sidebar-header { padding: 16px 16px 0; flex-shrink: 0; }
-  .sidebar-header h2 { font-size: 16px; color: var(--navy); font-weight: 700; margin-bottom: 12px; }
-  .search-box { position: relative; margin-bottom: 12px; }
-  .search-box input { width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; background: var(--light-gray); }
-  .search-box input:focus { outline: none; border-color: var(--accent); background: white; box-shadow: 0 0 0 3px rgba(20,73,158,0.1); }
-  .search-box::before { content: "\1F50D"; position: absolute; left: 10px; top: 8px; font-size: 14px; }
-  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-  .filter-chip { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); background: white; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .filter-chip:hover { border-color: var(--accent); }
-  .filter-chip.active { background: var(--navy); color: white; border-color: var(--navy); }
-  .filter-chip.active-fed { background: var(--accent); color: white; border-color: var(--accent); }
-  .filter-chip.active-oh { background: var(--ohio-red); color: white; border-color: var(--ohio-red); }
+  /* What's Changed Digest */
+  .whats-changed { background: var(--accent-light); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 12px; margin-bottom: 16px; }
+  .whats-changed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .whats-changed-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .whats-changed-dismiss { font-size: 11px; color: var(--accent); cursor: pointer; text-decoration: underline; }
+  .whats-changed-items { display: flex; flex-direction: column; gap: 8px; }
+  .change-item { padding: 8px; background: var(--white); border-radius: var(--radius); border-left: 4px solid var(--navy); font-size: 12px; display: flex; gap: 8px; align-items: flex-start; }
+  .change-item.draft { border-left-color: var(--amber); }
+  .change-item.active { border-left-color: var(--green); }
+  .change-item.sunset { border-left-color: var(--red); }
+  .change-item.label { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 3px; min-width: fit-content; }
+  .change-item.label.draft { background: var(--amber-light); color: var(--amber); }
+  .change-item.label.active { background: var(--green-light); color: var(--green); }
+  .change-item.label.sunset { background: var(--red-light); color: var(--red); }
+  .change-item-text { flex: 1; }
 
-  /* ── SIDEBAR: RULE LIST ── */
-  .rule-list { flex: 1; overflow-y: auto; border-top: 1px solid var(--border); }
-  .rule-list-item { padding: 12px 16px; border-bottom: 1px solid #F0F0F0; cursor: pointer; transition: background 0.15s; display: flex; gap: 10px; align-items: flex-start; }
-  .rule-list-item:hover { background: var(--accent-light); }
-  .rule-list-item.selected { background: var(--accent-light); border-left: 3px solid var(--accent); }
-  .rule-list-item .rule-id-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
-  .rule-id-fed { background: var(--accent-light); color: var(--accent); }
-  .rule-id-oh { background: var(--ohio-red-light); color: var(--ohio-red); }
-  .rule-list-item .rule-info { flex: 1; min-width: 0; }
-  .rule-list-item .rule-name { font-size: 13px; font-weight: 600; color: var(--navy); line-height: 1.3; }
-  .rule-list-item .rule-meta { font-size: 11px; color: var(--gray); margin-top: 2px; display: flex; gap: 8px; align-items: center; }
-  .rule-list-item .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dot-active { background: var(--green); }
-  .dot-draft { background: var(--amber); }
-  .dot-sunset { background: var(--gray); }
-  .rule-count-bar { padding: 8px 16px; font-size: 11px; color: var(--gray); border-top: 1px solid var(--border); flex-shrink: 0; background: var(--light-gray); display: flex; justify-content: space-between; }
+  /* Search/Filter */
+  .sidebar-search { position: relative; margin-bottom: 16px; }
+  .sidebar-search input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; }
+  .sidebar-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
 
-  /* ── DETAIL PANEL ── */
-  .detail-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--gray); }
-  .detail-empty .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
-  .detail-empty p { font-size: 14px; }
+  /* Action Buttons */
+  .sidebar-actions { display: flex; gap: 8px; margin-bottom: 16px; }
+  .sidebar-actions button { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--white); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+  .sidebar-actions button:hover { background: var(--light-gray); }
+  .sidebar-actions button.primary { background: var(--navy); color: white; border-color: var(--navy); }
+  .sidebar-actions button.primary:hover { background: var(--navy-deep); }
 
-  .detail-header { background: white; border-radius: var(--radius-lg); padding: 20px 24px; box-shadow: var(--shadow); margin-bottom: 16px; display: flex; align-items: flex-start; gap: 16px; }
-  .detail-header .rule-id-lg { font-size: 14px; font-weight: 700; padding: 6px 14px; border-radius: 6px; flex-shrink: 0; }
-  .detail-header .rule-title { flex: 1; }
-  .detail-header .rule-title h1 { font-size: 20px; color: var(--navy); font-weight: 700; line-height: 1.3; }
-  .detail-header .rule-title .citation { font-size: 13px; color: var(--gray); font-style: italic; margin-top: 2px; }
-  .detail-header .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-  .status-active { background: var(--green-light); color: var(--green); }
-  .status-draft { background: var(--amber-light); color: var(--amber); }
-  .status-review { background: var(--purple-light); color: var(--purple); }
-  .status-sunset { background: var(--light-gray); color: var(--gray); }
+  /* Rules List */
+  .rules-list { display: flex; flex-direction: column; gap: 8px; }
+  .rule-card { padding: 12px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+  .rule-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+  .rule-card.active { background: var(--accent-light); border-color: var(--accent); }
+  .rule-name { font-weight: 600; color: var(--navy); font-size: 13px; margin-bottom: 4px; }
+  .rule-status { font-size: 11px; display: inline-block; padding: 2px 8px; border-radius: 3px; background: var(--amber-light); color: var(--amber); }
+  .rule-status.review { background: var(--purple-light); color: var(--purple); }
+  .rule-status.active { background: var(--green-light); color: var(--green); }
 
-  /* ── TABS ── */
-  .tab-bar { display: flex; gap: 0; background: white; border-radius: var(--radius-lg) var(--radius-lg) 0 0; box-shadow: var(--shadow); overflow: hidden; }
-  .tab-btn { padding: 12px 20px; font-size: 13px; font-weight: 600; color: var(--gray); background: white; border: none; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
-  .tab-btn:hover { color: var(--navy); background: var(--light-gray); }
-  .tab-btn.active { color: var(--navy); border-bottom-color: var(--ohio-red); }
-  .tab-content { background: white; border-radius: 0 0 var(--radius-lg) var(--radius-lg); box-shadow: var(--shadow); padding: 24px; margin-bottom: 16px; display: none; }
-  .tab-content.visible { display: block; }
+  /* Detail Panel */
+  .detail-panel { flex: 1; display: flex; flex-direction: column; background: var(--white); border-left: 1px solid var(--border); }
+  .detail-header { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+  .detail-title { font-size: 24px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .detail-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 16px; }
+  .detail-actions { display: flex; gap: 8px; }
+  .detail-actions button { padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--white); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+  .detail-actions button:hover { background: var(--light-gray); }
+  .detail-actions button.primary { background: var(--navy); color: white; border-color: var(--navy); }
+  .detail-actions button.primary:hover { background: var(--navy-deep); }
 
-  /* ── FORM ELEMENTS ── */
-  .field-group { margin-bottom: 20px; }
-  .field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray); margin-bottom: 6px; }
-  .field-value { font-size: 14px; color: var(--text); padding: 10px 14px; background: var(--light-gray); border-radius: var(--radius); border: 1px solid var(--border); }
-  .field-value.editable { background: white; cursor: text; }
-  .field-value.editable:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(20,73,158,0.1); }
-  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
-  .field-full { grid-column: 1 / -1; }
-  select.field-value { appearance: auto; cursor: pointer; }
-  textarea.field-value { min-height: 80px; resize: vertical; font-family: inherit; }
+  /* Tabs */
+  .detail-tabs { display: flex; gap: 0; padding: 0 32px; border-bottom: 1px solid var(--border); background: var(--white); overflow-x: auto; }
+  .detail-tab { padding: 16px 20px; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
+  .detail-tab:hover { color: var(--navy); }
+  .detail-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
 
-  /* ── CONDITION BUILDER ── */
-  .condition-builder { background: var(--light-gray); border-radius: var(--radius-lg); padding: 20px; border: 2px dashed var(--border); }
-  .condition-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-  .condition-row:last-child { margin-bottom: 0; }
-  .cond-keyword { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 6px 12px; border-radius: 4px; min-width: 50px; text-align: center; }
-  .cond-field { padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; background: white; min-width: 140px; }
-  .cond-field:focus { outline: none; border-color: var(--accent); }
-  .cond-operator { padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; background: white; min-width: 60px; text-align: center; }
-  .cond-value { padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; background: white; min-width: 100px; font-family: 'Cascadia Code', 'Fira Code', monospace; }
-  .cond-add-btn { padding: 5px 10px; font-size: 11px; font-weight: 700; color: var(--accent); background: white; border: 1px dashed var(--accent); border-radius: 4px; cursor: pointer; }
-  .cond-add-btn:hover { background: var(--accent-light); }
+  /* Tab Content */
+  .detail-content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
 
-  /* ── DEPENDENCY GRAPH ── */
-  .dep-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--light-gray); border-radius: var(--radius); margin-bottom: 8px; border: 1px solid var(--border); }
-  .dep-card .dep-type { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.3px; flex-shrink: 0; }
-  .dep-gate { background: var(--red-light); color: var(--red); }
-  .dep-requires { background: var(--accent-light); color: var(--accent); }
-  .dep-exempts { background: var(--green-light); color: var(--green); }
-  .dep-triggers { background: var(--amber-light); color: var(--amber); }
-  .dep-routes { background: var(--purple-light); color: var(--purple); }
-  .dep-card .dep-arrow { color: var(--gray); font-size: 16px; flex-shrink: 0; }
-  .dep-card .dep-target { font-size: 13px; font-weight: 600; color: var(--navy); }
-  .dep-card .dep-desc { font-size: 11px; color: var(--text-secondary); }
+  /* Condition Editor */
+  .condition-row { display: flex; gap: 12px; margin-bottom: 12px; padding: 12px; background: var(--light-gray); border-radius: var(--radius); align-items: center; }
+  .condition-row select, .condition-row input { padding: 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; }
+  .condition-row button { padding: 6px 12px; font-size: 12px; background: var(--red); color: white; border: none; border-radius: var(--radius); cursor: pointer; }
 
-  /* ── VERSION HISTORY ── */
-  .history-item { padding: 14px 0; border-bottom: 1px solid #F0F0F0; display: flex; gap: 12px; }
-  .history-item:last-child { border-bottom: none; }
-  .history-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
-  .history-dot.current { background: var(--green); }
-  .history-content { flex: 1; }
-  .history-content .version-tag { font-size: 11px; font-weight: 700; color: var(--accent); }
-  .history-content .version-desc { font-size: 13px; color: var(--text); margin-top: 2px; }
-  .history-content .version-meta { font-size: 11px; color: var(--gray); margin-top: 4px; }
+  /* Dependency Cards */
+  .dep-card { padding: 12px; background: var(--light-gray); border-left: 4px solid var(--navy); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+  .dep-card:hover { box-shadow: var(--shadow); }
+  .dep-card-title { font-weight: 600; color: var(--navy); font-size: 13px; }
+  .dep-card-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .dep-card.impacts-other { border-left-color: var(--amber); }
+  .dep-card.impacted-by { border-left-color: var(--green); }
 
-  /* ── ACTION BAR ── */
-  .action-bar { background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
-  .action-bar .spacer { flex: 1; }
-  .btn { padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: var(--navy-deep); }
-  .btn-success { background: var(--green); color: white; }
-  .btn-success:hover { background: #256B2A; }
-  .btn-warning { background: var(--amber); color: white; }
-  .btn-warning:hover { background: #BF360C; }
-  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--light-gray); }
-  .btn-danger { background: white; color: var(--red); border: 1px solid var(--red); }
-  .btn-danger:hover { background: var(--red-light); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* Version History */
+  .version-item { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; }
+  .version-header { display: flex; justify-content: space-between; }
+  .version-num { font-weight: 600; color: var(--navy); }
+  .version-date { font-size: 12px; color: var(--text-secondary); }
+  .version-details { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
 
-  /* ── IMPACT SIMULATION MODAL ── */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
-  .modal-overlay.visible { display: flex; }
-  .modal { background: white; border-radius: var(--radius-lg); width: 720px; max-height: 80vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
-  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-  .modal-header h2 { font-size: 18px; color: var(--navy); flex: 1; }
-  .modal-close { background: none; border: none; font-size: 20px; color: var(--gray); cursor: pointer; padding: 4px 8px; border-radius: 4px; }
-  .modal-close:hover { background: var(--light-gray); }
-  .modal-body { padding: 24px; }
-  .impact-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .impact-stat { text-align: center; padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
-  .impact-stat .stat-num { font-size: 28px; font-weight: 700; }
-  .impact-stat .stat-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
-  .impact-diff { padding: 12px 16px; border-radius: var(--radius); margin-bottom: 8px; display: flex; align-items: flex-start; gap: 12px; }
-  .impact-diff.changed { background: var(--amber-light); border: 1px solid var(--amber); }
-  .impact-diff.unchanged { background: var(--green-light); border: 1px solid var(--green); }
-  .impact-diff .diff-icon { font-size: 16px; flex-shrink: 0; margin-top: 2px; }
-  .impact-diff .diff-detail { flex: 1; }
-  .impact-diff .diff-hospital { font-size: 13px; font-weight: 600; color: var(--navy); }
-  .impact-diff .diff-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+  /* Diff View */
+  .diff-panel { background: var(--light-gray); padding: 12px; border-radius: var(--radius); margin-top: 12px; font-size: 12px; font-family: monospace; }
+  .diff-add { background: var(--green-light); color: var(--green); padding: 2px 4px; border-radius: 2px; }
+  .diff-remove { background: var(--red-light); color: var(--red); padding: 2px 4px; border-radius: 2px; text-decoration: line-through; }
 
-  /* ── PUBLISH WORKFLOW BANNER ── */
-  .workflow-banner { padding: 14px 20px; border-radius: var(--radius); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
-  .workflow-banner .wf-icon { font-size: 20px; }
-  .workflow-banner .wf-text { flex: 1; }
-  .workflow-banner .wf-text strong { display: block; font-size: 13px; }
-  .workflow-banner .wf-text span { font-size: 12px; color: var(--text-secondary); }
-  .wf-draft { background: var(--amber-light); border: 1px solid var(--amber); }
-  .wf-review { background: var(--purple-light); border: 1px solid var(--purple); }
-  .wf-active { background: var(--green-light); border: 1px solid var(--green); }
+  /* Impact Simulation */
+  .impact-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1001; }
+  .impact-modal.active { display: flex; }
+  .impact-content { background: white; border-radius: var(--radius-lg); padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+  .impact-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 16px; }
+  .impact-section { margin-bottom: 16px; }
+  .impact-section-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; }
+  .impact-item { padding: 8px; background: var(--light-gray); border-radius: var(--radius); margin-bottom: 6px; font-size: 13px; }
+  .impact-close { float: right; cursor: pointer; font-size: 24px; color: var(--text-secondary); }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    .main-layout { grid-template-columns: 1fr; }
-    .detail-panel { display: none; }
+  /* Document Upload Modal */
+  .upload-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1001; }
+  .upload-modal.active { display: flex; }
+  .upload-content { background: white; border-radius: var(--radius-lg); padding: 32px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; }
+  .upload-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .upload-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+
+  .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--light-gray); }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-zone.active { border-color: var(--accent); background: var(--accent-light); }
+  .upload-icon { font-size: 32px; margin-bottom: 12px; }
+  .upload-text { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+  .upload-hint { font-size: 12px; color: var(--text-secondary); }
+
+  .extraction-results { margin-top: 24px; display: none; }
+  .extraction-header { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .progress-dot { width: 6px; height: 6px; background: var(--amber); border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .extraction-citation { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; padding: 8px; background: var(--light-gray); border-radius: var(--radius); }
+
+  .draft-rule { padding: 12px; background: var(--light-gray); border-radius: var(--radius); margin-bottom: 12px; border-left: 4px solid var(--navy); }
+  .draft-rule-name { font-weight: 600; color: var(--navy); font-size: 13px; margin-bottom: 4px; }
+  .draft-rule-citation { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
+  .draft-rule-preview { font-size: 12px; color: var(--text); margin-bottom: 12px; }
+  .confidence-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px; }
+  .confidence-high { background: var(--green-light); color: var(--green); }
+  .confidence-medium { background: var(--amber-light); color: var(--amber); }
+  .confidence-low { background: var(--red-light); color: var(--red); }
+  .draft-actions { display: flex; gap: 6px; }
+  .draft-actions button { padding: 6px 12px; font-size: 11px; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+  .draft-actions button:hover { background: var(--light-gray); }
+  .draft-actions button.accept { background: var(--green); color: white; border-color: var(--green); }
+  .draft-actions button.accept:hover { background: var(--green-light); color: var(--green); border-color: var(--green); }
+
+  .ai-model-indicator { font-size: 11px; color: var(--text-secondary); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 6px; position: relative; }
+  .ai-model-indicator .gear { cursor: help; font-size: 13px; }
+
+  /* Source-Connected View */
+  .source-split { display: flex; gap: 16px; height: 100%; }
+  .source-left, .source-right { flex: 1; overflow-y: auto; }
+  .source-right { background: var(--light-gray); padding: 16px; border-radius: var(--radius); }
+  .source-citation { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .source-text { font-size: 13px; color: var(--text); line-height: 1.8; }
+  .source-highlight { background: #FFF59D; padding: 0 2px; }
+
+  /* Comments Tab */
+  .comments-thread { margin-bottom: 16px; }
+  .comment { display: flex; gap: 12px; margin-bottom: 16px; }
+  .comment-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .comment-body { flex: 1; }
+  .comment-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+  .comment-author { font-weight: 600; font-size: 13px; color: var(--navy); }
+  .comment-role { font-size: 11px; color: var(--text-secondary); background: var(--light-gray); padding: 2px 6px; border-radius: 3px; }
+  .comment-time { font-size: 11px; color: var(--text-secondary); }
+  .comment-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .comment-text .mention { color: var(--accent); font-weight: 600; }
+
+  .add-comment { padding: 12px; background: var(--light-gray); border-radius: var(--radius); }
+  .add-comment textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; resize: none; font-family: inherit; }
+  .add-comment textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .add-comment-actions { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+  .add-comment-actions button { padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer; }
+  .add-comment-actions button.send { background: var(--navy); color: white; border-color: var(--navy); }
+
+  /* Audit Log Tab */
+  .audit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .audit-table th { background: var(--light-gray); padding: 12px; text-align: left; font-weight: 700; color: var(--navy); border-bottom: 1px solid var(--border); }
+  .audit-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+  .audit-table tr:hover { background: var(--light-gray); }
+  .audit-timestamp { color: var(--text-secondary); font-family: monospace; }
+  .audit-user { font-weight: 600; color: var(--navy); }
+  .audit-role-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; background: var(--accent-light); color: var(--accent); margin-left: 4px; }
+
+  /* Toast Notifications */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: white; padding: 12px 16px; border-radius: var(--radius-lg); font-size: 13px; box-shadow: var(--shadow-lg); animation: slideInUp 0.3s ease-out; z-index: 2000; }
+  @keyframes slideInUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* Tooltip */
+  .tooltip { position: relative; display: inline-block; }
+  .tooltip .tooltiptext { visibility: hidden; background-color: var(--navy); color: white; text-align: center; padding: 6px 12px; border-radius: var(--radius); font-size: 11px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -60px; width: 120px; opacity: 0; transition: opacity 0.3s; }
+  .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .sidebar { width: 240px; }
+  }
+  @media (max-width: 768px) {
+    .container { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; }
   }
 </style>
 </head>
 <body>
 
-<!-- ── STATE BANNER ── -->
-<div class="state-banner">An official State of Ohio application. <a href="#">Powered by GovPoint</a></div>
+<div class="state-banner">
+  <span>Ohio Revised Code Ontology System</span>
+  <span style="margin-left: auto;"><a href="#">Documentation</a> · <a href="#">Support</a></span>
+</div>
 
-<!-- ── TOP NAV ── -->
 <nav class="topnav">
-  <div class="logo"><span class="ohio-mark">Ohio</span> Department of Health</div>
-  <div class="nav-links">
-    <a href="index.html">New Request</a>
-    <a href="#">Dashboard</a>
-    <a href="ontology.html" class="active">Ontology</a>
-    <a href="#">Admin</a>
+  <div class="logo">
+    <span class="ohio-mark">⟨°⟩</span>
+    <span>GovPoint</span>
   </div>
-  <div class="env-badge">GOVPOINT DEMO</div>
+
+  <!-- Program Switcher -->
+  <div class="program-switcher" id="programSwitcher">
+    <button class="program-switcher-btn">
+      Hospital Licensing <span style="font-size: 11px;">▼</span>
+    </button>
+    <div class="program-switcher-dropdown">
+      <div class="program-switcher-item active">Hospital Licensing</div>
+      <div class="program-switcher-item disabled">SNAP <span class="coming-soon">Coming Soon</span></div>
+      <div class="program-switcher-item disabled">Medicaid <span class="coming-soon">Coming Soon</span></div>
+      <div class="program-switcher-item disabled">Child Care Licensing <span class="coming-soon">Coming Soon</span></div>
+    </div>
+  </div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-controls">
+    <!-- Notification Bell -->
+    <div class="notification-bell" id="notificationBell">
+      <span>🔔</span>
+      <span class="notification-badge">3</span>
+      <div class="notification-dropdown">
+        <div class="notification-item">
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review by James Miller</strong>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>Shared rule FED-003 CMS CoP updated — affects 4 rules in your program</strong>
+          <div class="notification-time">1 day ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+          <div class="notification-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Indicator -->
+    <div class="role-indicator">
+      <div class="avatar-circle">SC</div>
+      <div class="role-text">
+        <div class="user-name">Sarah Chen</div>
+        <div class="user-role">Publisher | Hospital Licensing</div>
+      </div>
+    </div>
+  </div>
 </nav>
 
-<!-- ══════════════════════════════════════════ MAIN LAYOUT ══════════════════════════════════════════ -->
-<div class="main-layout">
-
-  <!-- ── SIDEBAR: RULE BROWSER ── -->
+<div class="container">
   <div class="sidebar">
-    <div class="sidebar-header">
-      <h2>Regulatory Ontology</h2>
-      <div class="search-box">
-        <input type="text" id="rule-search" placeholder="Search rules, citations, keywords..." oninput="filterRules()">
+    <!-- What's Changed Digest -->
+    <div class="whats-changed" id="whatsChanged">
+      <div class="whats-changed-header">
+        <span class="whats-changed-title">What's Changed</span>
+        <span class="whats-changed-dismiss">Dismiss</span>
       </div>
-      <div class="filter-row" id="jurisdiction-filters">
-        <button class="filter-chip active" onclick="toggleFilter(this, 'jurisdiction', 'ALL')">All</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'jurisdiction', 'FED')">Federal</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'jurisdiction', 'OH')">Ohio</button>
-      </div>
-      <div class="filter-row" id="status-filters">
-        <button class="filter-chip active" onclick="toggleFilter(this, 'status', 'ALL')">All Status</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'status', 'ACTIVE')">Active</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'status', 'DRAFT')">Draft</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'status', 'SUNSET')">Sunset</button>
-      </div>
-      <div class="filter-row" id="phase-filters">
-        <button class="filter-chip active" onclick="toggleFilter(this, 'phase', 'ALL')">All Phases</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'phase', 'governance')">Governance</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'phase', 'classification')">Classification</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'phase', 'con')">CON</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'phase', 'federal')">Federal</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'phase', 'safety')">Safety</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'phase', 'impact')">Impact</button>
-        <button class="filter-chip" onclick="toggleFilter(this, 'phase', 'reporting')">Reporting</button>
+      <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Since your last login (Mar 8, 2026):</div>
+      <div class="whats-changed-items">
+        <div class="change-item draft">
+          <span class="label draft">NEW</span>
+          <span class="change-item-text">OH-020 Telehealth Bed Equivalency — New draft submitted</span>
+        </div>
+        <div class="change-item active">
+          <span class="label active">UPDATED</span>
+          <span class="change-item-text">FED-003 CMS CoP Compliance — Updated conditions</span>
+        </div>
+        <div class="change-item sunset">
+          <span class="label sunset">SUNSET</span>
+          <span class="change-item-text">OH-009 CON Expedited Review — Effective Mar 1</span>
+        </div>
       </div>
     </div>
 
-    <div class="rule-list" id="rule-list"></div>
-
-    <div class="rule-count-bar">
-      <span id="rule-count">40 rules</span>
-      <span>Ontology v0.1.3</span>
+    <!-- Search -->
+    <div class="sidebar-search">
+      <input type="text" id="searchInput" placeholder="Search rules...">
     </div>
+
+    <!-- Action Buttons -->
+    <div class="sidebar-actions">
+      <button class="primary" id="importBtn">⬆ Import from Document</button>
+      <button id="newRuleBtn">+ New Rule</button>
+    </div>
+
+    <!-- Rules List -->
+    <div class="rules-list" id="rulesList"></div>
   </div>
 
-  <!-- ── DETAIL PANEL ── -->
-  <div class="detail-panel" id="detail-panel">
-    <div class="detail-empty" id="detail-empty">
-      <div class="icon">&#128220;</div>
-      <p>Select a rule from the list to view and edit</p>
+  <div class="main">
+    <!-- Detail Panel Header -->
+    <div class="detail-header" id="detailHeader" style="display: none;">
+      <div>
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="detail-meta">
+          <span id="detailStatus"></span>
+          <span id="detailProgram"></span>
+          <span id="detailVersion"></span>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button id="simulateBtn">Simulate Impact</button>
+        <button class="primary" id="submitBtn">Submit for Review</button>
+      </div>
     </div>
 
-    <div id="detail-content" style="display:none;">
-      <!-- Workflow Banner -->
-      <div id="workflow-banner" class="workflow-banner wf-active" style="display:none;"></div>
+    <!-- Tabs -->
+    <div class="detail-tabs" id="detailTabs" style="display: none;">
+      <div class="detail-tab active" data-tab="overview">Overview</div>
+      <div class="detail-tab" data-tab="conditions">Condition Editor</div>
+      <div class="detail-tab" data-tab="dependencies">Dependencies</div>
+      <div class="detail-tab" data-tab="history">Version History</div>
+      <div class="detail-tab" data-tab="source">Source</div>
+      <div class="detail-tab" data-tab="comments">Comments</div>
+      <div class="detail-tab" data-tab="audit">Audit Log</div>
+    </div>
 
-      <!-- Header -->
-      <div class="detail-header">
-        <span class="rule-id-lg" id="d-rule-id"></span>
-        <div class="rule-title">
-          <h1 id="d-rule-name"></h1>
-          <div class="citation" id="d-citation"></div>
-        </div>
-        <span class="status-badge" id="d-status-badge"></span>
+    <!-- Tab Content -->
+    <div class="detail-content" id="detailContent" style="display: none;">
+      <!-- Overview Tab -->
+      <div class="tab-pane active" data-pane="overview">
+        <h3 style="margin-bottom: 16px; color: var(--navy);">Rule Details</h3>
+        <div id="overviewContent"></div>
       </div>
 
-      <!-- Tabs -->
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
-        <button class="tab-btn" onclick="showTab('conditions')">Condition Editor</button>
-        <button class="tab-btn" onclick="showTab('dependencies')">Dependencies</button>
-        <button class="tab-btn" onclick="showTab('history')">Version History</button>
+      <!-- Condition Editor Tab -->
+      <div class="tab-pane" data-pane="conditions">
+        <h3 style="margin-bottom: 16px; color: var(--navy);">Structured Conditions</h3>
+        <div id="conditionEditor"></div>
       </div>
 
-      <!-- Tab: Overview -->
-      <div class="tab-content visible" id="tab-overview">
-        <div class="field-grid">
-          <div class="field-group">
-            <div class="field-label">Jurisdiction</div>
-            <select class="field-value editable" id="d-jurisdiction">
-              <option value="FED">Federal</option>
-              <option value="OH">Ohio State</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <div class="field-label">Evaluation Phase</div>
-            <select class="field-value editable" id="d-phase">
-              <option value="governance">Phase 1: Governance Gate</option>
-              <option value="classification">Phase 2: Classification</option>
-              <option value="con">Phase 3: CON Screening</option>
-              <option value="federal">Phase 4: Federal Compliance</option>
-              <option value="safety">Phase 5: Safety Compliance</option>
-              <option value="impact">Phase 6: Impact Assessment</option>
-              <option value="reporting">Phase 7: Reporting</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <div class="field-label">Priority</div>
-            <select class="field-value editable" id="d-priority">
-              <option value="CRITICAL">Critical (Gate)</option>
-              <option value="HIGH">High</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <div class="field-label">Rule Type</div>
-            <select class="field-value editable" id="d-type">
-              <option value="GATE">Gate (blocks downstream)</option>
-              <option value="THRESHOLD">Threshold Check</option>
-              <option value="CLASSIFICATION">Classification</option>
-              <option value="COMPLIANCE">Compliance Requirement</option>
-              <option value="NOTIFICATION">Notification/Filing</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <div class="field-label">Effective Date</div>
-            <input type="date" class="field-value editable" id="d-effective">
-          </div>
-          <div class="field-group">
-            <div class="field-label">Sunset Date</div>
-            <input type="date" class="field-value editable" id="d-sunset" placeholder="None">
-          </div>
-          <div class="field-group field-full">
-            <div class="field-label">Description</div>
-            <textarea class="field-value editable" id="d-description" rows="3"></textarea>
-          </div>
-          <div class="field-group field-full">
-            <div class="field-label">Regulatory Citation (full text)</div>
-            <textarea class="field-value editable" id="d-citation-full" rows="2"></textarea>
-          </div>
-        </div>
+      <!-- Dependencies Tab -->
+      <div class="tab-pane" data-pane="dependencies">
+        <h3 style="margin-bottom: 16px; color: var(--navy);">Related Rules</h3>
+        <div id="dependenciesContent"></div>
       </div>
 
-      <!-- Tab: Condition Editor -->
-      <div class="tab-content" id="tab-conditions">
-        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Define the evaluation logic using structured conditions. Each row is a clause that the rule engine evaluates deterministically.</p>
-        <div class="condition-builder" id="condition-builder"></div>
-        <div style="margin-top:12px; display:flex; gap:8px;">
-          <button class="cond-add-btn" onclick="addConditionRow('IF')">+ Add IF clause</button>
-          <button class="cond-add-btn" onclick="addConditionRow('AND')">+ Add AND clause</button>
-          <button class="cond-add-btn" onclick="addConditionRow('THEN')">+ Add THEN outcome</button>
-        </div>
-        <div style="margin-top:20px; padding:14px; background:var(--accent-light); border-radius:var(--radius); border-left:3px solid var(--accent);">
-          <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; margin-bottom:4px;">Compiled Rule Preview</div>
-          <pre id="condition-preview" style="font-size:12px; font-family:'Cascadia Code','Fira Code',monospace; color:var(--text); white-space:pre-wrap; margin:0;"></pre>
-        </div>
+      <!-- Version History Tab -->
+      <div class="tab-pane" data-pane="history">
+        <h3 style="margin-bottom: 16px; color: var(--navy);">Version History</h3>
+        <div id="historyContent"></div>
       </div>
 
-      <!-- Tab: Dependencies -->
-      <div class="tab-content" id="tab-dependencies">
-        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Dependency edges define how this rule relates to other rules in the evaluation graph.</p>
-        <div id="dep-list"></div>
-        <button class="cond-add-btn" style="margin-top:12px;" onclick="alert('In production, this opens an edge builder to select target rule and edge type.')">+ Add Dependency Edge</button>
+      <!-- Source Tab -->
+      <div class="tab-pane" data-pane="source">
+        <h3 style="margin-bottom: 16px; color: var(--navy);">Source-Connected View</h3>
+        <div id="sourceContent"></div>
       </div>
 
-      <!-- Tab: Version History -->
-      <div class="tab-content" id="tab-history">
-        <div id="history-list"></div>
+      <!-- Comments Tab -->
+      <div class="tab-pane" data-pane="comments">
+        <h3 style="margin-bottom: 16px; color: var(--navy);">Comments & Discussion</h3>
+        <div id="commentsContent"></div>
       </div>
 
-      <!-- Action Bar -->
-      <div class="action-bar" style="margin-top:16px;">
-        <button class="btn btn-ghost" onclick="alert('Changes discarded.')">Discard Changes</button>
-        <div class="spacer"></div>
-        <button class="btn btn-primary" onclick="showImpactModal()">&#9889; Preview Impact</button>
-        <button class="btn btn-warning" id="btn-save-draft" onclick="saveDraft()">Save as Draft</button>
-        <button class="btn btn-success" id="btn-publish" onclick="submitForReview()">Submit for Review</button>
+      <!-- Audit Log Tab -->
+      <div class="tab-pane" data-pane="audit">
+        <h3 style="margin-bottom: 16px; color: var(--navy);">Audit Log</h3>
+        <div id="auditContent"></div>
+      </div>
+    </div>
+
+    <!-- No Selection State -->
+    <div id="noSelection" style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); text-align: center;">
+      <div>
+        <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+        <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Select a rule to view details</div>
+        <div style="font-size: 13px;">Choose a rule from the sidebar to see its conditions, dependencies, version history, and more.</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ IMPACT SIMULATION MODAL ══════════════════════════════════════════ -->
-<div class="modal-overlay" id="impact-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span style="font-size:20px;">&#9889;</span>
-      <h2>Impact Simulation</h2>
-      <button class="modal-close" onclick="closeImpactModal()">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Simulating how your proposed change would have affected the last 47 evaluations processed through this ontology.</p>
+<!-- Document Upload Modal -->
+<div class="upload-modal" id="uploadModal">
+  <div class="upload-content">
+    <span class="upload-close" style="float: right; cursor: pointer; font-size: 24px;">✕</span>
+    <h2 class="upload-title">Import from Document</h2>
+    <p class="upload-subtitle">Upload a statutory document and AI will extract rules</p>
 
-      <div class="impact-stat-grid">
-        <div class="impact-stat">
-          <div class="stat-num" style="color:var(--navy);">47</div>
-          <div class="stat-label">Evaluations Tested</div>
-        </div>
-        <div class="impact-stat">
-          <div class="stat-num" style="color:var(--amber);" id="impact-changed">3</div>
-          <div class="stat-label">Outcome Changed</div>
-        </div>
-        <div class="impact-stat">
-          <div class="stat-num" style="color:var(--green);" id="impact-unchanged">44</div>
-          <div class="stat-label">No Change</div>
-        </div>
-      </div>
-
-      <h3 style="font-size:14px; color:var(--navy); margin-bottom:12px;">Affected Evaluations</h3>
-      <div id="impact-results">
-        <div class="impact-diff changed">
-          <div class="diff-icon">&#9888;&#65039;</div>
-          <div class="diff-detail">
-            <div class="diff-hospital">Riverside Community Hospital (DEC-7A3F2B)</div>
-            <div class="diff-desc"><strong>Before:</strong> PASS &rarr; <strong>After:</strong> ACTION NEEDED. The modified threshold would have flagged this evaluation for additional review. Net bed change of +10 now triggers the updated condition.</div>
-          </div>
-        </div>
-        <div class="impact-diff changed">
-          <div class="diff-icon">&#9888;&#65039;</div>
-          <div class="diff-detail">
-            <div class="diff-hospital">Toledo Regional Medical Center (DEC-1E9C4D)</div>
-            <div class="diff-desc"><strong>Before:</strong> PASS &rarr; <strong>After:</strong> PASS (with different reasoning). The condition path changed but the final outcome remained the same. Audit trail would show updated citation reference.</div>
-          </div>
-        </div>
-        <div class="impact-diff changed">
-          <div class="diff-icon">&#128308;</div>
-          <div class="diff-detail">
-            <div class="diff-hospital">Appalachian Valley CAH (DEC-4B8E1F)</div>
-            <div class="diff-desc"><strong>Before:</strong> SKIP &rarr; <strong>After:</strong> ACTION NEEDED. The updated scope now includes Critical Access Hospitals, which were previously excluded from this rule.</div>
-          </div>
-        </div>
-        <div class="impact-diff unchanged">
-          <div class="diff-icon">&#9989;</div>
-          <div class="diff-detail">
-            <div class="diff-hospital">44 other evaluations</div>
-            <div class="diff-desc">No change in outcome. The modified rule did not affect the evaluation path or final decision for these cases.</div>
-          </div>
-        </div>
-      </div>
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">Drop PDF or image here or click to browse</div>
+      <div class="upload-hint">Supports PDF, PNG, JPG (max 10 MB)</div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeImpactModal()">Close</button>
-      <button class="btn btn-warning" onclick="closeImpactModal(); saveDraft();">Accept Risk &amp; Save Draft</button>
+
+    <div class="extraction-results" id="extractionResults">
+      <div class="extraction-header">
+        <span class="progress-dot" id="progressDot"></span>
+        <span id="extractionStatus">Analyzing document...</span>
+      </div>
+      <div class="extraction-citation" id="extractionCitation"></div>
+      <div id="draftRules"></div>
+      <div class="ai-model-indicator">
+        <span>⚙️</span>
+        <span>Model: Claude 3.5 Sonnet</span>
+        <span class="tooltip">
+          <span class="gear">🔧</span>
+          <span class="tooltiptext">AI model is configurable per tenant — supports Claude, GPT-4, Gemini, Llama, and custom models</span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ── DISCLAIMER FOOTER ── -->
-<footer style="background: var(--navy); color: rgba(255,255,255,0.7); text-align: center; padding: 20px 32px; font-size: 12px; line-height: 1.6;">
-  <div style="max-width: 800px; margin: 0 auto;">
-    <strong style="color: white;">PROTOTYPE DEMONSTRATION</strong><br>
-    This is a product concept by <a href="https://aimpointtechnology.com" style="color: #8BB8E8; text-decoration: none;">Aimpoint Technology</a>. Not affiliated with or endorsed by the Ohio Department of Health.<br>
-    <span style="color: rgba(255,255,255,0.4); margin-top: 8px; display: inline-block;">&copy; 2026 Aimpoint Technology &middot; GovPoint Policy Intelligence Infrastructure</span>
+<!-- Impact Simulation Modal -->
+<div class="impact-modal" id="impactModal">
+  <div class="impact-content">
+    <span class="impact-close" id="impactClose">✕</span>
+    <h2 class="impact-title" id="impactTitle"></h2>
+    <div class="impact-section">
+      <div class="impact-section-title">Rules with Direct Impact</div>
+      <div id="impactDirect"></div>
+    </div>
+    <div class="impact-section">
+      <div class="impact-section-title">Rules with Indirect Impact</div>
+      <div id="impactIndirect"></div>
+    </div>
+    <div class="impact-section">
+      <div class="impact-section-title">Potential Conflicts</div>
+      <div id="impactConflicts"></div>
+    </div>
   </div>
-</footer>
+</div>
 
 <script>
-// ══════════════════════════════════════════ RULE DATA ══════════════════════════════════════════
 const RULES = [
-  // Phase 1: Governance
-  { id:"FED-001", name:"Governing Body Authorization", citation:"42 CFR 482.12", phase:"governance", jurisdiction:"FED", priority:"CRITICAL", type:"GATE", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Requires the hospital governing body to authorize all changes to hospital operations, including capacity changes. This is the entry-point gate for the entire evaluation graph.",
-    citationFull:"42 CFR 482.12 — The governing body must ensure that the hospital operates in a manner that protects the health and safety of patients. The governing body is legally responsible for the conduct of the hospital.",
-    conditions:[{kw:"IF",field:"capacity_change_requested",op:"=",val:"TRUE"},{kw:"THEN",field:"governing_body_approval",op:"MUST =",val:"APPROVED"},{kw:"AND",field:"approval_date",op:"<",val:"target_implementation_date"}],
-    deps:[{type:"gate",target:"FED-002 through OH-019",desc:"Gates all 37 downstream rules until governing body approval is confirmed"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created from 42 CFR 482.12 during ontology build",current:false},{version:"v1.0.1",date:"2025-01-15",author:"M. Rodriguez",desc:"Added temporal sequencing requirement: approval_date must precede target_implementation_date",current:false},{version:"v1.1.0",date:"2025-06-01",author:"K. Potter",desc:"Updated gate scope to include all downstream rules (was previously limited to Phase 2-3)",current:true}]
-  },
-  { id:"OH-001", name:"Active Ohio License Verification", citation:"ORC 3722.02", phase:"governance", jurisdiction:"OH", priority:"CRITICAL", type:"GATE", status:"ACTIVE", effective:"2024-09-30", sunset:"",
-    description:"Ohio enacted mandatory hospital licensing under ORC 3722 effective September 30, 2024. This is Ohio's first mandatory licensing regime. No capacity change may proceed without an active license.",
-    citationFull:"ORC 3722.02 — No person shall operate a hospital without a license issued by the director of health. Penalties of $1,000 to $10,000 per day for unlicensed operation.",
-    conditions:[{kw:"IF",field:"hospital_operates_in_ohio",op:"=",val:"TRUE"},{kw:"THEN",field:"ohio_license_status",op:"MUST =",val:"ACTIVE"},{kw:"AND",field:"license_expiry",op:">",val:"target_implementation_date"}],
-    deps:[{type:"gate",target:"OH-002 through OH-019",desc:"Gates all Ohio state rules"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created from ORC 3722.02 (new law, effective Sept 30 2024)",current:true}]
-  },
-  { id:"OH-003", name:"CMS Certification Prerequisite", citation:"ORC 3722.02", phase:"governance", jurisdiction:"OH", priority:"HIGH", type:"COMPLIANCE", status:"ACTIVE", effective:"2024-09-30", sunset:"",
-    description:"Ohio requires CMS certification or accreditation by a CMS-approved organization as a prerequisite for hospital licensure. Creates a federal-to-state dependency.",
-    citationFull:"ORC 3722.02 — Hospital must hold CMS certification or be accredited by a CMS-approved accrediting organization (Joint Commission, DNV GL, etc.).",
-    conditions:[{kw:"IF",field:"hospital_applying_for_license",op:"=",val:"TRUE"},{kw:"THEN",field:"cms_certified",op:"=",val:"TRUE"},{kw:"OR",field:"accredited_by_cms_org",op:"=",val:"TRUE"}],
-    deps:[{type:"requires",target:"OH-001",desc:"CMS certification is prerequisite for Ohio license"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-
-  // Phase 2: Classification
-  { id:"OH-011", name:"Bed Count Definition Resolution", citation:"OAC 3701-59-01", phase:"classification", jurisdiction:"OH", priority:"HIGH", type:"CLASSIFICATION", status:"ACTIVE", effective:"2020-01-01", sunset:"",
-    description:"Resolves the total bed count per Ohio's broad definition. Includes beds under renovation and temporarily closed beds. Excludes temporary increases under 45 days.",
-    citationFull:"OAC 3701-59-01 — Licensed bed count includes all beds where patient care may be provided, including temporarily closed and renovation beds.",
-    conditions:[{kw:"IF",field:"change_type",op:"=",val:"PERMANENT"},{kw:"THEN",field:"total_bed_count",op:"=",val:"current_beds + net_change"},{kw:"IF",field:"change_type",op:"=",val:"TEMPORARY"},{kw:"AND",field:"duration",op:">",val:"45 days in 6 months"},{kw:"THEN",field:"classify_as",op:"=",val:"LICENSED"}],
-    deps:[{type:"requires",target:"FED-005",desc:"Feeds bed count to swing-bed threshold"},{type:"requires",target:"FED-006",desc:"Feeds bed count to CAH limit"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created from OAC 3701-59-01",current:true}]
-  },
-  { id:"OH-012", name:"Bed Category Classification", citation:"OAC 3701-59-05", phase:"classification", jurisdiction:"OH", priority:"MEDIUM", type:"CLASSIFICATION", status:"ACTIVE", effective:"2020-01-01", sunset:"",
-    description:"Each licensed bed must be assigned to exactly one category per OAC 3701-59-05. Classification determines reporting requirements and annual capacity report structure.",
-    citationFull:"OAC 3701-59-05 — Categories include: med-surg, ICU/CCU, psychiatric, pediatric, obstetric, rehabilitation, burn, emergency, hospice, LTAC, and others.",
-    conditions:[{kw:"IF",field:"bed_change_proposed",op:"=",val:"TRUE"},{kw:"THEN",field:"each_bed",op:"MUST BE IN",val:"exactly_one_category"},{kw:"AND",field:"category",op:"IN",val:"OAC_3701_59_05_list"}],
-    deps:[{type:"requires",target:"OH-013",desc:"Classification feeds annual capacity report"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"FED-006", name:"CAH 25-Bed Limit Check", citation:"42 CFR 485 Subpart F", phase:"classification", jurisdiction:"FED", priority:"CRITICAL", type:"THRESHOLD", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Critical Access Hospitals are limited to 25 inpatient beds. Exceeding this threshold disqualifies the hospital from CAH designation and changes Medicare reimbursement from cost-based to prospective payment.",
-    citationFull:"42 CFR 485 Subpart F — CAH must have no more than 25 inpatient beds. Psychiatric distinct part beds (up to 10) and rehab distinct part beds (up to 10) are excluded.",
-    conditions:[{kw:"IF",field:"hospital_type",op:"=",val:"CRITICAL_ACCESS"},{kw:"AND",field:"new_inpatient_beds",op:">",val:"25"},{kw:"THEN",field:"cah_status",op:"=",val:"AT_RISK"}],
-    deps:[{type:"gate",target:"ALL",desc:"Blocks capacity change until CAH status resolved"},{type:"exempts",target:"FED-007",desc:"Distinct part exception may exempt beds"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created from 42 CFR 485 Subpart F",current:false},{version:"v1.1.0",date:"2025-03-01",author:"M. Rodriguez",desc:"Clarified exclusion of psychiatric and rehab distinct part beds from 25-bed count",current:true}]
-  },
-  { id:"FED-007", name:"CAH Distinct Part Exception", citation:"42 CFR 485 Subpart F", phase:"classification", jurisdiction:"FED", priority:"HIGH", type:"COMPLIANCE", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Allows CAHs to operate up to 10 psychiatric distinct part beds and 10 rehabilitation distinct part beds in addition to the 25-bed limit.",
-    citationFull:"42 CFR 485 Subpart F — Psychiatric distinct part: max 10 beds. Rehab distinct part: max 10 beds. Excluded from 25-bed count.",
-    conditions:[{kw:"IF",field:"hospital_type",op:"=",val:"CRITICAL_ACCESS"},{kw:"AND",field:"bed_type",op:"IN",val:"PSYCHIATRIC, REHAB"},{kw:"AND",field:"distinct_part_beds",op:"<=",val:"10 per type"},{kw:"THEN",field:"exempt_from",op:"=",val:"FED-006 bed count"}],
-    deps:[{type:"exempts",target:"FED-006",desc:"Exempts distinct part beds from CAH 25-bed limit"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"FED-005", name:"Swing-Bed 100-Bed Threshold", citation:"42 CFR 482.58", phase:"classification", jurisdiction:"FED", priority:"HIGH", type:"THRESHOLD", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Swing-bed authorization is limited to hospitals with fewer than 100 inpatient beds. Reaching 100 beds revokes swing-bed authorization.",
-    citationFull:"42 CFR 482.58 — Swing-bed authorization limited to hospitals with fewer than 100 beds (excluding newborn and ICU).",
-    conditions:[{kw:"IF",field:"new_total_beds",op:">=",val:"100"},{kw:"THEN",field:"swing_bed_authorization",op:"=",val:"REVOKED"}],
-    deps:[{type:"requires",target:"FED-008",desc:"Swing-bed loss must be reported in PSF update"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-
-  // Phase 3: CON
-  { id:"OH-006", name:"CON Applicability Check", citation:"ORC 3702.51", phase:"con", jurisdiction:"OH", priority:"CRITICAL", type:"GATE", status:"ACTIVE", effective:"2019-01-01", sunset:"",
-    description:"Ohio's CON program has narrow scope: primarily LTC and high-dollar obstetric/newborn projects. Does NOT cover routine hospital bed additions. Triggers when obstetric project exceeds $5M.",
-    citationFull:"ORC 3702.51 — Certificate of Need required for: (a) obstetric/newborn projects >= $5M, (b) obstetric service-level changes, (c) LTC bed changes, (d) medical equipment >= $2M.",
-    conditions:[{kw:"IF",field:"involves_obstetric",op:"=",val:"TRUE"},{kw:"AND",field:"capital_expenditure",op:">=",val:"$5,000,000"},{kw:"THEN",field:"con_review",op:"=",val:"REQUIRED"}],
-    deps:[{type:"gate",target:"OH-007",desc:"Triggers CON application"},{type:"gate",target:"OH-015 through OH-018",desc:"Gates construction until CON approved"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule from ORC 3702.51 (post-2019 reform)",current:false},{version:"v1.0.1",date:"2025-04-10",author:"K. Potter",desc:"Added note: CON scope narrowed significantly by 2019 reforms. Third-party appeal rights eliminated.",current:true}]
-  },
-  { id:"OH-007", name:"CON Application Filing", citation:"ORC 3702.52", phase:"con", jurisdiction:"OH", priority:"HIGH", type:"NOTIFICATION", status:"ACTIVE", effective:"2019-01-01", sunset:"",
-    description:"CON application required with fee. Fee = greater of $5,000 or 1.5% of capital expenditure, capped at $20,000.",
-    citationFull:"ORC 3702.52 — Application fee formula: MAX($5,000, MIN(1.5% * capital, $20,000)).",
-    conditions:[{kw:"IF",field:"con_reviewable",op:"=",val:"TRUE"},{kw:"THEN",field:"submit_application",op:"=",val:"REQUIRED"},{kw:"AND",field:"fee",op:"=",val:"MAX($5K, MIN(1.5% * capex, $20K))"}],
-    deps:[{type:"requires",target:"OH-008",desc:"Application triggers review timeline"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"OH-008", name:"CON Standard Review Timeline", citation:"ORC 3702.52", phase:"con", jurisdiction:"OH", priority:"MEDIUM", type:"COMPLIANCE", status:"ACTIVE", effective:"2019-01-01", sunset:"",
-    description:"Standard CON review: 45-day completeness determination + 60-day director decision = ~105 days total.",
-    citationFull:"ORC 3702.52 — Completeness determination within 45 calendar days. Director decision within 60 calendar days after completeness.",
-    conditions:[{kw:"IF",field:"con_review_type",op:"=",val:"STANDARD"},{kw:"THEN",field:"completeness_window",op:"<=",val:"45 calendar days"},{kw:"AND",field:"decision_window",op:"<=",val:"60 calendar days"}],
-    deps:[{type:"gate",target:"OH-015",desc:"Construction blocked until CON approved"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"OH-010", name:"CON Capital Expenditure Cap", citation:"ORC 3702.52", phase:"con", jurisdiction:"OH", priority:"MEDIUM", type:"THRESHOLD", status:"ACTIVE", effective:"2019-01-01", sunset:"",
-    description:"Approved CON projects capped at 110% of approved cost. Exceeding triggers new CON review.",
-    citationFull:"ORC 3702.52 — Maximum allowable expenditure = 110% of approved cost.",
-    conditions:[{kw:"IF",field:"actual_cost",op:">",val:"110% * approved_cost"},{kw:"THEN",field:"new_con_review",op:"=",val:"REQUIRED"}],
-    deps:[],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-
-  // Phase 4: Federal Compliance
-  { id:"FED-002", name:"Physical Environment Compliance", citation:"42 CFR 482.41", phase:"federal", jurisdiction:"FED", priority:"HIGH", type:"COMPLIANCE", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Hospitals must maintain adequate facilities per NFPA 101 Life Safety Code (2012 Edition) as adopted by CMS. Physical modifications trigger Code evaluation.",
-    citationFull:"42 CFR 482.41 — Hospital must be constructed, arranged, and maintained to ensure safety of patients. NFPA 101 (2012 Ed.) adopted by CMS effective July 5, 2016.",
-    conditions:[{kw:"IF",field:"physical_plant_modification",op:"=",val:"TRUE"},{kw:"THEN",field:"nfpa_101_compliance",op:"=",val:"REQUIRED"}],
-    deps:[{type:"requires",target:"FED-010",desc:"Routes to Life Safety Code work classification"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"FED-008", name:"Provider Specific File Update", citation:"CMS Manual Ch. 3", phase:"federal", jurisdiction:"FED", priority:"HIGH", type:"NOTIFICATION", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"30-day advance written notice to MAC required for bed count changes in Provider Specific File. Changes are prospective only — cannot be backdated.",
-    citationFull:"CMS Manual Chapter 3 — PSF Field-24 (bed size) changes require 30-day advance written notice to MAC and CMS Regional Office. Prospective only.",
-    conditions:[{kw:"IF",field:"bed_count_change",op:"!=",val:"0"},{kw:"THEN",field:"notice_to_mac",op:"=",val:"30 days before effective"},{kw:"AND",field:"change_basis",op:"=",val:"PROSPECTIVE only"}],
-    deps:[{type:"triggers",target:"FED-009",desc:"PSF update may trigger enrollment update"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"FED-009", name:"CMS-855A Enrollment Update", citation:"42 CFR 424.520", phase:"federal", jurisdiction:"FED", priority:"MEDIUM", type:"NOTIFICATION", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Provider enrollment update via PECOS within 90 days for changes to practice location or service configuration.",
-    citationFull:"42 CFR 424.520 — Update CMS-855A within 90 calendar days via PECOS for practice location type or service changes.",
-    conditions:[{kw:"IF",field:"service_line_changed",op:"=",val:"TRUE"},{kw:"THEN",field:"update_855a",op:"=",val:"within 90 days via PECOS"}],
-    deps:[],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-
-  // Phase 5: Safety (selection)
-  { id:"FED-010", name:"Work Category Classification", citation:"NFPA 101 Ch. 43", phase:"safety", jurisdiction:"FED", priority:"HIGH", type:"CLASSIFICATION", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Classifies physical work into one of six NFPA 101 rehabilitation categories, each with different code compliance requirements.",
-    citationFull:"NFPA 101 Chapter 43 — Six categories: Repair, Replacement, Reconfiguration, Reconstruction, Addition, Change of Use.",
-    conditions:[{kw:"IF",field:"physical_construction",op:"=",val:"TRUE"},{kw:"THEN",field:"classify_work",op:"INTO",val:"REPAIR | REPLACEMENT | RECONFIGURATION | RECONSTRUCTION | ADDITION | CHANGE_OF_USE"}],
-    deps:[{type:"routes",target:"FED-011 through FED-015",desc:"Routes to appropriate compliance path based on classification"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"FED-015", name:"Sprinkler System Trigger", citation:"NFPA 101 Ch. 43", phase:"safety", jurisdiction:"FED", priority:"CRITICAL", type:"THRESHOLD", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"When rehabilitation affects more than 50% of aggregate building area, automatic sprinkler systems required on affected floors and all floors below. Major cost trigger.",
-    citationFull:"NFPA 101 Chapter 43 — If rehabilitation > 50% of aggregate building area, sprinkler systems required on affected floor(s) and all floors below.",
-    conditions:[{kw:"IF",field:"rehabilitation_area",op:">",val:"50% of aggregate_building_area"},{kw:"THEN",field:"sprinkler_systems",op:"=",val:"REQUIRED on affected + below"}],
-    deps:[{type:"gate",target:"Construction budget",desc:"Major cost impact — may require budget revision"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"OH-015", name:"State Fire Marshal Approval", citation:"ORC 3737", phase:"safety", jurisdiction:"OH", priority:"HIGH", type:"COMPLIANCE", status:"ACTIVE", effective:"2020-01-01", sunset:"",
-    description:"Construction plans must be submitted to Ohio State Fire Marshal for review and approval before construction begins. Typical review: 2-4 weeks.",
-    citationFull:"ORC 3737 and OAC 1301:7-7 — Hospital construction plans require Fire Marshal review and approval before construction begins.",
-    conditions:[{kw:"IF",field:"physical_construction",op:"=",val:"TRUE"},{kw:"THEN",field:"submit_plans_to",op:"=",val:"Ohio State Fire Marshal"},{kw:"AND",field:"timing",op:"=",val:"BEFORE construction begins"}],
-    deps:[{type:"requires",target:"OH-016",desc:"Coordinates with building permit process"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-
-  // Phase 6: Impact
-  { id:"FED-016", name:"EMTALA Transfer Capacity", citation:"42 CFR 489.24", phase:"impact", jurisdiction:"FED", priority:"HIGH", type:"COMPLIANCE", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Hospitals with specialized capabilities must accept appropriate transfers when beds are available. Capacity changes affect transfer obligation documentation.",
-    citationFull:"42 CFR 489.24 — Hospital with specialized capabilities must accept appropriate transfers when beds and personnel available.",
-    conditions:[{kw:"IF",field:"specialized_capabilities",op:"=",val:"TRUE"},{kw:"AND",field:"available_beds",op:">",val:"0"},{kw:"THEN",field:"must_accept_transfers",op:"=",val:"TRUE"}],
-    deps:[],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"FED-017", name:"Capacity Reduction EMTALA Review", citation:"42 CFR 489.24", phase:"impact", jurisdiction:"FED", priority:"CRITICAL", type:"COMPLIANCE", status:"ACTIVE", effective:"2016-07-05", sunset:"",
-    description:"Reducing hospital capacity creates EMTALA compliance risk. Penalties up to $119,942 per violation for hospitals >100 beds.",
-    citationFull:"42 CFR 489.24 — Civil penalties: $119,942 per violation (>100 beds), $59,973 (<=100 beds).",
-    conditions:[{kw:"IF",field:"net_bed_change",op:"<",val:"0"},{kw:"THEN",field:"emtala_impact_assessment",op:"=",val:"REQUIRED"}],
-    deps:[{type:"requires",target:"FED-016",desc:"Must update transfer capacity documentation"}],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:false},{version:"v1.0.1",date:"2025-08-15",author:"M. Rodriguez",desc:"Updated penalty amounts to 2025 inflation-adjusted figures",current:true}]
-  },
-
-  // Phase 7: Reporting
-  { id:"OH-002", name:"License Amendment Filing", citation:"ORC 3722.02", phase:"reporting", jurisdiction:"OH", priority:"HIGH", type:"NOTIFICATION", status:"ACTIVE", effective:"2024-09-30", sunset:"",
-    description:"Licensed bed count must match actual operational bed count. License amendment required before capacity change takes effect.",
-    citationFull:"ORC 3722.02 — License amendment must reflect updated bed count. Operating with beds exceeding licensed count constitutes unlicensed operation.",
-    conditions:[{kw:"IF",field:"capacity_change_requested",op:"=",val:"TRUE"},{kw:"THEN",field:"license_amendment",op:"=",val:"REQUIRED"},{kw:"AND",field:"timing",op:"=",val:"BEFORE change takes effect"}],
-    deps:[],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-  { id:"OH-013", name:"Annual Capacity Report Update", citation:"OAC 3701-59-05", phase:"reporting", jurisdiction:"OH", priority:"LOW", type:"NOTIFICATION", status:"ACTIVE", effective:"2020-01-01", sunset:"",
-    description:"Annual capacity report due March 1 must reflect bed changes. Reports beds, admissions, and patient days by category.",
-    citationFull:"OAC 3701-59-05 — Annual report by March 1 covering prior calendar year: beds, admissions, patient days — all by category.",
-    conditions:[{kw:"IF",field:"calendar_year_end",op:"=",val:"TRUE"},{kw:"THEN",field:"submit_report_by",op:"=",val:"March 1"}],
-    deps:[],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:true}]
-  },
-
-  // DRAFT example rule
-  { id:"OH-020", name:"Telehealth Bed Equivalency", citation:"ORC 3722 (proposed)", phase:"classification", jurisdiction:"OH", priority:"MEDIUM", type:"CLASSIFICATION", status:"DRAFT", effective:"", sunset:"",
-    description:"DRAFT: Proposed rule to define telehealth monitoring stations as bed-equivalents for capacity reporting. Under review with ODH policy team.",
-    citationFull:"Proposed amendment to ORC 3722 — Telehealth monitoring stations may count as 0.5 bed-equivalents for capacity reporting purposes when meeting minimum equipment and staffing requirements.",
-    conditions:[{kw:"IF",field:"station_type",op:"=",val:"TELEHEALTH_MONITORING"},{kw:"AND",field:"meets_equipment_requirements",op:"=",val:"TRUE"},{kw:"AND",field:"meets_staffing_requirements",op:"=",val:"TRUE"},{kw:"THEN",field:"bed_equivalent",op:"=",val:"0.5 per station"}],
-    deps:[{type:"requires",target:"OH-011",desc:"Feeds into bed count resolution"},{type:"requires",target:"OH-012",desc:"Creates new bed category classification"}],
-    history:[{version:"v0.1.0",date:"2026-02-01",author:"K. Potter",desc:"Draft rule created for telehealth bed equivalency concept",current:false},{version:"v0.2.0",date:"2026-02-20",author:"K. Potter",desc:"Updated with equipment and staffing prerequisites per ODH feedback",current:true}]
-  },
-
-  // SUNSET example rule
-  { id:"OH-009", name:"CON Expedited Review Timeline", citation:"ORC 3702.52", phase:"con", jurisdiction:"OH", priority:"LOW", type:"COMPLIANCE", status:"SUNSET", effective:"2019-01-01", sunset:"2025-12-31",
-    description:"SUNSET: Expedited CON review path (30-day completeness + 45-day decision). Suspended per 2025 legislative session pending CON program review.",
-    citationFull:"ORC 3702.52 — Expedited review: 30-day completeness + 45-day decision = ~75 days. Suspended effective Dec 31, 2025.",
-    conditions:[{kw:"IF",field:"con_review_type",op:"=",val:"EXPEDITED"},{kw:"THEN",field:"completeness_window",op:"<=",val:"30 calendar days"},{kw:"AND",field:"decision_window",op:"<=",val:"45 calendar days"}],
-    deps:[],
-    history:[{version:"v1.0.0",date:"2024-09-30",author:"System Import",desc:"Initial rule created",current:false},{version:"v1.1.0",date:"2025-12-01",author:"System",desc:"Rule sunset per 2025 legislative session. Expedited path suspended pending CON program review.",current:true}]
-  },
+  { id: 'OH-001', name: 'Bed Capacity Minimum', status: 'active', program: 'Hospital Licensing', version: '2.1', conditions: ['beds >= 25', 'licensed_facility == true'] },
+  { id: 'OH-002', name: 'Emergency Department Staffing', status: 'active', program: 'Hospital Licensing', version: '1.8', conditions: ['ed_beds >= 10', 'physicians >= 1'] },
+  { id: 'OH-003', name: 'ICU Isolation Requirements', status: 'active', program: 'Hospital Licensing', version: '3.0', conditions: ['icu_beds > 0', 'isolation_rate >= 0.5'] },
+  { id: 'OH-004', name: 'Pharmacy Licensing', status: 'active', program: 'Hospital Licensing', version: '1.5', conditions: ['licensed_pharmacist == true', 'pharmacy_hours >= 16'] },
+  { id: 'OH-005', name: 'Infection Control Program', status: 'review', program: 'Hospital Licensing', version: '2.3', conditions: ['infection_control_committee == true', 'quarterly_audit == true'] },
+  { id: 'OH-006', name: 'Medical Records Management', status: 'active', program: 'Hospital Licensing', version: '1.9', conditions: ['digital_records == true', 'backup_frequency == daily'] },
+  { id: 'OH-007', name: 'Patient Safety Reporting', status: 'active', program: 'Hospital Licensing', version: '2.0', conditions: ['incident_reporting == true', 'response_time <= 24'] },
+  { id: 'OH-008', name: 'Quality Assurance Program', status: 'active', program: 'Hospital Licensing', version: '1.6', conditions: ['qa_committee == true', 'review_frequency == monthly'] },
+  { id: 'OH-009', name: 'CON Expedited Review', status: 'active', program: 'Hospital Licensing', version: '1.2', conditions: ['project_cost > 200000', 'bed_change <= 5'] },
+  { id: 'OH-010', name: 'Capital Equipment Reporting', status: 'active', program: 'Hospital Licensing', version: '1.0', conditions: ['equipment_cost > 50000', 'report_within_30_days == true'] },
+  { id: 'OH-011', name: 'Telemedicine Compliance', status: 'draft', program: 'Hospital Licensing', version: '1.0', conditions: ['telehealth_enabled == true', 'licensed_provider == true'] },
+  { id: 'OH-012', name: 'Surgical Suite Standards', status: 'active', program: 'Hospital Licensing', version: '2.1', conditions: ['surgical_suites >= 2', 'air_exchange_rate >= 25'] },
+  { id: 'OH-013', name: 'Laboratory Accreditation', status: 'active', program: 'Hospital Licensing', version: '1.7', conditions: ['clia_certified == true', 'proficiency_testing == true'] },
+  { id: 'OH-014', name: 'Radiology Department', status: 'active', program: 'Hospital Licensing', version: '2.0', conditions: ['radiologist_on_call == true', 'mri_available == true'] },
+  { id: 'OH-015', name: 'Fire Code Compliance', status: 'active', program: 'Hospital Licensing', version: '1.8', conditions: ['sprinkler_system == true', 'emergency_exits >= 3'] },
+  { id: 'OH-016', name: 'Nursing Staffing Ratios', status: 'active', program: 'Hospital Licensing', version: '2.2', conditions: ['rn_ratio >= 0.5', 'continuous_staffing == true'] },
+  { id: 'OH-017', name: 'Dietary Services', status: 'active', program: 'Hospital Licensing', version: '1.4', conditions: ['dietitian_licensed == true', 'menu_planning == quarterly'] },
+  { id: 'OH-018', name: 'Environmental Health & Safety', status: 'active', program: 'Hospital Licensing', version: '1.6', conditions: ['hazmat_training == annual', 'waste_disposal == compliant'] },
+  { id: 'OH-019', name: 'Patient Rights & Grievance', status: 'active', program: 'Hospital Licensing', version: '1.9', conditions: ['grievance_process == documented', 'response_time <= 14'] },
+  { id: 'OH-020', name: 'Telehealth Bed Equivalency', status: 'draft', program: 'Hospital Licensing', version: '1.1', conditions: ['telehealth_beds >= 5', 'patient_satisfaction >= 4.0'] },
+  { id: 'FED-001', name: 'CMS Conditions of Participation', status: 'active', program: 'Hospital Licensing', version: '3.1', conditions: ['medicare_participating == true', 'quality_score >= 85'] },
+  { id: 'FED-002', name: 'Medicaid Compliance - Rates', status: 'review', program: 'Hospital Licensing', version: '2.0', conditions: ['medicaid_enrolled == true', 'rate_review == annual'] },
+  { id: 'FED-003', name: 'CMS CoP Compliance', status: 'active', program: 'Hospital Licensing', version: '2.4', conditions: ['cms_surveyed == true', 'deficiencies <= 5'] }
 ];
 
-// ══════════════════════════════════════════ STATE ══════════════════════════════════════════
+let currentRule = null;
+let rules = [...RULES];
 
-let filters = { jurisdiction: 'ALL', status: 'ALL', phase: 'ALL' };
-let selectedRuleId = null;
+// Initialize
+function init() {
+  renderRulesList();
+  setupEventListeners();
+}
 
-// ══════════════════════════════════════════ RULE LIST ══════════════════════════════════════════
+function renderRulesList() {
+  const container = document.getElementById('rulesList');
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-function renderRuleList() {
-  const search = document.getElementById('rule-search').value.toLowerCase();
-  const list = document.getElementById('rule-list');
-  const filtered = RULES.filter(r => {
-    if (filters.jurisdiction !== 'ALL' && r.jurisdiction !== filters.jurisdiction) return false;
-    if (filters.status !== 'ALL' && r.status !== filters.status) return false;
-    if (filters.phase !== 'ALL' && r.phase !== filters.phase) return false;
-    if (search && !r.id.toLowerCase().includes(search) && !r.name.toLowerCase().includes(search) && !r.citation.toLowerCase().includes(search) && !r.description.toLowerCase().includes(search)) return false;
-    return true;
+  const filtered = rules.filter(r =>
+    r.name.toLowerCase().includes(searchTerm) || r.id.toLowerCase().includes(searchTerm)
+  );
+
+  container.innerHTML = filtered.map(rule => `
+    <div class="rule-card ${rule.id === currentRule?.id ? 'active' : ''}" data-id="${rule.id}">
+      <div class="rule-name">${rule.id}</div>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">${rule.name}</div>
+      <span class="rule-status ${rule.status}" style="font-size: 11px;">${rule.status.toUpperCase()}</span>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.rule-card').forEach(card => {
+    card.addEventListener('click', () => selectRule(card.dataset.id));
   });
+}
 
-  list.innerHTML = filtered.map(r => {
-    const idClass = r.jurisdiction === 'FED' ? 'rule-id-fed' : 'rule-id-oh';
-    const dotClass = r.status === 'ACTIVE' ? 'dot-active' : r.status === 'DRAFT' ? 'dot-draft' : 'dot-sunset';
-    const selected = r.id === selectedRuleId ? 'selected' : '';
-    return `<div class="rule-list-item ${selected}" onclick="selectRule('${r.id}')">
-      <span class="rule-id-badge ${idClass}">${r.id}</span>
-      <div class="rule-info">
-        <div class="rule-name">${r.name}</div>
-        <div class="rule-meta">
-          <span class="status-dot ${dotClass}"></span>
-          <span>${r.status}</span>
-          <span>&middot;</span>
-          <span>${r.citation}</span>
-        </div>
+function selectRule(id) {
+  currentRule = rules.find(r => r.id === id);
+  renderRulesList();
+  renderDetailPanel();
+}
+
+function renderDetailPanel() {
+  if (!currentRule) return;
+
+  document.getElementById('detailHeader').style.display = 'flex';
+  document.getElementById('detailTabs').style.display = 'flex';
+  document.getElementById('detailContent').style.display = 'block';
+  document.getElementById('noSelection').style.display = 'none';
+
+  document.getElementById('detailTitle').textContent = currentRule.name;
+  document.getElementById('detailStatus').textContent = `Status: ${currentRule.status.toUpperCase()}`;
+  document.getElementById('detailProgram').textContent = `Program: ${currentRule.program}`;
+  document.getElementById('detailVersion').textContent = `v${currentRule.version}`;
+
+  // Overview
+  document.getElementById('overviewContent').innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">RULE ID</div>
+        <div style="font-size: 14px; color: var(--navy); font-weight: 600;">${currentRule.id}</div>
       </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('rule-count').textContent = filtered.length + ' of ' + RULES.length + ' rules';
-}
-
-function filterRules() { renderRuleList(); }
-
-function toggleFilter(btn, group, value) {
-  filters[group] = value;
-  const row = btn.parentElement;
-  row.querySelectorAll('.filter-chip').forEach(c => {
-    c.className = 'filter-chip';
-  });
-  if (group === 'jurisdiction' && value === 'FED') btn.className = 'filter-chip active-fed';
-  else if (group === 'jurisdiction' && value === 'OH') btn.className = 'filter-chip active-oh';
-  else btn.className = 'filter-chip active';
-  renderRuleList();
-}
-
-// ══════════════════════════════════════════ DETAIL PANEL ══════════════════════════════════════════
-
-function selectRule(ruleId) {
-  selectedRuleId = ruleId;
-  renderRuleList();
-  const rule = RULES.find(r => r.id === ruleId);
-  if (!rule) return;
-
-  document.getElementById('detail-empty').style.display = 'none';
-  document.getElementById('detail-content').style.display = 'block';
-
-  // Header
-  const idEl = document.getElementById('d-rule-id');
-  idEl.textContent = rule.id;
-  idEl.className = 'rule-id-lg ' + (rule.jurisdiction === 'FED' ? 'rule-id-fed' : 'rule-id-oh');
-  document.getElementById('d-rule-name').textContent = rule.name;
-  document.getElementById('d-citation').textContent = rule.citation;
-
-  const statusBadge = document.getElementById('d-status-badge');
-  statusBadge.textContent = rule.status;
-  statusBadge.className = 'status-badge status-' + rule.status.toLowerCase();
-
-  // Workflow banner
-  const wfBanner = document.getElementById('workflow-banner');
-  if (rule.status === 'DRAFT') {
-    wfBanner.style.display = 'flex';
-    wfBanner.className = 'workflow-banner wf-draft';
-    wfBanner.innerHTML = '<div class="wf-icon">&#9998;</div><div class="wf-text"><strong>Draft Rule</strong><span>This rule is in draft status and is not yet active in the evaluation engine. Edit freely, then submit for review when ready.</span></div>';
-  } else if (rule.status === 'SUNSET') {
-    wfBanner.style.display = 'flex';
-    wfBanner.className = 'workflow-banner wf-review';
-    wfBanner.innerHTML = '<div class="wf-icon">&#127773;</div><div class="wf-text"><strong>Sunset Rule</strong><span>This rule has been deactivated as of ' + rule.sunset + '. It remains in the ontology for audit purposes but is skipped during evaluation.</span></div>';
-  } else {
-    wfBanner.style.display = 'none';
-  }
-
-  // Overview fields
-  document.getElementById('d-jurisdiction').value = rule.jurisdiction;
-  document.getElementById('d-phase').value = rule.phase;
-  document.getElementById('d-priority').value = rule.priority;
-  document.getElementById('d-type').value = rule.type;
-  document.getElementById('d-effective').value = rule.effective;
-  document.getElementById('d-sunset').value = rule.sunset;
-  document.getElementById('d-description').value = rule.description;
-  document.getElementById('d-citation-full').value = rule.citationFull;
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">CURRENT VERSION</div>
+        <div style="font-size: 14px; color: var(--navy); font-weight: 600;">v${currentRule.version}</div>
+      </div>
+      <div style="grid-column: 1 / -1;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">DESCRIPTION</div>
+        <div style="font-size: 13px; color: var(--text);">Rule definition and implementation guidelines for ${currentRule.name.toLowerCase()}.</div>
+      </div>
+    </div>
+  `;
 
   // Conditions
-  renderConditions(rule);
+  document.getElementById('conditionEditor').innerHTML = `
+    ${currentRule.conditions.map((cond, i) => `
+      <div class="condition-row">
+        <span style="flex: 1;">IF ${cond}</span>
+        <button style="cursor: pointer;">Remove</button>
+      </div>
+    `).join('')}
+    <button style="padding: 8px 16px; background: var(--navy); color: white; border: none; border-radius: var(--radius); cursor: pointer; margin-top: 12px;">+ Add Condition</button>
+  `;
 
   // Dependencies
-  renderDependencies(rule);
-
-  // History
-  renderHistory(rule);
-
-  // Action bar buttons
-  document.getElementById('btn-save-draft').textContent = rule.status === 'DRAFT' ? 'Update Draft' : 'Save as Draft';
-  document.getElementById('btn-publish').textContent = rule.status === 'DRAFT' ? 'Submit for Review' : 'Create New Version';
-
-  // Reset to overview tab
-  showTab('overview');
-
-  // Scroll to top
-  document.getElementById('detail-panel').scrollTop = 0;
-}
-
-function renderConditions(rule) {
-  const builder = document.getElementById('condition-builder');
-  builder.innerHTML = rule.conditions.map((c, i) => `
-    <div class="condition-row">
-      <span class="cond-keyword">${c.kw}</span>
-      <input class="cond-field" value="${c.field}" onchange="updatePreview()">
-      <select class="cond-operator" onchange="updatePreview()">
-        <option ${c.op==='='?'selected':''}>= </option>
-        <option ${c.op==='!='?'selected':''}> !=</option>
-        <option ${c.op==='>='?'selected':''}> >=</option>
-        <option ${c.op==='<='?'selected':''}> <=</option>
-        <option ${c.op==='>'?'selected':''}> ></option>
-        <option ${c.op==='<'?'selected':''}> <</option>
-        <option ${c.op==='IN'?'selected':''}>IN</option>
-        <option ${c.op==='MUST ='?'selected':''}>MUST =</option>
-        <option ${c.op==='MUST BE IN'?'selected':''}>MUST BE IN</option>
-        <option ${c.op==='INTO'?'selected':''}>INTO</option>
-      </select>
-      <input class="cond-value" value="${c.val}" onchange="updatePreview()">
+  document.getElementById('dependenciesContent').innerHTML = `
+    <div class="dep-card impacts-other">
+      <div class="dep-card-title">FED-001 CMS Conditions of Participation</div>
+      <div class="dep-card-desc">This rule directly impacts emergency staffing requirements</div>
     </div>
-  `).join('');
-  updatePreview();
-}
-
-function updatePreview() {
-  const rows = document.querySelectorAll('#condition-builder .condition-row');
-  let preview = '';
-  rows.forEach(row => {
-    const kw = row.querySelector('.cond-keyword').textContent;
-    const field = row.querySelector('.cond-field').value;
-    const op = row.querySelector('.cond-operator').value.trim();
-    const val = row.querySelector('.cond-value').value;
-    preview += kw + ' ' + field + ' ' + op + ' ' + val + '\n';
-  });
-  document.getElementById('condition-preview').textContent = preview.trim();
-}
-
-function addConditionRow(keyword) {
-  const builder = document.getElementById('condition-builder');
-  const row = document.createElement('div');
-  row.className = 'condition-row';
-  row.innerHTML = `
-    <span class="cond-keyword">${keyword}</span>
-    <input class="cond-field" placeholder="field_name" onchange="updatePreview()">
-    <select class="cond-operator" onchange="updatePreview()">
-      <option>=</option><option>!=</option><option>>=</option><option><=</option><option>></option><option><</option><option>IN</option><option>MUST =</option>
-    </select>
-    <input class="cond-value" placeholder="value" onchange="updatePreview()">
+    <div class="dep-card impacted-by">
+      <div class="dep-card-title">OH-007 Patient Safety Reporting</div>
+      <div class="dep-card-desc">Updates to this rule affect incident tracking</div>
+    </div>
+    <div class="dep-card impacts-other">
+      <div class="dep-card-title">OH-016 Nursing Staffing Ratios</div>
+      <div class="dep-card-desc">Related rule with shared conditions on staffing</div>
+    </div>
   `;
-  builder.appendChild(row);
-  updatePreview();
-}
 
-function renderDependencies(rule) {
-  const list = document.getElementById('dep-list');
-  if (!rule.deps.length) {
-    list.innerHTML = '<p style="font-size:13px; color:var(--gray); font-style:italic;">No dependency edges defined for this rule.</p>';
-    return;
-  }
-  list.innerHTML = rule.deps.map(d => `
-    <div class="dep-card">
-      <span class="dep-type dep-${d.type}">${d.type}</span>
-      <span class="dep-arrow">&rarr;</span>
-      <div>
-        <div class="dep-target">${d.target}</div>
-        <div class="dep-desc">${d.desc}</div>
+  // History with Diff
+  document.getElementById('historyContent').innerHTML = `
+    <div class="version-item">
+      <div class="version-header">
+        <span class="version-num">v${currentRule.version}</span>
+        <span class="version-date">Current • Mar 10, 2026</span>
+      </div>
+      <div class="version-details">Updated by Sarah Chen (Publisher)</div>
+      <button style="margin-top: 8px; padding: 6px 12px; font-size: 12px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;">Compare →</button>
+    </div>
+    <div class="version-item">
+      <div class="version-header">
+        <span class="version-num">v${(parseFloat(currentRule.version) - 0.1).toFixed(1)}</span>
+        <span class="version-date">Previous • Mar 5, 2026</span>
+      </div>
+      <div class="version-details">Updated by James Miller (Reviewer)</div>
+    </div>
+    ${currentRule.version !== '1.0' ? `
+    <div class="diff-panel" style="display: none;">
+      <div><span class="diff-remove">net_bed_change threshold changed from ~~50~~ </span> → <span class="diff-add">**30**</span></div>
+    </div>
+    ` : ''}
+  `;
+
+  // Source View
+  document.getElementById('sourceContent').innerHTML = `
+    <div class="source-split">
+      <div class="source-left">
+        ${currentRule.conditions.map((cond, i) => `
+          <div class="condition-row">
+            <span style="flex: 1;">IF ${cond}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="source-right">
+        <div class="source-citation">Source: ORC § 3702.30(A)(1)</div>
+        <div class="source-text">
+          A hospital shall maintain a minimum capacity of <span class="source-highlight">not less than 25 licensed beds</span> and shall operate under a license issued by the director of health. The hospital shall be duly licensed as a hospital under <span class="source-highlight">the provisions of Chapter 3702 of the Revised Code</span>. The hospital shall maintain compliance with all statutory requirements...
+        </div>
       </div>
     </div>
-  `).join('');
-}
+  `;
 
-function renderHistory(rule) {
-  const list = document.getElementById('history-list');
-  list.innerHTML = rule.history.slice().reverse().map(h => `
-    <div class="history-item">
-      <div class="history-dot ${h.current ? 'current' : ''}"></div>
-      <div class="history-content">
-        <div class="version-tag">${h.version} ${h.current ? '(CURRENT)' : ''}</div>
-        <div class="version-desc">${h.desc}</div>
-        <div class="version-meta">${h.date} &middot; ${h.author}</div>
+  // Comments
+  document.getElementById('commentsContent').innerHTML = `
+    <div class="comments-thread">
+      <div class="comment">
+        <div class="comment-avatar">SC</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-author">Sarah Chen</span>
+            <span class="comment-role">Publisher</span>
+            <span class="comment-time">Mar 5, 2026</span>
+          </div>
+          <div class="comment-text">Updated threshold from 50 to 30 beds based on 2026 ORC amendment</div>
+        </div>
+      </div>
+      <div class="comment">
+        <div class="comment-avatar" style="background: var(--green);">JM</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-author">James Miller</span>
+            <span class="comment-role">Reviewer</span>
+            <span class="comment-time">Mar 6, 2026</span>
+          </div>
+          <div class="comment-text">Confirmed — matches the enrolled version of HB 247. Approved.</div>
+        </div>
+      </div>
+      <div class="comment">
+        <div class="comment-avatar" style="background: var(--purple);">LP</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-author">Lisa Park</span>
+            <span class="comment-role">Legal</span>
+            <span class="comment-time">Mar 7, 2026</span>
+          </div>
+          <div class="comment-text"><span class="mention">@Sarah</span> — note that this may interact with the federal CON exemption for critical access hospitals. Flagging for cross-reference.</div>
+        </div>
       </div>
     </div>
-  `).join('');
+    <div class="add-comment">
+      <textarea placeholder="Add a comment..."></textarea>
+      <div class="add-comment-actions">
+        <button>Cancel</button>
+        <button class="send">Send Comment</button>
+      </div>
+    </div>
+  `;
+
+  // Audit Log
+  document.getElementById('auditContent').innerHTML = `
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Role</th>
+          <th>Action</th>
+          <th>Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="audit-timestamp">Mar 10 14:32</td>
+          <td class="audit-user">Sarah Chen</td>
+          <td><span class="audit-role-badge">Publisher</span></td>
+          <td>Edited Conditions</td>
+          <td>Updated threshold parameter</td>
+        </tr>
+        <tr>
+          <td class="audit-timestamp">Mar 9 10:15</td>
+          <td class="audit-user">James Miller</td>
+          <td><span class="audit-role-badge">Reviewer</span></td>
+          <td>Approved</td>
+          <td>Moved to Active status</td>
+        </tr>
+        <tr>
+          <td class="audit-timestamp">Mar 8 09:22</td>
+          <td class="audit-user">Sarah Chen</td>
+          <td><span class="audit-role-badge">Publisher</span></td>
+          <td>Submitted for Review</td>
+          <td>Draft → Review workflow</td>
+        </tr>
+        <tr>
+          <td class="audit-timestamp">Mar 5 16:48</td>
+          <td class="audit-user">Sarah Chen</td>
+          <td><span class="audit-role-badge">Publisher</span></td>
+          <td>Created Draft</td>
+          <td>New rule drafted from ORC § 3702.30</td>
+        </tr>
+        <tr>
+          <td class="audit-timestamp">Mar 1 08:00</td>
+          <td class="audit-user">System</td>
+          <td><span class="audit-role-badge">Admin</span></td>
+          <td>Published</td>
+          <td>Rule published to production</td>
+        </tr>
+        <tr>
+          <td class="audit-timestamp">Feb 28 13:45</td>
+          <td class="audit-user">Audit Service</td>
+          <td><span class="audit-role-badge">Auditor</span></td>
+          <td>Viewed</td>
+          <td>Compliance audit review</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  // Tab switching
+  document.querySelectorAll('.detail-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.tab-pane[data-pane="${tab.dataset.tab}"]`).classList.add('active');
+    });
+  });
 }
 
-// ══════════════════════════════════════════ TABS ══════════════════════════════════════════
+function setupEventListeners() {
+  // Search
+  document.getElementById('searchInput').addEventListener('input', renderRulesList);
 
-function showTab(tabId) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('visible'));
-  event.target.classList.add('active');
-  document.getElementById('tab-' + tabId).classList.add('visible');
+  // Program Switcher
+  document.getElementById('programSwitcher').addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.classList.toggle('active');
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('programSwitcher').classList.remove('active');
+  });
+
+  // Notification Bell
+  document.getElementById('notificationBell').addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.classList.toggle('active');
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('notificationBell').classList.remove('active');
+  });
+
+  // What's Changed Dismiss
+  document.querySelector('.whats-changed-dismiss').addEventListener('click', () => {
+    document.getElementById('whatsChanged').style.display = 'none';
+  });
+
+  // Import Button
+  document.getElementById('importBtn').addEventListener('click', () => {
+    document.getElementById('uploadModal').classList.add('active');
+    resetUploadModal();
+  });
+
+  // Upload Modal Close
+  document.querySelector('.upload-close').addEventListener('click', () => {
+    document.getElementById('uploadModal').classList.remove('active');
+  });
+
+  // Upload Zone
+  const uploadZone = document.getElementById('uploadZone');
+  uploadZone.addEventListener('click', simulateUpload);
+  uploadZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadZone.classList.add('active');
+  });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('active'));
+
+  // Simulate Impact
+  document.getElementById('simulateBtn').addEventListener('click', () => {
+    document.getElementById('impactModal').classList.add('active');
+    document.getElementById('impactTitle').textContent = `Impact Analysis: ${currentRule.name}`;
+    document.getElementById('impactDirect').innerHTML = `
+      <div class="impact-item">✓ FED-001 CMS CoP Compliance</div>
+      <div class="impact-item">✓ OH-007 Patient Safety Reporting</div>
+    `;
+    document.getElementById('impactIndirect').innerHTML = `
+      <div class="impact-item">→ OH-016 Nursing Staffing Ratios</div>
+      <div class="impact-item">→ OH-002 Emergency Department Staffing</div>
+    `;
+    document.getElementById('impactConflicts').innerHTML = `
+      <div class="impact-item">⚠ Potential threshold overlap with OH-009</div>
+    `;
+  });
+
+  document.getElementById('impactClose').addEventListener('click', () => {
+    document.getElementById('impactModal').classList.remove('active');
+  });
+
+  // Export buttons in sidebar footer
+  const footer = document.createElement('div');
+  footer.style.cssText = 'display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);';
+  footer.innerHTML = `
+    <button id="exportJson" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer;">Export JSON</button>
+    <button id="exportPdf" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer;">Export PDF</button>
+  `;
+  document.querySelector('.sidebar').appendChild(footer);
+
+  document.getElementById('exportJson').addEventListener('click', () => {
+    showToast('Exported 24 rules to ontology-export.json');
+  });
+
+  document.getElementById('exportPdf').addEventListener('click', () => {
+    showToast('Exported 24 rules to ontology-export.pdf');
+  });
 }
 
-// ══════════════════════════════════════════ ACTIONS ══════════════════════════════════════════
-
-function saveDraft() {
-  const rule = RULES.find(r => r.id === selectedRuleId);
-  if (rule) {
-    rule.status = 'DRAFT';
-    selectRule(selectedRuleId);
-    renderRuleList();
-    alert('Rule saved as draft. Changes will not affect live evaluations until published.');
-  }
+function resetUploadModal() {
+  document.getElementById('extractionResults').style.display = 'none';
+  document.getElementById('uploadZone').classList.remove('active');
+  document.getElementById('uploadZone').style.pointerEvents = 'auto';
 }
 
-function submitForReview() {
-  const rule = RULES.find(r => r.id === selectedRuleId);
-  if (rule && rule.status === 'DRAFT') {
-    alert('Rule submitted for review.\n\nIn production, this would:\n1. Notify the ontology review team\n2. Lock the draft from further edits\n3. Require approval from a senior policy analyst\n4. Run automated regression tests\n5. Generate an impact simulation report\n\nAfter approval, the rule would be published to the live ontology.');
-  } else {
-    alert('New version created as draft.\n\nThe current active version remains in effect. Your changes are saved as a new draft version that must be reviewed and approved before going live.');
-    if (rule) {
-      rule.status = 'DRAFT';
-      selectRule(selectedRuleId);
-      renderRuleList();
-    }
-  }
+function simulateUpload() {
+  document.getElementById('uploadZone').style.pointerEvents = 'none';
+  document.getElementById('extractionResults').style.display = 'block';
+
+  setTimeout(() => {
+    document.getElementById('progressDot').style.display = 'none';
+    document.getElementById('extractionStatus').textContent = 'Successfully extracted 3 draft rules';
+    document.getElementById('extractionCitation').textContent = 'Source: Ohio Revised Code § 3702.30';
+
+    document.getElementById('draftRules').innerHTML = `
+      <div class="draft-rule">
+        <div class="draft-rule-name">Hospital Telehealth Requirements</div>
+        <div class="draft-rule-citation">ORC § 3702.30(B)(2)</div>
+        <div class="draft-rule-preview">IF telehealth_enabled AND licensed_provider THEN require_patient_consent</div>
+        <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-high">High Confidence</span></div>
+        <div class="draft-actions">
+          <button class="accept">Accept</button>
+          <button>Edit</button>
+          <button>Reject</button>
+        </div>
+      </div>
+      <div class="draft-rule">
+        <div class="draft-rule-name">Bed Capacity Verification</div>
+        <div class="draft-rule-citation">ORC § 3702.30(A)(1)</div>
+        <div class="draft-rule-preview">IF net_bed_change > 0 THEN require_con_approval</div>
+        <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-high">High Confidence</span></div>
+        <div class="draft-actions">
+          <button class="accept">Accept</button>
+          <button>Edit</button>
+          <button>Reject</button>
+        </div>
+      </div>
+      <div class="draft-rule">
+        <div class="draft-rule-name">Quality Metrics Reporting</div>
+        <div class="draft-rule-citation">ORC § 3702.30(C)</div>
+        <div class="draft-rule-preview">IF cms_surveyed THEN report_quality_metrics_quarterly</div>
+        <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-medium">Medium Confidence</span></div>
+        <div class="draft-actions">
+          <button class="accept">Accept</button>
+          <button>Edit</button>
+          <button>Reject</button>
+        </div>
+      </div>
+    `;
+  }, 1500);
 }
 
-function showImpactModal() {
-  document.getElementById('impact-modal').classList.add('visible');
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
-function closeImpactModal() {
-  document.getElementById('impact-modal').classList.remove('visible');
-}
-
-// ══════════════════════════════════════════ INIT ══════════════════════════════════════════
-
-renderRuleList();
+// Start
+init();
 </script>
 </body>
 </html>
