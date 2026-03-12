@@ -1,0 +1,136 @@
+# GovPoint – Project Context for Claude Code
+
+## Project Overview
+
+**GovPoint** is a "Policy Intelligence Infrastructure for Government" – a clickable demo that lets government agencies manage regulatory rules, evaluate license applications, and track compliance changes.
+
+- **Live URL**: https://govpoint-demo-8j38.vercel.app
+- **GitHub repo**: kevin-s-potter/govpoint-demo (auto-deploys to Vercel on push)
+- **Owner**: Kevin Potter, Aimpoint Technology (kevin@aimpointtechnology.com)
+
+## Architecture
+
+- **Frontend**: Standalone HTML files with inline CSS + JavaScript (no build step, no frameworks, no bundler)
+- **Database**: Supabase PostgreSQL (free tier)
+  - URL: `https://fshdlcveidwwufdigekh.supabase.co`
+  - Anon key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY`
+- **Hosting**: Vercel (auto-deploys from GitHub on push to main)
+- **API pattern**: Supabase REST API – every fetch uses both `apikey` and `Authorization: Bearer` headers
+- **Design system**: Salesforce Lightning Design System (SLDS) – CSS written to match SLDS aesthetic using SLDS color tokens, not the actual SLDS CDN
+
+## File Structure
+
+```
+govpoint-demo/
+├── index.html          # "New Request" – license evaluation demo (hardcoded scenarios A/B/C)
+├── ontology.html       # Ontology Manager – rule CRUD, 7-tab detail panel, Supabase write-back
+├── dashboard.html      # Analytics Dashboard – metrics, charts, activity table from audit_log
+├── audit-log.html      # Audit Log – filterable/paginated table with stats
+├── vercel.json         # Vercel config
+├── database/
+│   ├── 01_create_tables.sql    # Schema definition (11 tables)
+│   ├── 02_seed_data.sql        # Ohio hospital licensing seed data
+│   ├── 04_add_kentucky_tenant.sql  # Kentucky nursing home program
+│   └── 05_add_snap_program.sql     # SNAP benefits (183 rules)
+└── data/
+    └── schema.json     # Reference data model (JSON)
+```
+
+## Multi-Tenant / Multi-Program Model
+
+Every table has `tenant_id`. Programs live within tenants. Each HTML file has a `PROGRAM_CONFIG` object:
+
+```javascript
+const PROGRAM_CONFIG = {
+  'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 23 },
+  'snap':           { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'SNAP Benefits',      userId: 'user-001', ruleCount: 183 },
+  'nursing-home':   { tenant: 'ky-chfs',  abbr: 'CHFS', name: 'Kentucky CHFS',            programName: 'Nursing Home Licensing', userId: 'user-101', ruleCount: 8 }
+};
+```
+
+Each page has a program switcher dropdown calling `switchProgram(programId)` to update UI and reload data.
+
+## Consistent Nav (all 4 pages)
+
+Dark navy header (#032D60) with:
+1. GovPoint logo
+2. Program switcher dropdown (programs grouped by tenant)
+3. Nav links: **New Request** | **Ontology** | **Dashboard**
+4. Notification bell with dropdown
+5. User indicator (Sarah Chen / SC for Ohio, Maria Torres / MT for Kentucky)
+
+When adding a new program, ALL 4 HTML files need their PROGRAM_CONFIG and tenant-switcher dropdown updated.
+
+## SLDS Color Tokens
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| Brand blue | #0176D3 | Primary buttons, links, active states |
+| Navy dark | #032D60 | Header background, dark text headings |
+| Success | #2E844A | Active status, approvals |
+| Warning | #DD7A01 | Draft status, submit for review |
+| Error | #BA0517 | Sunset status, error states |
+| Purple | #9050E9 | In Review status, special badges |
+| Background | #F3F3F3 | Page background |
+| Card white | #FFFFFF | Card/panel backgrounds |
+| Border | #E5E5E5 | Card borders, dividers |
+| Text dark | #16325C | Headings, primary text |
+| Text label | #54698D | Labels, secondary text, timestamps |
+
+## Database Schema
+
+```
+tenants ──┬── programs ──── rules ───┬── rule_conditions
+          │                          ├── rule_dependencies
+          ├── users ─── user_roles   ├── rule_versions
+          │                          ├── comments
+          └── notifications          └── audit_log
+```
+
+### Current data
+- 2 tenants: `ohio-odh` (Ohio Dept of Health), `ky-chfs` (Kentucky CHFS)
+- 3 programs: Hospital Licensing (23 rules), SNAP Benefits (183 rules), Nursing Home Licensing (8 rules)
+- 214 total rules
+
+### ID conventions
+- `rule_id`: 2-3 letter prefix + number (OH-001, SNAP-001, NH-001)
+- `condition_id`: cond-{rule_id}-{seq} (cond-OH-001-01)
+- `dep_id`: dep-{rule_id}-{seq}
+- `status` values: always **lowercase** – 'active', 'draft', 'review', 'sunset'
+- User IDs: user-001 to user-003 (Ohio), user-101 to user-102 (Kentucky)
+- Timestamps: ISO format with timezone (-05 for Eastern)
+
+### Supabase query pattern
+```javascript
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_KEY = '...'; // anon key above
+
+async function query(table, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return await res.json();
+}
+```
+
+## Critical Rules
+
+1. **No external JS files** – all Supabase API code is inlined in each HTML file
+2. **Case-insensitive status** – DB stores lowercase, UI compares with `.toLowerCase()`
+3. **PROGRAM_CONFIG consistency** – must match across all 4 HTML files
+4. **Dashboard scoping** – `dashFilter` variable ('current', 'tenant', 'all') controls query scope
+5. **index.html is hardcoded** – evaluation logic is not database-driven (intentional for demo reliability)
+6. **Ontology write-back** – ontology.html has GovPointAPI class with saveRule(), discardChanges(), sendComment()
+7. **Audit everything** – database changes should include audit_log INSERT statements
+
+## Adding a New Program (checklist)
+
+1. Create SQL file: `database/XX_add_<program>.sql` with INSERTs for programs, rules, rule_conditions, rule_dependencies, audit_log, notifications
+2. Add PROGRAM_CONFIG entry to all 4 HTML files
+3. Add tenant-switcher dropdown option to all 4 HTML files
+4. Update USER_DISPLAY if new tenant needs new users
+5. Test that program switcher loads data correctly on all pages
