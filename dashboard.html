@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GovPoint | Analytics Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
   :root {
     --slds-blue-brand: #0176D3;
     --slds-blue-dark: #014486;
@@ -34,7 +33,7 @@
   }
 
   body {
-    font-family: 'Salesforce Sans', 'Inter', -apple-system, system-ui, sans-serif;
+    font-family: 'Salesforce Sans', -apple-system, system-ui, sans-serif;
     background: var(--slds-bg);
     color: var(--slds-text-dark);
     line-height: 1.5;
@@ -298,13 +297,17 @@
   }
 
   /* -- MAIN CONTENT -- */
-  .container {
-    max-width: 1440px;
-    margin: 0 auto;
+  .slds-scope {
+    background: var(--slds-bg);
     padding: 24px 32px;
   }
 
-  /* -- PAGE HEADER -- */
+  .container {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  /* -- PAGE HEADER (SLDS) -- */
   .page-header {
     display: flex;
     align-items: flex-start;
@@ -459,7 +462,7 @@
     margin-top: 4px;
   }
 
-  /* -- CHART CARDS -- */
+  /* -- CHART CARDS (SLDS) -- */
   .charts-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -668,7 +671,7 @@
     text-shadow: 0 1px 1px rgba(0,0,0,0.15);
   }
 
-  /* -- ACTIVITY TABLE -- */
+  /* -- ACTIVITY TABLE (SLDS) -- */
   .table-wrapper {
     overflow-x: auto;
   }
@@ -748,7 +751,7 @@
 
   @media (max-width: 768px) {
     .topnav { padding: 0 16px; height: 48px; }
-    .container { padding: 16px; }
+    .slds-scope { padding: 16px; }
     .metrics-row { grid-template-columns: repeat(2, 1fr); }
     .page-header { flex-direction: column; }
     .dash-filter { width: 100%; }
@@ -757,6 +760,9 @@
 </style>
 </head>
 <body>
+
+<!-- SLDS SCOPE WRAPPER -->
+<div class="slds-scope">
 
 <!-- GLOBAL HEADER -->
 <nav class="topnav">
@@ -806,7 +812,7 @@
 
   <div class="nav-controls">
     <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
-      <span>&x1F514;</span>
+      <span>&#x1F514;</span>
       <span class="notification-badge">3</span>
       <div class="notification-dropdown">
         <div class="notification-dropdown-header">Notifications</div>
@@ -836,127 +842,132 @@
 </nav>
 
 <!-- MAIN CONTENT -->
-<div class="container">
+<div style="background: var(--slds-bg); padding: 24px 32px;">
+  <div class="container">
 
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Dashboard</h1>
-      <p class="page-subtitle" id="pageSubtitle">Analytics and metrics for Hospital Licensing</p>
-    </div>
-    <div class="dash-filter">
-      <span class="dash-filter-label">Scope</span>
-      <div class="dash-filter-pills">
-        <button class="dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
-        <button class="dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">This Tenant</button>
-        <button class="dash-pill" data-filter="all" onclick="setDashFilter('all')">All Tenants</button>
+    <!-- PAGE HEADER -->
+    <div class="slds-page-header page-header">
+      <div>
+        <h1 class="slds-page-header__title page-title">Dashboard</h1>
+        <p class="page-subtitle" id="pageSubtitle">Analytics and metrics for Hospital Licensing</p>
+      </div>
+      <div class="dash-filter">
+        <span class="dash-filter-label">Scope</span>
+        <div class="dash-filter-pills">
+          <button class="slds-button dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
+          <button class="slds-button dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">This Tenant</button>
+          <button class="slds-button dash-pill" data-filter="all" onclick="setDashFilter('all')">All Tenants</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- METRICS ROW -->
-  <div class="metrics-row">
-    <div class="metric-card mc-total">
-      <div class="metric-icon">&x1F4CB;</div>
-      <div class="metric-number" id="totalRules">-</div>
-      <div class="metric-label">Total Rules</div>
+    <!-- METRICS ROW -->
+    <div class="metrics-row">
+      <div class="slds-box metric-card mc-total">
+        <div class="metric-icon">&#x1F4CB;</div>
+        <div class="metric-number" id="totalRules">-</div>
+        <div class="metric-label">Total Rules</div>
+      </div>
+      <div class="slds-box metric-card mc-active">
+        <div class="metric-icon">&check;</div>
+        <div class="metric-number" id="activeRules">-</div>
+        <div class="metric-label">Active</div>
+      </div>
+      <div class="slds-box metric-card mc-draft">
+        <div class="metric-icon">&#x270E;</div>
+        <div class="metric-number" id="draftRules">-</div>
+        <div class="metric-label">Draft</div>
+      </div>
+      <div class="slds-box metric-card mc-review">
+        <div class="metric-icon">&#x1F441;</div>
+        <div class="metric-number" id="reviewRules">-</div>
+        <div class="metric-label">In Review</div>
+      </div>
+      <div class="slds-box metric-card mc-conditions">
+        <div class="metric-icon">&#x2699;</div>
+        <div class="metric-number" id="conditionCount">-</div>
+        <div class="metric-label">Conditions</div>
+      </div>
+      <div class="slds-box metric-card mc-deps">
+        <div class="metric-icon">&#x1F517;</div>
+        <div class="metric-number" id="depCount">-</div>
+        <div class="metric-label">Dependencies</div>
+      </div>
     </div>
-    <div class="metric-card mc-active">
-      <div class="metric-icon">&check;</div>
-      <div class="metric-number" id="activeRules">-</div>
-      <div class="metric-label">Active</div>
-    </div>
-    <div class="metric-card mc-draft">
-      <div class="metric-icon">&x270E;</div>
-      <div class="metric-number" id="draftRules">-</div>
-      <div class="metric-label">Draft</div>
-    </div>
-    <div class="metric-card mc-review">
-      <div class="metric-icon">&x1F441;</div>
-      <div class="metric-number" id="reviewRules">-</div>
-      <div class="metric-label">In Review</div>
-    </div>
-    <div class="metric-card mc-conditions">
-      <div class="metric-icon">&x2699;</div>
-      <div class="metric-number" id="conditionCount">-</div>
-      <div class="metric-label">Conditions</div>
-    </div>
-    <div class="metric-card mc-deps">
-      <div class="metric-icon">&x1F517;</div>
-      <div class="metric-number" id="depCount">-</div>
-      <div class="metric-label">Dependencies</div>
-    </div>
-  </div>
 
-  <!-- CHARTS GRID -->
-  <div class="charts-grid">
+    <!-- CHARTS GRID -->
+    <div class="charts-grid">
 
-    <!-- STATUS DONUT CHART -->
-    <div class="chart-card">
+      <!-- STATUS DONUT CHART -->
+      <article class="slds-card chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Rules by Status</div>
+          <div class="chart-total" id="statusTotal">0 total</div>
+        </div>
+        <div class="donut-layout">
+          <div class="donut-container" id="donutChart"></div>
+          <div class="donut-legend" id="donutLegend"></div>
+        </div>
+      </article>
+
+      <!-- JURISDICTION SEGMENTED BAR -->
+      <article class="slds-card chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Rules by Jurisdiction</div>
+          <div class="chart-total" id="jurisdictionTotal">0 total</div>
+        </div>
+        <div id="jurisdictionChart"></div>
+      </article>
+
+      <!-- TYPE HORIZONTAL BAR -->
+      <article class="slds-card chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Top Rule Types</div>
+          <div class="chart-total" id="typeTotal">0 total</div>
+        </div>
+        <div class="hbar-chart" id="typeChart"></div>
+      </article>
+
+      <!-- PHASE HORIZONTAL BAR -->
+      <article class="slds-card chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Rules by Phase</div>
+          <div class="chart-total" id="phaseTotal">0 total</div>
+        </div>
+        <div class="hbar-chart" id="phaseChart"></div>
+      </article>
+
+    </div>
+
+    <!-- ACTIVITY TABLE -->
+    <article class="slds-card chart-card">
       <div class="chart-header">
-        <div class="chart-title">Rules by Status</div>
-        <div class="chart-total" id="statusTotal">0 total</div>
+        <div class="chart-title">Recent Activity</div>
+        <div class="chart-total" id="activityTotal"></div>
       </div>
-      <div class="donut-layout">
-        <div class="donut-container" id="donutChart"></div>
-        <div class="donut-legend" id="donutLegend"></div>
+      <div class="table-wrapper">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered data-table" id="activityTable">
+          <thead>
+            <tr class="slds-line-height_reset">
+              <th>Timestamp</th>
+              <th>Action</th>
+              <th>User</th>
+              <th>Target</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody id="activityTableBody">
+            <tr><td colspan="5" style="text-align:center; padding:32px; color:var(--slds-text-label);">Loading dashboard data...</td></tr>
+          </tbody>
+        </table>
       </div>
-    </div>
-
-    <!-- JURISDICTION SEGMENTED BAR -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Rules by Jurisdiction</div>
-        <div class="chart-total" id="jurisdictionTotal">0 total</div>
-      </div>
-      <div id="jurisdictionChart"></div>
-    </div>
-
-    <!-- TYPE HORIZONTAL BAR -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Top Rule Types</div>
-        <div class="chart-total" id="typeTotal">0 total</div>
-      </div>
-      <div class="hbar-chart" id="typeChart"></div>
-    </div>
-
-    <!-- PHASE HORIZONTAL BAR -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">Rules by Phase</div>
-        <div class="chart-total" id="phaseTotal">0 total</div>
-      </div>
-      <div class="hbar-chart" id="phaseChart"></div>
-    </div>
+    </article>
 
   </div>
-
-  <!-- ACTIVITY TABLE -->
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="chart-title">Recent Activity</div>
-      <div class="chart-total" id="activityTotal"></div>
-    </div>
-    <div class="table-wrapper">
-      <table class="data-table" id="activityTable">
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Action</th>
-            <th>User</th>
-            <th>Target</th>
-            <th>Detail</th>
-          </tr>
-        </thead>
-        <tbody id="activityTableBody">
-          <tr><td colspan="5" style="text-align:center; padding:32px; color:var(--slds-text-label);">Loading dashboard data...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+</div>
 
 </div>
+<!-- END SLDS SCOPE WRAPPER -->
 
 <script>
   // ============================================================
@@ -1314,7 +1325,7 @@
 
       return `<tr>
         <td style="white-space:nowrap; color:var(--slds-text-label); font-size:12px;">${timeStr}</td>
-        <td><span class="action-badge ${e.action}">${actionLabel}</span></td>
+        <td><span class="slds-badge action-badge ${e.action}">${actionLabel}</span></td>
         <td>${userName}</td>
         <td>${targetDisplay}</td>
         <td>${e.detail || '\u2014'}</td>

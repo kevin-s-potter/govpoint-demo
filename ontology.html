@@ -4,274 +4,1312 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GovPoint | Ontology Manager</title>
+<link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <style>
   :root {
-    --navy: #003366;
-    --navy-deep: #0E3F75;
-    --accent: #14499E;
-    --accent-light: #E8EFF8;
-    --ohio-red: #C41230;
-    --ohio-red-light: #FDEDEF;
-    --green: #2E7D32;
-    --green-light: #E8F5E9;
-    --amber: #D84315;
-    --amber-light: #FFF3E0;
-    --red: #C41230;
-    --red-light: #FDEDEF;
-    --purple: #7B1FA2;
-    --purple-light: #F3E5F5;
-    --gray: #4E4D4D;
-    --light-gray: #F2F2F2;
-    --border: #D0D5DD;
-    --white: #FFFFFF;
+    --slds-blue: #0176D3;
+    --slds-blue-dark: #014486;
+    --slds-blue-light: #1B96FF;
+    --slds-navy: #032D60;
+    --slds-success: #2E844A;
+    --slds-warning: #DD7A01;
+    --slds-error: #BA0517;
+    --slds-purple: #9050E9;
+    --slds-bg: #F3F3F3;
+    --slds-card: #FFFFFF;
+    --slds-border: #e5e5e5;
+    --slds-shadow: 0 2px 2px rgba(0,0,0,0.05);
+    --slds-radius: 0.25rem;
     --text: #1A1A2E;
     --text-secondary: #4A5568;
-    --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-    --radius: 6px;
-    --radius-lg: 8px;
   }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--light-gray); color: var(--text); line-height: 1.6; }
+
+  body {
+    font-family: 'Salesforce Sans', 'Inter', -apple-system, system-ui, sans-serif;
+    background: var(--slds-bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
 
   /* ── STATE BANNER ── */
-  .state-banner { background: var(--light-gray); padding: 4px 32px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
-  .state-banner a { color: var(--ohio-red); text-decoration: none; font-weight: 600; }
+  .state-banner {
+    background: var(--slds-bg);
+    padding: 8px 32px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--slds-border);
+  }
 
-  /* ── NAV ── */
-  .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
-  .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
-  .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+  .state-banner a {
+    color: var(--slds-error);
+    text-decoration: none;
+    font-weight: 600;
+  }
 
-  .topnav .nav-spacer { margin-left: auto; }
-  .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
-  .topnav .nav-links { display: flex; gap: 24px; }
-  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
-  .topnav .nav-links a:hover { color: var(--ohio-red); }
-  .topnav .nav-links a.active { color: var(--ohio-red); }
+  /* ── TOP NAV ── */
+  .topnav {
+    background: var(--slds-navy);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 24px;
+  }
 
-  .notification-bell { position: relative; cursor: pointer; font-size: 18px; margin-right: 16px; }
-  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--ohio-red, #C41230); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
-  .notification-dropdown.show { display: block; }
-  .notification-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; line-height: 1.4; }
-  .notification-item:last-child { border-bottom: none; }
-  .notification-time { color: #888; font-size: 11px; margin-top: 4px; }
+  .topnav .logo {
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
 
-  .role-indicator { display: flex; align-items: center; gap: 12px; }
-  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
-  .role-text { font-size: 13px; line-height: 1.4; }
-  .role-text .user-name { color: var(--navy); font-weight: 600; }
-  .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
+  .topnav .logo .ohio-mark {
+    color: #FFFFFF;
+    font-style: italic;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+  }
+
+  .topnav .nav-spacer {
+    margin-left: auto;
+  }
+
+  .topnav .nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .topnav .nav-links {
+    display: flex;
+    gap: 20px;
+  }
+
+  .topnav .nav-links a {
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: opacity 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .topnav .nav-links a:hover {
+    opacity: 0.8;
+  }
+
+  .topnav .nav-links a.active {
+    border-bottom: 3px solid var(--slds-blue-light);
+    padding-bottom: 2px;
+  }
+
+  .notification-bell {
+    position: relative;
+    cursor: pointer;
+    font-size: 18px;
+    color: #FFFFFF;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    background: var(--slds-error);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--slds-card);
+    border: 1px solid var(--slds-border);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 320px;
+    z-index: 200;
+    margin-top: 8px;
+  }
+
+  .notification-dropdown.show {
+    display: block;
+  }
+
+  .notification-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--slds-bg);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .notification-item:last-child {
+    border-bottom: none;
+  }
+
+  .notification-time {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .role-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--slds-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .role-text {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #FFFFFF;
+  }
+
+  .role-text .user-name {
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .role-text .user-role {
+    color: rgba(255,255,255,0.8);
+    font-size: 11px;
+  }
 
   /* ── TENANT SWITCHER ── */
-  .tenant-switcher { position: relative; margin-left: 24px; }
-  .tenant-switcher-btn { background: var(--accent-light); color: var(--navy); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-  .tenant-switcher-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-  .tenant-switcher-dropdown { display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; z-index: 200; margin-top: 8px; overflow: hidden; }
-  .tenant-switcher-dropdown.show { display: block; }
-  .tenant-option { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 13px; transition: background 0.15s; }
-  .tenant-option:hover { background: var(--accent-light); }
-  .tenant-option.active { background: var(--accent-light); font-weight: 600; }
-  .tenant-option .tenant-check { width: 16px; color: var(--accent); font-weight: 700; }
-  .tenant-option .tenant-info { flex: 1; }
-  .tenant-option .tenant-name { color: var(--navy); font-weight: 600; }
-  .tenant-option .tenant-detail { font-size: 11px; color: var(--text-secondary); }
+  .tenant-switcher {
+    position: relative;
+  }
+
+  .tenant-switcher-btn {
+    background: transparent;
+    color: #FFFFFF;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 3px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .tenant-switcher-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  .tenant-switcher-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--slds-card);
+    border: 1px solid var(--slds-border);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 280px;
+    z-index: 200;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .tenant-switcher-dropdown.show {
+    display: block;
+  }
+
+  .tenant-option {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    transition: background 0.15s;
+  }
+
+  .tenant-option:hover {
+    background: var(--slds-bg);
+  }
+
+  .tenant-option.active {
+    background: var(--slds-bg);
+    font-weight: 600;
+  }
+
+  .tenant-option .tenant-check {
+    width: 16px;
+    color: var(--slds-blue);
+    font-weight: 700;
+  }
+
+  .tenant-option .tenant-info {
+    flex: 1;
+  }
+
+  .tenant-option .tenant-name {
+    color: var(--slds-navy);
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .tenant-option .tenant-detail {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
 
   /* ── LAYOUT ── */
-  .container { display: flex; height: calc(100vh - 64px - 18px); }
-  .sidebar { width: 280px; background: var(--white); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px; }
-  .main { flex: 1; display: flex; flex-direction: column; }
+  .container {
+    display: flex;
+    height: calc(100vh - 64px - 40px);
+  }
 
-  /* What's Changed Digest */
-  .whats-changed { background: var(--accent-light); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 12px; margin-bottom: 16px; }
-  .whats-changed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .whats-changed-title { font-size: 13px; font-weight: 700; color: var(--navy); }
-  .whats-changed-dismiss { font-size: 11px; color: var(--accent); cursor: pointer; text-decoration: underline; }
-  .whats-changed-items { display: flex; flex-direction: column; gap: 8px; }
-  .change-item { padding: 8px; background: var(--white); border-radius: var(--radius); border-left: 4px solid var(--navy); font-size: 12px; display: flex; gap: 8px; align-items: flex-start; }
-  .change-item.draft { border-left-color: var(--amber); }
-  .change-item.active { border-left-color: var(--green); }
-  .change-item.sunset { border-left-color: var(--red); }
-  .change-item.label { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 3px; min-width: fit-content; }
-  .change-item.label.draft { background: var(--amber-light); color: var(--amber); }
-  .change-item.label.active { background: var(--green-light); color: var(--green); }
-  .change-item.label.sunset { background: var(--red-light); color: var(--red); }
-  .change-item-text { flex: 1; }
+  .sidebar {
+    width: 280px;
+    background: var(--slds-card);
+    border-right: 1px solid var(--slds-border);
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* What's Changed Accordion */
+  .whats-changed {
+    background: var(--slds-bg);
+    border: 1px solid var(--slds-border);
+    border-radius: 2px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .whats-changed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+
+  .whats-changed-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slds-navy);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .whats-changed-count {
+    font-size: 11px;
+    color: var(--slds-blue);
+    font-weight: 600;
+  }
+
+  .whats-changed-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .change-item {
+    padding: 8px;
+    background: var(--slds-card);
+    border-radius: 2px;
+    border-left: 3px solid var(--slds-navy);
+    font-size: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .change-item.draft {
+    border-left-color: var(--slds-warning);
+  }
+
+  .change-item.active {
+    border-left-color: var(--slds-success);
+  }
+
+  .change-item.sunset {
+    border-left-color: var(--slds-error);
+  }
+
+  .change-item.label {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    min-width: fit-content;
+    text-transform: uppercase;
+  }
+
+  .change-item.label.draft {
+    background: #FFF3D8;
+    color: var(--slds-warning);
+  }
+
+  .change-item.label.active {
+    background: #D4EDDA;
+    color: var(--slds-success);
+  }
+
+  .change-item.label.sunset {
+    background: #F8D7DA;
+    color: var(--slds-error);
+  }
+
+  .change-item-text {
+    flex: 1;
+  }
 
   /* Search/Filter */
-  .sidebar-search { position: relative; margin-bottom: 16px; }
-  .sidebar-search input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; }
-  .sidebar-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .sidebar-search {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--slds-border);
+    border-radius: 2px;
+    font-size: 12px;
+    font-family: inherit;
+  }
+
+  .sidebar-search input:focus {
+    outline: none;
+    border-color: var(--slds-blue);
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1);
+  }
 
   /* Action Buttons */
-  .sidebar-actions { display: flex; gap: 8px; margin-bottom: 16px; }
-  .sidebar-actions button { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--white); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
-  .sidebar-actions button:hover { background: var(--light-gray); }
-  .sidebar-actions button.primary { background: var(--navy); color: white; border-color: var(--navy); }
-  .sidebar-actions button.primary:hover { background: var(--navy-deep); }
+  .sidebar-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .sidebar-actions button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid var(--slds-border);
+    background: var(--slds-card);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sidebar-actions button:hover {
+    background: var(--slds-bg);
+    border-color: var(--slds-border);
+  }
+
+  .sidebar-actions button.primary {
+    background: var(--slds-blue);
+    color: white;
+    border-color: var(--slds-blue);
+  }
+
+  .sidebar-actions button.primary:hover {
+    background: var(--slds-blue-dark);
+    border-color: var(--slds-blue-dark);
+  }
 
   /* Rules List */
-  .rules-list { display: flex; flex-direction: column; gap: 8px; }
-  .rule-card { padding: 12px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
-  .rule-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
-  .rule-card.active { background: var(--accent-light); border-color: var(--accent); }
-  .rule-name { font-weight: 600; color: var(--navy); font-size: 13px; margin-bottom: 4px; }
-  .rule-status { font-size: 11px; display: inline-block; padding: 2px 8px; border-radius: 3px; background: var(--amber-light); color: var(--amber); }
-  .rule-status.review { background: var(--purple-light); color: var(--purple); }
-  .rule-status.active { background: var(--green-light); color: var(--green); }
+  .rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rule-card {
+    padding: 12px;
+    background: var(--slds-card);
+    border: 1px solid var(--slds-border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .rule-card:hover {
+    border-color: var(--slds-blue);
+    box-shadow: var(--slds-shadow);
+  }
+
+  .rule-card.active {
+    background: var(--slds-bg);
+    border-color: var(--slds-blue);
+  }
+
+  .rule-name {
+    font-weight: 600;
+    color: var(--slds-navy);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .rule-status {
+    font-size: 10px;
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: #FFF3D8;
+    color: var(--slds-warning);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .rule-status.review {
+    background: #E7D4F5;
+    color: var(--slds-purple);
+  }
+
+  .rule-status.active {
+    background: #D4EDDA;
+    color: var(--slds-success);
+  }
 
   /* Detail Panel */
-  .detail-panel { flex: 1; display: flex; flex-direction: column; background: var(--white); border-left: 1px solid var(--border); }
-  .detail-header { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
-  .detail-title { font-size: 24px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-  .detail-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 16px; }
-  .detail-actions { display: flex; gap: 8px; }
-  .detail-actions button { padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--white); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
-  .detail-actions button:hover { background: var(--light-gray); }
-  .detail-actions button.primary { background: var(--navy); color: white; border-color: var(--navy); }
-  .detail-actions button.primary:hover { background: var(--navy-deep); }
+  .detail-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--slds-card);
+    border-left: 1px solid var(--slds-border);
+  }
 
-  /* Tabs */
-  .detail-tabs { display: flex; gap: 0; padding: 0 32px; border-bottom: 1px solid var(--border); background: var(--white); overflow-x: auto; }
-  .detail-tab { padding: 16px 20px; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
-  .detail-tab:hover { color: var(--navy); }
-  .detail-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+  .detail-header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--slds-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .detail-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--slds-navy);
+    margin-bottom: 8px;
+  }
+
+  .detail-meta {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 16px;
+  }
+
+  .detail-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .detail-actions button {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--slds-border);
+    background: var(--slds-card);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .detail-actions button:hover {
+    background: var(--slds-bg);
+  }
+
+  .detail-actions button.primary {
+    background: var(--slds-blue);
+    color: white;
+    border-color: var(--slds-blue);
+  }
+
+  .detail-actions button.primary:hover {
+    background: var(--slds-blue-dark);
+    border-color: var(--slds-blue-dark);
+  }
+
+  /* Tabs - using SLDS pattern */
+  .detail-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--slds-border);
+    background: var(--slds-card);
+    overflow-x: auto;
+  }
+
+  .detail-tab {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .detail-tab:hover {
+    color: var(--slds-navy);
+  }
+
+  .detail-tab.active {
+    color: var(--slds-blue);
+    border-bottom-color: var(--slds-blue);
+  }
 
   /* Tab Content */
-  .detail-content { flex: 1; overflow-y: auto; padding: 24px 32px; }
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
+  .detail-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  .tab-pane h3 {
+    margin-bottom: 16px;
+    color: var(--slds-navy);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
   /* Condition Editor */
-  .condition-row { display: flex; gap: 12px; margin-bottom: 12px; padding: 12px; background: var(--light-gray); border-radius: var(--radius); align-items: center; }
-  .condition-row select, .condition-row input { padding: 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; }
-  .condition-row button { padding: 6px 12px; font-size: 12px; background: var(--red); color: white; border: none; border-radius: var(--radius); cursor: pointer; }
+  .condition-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: var(--slds-bg);
+    border-radius: 2px;
+    align-items: center;
+  }
+
+  .condition-row select,
+  .condition-row input {
+    padding: 8px 12px;
+    border: 1px solid var(--slds-border);
+    border-radius: 2px;
+    font-size: 12px;
+    font-family: inherit;
+  }
+
+  .condition-row select:focus,
+  .condition-row input:focus {
+    outline: none;
+    border-color: var(--slds-blue);
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1);
+  }
+
+  .condition-row button {
+    padding: 6px 12px;
+    font-size: 11px;
+    background: var(--slds-error);
+    color: white;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+  }
 
   /* Dependency Cards */
-  .dep-card { padding: 12px; background: var(--light-gray); border-left: 4px solid var(--navy); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
-  .dep-card:hover { box-shadow: var(--shadow); }
-  .dep-card-title { font-weight: 600; color: var(--navy); font-size: 13px; }
-  .dep-card-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-  .dep-card.impacts-other { border-left-color: var(--amber); }
-  .dep-card.impacted-by { border-left-color: var(--green); }
+  .dep-card {
+    padding: 12px;
+    background: var(--slds-bg);
+    border-left: 3px solid var(--slds-navy);
+    border-radius: 2px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dep-card:hover {
+    box-shadow: var(--slds-shadow);
+  }
+
+  .dep-card-title {
+    font-weight: 600;
+    color: var(--slds-navy);
+    font-size: 12px;
+  }
+
+  .dep-card-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .dep-card.impacts-other {
+    border-left-color: var(--slds-warning);
+  }
+
+  .dep-card.impacted-by {
+    border-left-color: var(--slds-success);
+  }
 
   /* Version History */
-  .version-item { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; }
-  .version-header { display: flex; justify-content: space-between; }
-  .version-num { font-weight: 600; color: var(--navy); }
-  .version-date { font-size: 12px; color: var(--text-secondary); }
-  .version-details { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+  .version-item {
+    padding: 12px;
+    border: 1px solid var(--slds-border);
+    border-radius: 2px;
+    margin-bottom: 8px;
+  }
+
+  .version-header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .version-num {
+    font-weight: 600;
+    color: var(--slds-navy);
+    font-size: 12px;
+  }
+
+  .version-date {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .version-details {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
 
   /* Diff View */
-  .diff-panel { background: var(--light-gray); padding: 12px; border-radius: var(--radius); margin-top: 12px; font-size: 12px; font-family: monospace; }
-  .diff-add { background: var(--green-light); color: var(--green); padding: 2px 4px; border-radius: 2px; }
-  .diff-remove { background: var(--red-light); color: var(--red); padding: 2px 4px; border-radius: 2px; text-decoration: line-through; }
+  .diff-panel {
+    background: var(--slds-bg);
+    padding: 12px;
+    border-radius: 2px;
+    margin-top: 12px;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+  }
 
-  /* Impact Simulation */
-  .impact-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1001; }
-  .impact-modal.active { display: flex; }
-  .impact-content { background: white; border-radius: var(--radius-lg); padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
-  .impact-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 16px; }
-  .impact-section { margin-bottom: 16px; }
-  .impact-section-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; }
-  .impact-item { padding: 8px; background: var(--light-gray); border-radius: var(--radius); margin-bottom: 6px; font-size: 13px; }
-  .impact-close { float: right; cursor: pointer; font-size: 24px; color: var(--text-secondary); }
+  .diff-add {
+    background: #D4EDDA;
+    color: var(--slds-success);
+    padding: 2px 4px;
+    border-radius: 2px;
+  }
+
+  .diff-remove {
+    background: #F8D7DA;
+    color: var(--slds-error);
+    padding: 2px 4px;
+    border-radius: 2px;
+    text-decoration: line-through;
+  }
+
+  /* Impact Simulation Modal */
+  .impact-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+  }
+
+  .impact-modal.active {
+    display: flex;
+  }
+
+  .impact-content {
+    background: var(--slds-card);
+    border-radius: 2px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  .impact-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--slds-navy);
+    margin-bottom: 16px;
+  }
+
+  .impact-section {
+    margin-bottom: 16px;
+  }
+
+  .impact-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .impact-item {
+    padding: 8px 12px;
+    background: var(--slds-bg);
+    border-radius: 2px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .impact-close {
+    float: right;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text-secondary);
+  }
 
   /* Document Upload Modal */
-  .upload-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1001; }
-  .upload-modal.active { display: flex; }
-  .upload-content { background: white; border-radius: var(--radius-lg); padding: 32px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; }
-  .upload-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-  .upload-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+  .upload-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+  }
 
-  .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--light-gray); }
-  .upload-zone:hover { border-color: var(--accent); background: var(--accent-light); }
-  .upload-zone.active { border-color: var(--accent); background: var(--accent-light); }
-  .upload-icon { font-size: 32px; margin-bottom: 12px; }
-  .upload-text { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
-  .upload-hint { font-size: 12px; color: var(--text-secondary); }
+  .upload-modal.active {
+    display: flex;
+  }
 
-  .extraction-results { margin-top: 24px; display: none; }
-  .extraction-header { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .progress-dot { width: 6px; height: 6px; background: var(--amber); border-radius: 50%; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .upload-content {
+    background: var(--slds-card);
+    border-radius: 2px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
 
-  .extraction-citation { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; padding: 8px; background: var(--light-gray); border-radius: var(--radius); }
+  .upload-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--slds-navy);
+    margin-bottom: 8px;
+  }
 
-  .draft-rule { padding: 12px; background: var(--light-gray); border-radius: var(--radius); margin-bottom: 12px; border-left: 4px solid var(--navy); }
-  .draft-rule-name { font-weight: 600; color: var(--navy); font-size: 13px; margin-bottom: 4px; }
-  .draft-rule-citation { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
-  .draft-rule-preview { font-size: 12px; color: var(--text); margin-bottom: 12px; }
-  .confidence-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px; }
-  .confidence-high { background: var(--green-light); color: var(--green); }
-  .confidence-medium { background: var(--amber-light); color: var(--amber); }
-  .confidence-low { background: var(--red-light); color: var(--red); }
-  .draft-actions { display: flex; gap: 6px; }
-  .draft-actions button { padding: 6px 12px; font-size: 11px; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
-  .draft-actions button:hover { background: var(--light-gray); }
-  .draft-actions button.accept { background: var(--green); color: white; border-color: var(--green); }
-  .draft-actions button.accept:hover { background: var(--green-light); color: var(--green); border-color: var(--green); }
+  .upload-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
 
-  .ai-model-indicator { font-size: 11px; color: var(--text-secondary); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 6px; position: relative; }
-  .ai-model-indicator .gear { cursor: help; font-size: 13px; }
+  .upload-zone {
+    border: 2px dashed var(--slds-border);
+    border-radius: 2px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--slds-bg);
+  }
+
+  .upload-zone:hover {
+    border-color: var(--slds-blue);
+    background: rgba(1, 118, 211, 0.05);
+  }
+
+  .upload-zone.active {
+    border-color: var(--slds-blue);
+    background: rgba(1, 118, 211, 0.05);
+  }
+
+  .upload-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .upload-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slds-navy);
+    margin-bottom: 4px;
+  }
+
+  .upload-hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .extraction-results {
+    margin-top: 24px;
+    display: none;
+  }
+
+  .extraction-header {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slds-navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .progress-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--slds-warning);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .extraction-citation {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background: var(--slds-bg);
+    border-radius: 2px;
+  }
+
+  .draft-rule {
+    padding: 12px;
+    background: var(--slds-bg);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--slds-navy);
+  }
+
+  .draft-rule-name {
+    font-weight: 600;
+    color: var(--slds-navy);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .draft-rule-citation {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .draft-rule-preview {
+    font-size: 11px;
+    color: var(--text);
+    margin-bottom: 12px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .confidence-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .confidence-high {
+    background: #D4EDDA;
+    color: var(--slds-success);
+  }
+
+  .confidence-medium {
+    background: #FFF3D8;
+    color: var(--slds-warning);
+  }
+
+  .confidence-low {
+    background: #F8D7DA;
+    color: var(--slds-error);
+  }
+
+  .draft-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .draft-actions button {
+    padding: 6px 12px;
+    font-size: 10px;
+    border: 1px solid var(--slds-border);
+    background: var(--slds-card);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .draft-actions button:hover {
+    background: var(--slds-bg);
+  }
+
+  .draft-actions button.accept {
+    background: var(--slds-success);
+    color: white;
+    border-color: var(--slds-success);
+  }
+
+  .draft-actions button.accept:hover {
+    background: #1e5f37;
+    border-color: #1e5f37;
+  }
+
+  .ai-model-indicator {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--slds-border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+  }
+
+  .ai-model-indicator .gear {
+    cursor: help;
+    font-size: 12px;
+  }
 
   /* Source-Connected View */
-  .source-split { display: flex; gap: 16px; height: 100%; }
-  .source-left, .source-right { flex: 1; overflow-y: auto; }
-  .source-right { background: var(--light-gray); padding: 16px; border-radius: var(--radius); }
-  .source-citation { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-  .source-text { font-size: 13px; color: var(--text); line-height: 1.8; }
-  .source-highlight { background: #FFF59D; padding: 0 2px; }
+  .source-split {
+    display: flex;
+    gap: 16px;
+    height: 100%;
+  }
+
+  .source-left,
+  .source-right {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .source-right {
+    background: var(--slds-bg);
+    padding: 16px;
+    border-radius: 2px;
+  }
+
+  .source-citation {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--slds-navy);
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--slds-border);
+  }
+
+  .source-text {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.8;
+  }
+
+  .source-highlight {
+    background: #FFF59D;
+    padding: 0 2px;
+  }
 
   /* Comments Tab */
-  .comments-thread { margin-bottom: 16px; }
-  .comment { display: flex; gap: 12px; margin-bottom: 16px; }
-  .comment-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-  .comment-body { flex: 1; }
-  .comment-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
-  .comment-author { font-weight: 600; font-size: 13px; color: var(--navy); }
-  .comment-role { font-size: 11px; color: var(--text-secondary); background: var(--light-gray); padding: 2px 6px; border-radius: 3px; }
-  .comment-time { font-size: 11px; color: var(--text-secondary); }
-  .comment-text { font-size: 13px; color: var(--text); line-height: 1.6; }
-  .comment-text .mention { color: var(--accent); font-weight: 600; }
+  .comments-thread {
+    margin-bottom: 16px;
+  }
 
-  .add-comment { padding: 12px; background: var(--light-gray); border-radius: var(--radius); }
-  .add-comment textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; resize: none; font-family: inherit; }
-  .add-comment textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
-  .add-comment-actions { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
-  .add-comment-actions button { padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer; }
-  .add-comment-actions button.send { background: var(--navy); color: white; border-color: var(--navy); }
+  .comment {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
 
-  /* Audit Log Tab */
-  .audit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .audit-table th { background: var(--light-gray); padding: 12px; text-align: left; font-weight: 700; color: var(--navy); border-bottom: 1px solid var(--border); }
-  .audit-table td { padding: 12px; border-bottom: 1px solid var(--border); }
-  .audit-table tr:hover { background: var(--light-gray); }
-  .audit-timestamp { color: var(--text-secondary); font-family: monospace; }
-  .audit-user { font-weight: 600; color: var(--navy); }
-  .audit-role-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; background: var(--accent-light); color: var(--accent); margin-left: 4px; }
+  .comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--slds-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .comment-body {
+    flex: 1;
+  }
+
+  .comment-header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .comment-author {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--slds-navy);
+  }
+
+  .comment-role {
+    font-size: 10px;
+    color: var(--text-secondary);
+    background: var(--slds-bg);
+    padding: 2px 6px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .comment-time {
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+
+  .comment-text {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .comment-text .mention {
+    color: var(--slds-blue);
+    font-weight: 600;
+  }
+
+  .add-comment {
+    padding: 12px;
+    background: var(--slds-bg);
+    border-radius: 2px;
+  }
+
+  .add-comment textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--slds-border);
+    border-radius: 2px;
+    font-size: 12px;
+    resize: none;
+    font-family: inherit;
+  }
+
+  .add-comment textarea:focus {
+    outline: none;
+    border-color: var(--slds-blue);
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1);
+  }
+
+  .add-comment-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: flex-end;
+  }
+
+  .add-comment-actions button {
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid var(--slds-border);
+    background: var(--slds-card);
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  .add-comment-actions button.send {
+    background: var(--slds-blue);
+    color: white;
+    border-color: var(--slds-blue);
+  }
+
+  /* Audit Log Table */
+  .audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .audit-table th {
+    background: var(--slds-bg);
+    padding: 12px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--slds-navy);
+    border-bottom: 1px solid var(--slds-border);
+  }
+
+  .audit-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--slds-border);
+  }
+
+  .audit-table tr:hover {
+    background: var(--slds-bg);
+  }
+
+  .audit-timestamp {
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+  }
+
+  .audit-user {
+    font-weight: 600;
+    color: var(--slds-navy);
+  }
+
+  .audit-role-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: var(--slds-bg);
+    color: var(--slds-blue);
+    text-transform: uppercase;
+  }
 
   /* Toast Notifications */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: white; padding: 12px 16px; border-radius: var(--radius-lg); font-size: 13px; box-shadow: var(--shadow-lg); animation: slideInUp 0.3s ease-out; z-index: 2000; }
-  @keyframes slideInUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--slds-navy);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 2px;
+    font-size: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    animation: slideInUp 0.3s ease-out;
+    z-index: 2000;
+  }
+
+  @keyframes slideInUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
 
   /* Tooltip */
-  .tooltip { position: relative; display: inline-block; }
-  .tooltip .tooltiptext { visibility: hidden; background-color: var(--navy); color: white; text-align: center; padding: 6px 12px; border-radius: var(--radius); font-size: 11px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -60px; width: 120px; opacity: 0; transition: opacity 0.3s; }
-  .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+  .tooltip {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: var(--slds-navy);
+    color: white;
+    text-align: center;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    width: 120px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
 
   /* Responsive */
   @media (max-width: 1200px) {
-    .sidebar { width: 240px; }
+    .sidebar {
+      width: 240px;
+    }
   }
+
   @media (max-width: 768px) {
-    .container { flex-direction: column; }
-    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; }
+    .container {
+      flex-direction: column;
+    }
+
+    .sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--slds-border);
+      max-height: 40vh;
+    }
+
+    .topnav {
+      flex-direction: column;
+      height: auto;
+      padding: 12px 16px;
+      gap: 12px;
+    }
+
+    .nav-links {
+      flex-direction: column;
+      gap: 12px;
+    }
   }
 </style>
 </head>
-<body>
+<body class="slds-scope">
 
 <div class="state-banner">
   <span>Ohio Revised Code Ontology System</span>
@@ -285,11 +1323,11 @@
   </div>
 
   <div class="tenant-switcher">
-    <button class="tenant-switcher-btn" onclick="document.querySelector('.tenant-switcher-dropdown').classList.toggle('show')">
-      <span id="tenantLabel">ODH · Hospital Licensing</span> <span style="font-size: 10px;">▼</span>
+    <button class="tenant-switcher-btn slds-button slds-button_neutral" onclick="document.querySelector('.tenant-switcher-dropdown').classList.toggle('show')">
+      <span id="tenantLabel">ODH · Hospital Licensing</span> <span style="font-size: 9px;">▼</span>
     </button>
     <div class="tenant-switcher-dropdown">
-      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--light-gray);">Ohio Department of Health</div>
+      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--slds-bg);">Ohio Department of Health</div>
       <div class="tenant-option active" data-program="hosp-licensing" onclick="switchProgram('hosp-licensing')">
         <span class="tenant-check">✓</span>
         <div class="tenant-info">
@@ -304,7 +1342,7 @@
           <div class="tenant-detail">SNAP-OH · 183 rules</div>
         </div>
       </div>
-      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--light-gray); border-top: 1px solid var(--light-gray);">Kentucky CHFS</div>
+      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--slds-bg); border-top: 1px solid var(--slds-bg);">Kentucky CHFS</div>
       <div class="tenant-option" data-program="nursing-home" onclick="switchProgram('nursing-home')">
         <span class="tenant-check"></span>
         <div class="tenant-info">
@@ -359,26 +1397,26 @@
     <div class="whats-changed" id="whatsChanged">
       <div class="whats-changed-header" id="whatsChangedToggle" style="cursor: pointer;">
         <span class="whats-changed-title">What's Changed <span id="whatsChangedArrow" style="font-size: 10px; margin-left: 4px;">▼</span></span>
-        <span class="whats-changed-count" id="whatsChangedCount" style="font-size: 11px; color: var(--accent); font-weight: 600;"></span>
+        <span class="whats-changed-count" id="whatsChangedCount" style="font-size: 11px; color: var(--slds-blue); font-weight: 600;"></span>
       </div>
       <div id="whatsChangedBody">
         <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">Since your last login (Mar 8, 2026):</div>
         <div class="whats-changed-items">
           <div style="font-size: 12px; color: var(--text-secondary); padding: 8px;">Loading...</div>
         </div>
-        <a href="audit-log.html" style="display: block; text-align: center; font-size: 11px; color: var(--accent); margin-top: 8px; text-decoration: none; font-weight: 600;">View Full Audit Log →</a>
+        <a href="audit-log.html" style="display: block; text-align: center; font-size: 11px; color: var(--slds-blue); margin-top: 8px; text-decoration: none; font-weight: 600;">View Full Audit Log →</a>
       </div>
     </div>
 
     <!-- Search -->
     <div class="sidebar-search">
-      <input type="text" id="searchInput" placeholder="Search rules...">
+      <input type="text" id="searchInput" placeholder="Search rules..." class="slds-input">
     </div>
 
     <!-- Action Buttons -->
     <div class="sidebar-actions">
-      <button class="primary" id="importBtn">⬆ Import from Document</button>
-      <button id="newRuleBtn">+ New Rule</button>
+      <button class="primary slds-button slds-button_brand" id="importBtn">⬆ Import</button>
+      <button class="slds-button slds-button_neutral" id="newRuleBtn">+ New</button>
     </div>
 
     <!-- Rules List -->
@@ -397,63 +1435,63 @@
         </div>
       </div>
       <div class="detail-actions">
-        <button id="simulateBtn">Simulate Impact</button>
-        <button class="primary" id="submitBtn">Submit for Review</button>
+        <button class="slds-button slds-button_neutral" id="simulateBtn">Simulate Impact</button>
+        <button class="primary slds-button slds-button_brand" id="submitBtn">Submit for Review</button>
       </div>
     </div>
 
     <!-- Tabs -->
-    <div class="detail-tabs" id="detailTabs" style="display: none;">
-      <div class="detail-tab active" data-tab="overview">Overview</div>
-      <div class="detail-tab" data-tab="conditions">Condition Editor</div>
-      <div class="detail-tab" data-tab="dependencies">Dependencies</div>
-      <div class="detail-tab" data-tab="history">Version History</div>
-      <div class="detail-tab" data-tab="source">Source</div>
-      <div class="detail-tab" data-tab="comments">Comments</div>
-      <div class="detail-tab" data-tab="audit">Audit Log</div>
+    <div class="detail-tabs slds-tabs_default" id="detailTabs" style="display: none;">
+      <div class="detail-tab slds-tabs_default__item active" data-tab="overview"><a class="slds-tabs_default__link" href="javascript:void(0)">Overview</a></div>
+      <div class="detail-tab slds-tabs_default__item" data-tab="conditions"><a class="slds-tabs_default__link" href="javascript:void(0)">Conditions</a></div>
+      <div class="detail-tab slds-tabs_default__item" data-tab="dependencies"><a class="slds-tabs_default__link" href="javascript:void(0)">Dependencies</a></div>
+      <div class="detail-tab slds-tabs_default__item" data-tab="history"><a class="slds-tabs_default__link" href="javascript:void(0)">History</a></div>
+      <div class="detail-tab slds-tabs_default__item" data-tab="source"><a class="slds-tabs_default__link" href="javascript:void(0)">Source</a></div>
+      <div class="detail-tab slds-tabs_default__item" data-tab="comments"><a class="slds-tabs_default__link" href="javascript:void(0)">Comments</a></div>
+      <div class="detail-tab slds-tabs_default__item" data-tab="audit"><a class="slds-tabs_default__link" href="javascript:void(0)">Audit</a></div>
     </div>
 
     <!-- Tab Content -->
     <div class="detail-content" id="detailContent" style="display: none;">
       <!-- Overview Tab -->
       <div class="tab-pane active" data-pane="overview">
-        <h3 style="margin-bottom: 16px; color: var(--navy);">Rule Details</h3>
+        <h3>Rule Details</h3>
         <div id="overviewContent"></div>
       </div>
 
       <!-- Condition Editor Tab -->
       <div class="tab-pane" data-pane="conditions">
-        <h3 style="margin-bottom: 16px; color: var(--navy);">Structured Conditions</h3>
+        <h3>Structured Conditions</h3>
         <div id="conditionEditor"></div>
       </div>
 
       <!-- Dependencies Tab -->
       <div class="tab-pane" data-pane="dependencies">
-        <h3 style="margin-bottom: 16px; color: var(--navy);">Related Rules</h3>
+        <h3>Related Rules</h3>
         <div id="dependenciesContent"></div>
       </div>
 
       <!-- Version History Tab -->
       <div class="tab-pane" data-pane="history">
-        <h3 style="margin-bottom: 16px; color: var(--navy);">Version History</h3>
+        <h3>Version History</h3>
         <div id="historyContent"></div>
       </div>
 
       <!-- Source Tab -->
       <div class="tab-pane" data-pane="source">
-        <h3 style="margin-bottom: 16px; color: var(--navy);">Source-Connected View</h3>
+        <h3>Source-Connected View</h3>
         <div id="sourceContent"></div>
       </div>
 
       <!-- Comments Tab -->
       <div class="tab-pane" data-pane="comments">
-        <h3 style="margin-bottom: 16px; color: var(--navy);">Comments & Discussion</h3>
+        <h3>Comments & Discussion</h3>
         <div id="commentsContent"></div>
       </div>
 
       <!-- Audit Log Tab -->
       <div class="tab-pane" data-pane="audit">
-        <h3 style="margin-bottom: 16px; color: var(--navy);">Audit Log</h3>
+        <h3>Audit Log</h3>
         <div id="auditContent"></div>
       </div>
     </div>
@@ -472,7 +1510,7 @@
 <!-- Document Upload Modal -->
 <div class="upload-modal" id="uploadModal">
   <div class="upload-content">
-    <span class="upload-close" style="float: right; cursor: pointer; font-size: 24px;">✕</span>
+    <span class="upload-close" style="float: right; cursor: pointer; font-size: 18px;">✕</span>
     <h2 class="upload-title">Import from Document</h2>
     <p class="upload-subtitle">Upload a statutory document and AI will extract rules</p>
 
@@ -519,6 +1557,8 @@
       <div id="impactConflicts"></div>
     </div>
   </div>
+</div>
+
 </div>
 
 <script>
@@ -819,7 +1859,7 @@ function renderRulesList() {
     <div class="rule-card ${rule.rule_id === currentRule?.rule_id ? 'active' : ''}" data-id="${rule.rule_id}">
       <div class="rule-name">${rule.rule_id}</div>
       <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">${rule.name}</div>
-      <span class="rule-status ${rule.status}" style="font-size: 11px;">${rule.status.toUpperCase()}</span>
+      <span class="rule-status slds-badge ${rule.status}" style="font-size: 11px;">${rule.status.toUpperCase()}</span>
     </div>
   `).join('');
 
@@ -860,8 +1900,8 @@ async function renderDetailPanel() {
 
   // ── OVERVIEW TAB — editable fields from DB ──────────────────
   const r = currentRule;
-  const fieldStyle = 'width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; background: var(--white); transition: border-color 0.2s, box-shadow 0.2s;';
-  const fieldFocus = 'onfocus="this.style.borderColor=\'var(--accent)\';this.style.boxShadow=\'0 0 0 3px var(--accent-light)\'" onblur="this.style.borderColor=\'var(--border)\';this.style.boxShadow=\'none\'"';
+  const fieldStyle = 'width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px; font-family: inherit; background: var(--slds-card); transition: border-color 0.2s, box-shadow 0.2s;';
+  const fieldFocus = 'onfocus="this.style.borderColor=\'var(--slds-blue)\';this.style.boxShadow=\'0 0 0 2px rgba(1, 118, 211, 0.1)\'" onblur="this.style.borderColor=\'var(--slds-border)\';this.style.boxShadow=\'none\'"';
 
   const selOpt = (val, options) => options.map(o => {
     const optVal = typeof o === 'object' ? o.value : o;
@@ -872,72 +1912,72 @@ async function renderDetailPanel() {
   document.getElementById('overviewContent').innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">RULE ID</div>
-        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">${r.rule_id}</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">RULE ID</div>
+        <div style="font-size: 14px; color: var(--slds-navy); font-weight: 600; padding: 8px 0;">${r.rule_id}</div>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CURRENT VERSION</div>
-        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">v${r.version}</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">CURRENT VERSION</div>
+        <div style="font-size: 14px; color: var(--slds-navy); font-weight: 600; padding: 8px 0;">v${r.version}</div>
       </div>
       <div style="grid-column: 1 / -1;">
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">NAME</div>
-        <input type="text" value="${r.name}" style="${fieldStyle}" ${fieldFocus} />
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">NAME</div>
+        <input type="text" class="slds-input" value="${r.name}" style="${fieldStyle}" ${fieldFocus} />
       </div>
       <div style="grid-column: 1 / -1;">
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">DESCRIPTION</div>
-        <textarea rows="3" style="${fieldStyle} resize: vertical;" ${fieldFocus}>${r.description || ''}</textarea>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">DESCRIPTION</div>
+        <textarea rows="3" class="slds-input" style="${fieldStyle} resize: vertical;" ${fieldFocus}>${r.description || ''}</textarea>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CITATION</div>
-        <input type="text" value="${r.citation || ''}" style="${fieldStyle}" ${fieldFocus} />
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">CITATION</div>
+        <input type="text" class="slds-input" value="${r.citation || ''}" style="${fieldStyle}" ${fieldFocus} />
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">JURISDICTION</div>
-        <select style="${fieldStyle}">${selOpt(r.jurisdiction, ['Ohio', 'Federal', 'Local'])}</select>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">JURISDICTION</div>
+        <select class="slds-select" style="${fieldStyle}">${selOpt(r.jurisdiction, ['Ohio', 'Federal', 'Local'])}</select>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">STATUS</div>
-        <select style="${fieldStyle}">${selOpt(r.status, [
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">STATUS</div>
+        <select class="slds-select" style="${fieldStyle}">${selOpt(r.status, [
           {value:'draft',label:'Draft'},{value:'review',label:'Review'},{value:'active',label:'Active'},{value:'sunset',label:'Sunset'}
         ])}</select>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">RULE TYPE</div>
-        <select style="${fieldStyle}">${selOpt(r.rule_type, [
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">RULE TYPE</div>
+        <select class="slds-select" style="${fieldStyle}">${selOpt(r.rule_type, [
           {value:'GATE',label:'GATE — Must pass to proceed'},{value:'FILTER',label:'FILTER — Narrows eligibility'},
           {value:'CALC',label:'CALC — Computes a value'},{value:'ROUTE',label:'ROUTE — Determines pathway'},
           {value:'INFO',label:'INFO — Documentation requirement'}
         ])}</select>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">PRIORITY</div>
-        <select style="${fieldStyle}">${selOpt(r.priority, [
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">PRIORITY</div>
+        <select class="slds-select" style="${fieldStyle}">${selOpt(r.priority, [
           {value:'P1',label:'P1 — Critical'},{value:'P2',label:'P2 — Required'},
           {value:'P3',label:'P3 — Recommended'},{value:'P4',label:'P4 — Informational'}
         ])}</select>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">PHASE</div>
-        <select style="${fieldStyle}">${selOpt(r.phase, ['LICENSING','COMPLIANCE','APPLICATION_PROCESSING','REPORTING_VERIFICATION','RECERTIFICATION'])}</select>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">PHASE</div>
+        <select class="slds-select" style="${fieldStyle}">${selOpt(r.phase, ['LICENSING','COMPLIANCE','APPLICATION_PROCESSING','REPORTING_VERIFICATION','RECERTIFICATION'])}</select>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CLASSIFICATION</div>
-        <select style="${fieldStyle}">${selOpt(r.classification, [
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">CLASSIFICATION</div>
+        <select class="slds-select" style="${fieldStyle}">${selOpt(r.classification, [
           {value:'standard',label:'Standard'},{value:'restricted',label:'Restricted'},{value:'confidential',label:'Confidential'}
         ])}</select>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">EFFECTIVE DATE</div>
-        <input type="date" value="${r.effective_date || ''}" style="${fieldStyle}" ${fieldFocus} />
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">EFFECTIVE DATE</div>
+        <input type="date" class="slds-input" value="${r.effective_date || ''}" style="${fieldStyle}" ${fieldFocus} />
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">SUNSET DATE</div>
-        <input type="date" value="${r.sunset_date || ''}" style="${fieldStyle}" ${fieldFocus} />
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">SUNSET DATE</div>
+        <input type="date" class="slds-input" value="${r.sunset_date || ''}" style="${fieldStyle}" ${fieldFocus} />
       </div>
     </div>
-    <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border);">
-      <button onclick="discardChanges()" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer;">Discard</button>
-      <button id="saveRuleBtn" onclick="saveRule()" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: none; background: var(--navy); color: white; border-radius: var(--radius); cursor: pointer;">Save Changes</button>
+    <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--slds-border);">
+      <button class="slds-button slds-button_neutral" onclick="discardChanges()" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Discard</button>
+      <button class="slds-button slds-button_brand" id="saveRuleBtn" onclick="saveRule()" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Save Changes</button>
     </div>
   `;
 
@@ -945,15 +1985,15 @@ async function renderDetailPanel() {
   document.getElementById('conditionEditor').innerHTML = `
     ${conditions.map(c => `
       <div class="condition-row">
-        <span style="font-weight: 600; color: var(--navy); min-width: 140px;">${c.field}</span>
-        <span style="font-weight: 600; color: var(--ohio-red); min-width: 40px; text-align: center;">${c.operator}</span>
+        <span style="font-weight: 600; color: var(--slds-navy); min-width: 140px;">${c.field}</span>
+        <span style="font-weight: 600; color: var(--slds-error); min-width: 40px; text-align: center;">${c.operator}</span>
         <span style="flex: 1;">${c.value}</span>
         <span style="font-size: 11px; color: var(--text-secondary); min-width: 60px;">${c.value_type}</span>
         <button style="cursor: pointer;">Remove</button>
       </div>
     `).join('')}
     ${conditions.length === 0 ? '<div style="color: var(--text-secondary); font-size: 13px;">No conditions defined yet.</div>' : ''}
-    <button style="padding: 8px 16px; background: var(--navy); color: white; border: none; border-radius: var(--radius); cursor: pointer; margin-top: 12px;">+ Add Condition</button>
+    <button style="padding: 8px 16px; background: var(--slds-blue); color: white; border: none; border-radius: 2px; cursor: pointer; margin-top: 12px;">+ Add Condition</button>
   `;
 
   // ── DEPENDENCIES TAB — from rule_dependencies table ─────────
@@ -1020,14 +2060,14 @@ async function renderDetailPanel() {
   `;
 
   // ── COMMENTS TAB — from comments table ──────────────────────
-  const avatarColors = { 'user-001': 'var(--accent)', 'user-002': 'var(--green)', 'user-003': 'var(--purple)' };
+  const avatarColors = { 'user-001': 'var(--slds-blue)', 'user-002': 'var(--slds-success)', 'user-003': 'var(--slds-purple)' };
   const roleMap = { 'user-001': 'Publisher', 'user-002': 'Reviewer', 'user-003': 'Viewer' };
 
   document.getElementById('commentsContent').innerHTML = `
     <div class="comments-thread">
       ${comments.map(c => `
         <div class="comment">
-          <div class="comment-avatar" style="background: ${avatarColors[c.user_id] || 'var(--accent)'};">${c.user?.avatar_initials || '??'}</div>
+          <div class="comment-avatar" style="background: ${avatarColors[c.user_id] || 'var(--slds-blue)'};">${c.user?.avatar_initials || '??'}</div>
           <div class="comment-body">
             <div class="comment-header">
               <span class="comment-author">${c.user?.display_name || 'Unknown'}</span>
@@ -1044,7 +2084,7 @@ async function renderDetailPanel() {
       <textarea id="commentInput" placeholder="Add a comment..."></textarea>
       <div class="add-comment-actions">
         <button onclick="document.getElementById('commentInput').value=''">Cancel</button>
-        <button class="send" onclick="sendComment()">Send Comment</button>
+        <button class="send slds-button slds-button_brand" onclick="sendComment()">Send Comment</button>
       </div>
     </div>
   `;
@@ -1053,7 +2093,7 @@ async function renderDetailPanel() {
   const fmtTS = (d) => { try { return new Date(d).toLocaleString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}); } catch(e) { return d; } };
 
   document.getElementById('auditContent').innerHTML = `
-    <table class="audit-table">
+    <table class="audit-table slds-table slds-table_cell-buffer slds-table_bordered">
       <thead>
         <tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th><th>Detail</th></tr>
       </thead>
@@ -1062,7 +2102,7 @@ async function renderDetailPanel() {
           <tr>
             <td class="audit-timestamp">${fmtTS(a.timestamp)}</td>
             <td class="audit-user">${a.user?.display_name || a.role || 'System'}</td>
-            <td><span class="audit-role-badge">${(a.role || 'system').charAt(0).toUpperCase() + (a.role || 'system').slice(1)}</span></td>
+            <td><span class="audit-role-badge slds-badge">${(a.role || 'system').charAt(0).toUpperCase() + (a.role || 'system').slice(1)}</span></td>
             <td>${(a.action || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
             <td>${a.detail || ''}</td>
           </tr>
@@ -1145,10 +2185,10 @@ function setupEventListeners() {
 
   // Export buttons
   const footer = document.createElement('div');
-  footer.style.cssText = 'display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);';
+  footer.style.cssText = 'display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--slds-border);';
   footer.innerHTML = `
-    <button id="exportJson" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer;">Export JSON</button>
-    <button id="exportPdf" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer;">Export PDF</button>
+    <button class="slds-button slds-button_neutral" id="exportJson" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export JSON</button>
+    <button class="slds-button slds-button_neutral" id="exportPdf" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export PDF</button>
   `;
   document.querySelector('.sidebar').appendChild(footer);
 
@@ -1181,21 +2221,21 @@ function simulateUpload() {
         <div class="draft-rule-citation">ORC § 3702.30(B)(2)</div>
         <div class="draft-rule-preview">IF telehealth_enabled AND licensed_provider THEN require_patient_consent</div>
         <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-high">High Confidence</span></div>
-        <div class="draft-actions"><button class="accept">Accept</button><button>Edit</button><button>Reject</button></div>
+        <div class="draft-actions"><button class="accept slds-button slds-button_success">Accept</button><button class="slds-button slds-button_neutral">Edit</button><button class="slds-button slds-button_neutral">Reject</button></div>
       </div>
       <div class="draft-rule">
         <div class="draft-rule-name">Bed Capacity Verification</div>
         <div class="draft-rule-citation">ORC § 3702.30(A)(1)</div>
         <div class="draft-rule-preview">IF net_bed_change > 0 THEN require_con_approval</div>
         <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-high">High Confidence</span></div>
-        <div class="draft-actions"><button class="accept">Accept</button><button>Edit</button><button>Reject</button></div>
+        <div class="draft-actions"><button class="accept slds-button slds-button_success">Accept</button><button class="slds-button slds-button_neutral">Edit</button><button class="slds-button slds-button_neutral">Reject</button></div>
       </div>
       <div class="draft-rule">
         <div class="draft-rule-name">Quality Metrics Reporting</div>
         <div class="draft-rule-citation">ORC § 3702.30(C)</div>
         <div class="draft-rule-preview">IF cms_surveyed THEN report_quality_metrics_quarterly</div>
         <div style="margin-bottom: 8px;"><span class="confidence-badge confidence-medium">Medium Confidence</span></div>
-        <div class="draft-actions"><button class="accept">Accept</button><button>Edit</button><button>Reject</button></div>
+        <div class="draft-actions"><button class="accept slds-button slds-button_success">Accept</button><button class="slds-button slds-button_neutral">Edit</button><button class="slds-button slds-button_neutral">Reject</button></div>
       </div>
     `;
   }, 1500);
@@ -1312,7 +2352,7 @@ async function sendComment() {
 
     // Re-render comments tab with fresh data
     const comments = await govpoint.getComments(currentRule.rule_id);
-    const avatarColors = { 'user-001': 'var(--accent)', 'user-002': 'var(--green)', 'user-003': 'var(--purple)' };
+    const avatarColors = { 'user-001': 'var(--slds-blue)', 'user-002': 'var(--slds-success)', 'user-003': 'var(--slds-purple)' };
     const roleMap = { 'user-001': 'Publisher', 'user-002': 'Reviewer', 'user-003': 'Viewer' };
     const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}); } catch(e) { return d; } };
 
@@ -1320,7 +2360,7 @@ async function sendComment() {
       <div class="comments-thread">
         ${comments.map(c => `
           <div class="comment">
-            <div class="comment-avatar" style="background: ${avatarColors[c.user_id] || 'var(--accent)'};">${c.user?.avatar_initials || '??'}</div>
+            <div class="comment-avatar" style="background: ${avatarColors[c.user_id] || 'var(--slds-blue)'};">${c.user?.avatar_initials || '??'}</div>
             <div class="comment-body">
               <div class="comment-header">
                 <span class="comment-author">${c.user?.display_name || 'Unknown'}</span>
@@ -1336,7 +2376,7 @@ async function sendComment() {
         <textarea id="commentInput" placeholder="Add a comment..."></textarea>
         <div class="add-comment-actions">
           <button onclick="document.getElementById('commentInput').value=''">Cancel</button>
-          <button class="send" onclick="sendComment()">Send Comment</button>
+          <button class="send slds-button slds-button_brand" onclick="sendComment()">Send Comment</button>
         </div>
       </div>
     `;

@@ -4,241 +4,238 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GovPoint | Hospital Capacity Change</title>
+<link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <style>
   :root {
-    --navy: #003366;
-    --navy-deep: #0E3F75;
-    --accent: #14499E;
-    --accent-light: #E8EFF8;
-    --ohio-red: #C41230;
-    --ohio-red-light: #FDEDEF;
-    --green: #2E7D32;
-    --green-light: #E8F5E9;
-    --amber: #D84315;
-    --amber-light: #FFF3E0;
-    --red: #C41230;
-    --red-light: #FDEDEF;
-    --gray: #4E4D4D;
-    --light-gray: #F2F2F2;
-    --border: #D0D5DD;
-    --white: #FFFFFF;
-    --text: #1A1A2E;
+    --slds-blue: #0176D3;
+    --slds-dark: #014486;
+    --slds-light: #1B96FF;
+    --slds-navy: #032D60;
+    --slds-success: #2E844A;
+    --slds-warning: #DD7A01;
+    --slds-error: #BA0517;
+    --slds-bg: #F3F3F3;
+    --slds-card: #FFFFFF;
+    --slds-border: #E5E5E5;
+    --slds-radius: 0.25rem;
+    --text-primary: #1A1A2E;
     --text-secondary: #4A5568;
-    --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-    --radius: 6px;
-    --radius-lg: 8px;
+    --shadow: 0 2px 2px rgba(0,0,0,0.05);
+    --gray: #4E4D4D;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--light-gray); color: var(--text); line-height: 1.6; }
+  body { font-family: (--slds-font), 'Salesforce Sans', 'Inter', -apple-system, system-ui, sans-serif; background: var(--slds-bg); color: var(--text-primary); line-height: 1.6; }
 
   /* ── STATE BANNER ── */
-  .state-banner { background: var(--light-gray); padding: 4px 32px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
-  .state-banner a { color: var(--ohio-red); text-decoration: none; font-weight: 600; }
+  .state-banner { background: var(--slds-bg); padding: 6px 24px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--slds-border); }
+  .state-banner a { color: var(--slds-dark); text-decoration: none; font-weight: 600; }
 
-  /* ── NAV ── */
-  .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
-  .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
-  .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+  /* ── NAV (SLDS Dark Navy Header) ── */
+  .topnav { background: var(--slds-navy); padding: 0 24px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+  .topnav .logo { color: white; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
+  .topnav .logo .ohio-mark { color: white; font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; }
 
   .topnav .nav-spacer { margin-left: auto; }
-  .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
-  .topnav .nav-links { display: flex; gap: 24px; }
-  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
-  .topnav .nav-links a:hover { color: var(--ohio-red); }
-  .topnav .nav-links a.active { color: var(--ohio-red); }
+  .topnav .nav-controls { display: flex; align-items: center; gap: 20px; }
+  .topnav .nav-links { display: flex; gap: 20px; }
+  .topnav .nav-links a { color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+  .topnav .nav-links a:hover { color: white; }
+  .topnav .nav-links a.active { color: white; font-weight: 600; border-bottom: 2px solid var(--slds-light); padding-bottom: 3px; }
 
-  .notification-bell { position: relative; cursor: pointer; font-size: 18px; margin-right: 16px; }
-  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--ohio-red, #C41230); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
+  .notification-bell { position: relative; cursor: pointer; font-size: 18px; color: rgba(255, 255, 255, 0.8); }
+  .notification-bell:hover { color: white; }
+  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--slds-error); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--slds-border); border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
   .notification-dropdown.show { display: block; }
-  .notification-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; line-height: 1.4; }
+  .notification-item { padding: 12px 16px; border-bottom: 1px solid var(--slds-border); font-size: 12px; line-height: 1.5; }
   .notification-item:last-child { border-bottom: none; }
-  .notification-time { color: #888; font-size: 11px; margin-top: 4px; }
+  .notification-item strong { color: var(--text-primary); }
+  .notification-time { color: var(--gray); font-size: 11px; margin-top: 4px; }
 
   .role-indicator { display: flex; align-items: center; gap: 12px; }
-  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
-  .role-text { font-size: 13px; line-height: 1.4; }
-  .role-text .user-name { color: var(--navy); font-weight: 600; }
-  .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
+  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--slds-light); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .role-text { font-size: 13px; line-height: 1.4; color: rgba(255, 255, 255, 0.9); }
+  .role-text .user-name { color: white; font-weight: 600; }
+  .role-text .user-role { color: rgba(255, 255, 255, 0.7); font-size: 11px; }
 
   /* ── TENANT SWITCHER ── */
-  .tenant-switcher { position: relative; margin-left: 24px; }
-  .tenant-switcher-btn { background: var(--accent-light); color: var(--navy); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-  .tenant-switcher-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-  .tenant-switcher-dropdown { display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; z-index: 200; margin-top: 8px; overflow: hidden; }
+  .tenant-switcher { position: relative; }
+  .tenant-switcher-btn { background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 3px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .tenant-switcher-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: rgba(255, 255, 255, 0.5); }
+  .tenant-switcher-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--slds-border); border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 280px; z-index: 200; margin-top: 4px; overflow: hidden; }
   .tenant-switcher-dropdown.show { display: block; }
   .tenant-option { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 13px; transition: background 0.15s; }
-  .tenant-option:hover { background: var(--accent-light); }
-  .tenant-option.active { background: var(--accent-light); font-weight: 600; }
-  .tenant-option .tenant-check { width: 16px; color: var(--accent); font-weight: 700; }
+  .tenant-option:hover { background: var(--slds-bg); }
+  .tenant-option.active { background: #E9F3FF; font-weight: 600; }
+  .tenant-option .tenant-check { width: 16px; color: var(--slds-blue); font-weight: 700; }
   .tenant-option .tenant-info { flex: 1; }
-  .tenant-option .tenant-name { color: var(--navy); font-weight: 600; }
+  .tenant-option .tenant-name { color: var(--text-primary); font-weight: 600; }
   .tenant-option .tenant-detail { font-size: 11px; color: var(--text-secondary); }
 
   /* ── LAYOUT ── */
-  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
   .page-header { margin-bottom: 32px; }
-  .page-header h1 { font-size: 28px; color: var(--navy); font-weight: 700; }
-  .page-header p { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
+  .page-header h1 { font-size: 28px; color: var(--text-primary); font-weight: 700; letter-spacing: -0.4px; }
+  .page-header p { color: var(--text-secondary); font-size: 14px; margin-top: 6px; }
 
-  /* ── CARDS ── */
-  .card { background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 28px; margin-bottom: 24px; border: 1px solid var(--border); }
-  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-  .card-header h2 { font-size: 18px; color: var(--navy); font-weight: 600; }
-  .card-header .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.3px; }
-  .badge-blue { background: var(--accent-light); color: var(--accent); }
-  .badge-green { background: var(--green-light); color: var(--green); }
-  .badge-amber { background: var(--amber-light); color: var(--amber); }
-  .badge-red { background: var(--red-light); color: var(--red); }
+  /* ── CARDS (SLDS Style) ── */
+  .card { background: var(--slds-card); border-radius: 3px; box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; border: 1px solid var(--slds-border); }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--slds-border); }
+  .card-header h2 { font-size: 16px; color: var(--text-primary); font-weight: 700; }
+  .card-header .badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 3px; letter-spacing: 0.2px; }
+  .badge-blue { background: #E9F3FF; color: var(--slds-dark); }
+  .badge-green { background: #E8F5E9; color: var(--slds-success); }
+  .badge-amber { background: #FFF3E0; color: var(--slds-warning); }
+  .badge-red { background: #FDEDEF; color: var(--slds-error); }
 
-  /* ── FORMS ── */
+  /* ── FORMS (SLDS Style) ── */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
   .form-group { display: flex; flex-direction: column; }
   .form-group.full { grid-column: 1 / -1; }
-  .form-group label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
-  .form-group input, .form-group select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; color: var(--text); background: white; transition: border 0.2s; }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,117,182,0.15); }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .form-group input, .form-group select { padding: 8px 12px; border: 1px solid var(--slds-border); border-radius: 3px; font-size: 13px; color: var(--text-primary); background: white; transition: border 0.2s; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--slds-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15); }
   .form-group .hint { font-size: 12px; color: var(--gray); margin-top: 4px; }
   .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
-  .checkbox-group label { font-size: 14px; font-weight: 400; color: var(--text); text-transform: none; letter-spacing: 0; margin: 0; }
+  .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--slds-blue); cursor: pointer; }
+  .checkbox-group label { font-size: 13px; font-weight: 400; color: var(--text-primary); text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer; }
 
-  /* ── BUTTONS ── */
-  .btn { padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: #2563a8; }
-  .btn-secondary { background: white; color: var(--accent); border: 1px solid var(--accent); }
-  .btn-secondary:hover { background: var(--accent-light); }
-  .btn-success { background: var(--green); color: white; }
-  .btn-success:hover { background: #256B2A; }
-  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--light-gray); }
-  .btn-lg { padding: 14px 28px; font-size: 16px; border-radius: 8px; }
-  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  /* ── BUTTONS (SLDS Style) ── */
+  .btn { padding: 8px 16px; border-radius: 3px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary { background: var(--slds-blue); color: white; }
+  .btn-primary:hover { background: var(--slds-dark); }
+  .btn-secondary { background: white; color: var(--slds-blue); border: 1px solid var(--slds-blue); }
+  .btn-secondary:hover { background: #E9F3FF; }
+  .btn-success { background: var(--slds-success); color: white; }
+  .btn-success:hover { background: #1E5631; }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--slds-border); }
+  .btn-ghost:hover { background: var(--slds-bg); }
+  .btn-lg { padding: 12px 24px; font-size: 14px; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
   .btn-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ── SCENARIO PICKER ── */
-  .scenario-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-  .scenario-btn { padding: 12px 18px; border-radius: 8px; border: 2px solid var(--border); background: white; cursor: pointer; text-align: left; flex: 1; min-width: 200px; transition: all 0.2s; }
-  .scenario-btn:hover { border-color: var(--accent); background: var(--accent-light); }
-  .scenario-btn h4 { font-size: 13px; color: var(--navy); margin-bottom: 2px; }
-  .scenario-btn p { font-size: 11px; color: var(--gray); line-height: 1.4; }
+  /* ── SCENARIO PICKER (Card-based) ── */
+  .scenario-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .scenario-btn { padding: 16px; border-radius: 3px; border: 1px solid var(--slds-border); background: white; cursor: pointer; text-align: left; flex: 1; min-width: 200px; transition: all 0.2s; }
+  .scenario-btn:hover { border-color: var(--slds-blue); background: #E9F3FF; }
+  .scenario-btn h4 { font-size: 13px; color: var(--text-primary); margin-bottom: 4px; font-weight: 700; }
+  .scenario-btn p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
 
-  /* ── STEPPER ── */
-  .stepper { display: flex; align-items: center; margin-bottom: 32px; padding: 0 12px; }
-  .step { display: flex; align-items: center; gap: 10px; }
-  .step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 2px solid var(--border); color: var(--gray); background: white; transition: all 0.3s; flex-shrink: 0; }
-  .step.active .step-num { background: var(--ohio-red); color: white; border-color: var(--ohio-red); }
-  .step.done .step-num { background: var(--green); color: white; border-color: var(--green); }
-  .step-label { font-size: 13px; color: var(--gray); font-weight: 500; white-space: nowrap; }
-  .step.active .step-label { color: var(--ohio-red); font-weight: 600; }
-  .step.done .step-label { color: var(--green); }
-  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; min-width: 20px; transition: background 0.3s; }
-  .step-line.done { background: var(--green); }
+  /* ── STEPPER (SLDS Path Component) ── */
+  .stepper { display: flex; align-items: center; margin-bottom: 32px; padding: 0; }
+  .step { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .step-num { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 2px solid var(--slds-border); color: var(--text-secondary); background: white; transition: all 0.3s; flex-shrink: 0; }
+  .step.active .step-num { background: var(--slds-blue); color: white; border-color: var(--slds-blue); }
+  .step.done .step-num { background: var(--slds-success); color: white; border-color: var(--slds-success); }
+  .step-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; }
+  .step.active .step-label { color: var(--slds-blue); font-weight: 600; }
+  .step.done .step-label { color: var(--slds-success); }
+  .step-line { flex: 1; height: 1px; background: var(--slds-border); margin: 0 8px; min-width: 16px; transition: background 0.3s; }
+  .step-line.done { background: var(--slds-success); }
 
-  /* ── EVALUATION VIEW ── */
-  .eval-phase { background: white; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 12px; overflow: hidden; transition: all 0.3s; }
-  .eval-phase.processing { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(46,117,182,0.15); }
-  .eval-phase.passed { border-color: var(--green); }
-  .eval-phase.flagged { border-color: var(--amber); }
-  .eval-phase.blocked { border-color: var(--red); }
-  .eval-phase-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-  .eval-phase-header .phase-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-  .eval-phase.waiting .phase-icon { background: var(--light-gray); color: var(--gray); }
-  .eval-phase.processing .phase-icon { background: var(--accent-light); color: var(--accent); }
-  .eval-phase.passed .phase-icon { background: var(--green-light); color: var(--green); }
-  .eval-phase.flagged .phase-icon { background: var(--amber-light); color: var(--amber); }
-  .eval-phase.blocked .phase-icon { background: var(--red-light); color: var(--red); }
-  .eval-phase-header h3 { font-size: 14px; color: var(--navy); font-weight: 600; flex: 1; }
-  .eval-phase-header .phase-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
-  .eval-phase-body { padding: 0 18px 16px; display: none; }
+  /* ── EVALUATION VIEW (SLDS Expandable Section) ── */
+  .eval-phase { background: white; border-radius: 3px; border: 1px solid var(--slds-border); margin-bottom: 12px; overflow: hidden; transition: all 0.3s; }
+  .eval-phase.processing { border-color: var(--slds-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1); }
+  .eval-phase.passed { border-color: var(--slds-success); }
+  .eval-phase.flagged { border-color: var(--slds-warning); }
+  .eval-phase.blocked { border-color: var(--slds-error); }
+  .eval-phase-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #F7F7F7; }
+  .eval-phase-header .phase-icon { width: 28px; height: 28px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .eval-phase.waiting .phase-icon { background: var(--slds-bg); color: var(--gray); }
+  .eval-phase.processing .phase-icon { background: #E9F3FF; color: var(--slds-blue); }
+  .eval-phase.passed .phase-icon { background: #E8F5E9; color: var(--slds-success); }
+  .eval-phase.flagged .phase-icon { background: #FFF3E0; color: var(--slds-warning); }
+  .eval-phase.blocked .phase-icon { background: #FDEDEF; color: var(--slds-error); }
+  .eval-phase-header h3 { font-size: 14px; color: var(--text-primary); font-weight: 600; flex: 1; }
+  .eval-phase-header .phase-status { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 3px; }
+  .eval-phase-body { padding: 0 16px 16px; display: none; }
   .eval-phase.open .eval-phase-body { display: block; }
 
   /* ── RULE ROWS ── */
-  .rule-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F0F0F0; }
+  .rule-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0F0F0; }
   .rule-row:last-child { border-bottom: none; }
-  .rule-id { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .rule-id { font-size: 11px; font-weight: 700; color: var(--slds-blue); background: #E9F3FF; padding: 3px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
   .rule-detail { flex: 1; }
-  .rule-detail .rule-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .rule-detail .rule-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
   .rule-detail .rule-citation { font-size: 11px; color: var(--gray); font-style: italic; }
-  .rule-detail .rule-result { font-size: 12px; margin-top: 4px; }
-  .rule-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
-  .status-pass { background: var(--green-light); color: var(--green); }
-  .status-flag { background: var(--amber-light); color: var(--amber); }
-  .status-block { background: var(--red-light); color: var(--red); }
-  .status-skip { background: var(--light-gray); color: var(--gray); }
+  .rule-detail .rule-result { font-size: 12px; margin-top: 4px; color: var(--text-secondary); }
+  .rule-status { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .status-pass { background: #E8F5E9; color: var(--slds-success); }
+  .status-flag { background: #FFF3E0; color: var(--slds-warning); }
+  .status-block { background: #FDEDEF; color: var(--slds-error); }
+  .status-skip { background: var(--slds-bg); color: var(--gray); }
   .status-wait { background: #F3E5F5; color: #7B1FA2; }
 
-  /* ── RESULTS DASHBOARD ── */
+  /* ── RESULTS DASHBOARD (SLDS Metric Cards) ── */
   .result-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .result-stat { background: white; border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); text-align: center; }
-  .result-stat .stat-value { font-size: 32px; font-weight: 700; }
-  .result-stat .stat-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .result-stat { background: white; border-radius: 3px; padding: 20px; border: 1px solid var(--slds-border); text-align: center; }
+  .result-stat .stat-value { font-size: 32px; font-weight: 700; line-height: 1; }
+  .result-stat .stat-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 8px; font-weight: 600; }
 
   .timeline { position: relative; padding-left: 28px; }
-  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
-  .timeline-item { position: relative; margin-bottom: 16px; }
-  .timeline-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); background: white; }
-  .timeline-item.critical::before { background: var(--red); border-color: var(--red); }
-  .timeline-item.warning::before { background: var(--amber); border-color: var(--amber); }
-  .timeline-item.done::before { background: var(--green); border-color: var(--green); }
-  .timeline-item h4 { font-size: 13px; color: var(--navy); font-weight: 600; }
-  .timeline-item p { font-size: 12px; color: var(--text-secondary); }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: var(--slds-border); }
+  .timeline-item { position: relative; margin-bottom: 20px; }
+  .timeline-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--slds-blue); background: white; }
+  .timeline-item.critical::before { background: var(--slds-error); border-color: var(--slds-error); }
+  .timeline-item.warning::before { background: var(--slds-warning); border-color: var(--slds-warning); }
+  .timeline-item.done::before { background: var(--slds-success); border-color: var(--slds-success); }
+  .timeline-item h4 { font-size: 13px; color: var(--text-primary); font-weight: 600; }
+  .timeline-item p { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
   .timeline-item .tl-date { font-size: 11px; color: var(--gray); font-weight: 600; }
 
   .audit-row { display: grid; grid-template-columns: 100px 1fr 120px; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F0F0F0; font-size: 12px; }
   .audit-row.audit-header { font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.3px; font-size: 11px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
 
-  /* ── ENHANCED AUDIT ── */
-  .audit-entry { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; transition: all 0.2s; }
+  /* ── ENHANCED AUDIT (SLDS Expandable Sections) ── */
+  .audit-entry { border: 1px solid var(--slds-border); border-radius: 3px; margin-bottom: 12px; overflow: hidden; transition: all 0.2s; }
   .audit-entry:hover { box-shadow: var(--shadow); }
-  .audit-entry-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: white; }
-  .audit-entry-header:hover { background: var(--light-gray); }
-  .audit-entry .entry-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: var(--accent-light); color: var(--accent); flex-shrink: 0; }
-  .audit-entry .entry-id { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
-  .audit-entry .entry-name { font-size: 13px; font-weight: 600; color: var(--navy); flex: 1; }
-  .audit-entry .entry-status { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; flex-shrink: 0; }
+  .audit-entry-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #F7F7F7; }
+  .audit-entry-header:hover { background: #F0F0F0; }
+  .audit-entry .entry-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #E9F3FF; color: var(--slds-blue); flex-shrink: 0; }
+  .audit-entry .entry-id { font-size: 11px; font-weight: 700; color: var(--slds-blue); background: #E9F3FF; padding: 3px 8px; border-radius: 3px; flex-shrink: 0; }
+  .audit-entry .entry-name { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; }
+  .audit-entry .entry-status { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 3px; flex-shrink: 0; }
   .audit-entry .entry-arrow { color: var(--gray); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; }
   .audit-entry.open .entry-arrow { transform: rotate(90deg); }
-  .audit-entry-body { display: none; padding: 0 18px 18px; background: white; }
+  .audit-entry-body { display: none; padding: 16px; background: white; border-top: 1px solid var(--slds-border); }
   .audit-entry.open .audit-entry-body { display: block; }
-  .audit-section { margin-bottom: 14px; }
-  .audit-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray); margin-bottom: 6px; }
-  .audit-condition { background: #1A1A2E; color: #E0E0E0; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; padding: 12px 16px; border-radius: 6px; line-height: 1.7; overflow-x: auto; }
+  .audit-section { margin-bottom: 16px; }
+  .audit-section:last-child { margin-bottom: 0; }
+  .audit-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray); margin-bottom: 8px; }
+  .audit-condition { background: #1A1A2E; color: #E0E0E0; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; padding: 12px; border-radius: 3px; line-height: 1.6; overflow-x: auto; }
   .audit-condition .kw { color: #7CB3F5; }
   .audit-condition .val { color: #8BDB81; }
   .audit-condition .op { color: #F5C97C; }
   .audit-condition .cmt { color: #6A7A8A; }
-  .audit-facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
-  .audit-fact { display: flex; justify-content: space-between; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
-  .audit-fact:nth-child(odd) { background: var(--light-gray); }
-  .audit-fact .fact-name { font-weight: 600; color: var(--navy); }
+  .audit-facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+  .audit-fact { display: flex; justify-content: space-between; padding: 6px 8px; border-radius: 3px; font-size: 12px; }
+  .audit-fact:nth-child(odd) { background: var(--slds-bg); }
+  .audit-fact .fact-name { font-weight: 600; color: var(--text-primary); }
   .audit-fact .fact-val { font-family: monospace; color: var(--text-secondary); }
-  .audit-reasoning { font-size: 13px; color: var(--text-secondary); line-height: 1.7; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--accent-light); border-radius: 0 6px 6px 0; }
+  .audit-reasoning { font-size: 13px; color: var(--text-secondary); line-height: 1.6; padding: 12px; border-left: 3px solid var(--slds-blue); background: #E9F3FF; border-radius: 0 3px 3px 0; }
   .audit-deps { display: flex; flex-wrap: wrap; gap: 6px; }
-  .audit-dep-tag { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
-  .dep-gate { background: var(--red-light); color: var(--red); }
-  .dep-requires { background: var(--accent-light); color: var(--accent); }
-  .dep-exempts { background: var(--green-light); color: var(--green); }
-  .dep-triggers { background: var(--amber-light); color: var(--amber); }
+  .audit-dep-tag { font-size: 11px; padding: 4px 10px; border-radius: 3px; font-weight: 600; }
+  .dep-gate { background: #FDEDEF; color: var(--slds-error); }
+  .dep-requires { background: #E9F3FF; color: var(--slds-blue); }
+  .dep-exempts { background: #E8F5E9; color: var(--slds-success); }
+  .dep-triggers { background: #FFF3E0; color: var(--slds-warning); }
   .dep-routes { background: #F3E5F5; color: #7B1FA2; }
-  .audit-phase-divider { font-size: 13px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; padding: 16px 0 8px; border-bottom: 2px solid var(--border); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-  .audit-phase-divider .phase-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .audit-phase-divider { font-size: 12px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px; padding: 16px 0 8px; border-bottom: 1px solid var(--slds-border); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .audit-phase-divider .phase-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-  /* ── BED TABLE (ODH style) ── */
+  /* ── BED TABLE (SLDS Data Table) ── */
   .bed-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .bed-table th { background: var(--navy); color: white; padding: 8px 6px; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .bed-table th { background: var(--slds-navy); color: white; padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2px; }
   .bed-table th:first-child { text-align: left; min-width: 220px; }
-  .bed-table td { padding: 4px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  .bed-table td:first-child { font-size: 12px; color: var(--text); font-weight: 500; }
-  .bed-table td input { width: 100%; padding: 5px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; text-align: center; background: white; }
-  .bed-table td input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(20,73,158,0.15); }
-  .bed-table tr:hover { background: var(--accent-light); }
-  .bed-table .section-row { background: var(--light-gray); }
-  .bed-table .section-row td { font-weight: 700; color: var(--navy); font-size: 12px; padding: 8px 6px; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--navy); }
-  .bed-table .sub-row td:first-child { padding-left: 24px; font-size: 11px; color: var(--text-secondary); }
+  .bed-table td { padding: 8px; border-bottom: 1px solid var(--slds-border); vertical-align: middle; }
+  .bed-table td:first-child { font-size: 12px; color: var(--text-primary); font-weight: 500; text-align: left; }
+  .bed-table td input { width: 100%; padding: 6px 8px; border: 1px solid var(--slds-border); border-radius: 3px; font-size: 12px; text-align: center; background: white; }
+  .bed-table td input:focus { outline: none; border-color: var(--slds-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1); }
+  .bed-table tr:hover { background: #F7F7F7; }
+  .bed-table .section-row { background: #F3F3F3; }
+  .bed-table .section-row td { font-weight: 700; color: var(--text-primary); font-size: 12px; padding: 10px 8px; text-transform: uppercase; letter-spacing: 0.2px; border-bottom: 2px solid var(--slds-navy); }
+  .bed-table .sub-row td:first-child { padding-left: 32px; font-size: 11px; color: var(--text-secondary); }
 
   /* ── HIDDEN PAGES ── */
   .page { display: none; }
@@ -259,6 +256,7 @@
 </style>
 </head>
 <body>
+<div class="slds-scope">
 
 <div class="state-banner">
   <span>Ohio Revised Code Ontology System</span>
@@ -267,7 +265,7 @@
 
 <nav class="topnav">
   <div class="logo">
-    <span class="ohio-mark">⟨°⟩</span>
+    <span class="ohio-mark">⌘</span>
     <span>GovPoint</span>
   </div>
 
@@ -361,12 +359,13 @@
   </div>
 
   <!-- Scenario quick-fill -->
-  <div class="card" style="background: var(--accent-light); border-color: var(--accent);">
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-      <span style="font-size: 18px;">&#9889;</span>
-      <span style="font-size: 14px; font-weight: 600; color: var(--navy);">Quick Demo: Choose a scenario to auto-populate the form</span>
-    </div>
-    <div class="scenario-bar">
+  <article class="slds-card" style="background: #E9F3FF; border-color: var(--slds-blue);">
+    <div class="slds-card__body slds-card__body_inner">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span style="font-size: 18px;">✨</span>
+        <span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">Quick Demo: Choose a scenario to auto-populate the form</span>
+      </div>
+      <div class="scenario-bar">
       <button class="scenario-btn" onclick="loadScenario('A')">
         <h4>Scenario A: Add Med-Surg Beds</h4>
         <p>Columbus hospital adds 10 adult med-surg beds (70&rarr;80) via new 4W wing. $3.2M addition.</p>
@@ -379,63 +378,82 @@
         <h4>Scenario C: Close OB/Neonatal Unit</h4>
         <p>Toledo hospital closes entire OB unit (Level II/III + nursery). Triggers CON &amp; EMTALA review.</p>
       </button>
+      </div>
     </div>
-  </div>
+  </article>
 
   <!-- Hospital Information (matches ODH HEA 3614 header) -->
-  <div class="card">
-    <div class="card-header">
-      <h2>Hospital Information</h2>
-      <span class="badge badge-blue">ODH HEA 3614</span>
-    </div>
-    <div class="form-grid">
-      <div class="form-group"><label>Main Hospital Name (DBA)</label><input type="text" id="f_name" placeholder="e.g., Riverside Community Hospital"></div>
-      <div class="form-group"><label>License Number</label><input type="text" id="f_license_num" placeholder="e.g., H-1234"></div>
-      <div class="form-group full"><label>Main Hospital Address</label><input type="text" id="f_address" placeholder="e.g., 450 W. 10th Avenue, Columbus, OH 43210"></div>
-      <div class="form-group"><label>Location Type</label>
-        <select id="f_loc_type"><option value="MAIN">Main Hospital Location</option><option value="PROVIDER_BASED">Provider-based Location</option></select>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Hospital Information</h2>
       </div>
-      <div class="form-group"><label>Provider-based Location Name</label><input type="text" id="f_loc_name" placeholder="(if provider-based)" disabled></div>
-      <div class="form-group full"><label>Provider-based Location Address</label><input type="text" id="f_loc_addr" placeholder="(if provider-based)" disabled></div>
+    </header>
+    <span class="slds-badge" style="background: #E9F3FF; color: #014486;">ODH HEA 3614</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
+    <div class="form-grid">
+      <div class="slds-form-element"><label class="slds-form-element__label">Main Hospital Name (DBA)</label><div class="slds-form-element__control"><input type="text" id="f_name" placeholder="e.g., Riverside Community Hospital" class="slds-input"></div></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">License Number</label><div class="slds-form-element__control"><input type="text" id="f_license_num" placeholder="e.g., H-1234" class="slds-input"></div></div>
+      <div class="slds-form-element" style="grid-column: 1 / -1;"><label class="slds-form-element__label">Main Hospital Address</label><div class="slds-form-element__control"><input type="text" id="f_address" placeholder="e.g., 450 W. 10th Avenue, Columbus, OH 43210" class="slds-input"></div></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Location Type</label>
+        <div class="slds-form-element__control"><select id="f_loc_type" class="slds-select"><option value="MAIN">Main Hospital Location</option><option value="PROVIDER_BASED">Provider-based Location</option></select></div>
+      </div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Provider-based Location Name</label><div class="slds-form-element__control"><input type="text" id="f_loc_name" placeholder="(if provider-based)" disabled class="slds-input"></div></div>
+      <div class="slds-form-element" style="grid-column: 1 / -1;"><label class="slds-form-element__label">Provider-based Location Address</label><div class="slds-form-element__control"><input type="text" id="f_loc_addr" placeholder="(if provider-based)" disabled class="slds-input"></div></div>
     </div>
   </div>
+</article>
 
   <!-- GovPoint Supplemental Data (not on ODH form — feeds regulatory evaluation) -->
-  <div class="card">
-    <div class="card-header">
-      <h2>Supplemental Regulatory Data</h2>
-      <span class="badge badge-amber">GOVPOINT ENRICHMENT</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Supplemental Regulatory Data</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">GOVPOINT ENRICHMENT</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">These fields are not on the ODH notification form but are required by GovPoint to evaluate the full federal and state regulatory stack.</p>
     <div class="form-grid">
-      <div class="form-group"><label>Hospital Type</label>
-        <select id="f_type"><option value="">Select...</option><option value="STANDARD">Standard Hospital</option><option value="CRITICAL_ACCESS">Critical Access Hospital (CAH)</option><option value="SOLE_COMMUNITY">Sole Community Hospital</option><option value="TEACHING">Teaching Hospital</option><option value="CHILDRENS">Children's Hospital</option></select>
+      <div class="slds-form-element"><label class="slds-form-element__label">Hospital Type</label>
+        <div class="slds-form-element__control"><select id="f_type" class="slds-select"><option value="">Select...</option><option value="STANDARD">Standard Hospital</option><option value="CRITICAL_ACCESS">Critical Access Hospital (CAH)</option><option value="SOLE_COMMUNITY">Sole Community Hospital</option><option value="TEACHING">Teaching Hospital</option><option value="CHILDRENS">Children's Hospital</option></select></div>
       </div>
-      <div class="form-group"><label>CMS Certified</label>
-        <select id="f_cms"><option value="true">Yes</option><option value="false">No</option></select>
+      <div class="slds-form-element"><label class="slds-form-element__label">CMS Certified</label>
+        <div class="slds-form-element__control"><select id="f_cms" class="slds-select"><option value="true">Yes</option><option value="false">No</option></select></div>
       </div>
-      <div class="form-group"><label>Ohio License Status</label>
-        <select id="f_license"><option value="ACTIVE">Active</option><option value="EXPIRED">Expired</option><option value="PENDING">Pending</option></select>
+      <div class="slds-form-element"><label class="slds-form-element__label">Ohio License Status</label>
+        <div class="slds-form-element__control"><select id="f_license" class="slds-select"><option value="ACTIVE">Active</option><option value="EXPIRED">Expired</option><option value="PENDING">Pending</option></select></div>
       </div>
-      <div class="form-group"><label>Accreditor Survey Current</label>
-        <select id="f_accredited"><option value="true">Yes - Current</option><option value="false">No - Expired/None</option></select>
+      <div class="slds-form-element"><label class="slds-form-element__label">Accreditor Survey Current</label>
+        <div class="slds-form-element__control"><select id="f_accredited" class="slds-select"><option value="true">Yes - Current</option><option value="false">No - Expired/None</option></select></div>
       </div>
-      <div class="form-group"><label>Swing-Bed Authorized</label>
-        <select id="f_swing"><option value="false">No</option><option value="true">Yes</option></select>
+      <div class="slds-form-element"><label class="slds-form-element__label">Swing-Bed Authorized</label>
+        <div class="slds-form-element__control"><select id="f_swing" class="slds-select"><option value="false">No</option><option value="true">Yes</option></select></div>
       </div>
-      <div class="form-group"><label>Estimated Capital Expenditure</label><input type="text" id="f_capex" placeholder="e.g., $3,200,000"></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Estimated Capital Expenditure</label><div class="slds-form-element__control"><input type="text" id="f_capex" placeholder="e.g., $3,200,000" class="slds-input"></div></div>
     </div>
+  </div>
+</article>
   </div>
 
   <!-- Bed Changes Table (matches ODH HEA 3614 exactly) -->
-  <div class="card">
-    <div class="card-header">
-      <h2>Notification of Bed Number Changes or Bed Relocation</h2>
-      <span class="badge badge-blue">ODH HEA 3614 &middot; OAC 3701-22-03(K)</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Notification of Bed Number Changes or Bed Relocation</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #E9F3FF; color: #014486;">ODH HEA 3614 &middot; OAC 3701-22-03(K)</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Submit completed form and floor plan to <strong>liccert@odh.ohio.gov</strong>. If construction/modernization is involved, also submit the Director Notifications form per OAC 3701-22-03(K).</p>
     <div style="overflow-x:auto;">
-      <table class="bed-table" id="bed-table">
+      <table class="slds-table slds-table_cell-buffer slds-table_bordered" id="bed-table">
         <thead>
           <tr>
             <th>Hospital Bed Category</th>
@@ -449,82 +467,95 @@
         <tbody>
           <!-- Hospital Beds -->
           <tr class="section-row"><td colspan="6">Hospital Beds</td></tr>
-          <tr><td>Adult Medical/Surgical</td><td><input id="b_medsurg_cur" type="number"></td><td><input id="b_medsurg_curfl"></td><td><input id="b_medsurg_new" type="number"></td><td><input id="b_medsurg_newfl"></td><td><input id="b_medsurg_date" type="date"></td></tr>
-          <tr><td>Adult Special Care (ICU/CCU)</td><td><input id="b_icu_cur" type="number"></td><td><input id="b_icu_curfl"></td><td><input id="b_icu_new" type="number"></td><td><input id="b_icu_newfl"></td><td><input id="b_icu_date" type="date"></td></tr>
-          <tr><td>Alcohol or Drug Abuse Rehabilitation</td><td><input id="b_rehab_sub_cur" type="number"></td><td><input id="b_rehab_sub_curfl"></td><td><input id="b_rehab_sub_new" type="number"></td><td><input id="b_rehab_sub_newfl"></td><td><input id="b_rehab_sub_date" type="date"></td></tr>
-          <tr><td>Burn</td><td><input id="b_burn_cur" type="number"></td><td><input id="b_burn_curfl"></td><td><input id="b_burn_new" type="number"></td><td><input id="b_burn_newfl"></td><td><input id="b_burn_date" type="date"></td></tr>
-          <tr><td>Emergency Service Beds</td><td><input id="b_ed_cur" type="number"></td><td><input id="b_ed_curfl"></td><td><input id="b_ed_new" type="number"></td><td><input id="b_ed_newfl"></td><td><input id="b_ed_date" type="date"></td></tr>
-          <tr><td>Hospice</td><td><input id="b_hospice_cur" type="number"></td><td><input id="b_hospice_curfl"></td><td><input id="b_hospice_new" type="number"></td><td><input id="b_hospice_newfl"></td><td><input id="b_hospice_date" type="date"></td></tr>
-          <tr><td>LTAC (&lt;30 days)</td><td><input id="b_ltac_cur" type="number"></td><td><input id="b_ltac_curfl"></td><td><input id="b_ltac_new" type="number"></td><td><input id="b_ltac_newfl"></td><td><input id="b_ltac_date" type="date"></td></tr>
-          <tr><td>Pediatric &mdash; General</td><td><input id="b_peds_cur" type="number"></td><td><input id="b_peds_curfl"></td><td><input id="b_peds_new" type="number"></td><td><input id="b_peds_newfl"></td><td><input id="b_peds_date" type="date"></td></tr>
-          <tr><td>Pediatric Intensive Care (PICU)</td><td><input id="b_picu_cur" type="number"></td><td><input id="b_picu_curfl"></td><td><input id="b_picu_new" type="number"></td><td><input id="b_picu_newfl"></td><td><input id="b_picu_date" type="date"></td></tr>
-          <tr><td>Physical Rehabilitation</td><td><input id="b_physrehab_cur" type="number"></td><td><input id="b_physrehab_curfl"></td><td><input id="b_physrehab_new" type="number"></td><td><input id="b_physrehab_newfl"></td><td><input id="b_physrehab_date" type="date"></td></tr>
-          <tr><td>Psychiatric &mdash; Not Licensed by MHAS</td><td><input id="b_psych_cur" type="number"></td><td><input id="b_psych_curfl"></td><td><input id="b_psych_new" type="number"></td><td><input id="b_psych_newfl"></td><td><input id="b_psych_date" type="date"></td></tr>
-          <tr><td>Psychiatric &mdash; MHAS Licensed*</td><td><input id="b_psych_mhas_cur" type="number"></td><td><input id="b_psych_mhas_curfl"></td><td><input id="b_psych_mhas_new" type="number"></td><td><input id="b_psych_mhas_newfl"></td><td><input id="b_psych_mhas_date" type="date"></td></tr>
-          <tr><td>Any Other Inpatient Bed</td><td><input id="b_other_cur" type="number"></td><td><input id="b_other_curfl"></td><td><input id="b_other_new" type="number"></td><td><input id="b_other_newfl"></td><td><input id="b_other_date" type="date"></td></tr>
+          <tr><td>Adult Medical/Surgical</td><td><input id="b_medsurg_cur" type="number" class="slds-input"></div></td><td><input id="b_medsurg_curfl"></td><td><input id="b_medsurg_new" type="number" class="slds-input"></div></td><td><input id="b_medsurg_newfl"></td><td><input id="b_medsurg_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Adult Special Care (ICU/CCU)</td><td><input id="b_icu_cur" type="number" class="slds-input"></div></td><td><input id="b_icu_curfl"></td><td><input id="b_icu_new" type="number" class="slds-input"></div></td><td><input id="b_icu_newfl"></td><td><input id="b_icu_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Alcohol or Drug Abuse Rehabilitation</td><td><input id="b_rehab_sub_cur" type="number" class="slds-input"></div></td><td><input id="b_rehab_sub_curfl"></td><td><input id="b_rehab_sub_new" type="number" class="slds-input"></div></td><td><input id="b_rehab_sub_newfl"></td><td><input id="b_rehab_sub_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Burn</td><td><input id="b_burn_cur" type="number" class="slds-input"></div></td><td><input id="b_burn_curfl"></td><td><input id="b_burn_new" type="number" class="slds-input"></div></td><td><input id="b_burn_newfl"></td><td><input id="b_burn_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Emergency Service Beds</td><td><input id="b_ed_cur" type="number" class="slds-input"></div></td><td><input id="b_ed_curfl"></td><td><input id="b_ed_new" type="number" class="slds-input"></div></td><td><input id="b_ed_newfl"></td><td><input id="b_ed_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Hospice</td><td><input id="b_hospice_cur" type="number" class="slds-input"></div></td><td><input id="b_hospice_curfl"></td><td><input id="b_hospice_new" type="number" class="slds-input"></div></td><td><input id="b_hospice_newfl"></td><td><input id="b_hospice_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>LTAC (&lt;30 days)</td><td><input id="b_ltac_cur" type="number" class="slds-input"></div></td><td><input id="b_ltac_curfl"></td><td><input id="b_ltac_new" type="number" class="slds-input"></div></td><td><input id="b_ltac_newfl"></td><td><input id="b_ltac_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Pediatric &mdash; General</td><td><input id="b_peds_cur" type="number" class="slds-input"></div></td><td><input id="b_peds_curfl"></td><td><input id="b_peds_new" type="number" class="slds-input"></div></td><td><input id="b_peds_newfl"></td><td><input id="b_peds_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Pediatric Intensive Care (PICU)</td><td><input id="b_picu_cur" type="number" class="slds-input"></div></td><td><input id="b_picu_curfl"></td><td><input id="b_picu_new" type="number" class="slds-input"></div></td><td><input id="b_picu_newfl"></td><td><input id="b_picu_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Physical Rehabilitation</td><td><input id="b_physrehab_cur" type="number" class="slds-input"></div></td><td><input id="b_physrehab_curfl"></td><td><input id="b_physrehab_new" type="number" class="slds-input"></div></td><td><input id="b_physrehab_newfl"></td><td><input id="b_physrehab_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Psychiatric &mdash; Not Licensed by MHAS</td><td><input id="b_psych_cur" type="number" class="slds-input"></div></td><td><input id="b_psych_curfl"></td><td><input id="b_psych_new" type="number" class="slds-input"></div></td><td><input id="b_psych_newfl"></td><td><input id="b_psych_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Psychiatric &mdash; MHAS Licensed*</td><td><input id="b_psych_mhas_cur" type="number" class="slds-input"></div></td><td><input id="b_psych_mhas_curfl"></td><td><input id="b_psych_mhas_new" type="number" class="slds-input"></div></td><td><input id="b_psych_mhas_newfl"></td><td><input id="b_psych_mhas_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Any Other Inpatient Bed</td><td><input id="b_other_cur" type="number" class="slds-input"></div></td><td><input id="b_other_curfl"></td><td><input id="b_other_new" type="number" class="slds-input"></div></td><td><input id="b_other_newfl"></td><td><input id="b_other_date" type="date" class="slds-input"></div></td></tr>
 
           <!-- Long Term Care -->
           <tr class="section-row"><td colspan="6">Long Term Care</td></tr>
-          <tr><td>SNF &mdash; Not Licensed</td><td><input id="b_snf_cur" type="number"></td><td><input id="b_snf_curfl"></td><td><input id="b_snf_new" type="number"></td><td><input id="b_snf_newfl"></td><td><input id="b_snf_date" type="date"></td></tr>
-          <tr><td>NF &mdash; Not Licensed</td><td><input id="b_nf_cur" type="number"></td><td><input id="b_nf_curfl"></td><td><input id="b_nf_new" type="number"></td><td><input id="b_nf_newfl"></td><td><input id="b_nf_date" type="date"></td></tr>
-          <tr><td>SNF/NF &mdash; Not Licensed</td><td><input id="b_snfnf_cur" type="number"></td><td><input id="b_snfnf_curfl"></td><td><input id="b_snfnf_new" type="number"></td><td><input id="b_snfnf_newfl"></td><td><input id="b_snfnf_date" type="date"></td></tr>
-          <tr><td>Special Skilled (3702.521)</td><td><input id="b_specskill_cur" type="number"></td><td><input id="b_specskill_curfl"></td><td><input id="b_specskill_new" type="number"></td><td><input id="b_specskill_newfl"></td><td><input id="b_specskill_date" type="date"></td></tr>
+          <tr><td>SNF &mdash; Not Licensed</td><td><input id="b_snf_cur" type="number" class="slds-input"></div></td><td><input id="b_snf_curfl"></td><td><input id="b_snf_new" type="number" class="slds-input"></div></td><td><input id="b_snf_newfl"></td><td><input id="b_snf_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>NF &mdash; Not Licensed</td><td><input id="b_nf_cur" type="number" class="slds-input"></div></td><td><input id="b_nf_curfl"></td><td><input id="b_nf_new" type="number" class="slds-input"></div></td><td><input id="b_nf_newfl"></td><td><input id="b_nf_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>SNF/NF &mdash; Not Licensed</td><td><input id="b_snfnf_cur" type="number" class="slds-input"></div></td><td><input id="b_snfnf_curfl"></td><td><input id="b_snfnf_new" type="number" class="slds-input"></div></td><td><input id="b_snfnf_newfl"></td><td><input id="b_snfnf_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Special Skilled (3702.521)</td><td><input id="b_specskill_cur" type="number" class="slds-input"></div></td><td><input id="b_specskill_curfl"></td><td><input id="b_specskill_new" type="number" class="slds-input"></div></td><td><input id="b_specskill_newfl"></td><td><input id="b_specskill_date" type="date" class="slds-input"></div></td></tr>
 
           <!-- Obstetric / Neonatal -->
           <tr class="section-row"><td colspan="6">Obstetric / Neonatal</td></tr>
-          <tr><td>Obstetric Capacity &mdash; Level I</td><td><input id="b_ob1_cur" type="number"></td><td><input id="b_ob1_curfl"></td><td><input id="b_ob1_new" type="number"></td><td><input id="b_ob1_newfl"></td><td><input id="b_ob1_date" type="date"></td></tr>
-          <tr><td>Obstetric Capacity &mdash; Level II</td><td><input id="b_ob2_cur" type="number"></td><td><input id="b_ob2_curfl"></td><td><input id="b_ob2_new" type="number"></td><td><input id="b_ob2_newfl"></td><td><input id="b_ob2_date" type="date"></td></tr>
-          <tr><td>Obstetric Capacity &mdash; Level III (+ Special Delivery)</td><td><input id="b_ob3_cur" type="number"></td><td><input id="b_ob3_curfl"></td><td><input id="b_ob3_new" type="number"></td><td><input id="b_ob3_newfl"></td><td><input id="b_ob3_date" type="date"></td></tr>
-          <tr><td>Obstetric Capacity &mdash; Level IV (+ Special Delivery)</td><td><input id="b_ob4_cur" type="number"></td><td><input id="b_ob4_curfl"></td><td><input id="b_ob4_new" type="number"></td><td><input id="b_ob4_newfl"></td><td><input id="b_ob4_date" type="date"></td></tr>
-          <tr class="sub-row"><td>Neonatal Level I &mdash; Well Baby Beds</td><td><input id="b_neo1_cur" type="number"></td><td><input id="b_neo1_curfl"></td><td><input id="b_neo1_new" type="number"></td><td><input id="b_neo1_newfl"></td><td><input id="b_neo1_date" type="date"></td></tr>
-          <tr class="sub-row"><td>Neonatal Level II &mdash; Special Care Nursery</td><td><input id="b_neo2_cur" type="number"></td><td><input id="b_neo2_curfl"></td><td><input id="b_neo2_new" type="number"></td><td><input id="b_neo2_newfl"></td><td><input id="b_neo2_date" type="date"></td></tr>
-          <tr class="sub-row"><td>Neonatal Level III &mdash; NICU</td><td><input id="b_neo3_cur" type="number"></td><td><input id="b_neo3_curfl"></td><td><input id="b_neo3_new" type="number"></td><td><input id="b_neo3_newfl"></td><td><input id="b_neo3_date" type="date"></td></tr>
-          <tr class="sub-row"><td>Neonatal Level IV &mdash; Regional NICU</td><td><input id="b_neo4_cur" type="number"></td><td><input id="b_neo4_curfl"></td><td><input id="b_neo4_new" type="number"></td><td><input id="b_neo4_newfl"></td><td><input id="b_neo4_date" type="date"></td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level I</td><td><input id="b_ob1_cur" type="number" class="slds-input"></div></td><td><input id="b_ob1_curfl"></td><td><input id="b_ob1_new" type="number" class="slds-input"></div></td><td><input id="b_ob1_newfl"></td><td><input id="b_ob1_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level II</td><td><input id="b_ob2_cur" type="number" class="slds-input"></div></td><td><input id="b_ob2_curfl"></td><td><input id="b_ob2_new" type="number" class="slds-input"></div></td><td><input id="b_ob2_newfl"></td><td><input id="b_ob2_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level III (+ Special Delivery)</td><td><input id="b_ob3_cur" type="number" class="slds-input"></div></td><td><input id="b_ob3_curfl"></td><td><input id="b_ob3_new" type="number" class="slds-input"></div></td><td><input id="b_ob3_newfl"></td><td><input id="b_ob3_date" type="date" class="slds-input"></div></td></tr>
+          <tr><td>Obstetric Capacity &mdash; Level IV (+ Special Delivery)</td><td><input id="b_ob4_cur" type="number" class="slds-input"></div></td><td><input id="b_ob4_curfl"></td><td><input id="b_ob4_new" type="number" class="slds-input"></div></td><td><input id="b_ob4_newfl"></td><td><input id="b_ob4_date" type="date" class="slds-input"></div></td></tr>
+          <tr class="sub-row"><td>Neonatal Level I &mdash; Well Baby Beds</td><td><input id="b_neo1_cur" type="number" class="slds-input"></div></td><td><input id="b_neo1_curfl"></td><td><input id="b_neo1_new" type="number" class="slds-input"></div></td><td><input id="b_neo1_newfl"></td><td><input id="b_neo1_date" type="date" class="slds-input"></div></td></tr>
+          <tr class="sub-row"><td>Neonatal Level II &mdash; Special Care Nursery</td><td><input id="b_neo2_cur" type="number" class="slds-input"></div></td><td><input id="b_neo2_curfl"></td><td><input id="b_neo2_new" type="number" class="slds-input"></div></td><td><input id="b_neo2_newfl"></td><td><input id="b_neo2_date" type="date" class="slds-input"></div></td></tr>
+          <tr class="sub-row"><td>Neonatal Level III &mdash; NICU</td><td><input id="b_neo3_cur" type="number" class="slds-input"></div></td><td><input id="b_neo3_curfl"></td><td><input id="b_neo3_new" type="number" class="slds-input"></div></td><td><input id="b_neo3_newfl"></td><td><input id="b_neo3_date" type="date" class="slds-input"></div></td></tr>
+          <tr class="sub-row"><td>Neonatal Level IV &mdash; Regional NICU</td><td><input id="b_neo4_cur" type="number" class="slds-input"></div></td><td><input id="b_neo4_curfl"></td><td><input id="b_neo4_new" type="number" class="slds-input"></div></td><td><input id="b_neo4_newfl"></td><td><input id="b_neo4_date" type="date" class="slds-input"></div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
+</article>
 
   <!-- Affirmation (from ODH form) -->
-  <div class="card">
-    <div class="card-header">
-      <h2>Affirmation</h2>
-      <span class="badge badge-blue">ODH HEA 3614</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Affirmation</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #E9F3FF; color: #014486;">ODH HEA 3614</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <div class="form-grid">
-      <div class="form-group"><label>Name of Authorized Representative</label><input type="text" id="f_auth_name" placeholder="e.g., Dr. Sarah Chen"></div>
-      <div class="form-group"><label>Title</label><input type="text" id="f_auth_title" placeholder="e.g., Chief Executive Officer"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="f_auth_email" placeholder="e.g., schen@hospital.org"></div>
-      <div class="form-group"><label>Date</label><input type="date" id="f_approval_date"></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Name of Authorized Representative</label><div class="slds-form-element__control"><input type="text" id="f_auth_name" placeholder="e.g., Dr. Sarah Chen" class="slds-input"></div></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Title</label><div class="slds-form-element__control"><input type="text" id="f_auth_title" placeholder="e.g., Chief Executive Officer" class="slds-input"></div></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Email</label><div class="slds-form-element__control"><input type="email" id="f_auth_email" placeholder="e.g., schen@hospital.org" class="slds-input"></div></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Date</label><div class="slds-form-element__control"><input type="date" id="f_approval_date" class="slds-input"></div></div>
     </div>
   </div>
+</article>
 
   <!-- Construction / Physical Plant (GovPoint supplemental) -->
-  <div class="card">
-    <div class="card-header">
-      <h2>Physical Construction Details</h2>
-      <span class="badge badge-amber">GOVPOINT ENRICHMENT</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Physical Construction Details</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">GOVPOINT ENRICHMENT</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">If construction or modernization is involved, these fields feed the NFPA 101, ADA, and Fire Marshal evaluation rules.</p>
     <div class="form-grid">
-      <div class="form-group full">
+      <div class="slds-form-element" style="grid-column: 1 / -1;">
         <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-          <div class="checkbox-group"><input type="checkbox" id="f_construction"><label for="f_construction">Involves physical construction</label></div>
-          <div class="checkbox-group"><input type="checkbox" id="f_involves_ob"><label for="f_involves_ob">Involves obstetric / newborn</label></div>
-          <div class="checkbox-group"><input type="checkbox" id="f_involves_ed"><label for="f_involves_ed">Involves emergency department</label></div>
+          <div class="checkbox-group"><div class="slds-form-element__control"><input type="checkbox" id="f_construction" class="slds-input"></div><label for="f_construction">Involves physical construction</label></div>
+          <div class="checkbox-group"><input type="checkbox" id="f_involves_ob" class="slds-input"></div><label for="f_involves_ob">Involves obstetric / newborn</label></div>
+          <div class="checkbox-group"><input type="checkbox" id="f_involves_ed" class="slds-input"></div><label for="f_involves_ed">Involves emergency department</label></div>
         </div>
       </div>
-      <div class="form-group"><label>Target Implementation Date</label><input type="date" id="f_target_date"></div>
-      <div class="form-group"><label>Building Area Affected (%)</label><input type="number" id="f_area_pct" placeholder="e.g., 15" min="0" max="100"></div>
-      <div class="form-group"><label>Work Category (NFPA 101 Ch. 43)</label>
-        <select id="f_work_cat"><option value="">N/A - No construction</option><option value="REPAIR">Repair / Restoration</option><option value="REPLACEMENT">Replacement in Kind</option><option value="RECONFIGURATION">Reconfiguration of Spaces</option><option value="RECONSTRUCTION">Reconstruction</option><option value="ADDITION">Addition (New Wing/Floor)</option><option value="CHANGE_OF_USE">Change of Use / Occupancy</option></select>
+      <div class="slds-form-element"><label class="slds-form-element__label">Target Implementation Date</label><div class="slds-form-element__control"><input type="date" id="f_target_date" class="slds-input"></div></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Building Area Affected (%)</label><div class="slds-form-element__control"><input type="number" id="f_area_pct" placeholder="e.g., 15" min="0" max="100" class="slds-input"></div></div>
+      <div class="slds-form-element"><label class="slds-form-element__label">Work Category (NFPA 101 Ch. 43)</label>
+        <div class="slds-form-element__control"><select id="f_work_cat" class="slds-select"><option value="">N/A - No construction</option><option value="REPAIR">Repair / Restoration</option><option value="REPLACEMENT">Replacement in Kind</option><option value="RECONFIGURATION">Reconfiguration of Spaces</option><option value="RECONSTRUCTION">Reconstruction</option><option value="ADDITION">Addition (New Wing/Floor)</option><option value="CHANGE_OF_USE">Change of Use / Occupancy</option></select></div>
       </div>
     </div>
   </div>
+</article>
 
   <div class="btn-group" style="justify-content: flex-end;">
-    <button class="btn btn-ghost" onclick="clearForm()">Clear Form</button>
-    <button class="btn btn-primary btn-lg" onclick="startEvaluation()">&#9654; Evaluate Capacity Change</button>
+    <button class="slds-button slds-button_neutral" onclick="clearForm()">Clear Form</button>
+    <button class="slds-button slds-button_brand" onclick="startEvaluation()">&#9654; Evaluate Capacity Change</button>
   </div>
 </div>
 
@@ -536,8 +567,8 @@
   </div>
   <div id="eval-phases"></div>
   <div class="btn-group" style="justify-content: space-between; margin-top: 24px;">
-    <button class="btn btn-ghost" onclick="showPage('intake')">&#8592; Back to Intake</button>
-    <button class="btn btn-success btn-lg" id="btn-view-results" style="display:none;" onclick="showPage('results')">View Decision Report &#8594;</button>
+    <button class="slds-button slds-button_neutral" onclick="showPage('intake')">&#8592; Back to Intake</button>
+    <button class="slds-button slds-button_success" id="btn-view-results" style="display:none;" onclick="showPage('results')">View Decision Report &#8594;</button>
   </div>
 </div>
 
@@ -552,29 +583,43 @@
   <div class="result-summary" id="result-stats"></div>
 
   <!-- Decision Banner -->
-  <div class="card" id="decision-banner" style="text-align: center; padding: 32px;"></div>
+  <article class="slds-card" id="decision-banner" style="text-align: center; padding: 32px;">
+    <div class="slds-card__body slds-card__body_inner"></div>
+  </article>
 
   <!-- Triggered Rules -->
-  <div class="card">
-    <div class="card-header">
-      <h2>Triggered Rules &amp; Requirements</h2>
-      <span class="badge badge-blue">COMPLIANCE CHECKLIST</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Triggered Rules &amp; Requirements</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #E9F3FF; color: #014486;">COMPLIANCE CHECKLIST</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <div id="triggered-rules-list"></div>
   </div>
+</article>
 
   <!-- Action Timeline -->
-  <div class="card">
-    <div class="card-header">
-      <h2>Required Actions Timeline</h2>
-      <span class="badge badge-amber">CRITICAL PATH</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Required Actions Timeline</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">CRITICAL PATH</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <div class="timeline" id="action-timeline"></div>
   </div>
+</article>
 
   <div class="btn-group" style="justify-content: space-between;">
-    <button class="btn btn-ghost" onclick="showPage('evaluation')">&#8592; Back to Evaluation</button>
-    <button class="btn btn-primary btn-lg" onclick="showPage('audit')">View Full Audit Trail &#8594;</button>
+    <button class="slds-button slds-button_neutral" onclick="showPage('evaluation')">&#8592; Back to Evaluation</button>
+    <button class="slds-button slds-button_brand" onclick="showPage('audit')">View Full Audit Trail &#8594;</button>
   </div>
 </div>
 
@@ -585,25 +630,37 @@
     <p>Complete decision lineage | Tamper-evident hash chain | Every rule evaluated, every fact checked</p>
   </div>
 
-  <div class="card">
-    <div class="card-header">
-      <h2>Decision Metadata</h2>
-      <span class="badge badge-green">IMMUTABLE RECORD</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Decision Metadata</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #E8F5E9; color: #2E844A;">IMMUTABLE RECORD</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <div id="audit-metadata" style="display: grid; grid-template-columns: 200px 1fr; gap: 8px 16px; font-size: 13px;"></div>
   </div>
+</article>
 
-  <div class="card">
-    <div class="card-header">
-      <h2>Rule Evaluation Sequence</h2>
-      <span class="badge badge-blue">40 RULES EVALUATED</span>
-    </div>
+  <article class="slds-card">
+  <div class="slds-card__header slds-grid">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title">Rule Evaluation Sequence</h2>
+      </div>
+    </header>
+    <span class="slds-badge" style="background: #E9F3FF; color: #014486;">40 RULES EVALUATED</span>
+  </div>
+  <div class="slds-card__body slds-card__body_inner">
     <div id="audit-sequence"></div>
   </div>
+</article>
 
   <div class="btn-group" style="justify-content: space-between;">
-    <button class="btn btn-ghost" onclick="showPage('results')">&#8592; Back to Results</button>
-    <button class="btn btn-primary" onclick="showPage('intake')">&#8634; New Evaluation</button>
+    <button class="slds-button slds-button_neutral" onclick="showPage('results')">&#8592; Back to Results</button>
+    <button class="slds-button slds-button_brand" onclick="showPage('intake')">&#8634; New Evaluation</button>
   </div>
 </div>
 
@@ -1733,14 +1790,15 @@ document.getElementById('f_loc_type').addEventListener('change', function() {
 </script>
 
 <!-- ── DISCLAIMER FOOTER ── -->
-<footer style="background: var(--navy); color: rgba(255,255,255,0.7); text-align: center; padding: 20px 32px; font-size: 12px; line-height: 1.6; margin-top: 48px;">
+<footer style="background: var(--slds-navy); color: rgba(255,255,255,0.75); text-align: center; padding: 20px 24px; font-size: 12px; line-height: 1.6; margin-top: 48px;">
   <div style="max-width: 800px; margin: 0 auto;">
     <strong style="color: white;">PROTOTYPE DEMONSTRATION</strong><br>
-    This is a product concept by <a href="https://aimpointtechnology.com" style="color: #8BB8E8; text-decoration: none;">Aimpoint Technology</a>. Not affiliated with or endorsed by the Ohio Department of Health.<br>
+    This is a product concept by <a href="https://aimpointtechnology.com" style="color: var(--slds-light); text-decoration: none;">Aimpoint Technology</a>. Not affiliated with or endorsed by the Ohio Department of Health.<br>
     Form structure references ODH HEA 3614. Regulatory citations are for demonstration purposes and should not be used as legal guidance.<br>
-    <span style="color: rgba(255,255,255,0.4); margin-top: 8px; display: inline-block;">&copy; 2026 Aimpoint Technology &middot; GovPoint Policy Intelligence Infrastructure</span>
+    <span style="color: rgba(255,255,255,0.5); margin-top: 8px; display: inline-block;">&copy; 2026 Aimpoint Technology &middot; GovPoint Policy Intelligence Infrastructure</span>
   </div>
 </footer>
 
+</div>
 </body>
 </html>
