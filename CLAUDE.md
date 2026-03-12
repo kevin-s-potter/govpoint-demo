@@ -127,6 +127,45 @@ async function query(table, params = '') {
 6. **Ontology write-back** – ontology.html has GovPointAPI class with saveRule(), discardChanges(), sendComment()
 7. **Audit everything** – database changes should include audit_log INSERT statements
 
+## Business Context & Positioning
+
+### The Problem GovPoint Solves
+Agencies using AI for licensing/permitting decisions face a legal gap: operational platforms (Salesforce, Accela, Tyler) handle workflow but not policy reasoning. LLMs are powerful but hallucinate policy and can't produce auditable decisions. GovPoint is the governed policy decision layer in between.
+
+The key question GovPoint answers: *"Why was this license denied?"* — with a specific statute, specific rule, and specific facts. Not "the model said so."
+
+### Core Value Props (in priority order for buyers)
+1. **Legal Defensibility** — every decision cites statute, is documented, and is exhibit-ready for legal challenges
+2. **Consistent Outcomes** — same facts + same statute = same outcome, regardless of staff or day of week
+3. **Faster Decisions** — routine cases auto-process; staff focus on edge cases and appeals
+4. **Reduced Liability** — configurable human oversight dial (Full Human Review → Exception-Based → Automated with Audit)
+5. **Regulatory Currency** — ontology updates as statutes change; no manual staff review of every amendment
+
+### Competitive Positioning
+- vs. Salesforce/Accela/Tyler: "They own workflow. GovPoint adds policy reasoning they don't have."
+- vs. Databricks/Snowflake: "They own data. GovPoint adds governed decisions."
+- vs. raw LLMs: "Powerful but without grounding they hallucinate policy. GovPoint grounds them."
+
+### Regulatory Compliance Built In
+- OMB M-24-10 (federal audit trail requirements) — met by design
+- Colorado SB24-205 (algorithmic due-care standard) — covered by audit infrastructure
+- Mathews v. Eldridge (due process: explain, human judgment, appeal) — fully satisfied
+
+### Sales Motion
+- Target: State agency leaders + IT buyers (CIOs)
+- Entry point: 90-day pilot on one license type — no long procurement cycle
+- Active CIO relationships: Montana, Delaware, New Jersey, Michigan
+- Montana CCL POC complete: 24 statutory exemptions mapped, Title 37 Ch. 45 + HB 239 (2026) encoded
+- Integration story: API-first, complements existing stack, data stays on-premise
+
+### Demo Goals
+The demo should make buyers feel:
+- "This is exactly the audit trail our legal team has been asking for"
+- "Our staff could actually use this to manage rules without IT"
+- "This could plug into what we already have"
+
+The ontology manager is the key differentiator to show IT buyers — it proves the rules are transparent, editable, and versioned, not a black box.
+
 ## Adding a New Program (checklist)
 
 1. Create SQL file: `database/XX_add_<program>.sql` with INSERTs for programs, rules, rule_conditions, rule_dependencies, audit_log, notifications
