@@ -1,5 +1,5 @@
 -- ============================================================
--- GovPoint Database Schema — Migration 01
+-- LexiPoint Database Schema — Migration 01
 -- Run this in the Supabase SQL Editor (supabase.com → your project → SQL Editor)
 -- ============================================================
 

@@ -1,4 +1,4 @@
-# GovPoint Database Setup — Step by Step
+# LexiPoint Database Setup — Step by Step
 
 ## What You Need
 - A GitHub account (you already have one)
@@ -10,7 +10,7 @@
 2. Click **"Start your project"** → sign in with GitHub
 3. Click **"New Project"**
    - **Organization**: Your personal org (auto-created)
-   - **Name**: `govpoint`
+   - **Name**: `lexipoint`
    - **Database Password**: Pick something strong, **save it** (you'll need it later)
    - **Region**: `US East (N. Virginia)` — closest to Ohio
 4. Click **"Create new project"** — wait ~2 minutes

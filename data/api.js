@@ -1,7 +1,7 @@
 /**
- * GovPoint Data API — Supabase Edition
+ * LexiPoint Data API — Supabase Edition
  *
- * All data access for the GovPoint demo goes through this module.
+ * All data access for the LexiPoint demo goes through this module.
  * Reads from a live Supabase PostgreSQL database via REST API.
  *
  * ARCHITECTURE:
@@ -15,7 +15,7 @@
 const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
 
-class GovPointAPI {
+class LexiPointAPI {
   constructor() {
     // Cache fetched data so we don't re-query on every click
     this._cache = {};
@@ -37,7 +37,7 @@ class GovPointAPI {
     });
 
     if (!res.ok) {
-      console.error(`[GovPoint API] ${table} query failed: ${res.status}`);
+      console.error(`[LexiPoint API] ${table} query failed: ${res.status}`);
       return [];
     }
 
@@ -58,9 +58,9 @@ class GovPointAPI {
         this._query('notifications', 'select=*&order=created_at.desc')
       ]);
       const rules = this._cache['rules?select=*&order=rule_id'] || [];
-      console.log(`[GovPoint API] Connected to Supabase — loaded ${rules.length} rules`);
+      console.log(`[LexiPoint API] Connected to Supabase — loaded ${rules.length} rules`);
     } catch (e) {
-      console.error('[GovPoint API] Prefetch failed:', e);
+      console.error('[LexiPoint API] Prefetch failed:', e);
     }
     return this;
   }
@@ -198,4 +198,4 @@ class GovPointAPI {
 }
 
 // Singleton
-const govpoint = new GovPointAPI();
+const lexipoint = new LexiPointAPI();

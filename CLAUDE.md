@@ -1,11 +1,11 @@
-# GovPoint – Project Context for Claude Code
+# LexiPoint – Project Context for Claude Code
 
 ## Project Overview
 
-**GovPoint** is a "Policy Intelligence Infrastructure for Government" – a clickable demo that lets government agencies manage regulatory rules, evaluate license applications, and track compliance changes.
+**LexiPoint** is a "Policy Intelligence Infrastructure for Government" – a clickable demo that lets government agencies manage regulatory rules, evaluate license applications, and track compliance changes.
 
-- **Live URL**: https://govpoint-demo-8j38.vercel.app
-- **GitHub repo**: kevin-s-potter/govpoint-demo (auto-deploys to Vercel on push)
+- **Live URL**: https://lexipoint-demo-8j38.vercel.app
+- **GitHub repo**: kevin-s-potter/lexipoint-demo (auto-deploys to Vercel on push)
 - **Owner**: Kevin Potter, Aimpoint Technology (kevin@aimpointtechnology.com)
 
 ## Architecture
@@ -21,7 +21,7 @@
 ## File Structure
 
 ```
-govpoint-demo/
+lexipoint-demo/
 ├── index.html          # "New Request" – license evaluation demo (hardcoded scenarios A/B/C)
 ├── ontology.html       # Ontology Manager – rule CRUD, 7-tab detail panel, Supabase write-back
 ├── dashboard.html      # Analytics Dashboard – metrics, charts, activity table from audit_log
@@ -53,7 +53,7 @@ Each page has a program switcher dropdown calling `switchProgram(programId)` to 
 ## Consistent Nav (all 4 pages)
 
 Dark navy header (#032D60) with:
-1. GovPoint logo
+1. LexiPoint logo
 2. Program switcher dropdown (programs grouped by tenant)
 3. Nav links: **New Request** | **Ontology** | **Dashboard**
 4. Notification bell with dropdown
@@ -124,15 +124,15 @@ async function query(table, params = '') {
 3. **PROGRAM_CONFIG consistency** – must match across all 4 HTML files
 4. **Dashboard scoping** – `dashFilter` variable ('current', 'tenant', 'all') controls query scope
 5. **index.html is hardcoded** – evaluation logic is not database-driven (intentional for demo reliability)
-6. **Ontology write-back** – ontology.html has GovPointAPI class with saveRule(), discardChanges(), sendComment()
+6. **Ontology write-back** – ontology.html has LexiPointAPI class with saveRule(), discardChanges(), sendComment()
 7. **Audit everything** – database changes should include audit_log INSERT statements
 
 ## Business Context & Positioning
 
-### The Problem GovPoint Solves
-Agencies using AI for licensing/permitting decisions face a legal gap: operational platforms (Salesforce, Accela, Tyler) handle workflow but not policy reasoning. LLMs are powerful but hallucinate policy and can't produce auditable decisions. GovPoint is the governed policy decision layer in between.
+### The Problem LexiPoint Solves
+Agencies using AI for licensing/permitting decisions face a legal gap: operational platforms (Salesforce, Accela, Tyler) handle workflow but not policy reasoning. LLMs are powerful but hallucinate policy and can't produce auditable decisions. LexiPoint is the governed policy decision layer in between.
 
-The key question GovPoint answers: *"Why was this license denied?"* — with a specific statute, specific rule, and specific facts. Not "the model said so."
+The key question LexiPoint answers: *"Why was this license denied?"* — with a specific statute, specific rule, and specific facts. Not "the model said so."
 
 ### Core Value Props (in priority order for buyers)
 1. **Legal Defensibility** — every decision cites statute, is documented, and is exhibit-ready for legal challenges
@@ -142,9 +142,9 @@ The key question GovPoint answers: *"Why was this license denied?"* — with a s
 5. **Regulatory Currency** — ontology updates as statutes change; no manual staff review of every amendment
 
 ### Competitive Positioning
-- vs. Salesforce/Accela/Tyler: "They own workflow. GovPoint adds policy reasoning they don't have."
-- vs. Databricks/Snowflake: "They own data. GovPoint adds governed decisions."
-- vs. raw LLMs: "Powerful but without grounding they hallucinate policy. GovPoint grounds them."
+- vs. Salesforce/Accela/Tyler: "They own workflow. LexiPoint adds policy reasoning they don't have."
+- vs. Databricks/Snowflake: "They own data. LexiPoint adds governed decisions."
+- vs. raw LLMs: "Powerful but without grounding they hallucinate policy. LexiPoint grounds them."
 
 ### Regulatory Compliance Built In
 - OMB M-24-10 (federal audit trail requirements) — met by design
@@ -159,9 +159,9 @@ The key question GovPoint answers: *"Why was this license denied?"* — with a s
 - Integration story: API-first, complements existing stack, data stays on-premise
 
 ### Core Positioning Line
-"SharePoint manages documents about your policy. GovPoint manages your policy as executable code with legal accountability."
+"SharePoint manages documents about your policy. LexiPoint manages your policy as executable code with legal accountability."
 
-The longer form: A CMS manages documents about policy. GovPoint manages policy as executable code with legal accountability. The same way you wouldn't manage a production database schema with a word processor, you can't manage a live regulatory decision engine with SharePoint — the consequences of an undetected dependency conflict aren't a broken link, they're a legally incorrect licensing decision that exposes the agency to liability.
+The longer form: A CMS manages documents about policy. LexiPoint manages policy as executable code with legal accountability. The same way you wouldn't manage a production database schema with a word processor, you can't manage a live regulatory decision engine with SharePoint — the consequences of an undetected dependency conflict aren't a broken link, they're a legally incorrect licensing decision that exposes the agency to liability.
 
 Use this framing when thinking about feature work: every UI decision should reinforce that this is infrastructure, not software. The stakes of getting rules wrong are legal, not just technical.
 

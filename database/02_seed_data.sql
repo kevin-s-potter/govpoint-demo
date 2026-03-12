@@ -1,5 +1,5 @@
 -- ============================================================
--- GovPoint Seed Data — Migration 02
+-- LexiPoint Seed Data — Migration 02
 -- Run this AFTER 01_create_tables.sql
 -- Populates all tables with Ohio Hospital Licensing demo data
 -- ============================================================

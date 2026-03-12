@@ -1,6 +1,6 @@
 {
-  "$schema": "GovPoint Ontology Data Model v1.0",
-  "_description": "Relational data model for GovPoint. Designed for PostgreSQL but represented here as JSON for the demo layer. Each top-level key maps to a database table.",
+  "$schema": "LexiPoint Ontology Data Model v1.0",
+  "_description": "Relational data model for LexiPoint. Designed for PostgreSQL but represented here as JSON for the demo layer. Each top-level key maps to a database table.",
 
   "tenants": [
     {

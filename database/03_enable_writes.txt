@@ -1,5 +1,5 @@
 -- ============================================================
--- GovPoint — Enable anonymous writes for demo
+-- LexiPoint — Enable anonymous writes for demo
 -- Run this in Supabase SQL Editor (same as before)
 -- ============================================================
 

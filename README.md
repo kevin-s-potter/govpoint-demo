@@ -1,8 +1,8 @@
-# GovPoint Demo
+# LexiPoint Demo
 
 **Policy Intelligence Infrastructure for Government**
 
-A clickable prototype demonstrating GovPoint's deterministic rule evaluation engine applied to the Ohio Department of Health Hospital Capacity Change process (HEA 3614).
+A clickable prototype demonstrating LexiPoint's deterministic rule evaluation engine applied to the Ohio Department of Health Hospital Capacity Change process (HEA 3614).
 
 ## What This Demonstrates
 

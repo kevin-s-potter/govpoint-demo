@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GovPoint | Ontology Manager</title>
+<title>LexiPoint | Ontology Manager</title>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
@@ -1747,7 +1747,7 @@
 <nav class="topnav">
   <div class="logo">
     <span class="ohio-mark">⟨°⟩</span>
-    <span>GovPoint</span>
+    <span>LexiPoint</span>
   </div>
 
   <div class="tenant-switcher">
@@ -2034,11 +2034,11 @@
 </div>
 
 <script>
-// ── GOVPOINT SUPABASE API ────────────────────────────────────
+// ── LEXIPOINT SUPABASE API ────────────────────────────────────
 const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
 
-class GovPointAPI {
+class LexiPointAPI {
   constructor() {
     this._cache = {};
     this.ready = this._prefetch();
@@ -2050,7 +2050,7 @@ class GovPointAPI {
     const res = await fetch(url, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
     });
-    if (!res.ok) { console.error(`[GovPoint API] ${table} query failed: ${res.status}`); return []; }
+    if (!res.ok) { console.error(`[LexiPoint API] ${table} query failed: ${res.status}`); return []; }
     const data = await res.json();
     this._cache[cacheKey] = data;
     return data;
@@ -2066,8 +2066,8 @@ class GovPointAPI {
         this._query('notifications', 'select=*&order=created_at.desc')
       ]);
       const rules = this._cache['rules?select=*&order=rule_id'] || [];
-      console.log(`[GovPoint API] Connected to Supabase — loaded ${rules.length} rules`);
-    } catch (e) { console.error('[GovPoint API] Prefetch failed:', e); }
+      console.log(`[LexiPoint API] Connected to Supabase — loaded ${rules.length} rules`);
+    } catch (e) { console.error('[LexiPoint API] Prefetch failed:', e); }
     return this;
   }
   clearCache() { this._cache = {}; }
@@ -2136,7 +2136,7 @@ class GovPointAPI {
     });
     if (!res.ok) {
       const err = await res.text();
-      console.error(`[GovPoint API] updateRule failed: ${res.status}`, err);
+      console.error(`[LexiPoint API] updateRule failed: ${res.status}`, err);
       throw new Error(`Save failed (${res.status}): ${err}`);
     }
     this.clearCache();
@@ -2163,7 +2163,7 @@ class GovPointAPI {
     });
     if (!res.ok) {
       const err = await res.text();
-      console.error(`[GovPoint API] addComment failed: ${res.status}`, err);
+      console.error(`[LexiPoint API] addComment failed: ${res.status}`, err);
       throw new Error(`Comment failed (${res.status}): ${err}`);
     }
     this.clearCache();
@@ -2191,11 +2191,11 @@ class GovPointAPI {
         detail: detail
       })
     });
-    if (!res.ok) { console.error(`[GovPoint API] addAuditEntry failed: ${res.status}`); }
+    if (!res.ok) { console.error(`[LexiPoint API] addAuditEntry failed: ${res.status}`); }
     this.clearCache();
   }
 }
-const govpoint = new GovPointAPI();
+const lexipoint = new LexiPointAPI();
 </script>
 <script>
 // ── PROGRAM CONFIG ────────────────────────────────────────────
@@ -2232,7 +2232,7 @@ function switchProgram(programId) {
   document.querySelector('.user-role').textContent = `${user.role} | ${config.programName}`;
 
   // Clear cache and reload
-  govpoint.clearCache();
+  lexipoint.clearCache();
   init();
 }
 
@@ -2249,13 +2249,13 @@ let rules = [];           // all rules for current program
 
 // ── INITIALIZE — wait for Supabase data ──────────────────────
 async function init() {
-  await govpoint.ready;
+  await lexipoint.ready;
   const config = PROGRAM_CONFIG[currentProgram];
-  rules = await govpoint.getRules(currentProgram);
+  rules = await lexipoint.getRules(currentProgram);
   console.log(`[Ontology UI] ${rules.length} rules loaded from Supabase for ${currentProgram}`);
 
   // Update notification badge from DB
-  const unread = await govpoint.getUnreadCount(config.userId);
+  const unread = await lexipoint.getUnreadCount(config.userId);
   const badge = document.querySelector('.notification-badge');
   if (badge) badge.textContent = unread;
 
@@ -2278,7 +2278,7 @@ async function init() {
 async function loadWhatsChanged() {
   try {
     const config = PROGRAM_CONFIG[currentProgram];
-    const entries = await govpoint._query('audit_log', `order=timestamp.desc&limit=10&action=neq.login&action=neq.view&tenant_id=eq.${config.tenant}`);
+    const entries = await lexipoint._query('audit_log', `order=timestamp.desc&limit=10&action=neq.login&action=neq.view&tenant_id=eq.${config.tenant}`);
     const rulesMap = {};
     rules.forEach(r => { rulesMap[r.rule_id] = r; });
 
@@ -2350,7 +2350,7 @@ function renderRulesList() {
 
 // ── SELECT RULE ──────────────────────────────────────────────
 async function selectRule(id) {
-  currentRule = await govpoint.getRule(id);
+  currentRule = await lexipoint.getRule(id);
 
   // Add to workspace tabs if not already there
   if (!workspaceTabs.find(t => t.ruleId === id)) {
@@ -2379,11 +2379,11 @@ async function renderDetailPanel() {
 
   // Fetch related data in parallel
   const [conditions, deps, versions, comments, auditLog] = await Promise.all([
-    govpoint.getConditions(currentRule.rule_id),
-    govpoint.getDependencies(currentRule.rule_id),
-    govpoint.getVersionHistory(currentRule.rule_id),
-    govpoint.getComments(currentRule.rule_id),
-    govpoint.getAuditLog(currentRule.rule_id)
+    lexipoint.getConditions(currentRule.rule_id),
+    lexipoint.getDependencies(currentRule.rule_id),
+    lexipoint.getVersionHistory(currentRule.rule_id),
+    lexipoint.getComments(currentRule.rule_id),
+    lexipoint.getAuditLog(currentRule.rule_id)
   ]);
 
   // ── OVERVIEW TAB — editable fields from DB ──────────────────
@@ -2645,7 +2645,7 @@ function setupEventListeners() {
 
   _on('simulateBtn', 'click', async () => {
     if (!currentRule) return;
-    const deps = await govpoint.getDependencies(currentRule.rule_id);
+    const deps = await lexipoint.getDependencies(currentRule.rule_id);
     const modal = document.getElementById('impactModal');
     if (modal) modal.classList.add('active');
     const title = document.getElementById('impactTitle');
@@ -2776,10 +2776,10 @@ async function saveRule() {
     }
 
     // Save to database
-    const updated = await govpoint.updateRule(currentRule.rule_id, fields);
+    const updated = await lexipoint.updateRule(currentRule.rule_id, fields);
 
     // Write audit log entry
-    await govpoint.addAuditEntry(
+    await lexipoint.addAuditEntry(
       'ohio-odh', 'user-001', 'publisher', 'edit_rule',
       'rule', currentRule.rule_id,
       changes.join('; ')
@@ -2787,7 +2787,7 @@ async function saveRule() {
 
     // Refresh local state
     currentRule = updated;
-    rules = await govpoint.getRules('hosp-licensing');
+    rules = await lexipoint.getRules('hosp-licensing');
     renderRulesList();
 
     // Update header
@@ -2809,8 +2809,8 @@ async function saveRule() {
 async function discardChanges() {
   if (!currentRule) return;
   // Re-fetch the rule from DB and re-render
-  govpoint.clearCache();
-  currentRule = await govpoint.getRule(currentRule.rule_id);
+  lexipoint.clearCache();
+  currentRule = await lexipoint.getRule(currentRule.rule_id);
   await renderDetailPanel();
   showToast('Changes discarded');
 }
@@ -2823,17 +2823,17 @@ async function sendComment() {
   if (!body) { showToast('Comment cannot be empty'); return; }
 
   try {
-    await govpoint.addComment(currentRule.rule_id, 'user-001', body);
+    await lexipoint.addComment(currentRule.rule_id, 'user-001', body);
 
     // Write audit log entry
-    await govpoint.addAuditEntry(
+    await lexipoint.addAuditEntry(
       'ohio-odh', 'user-001', 'publisher', 'add_comment',
       'rule', currentRule.rule_id,
       body.substring(0, 80) + (body.length > 80 ? '...' : '')
     );
 
     // Re-render comments tab with fresh data
-    const comments = await govpoint.getComments(currentRule.rule_id);
+    const comments = await lexipoint.getComments(currentRule.rule_id);
     const avatarColors = { 'user-001': 'var(--slds-blue)', 'user-002': 'var(--slds-success)', 'user-003': 'var(--slds-purple)' };
     const roleMap = { 'user-001': 'Publisher', 'user-002': 'Reviewer', 'user-003': 'Viewer' };
     const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}); } catch(e) { return d; } };
@@ -3283,7 +3283,7 @@ function cbAcceptAI(groupId, condId) {
   if (cond) {
     cond.source = 'user';
     if (cbState.rule) {
-      govpoint.addAuditEntry(
+      lexipoint.addAuditEntry(
         'ohio-odh', 'user-001', 'publisher', 'accept_ai_suggestion',
         'rule', cbState.rule.rule_id,
         `AI suggestion accepted: ${cond.field} ${cond.operator} ${cond.value}`
@@ -3457,7 +3457,7 @@ function cbApplySuggestion(index) {
 
   // Log AI suggestion acceptance to audit trail
   if (cbState.rule) {
-    govpoint.addAuditEntry(
+    lexipoint.addAuditEntry(
       'ohio-odh', 'user-001', 'publisher', 'accept_ai_suggestion',
       'rule', cbState.rule.rule_id,
       `AI suggestion accepted: ${s.field} ${s.operator} ${s.value}`
@@ -4124,7 +4124,7 @@ async function renderDependencyGraph() {
 
   // Fetch all dependencies
   try {
-    const allDeps = await govpoint._query('rule_dependencies', 'select=*');
+    const allDeps = await lexipoint._query('rule_dependencies', 'select=*');
 
     // Build nodes and links
     const nodeMap = {};
@@ -4424,11 +4424,11 @@ function renderAIInsights(rule) {
 // ── FOCUSED DEPENDENCY GRAPH in Dependencies Tab (Feature 3) ──────
 async function renderFocusedDependencyGraph(ruleId) {
   const container = document.getElementById('dependenciesContent');
-  const rule = await govpoint.getRule(ruleId);
-  const deps = await govpoint.getDependencies(ruleId);
+  const rule = await lexipoint.getRule(ruleId);
+  const deps = await lexipoint.getDependencies(ruleId);
 
   // Create mini graph data
-  const allDeps = await govpoint._query('rule_dependencies', 'select=*');
+  const allDeps = await lexipoint._query('rule_dependencies', 'select=*');
   const nodeMap = {};
   nodeMap[ruleId] = { id: ruleId, name: rule.name, status: rule.status, isCentral: true };
 

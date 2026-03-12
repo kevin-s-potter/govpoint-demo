@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GovPoint | Hospital Capacity Change</title>
+<title>LexiPoint | Hospital Capacity Change</title>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <style>
   :root {
@@ -266,7 +266,7 @@
 <nav class="topnav">
   <div class="logo">
     <span class="ohio-mark">⌘</span>
-    <span>GovPoint</span>
+    <span>LexiPoint</span>
   </div>
 
   <div class="tenant-switcher">
@@ -406,7 +406,7 @@
   </div>
 </article>
 
-  <!-- GovPoint Supplemental Data (not on ODH form — feeds regulatory evaluation) -->
+  <!-- LexiPoint Supplemental Data (not on ODH form — feeds regulatory evaluation) -->
   <article class="slds-card">
   <div class="slds-card__header slds-grid">
     <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -414,10 +414,10 @@
         <h2 class="slds-card__header-title">Supplemental Regulatory Data</h2>
       </div>
     </header>
-    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">GOVPOINT ENRICHMENT</span>
+    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">LEXIPOINT ENRICHMENT</span>
   </div>
   <div class="slds-card__body slds-card__body_inner">
-    <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">These fields are not on the ODH notification form but are required by GovPoint to evaluate the full federal and state regulatory stack.</p>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">These fields are not on the ODH notification form but are required by LexiPoint to evaluate the full federal and state regulatory stack.</p>
     <div class="form-grid">
       <div class="slds-form-element"><label class="slds-form-element__label">Hospital Type</label>
         <div class="slds-form-element__control"><select id="f_type" class="slds-select"><option value="">Select...</option><option value="STANDARD">Standard Hospital</option><option value="CRITICAL_ACCESS">Critical Access Hospital (CAH)</option><option value="SOLE_COMMUNITY">Sole Community Hospital</option><option value="TEACHING">Teaching Hospital</option><option value="CHILDRENS">Children's Hospital</option></select></div></div>
@@ -518,7 +518,7 @@
   </div>
 </article>
 
-  <!-- Construction / Physical Plant (GovPoint supplemental) -->
+  <!-- Construction / Physical Plant (LexiPoint supplemental) -->
   <article class="slds-card">
   <div class="slds-card__header slds-grid">
     <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -526,7 +526,7 @@
         <h2 class="slds-card__header-title">Physical Construction Details</h2>
       </div>
     </header>
-    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">GOVPOINT ENRICHMENT</span>
+    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">LEXIPOINT ENRICHMENT</span>
   </div>
   <div class="slds-card__body slds-card__body_inner">
     <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">If construction or modernization is involved, these fields feed the NFPA 101, ADA, and Fire Marshal evaluation rules.</p>
@@ -1672,7 +1672,7 @@ function buildAudit() {
     ['Ontology Version', ontologyVersion],
     ['Evaluation Timestamp', now],
     ['Hospital', name],
-    ['Evaluator', 'GovPoint Decision Engine v0.1'],
+    ['Evaluator', 'LexiPoint Decision Engine v0.1'],
     ['Decision Mode', 'DETERMINISTIC (no LLM escalation required)'],
     ['Total Rules in Ontology', '40'],
     ['Rules Evaluated', Object.values(evalResults).filter(r => r.status !== 'skip').length.toString()],
@@ -1789,7 +1789,7 @@ document.getElementById('f_loc_type').addEventListener('change', function() {
     <strong style="color: white;">PROTOTYPE DEMONSTRATION</strong><br>
     This is a product concept by <a href="https://aimpointtechnology.com" style="color: var(--slds-light); text-decoration: none;">Aimpoint Technology</a>. Not affiliated with or endorsed by the Ohio Department of Health.<br>
     Form structure references ODH HEA 3614. Regulatory citations are for demonstration purposes and should not be used as legal guidance.<br>
-    <span style="color: rgba(255,255,255,0.5); margin-top: 8px; display: inline-block;">&copy; 2026 Aimpoint Technology &middot; GovPoint Policy Intelligence Infrastructure</span>
+    <span style="color: rgba(255,255,255,0.5); margin-top: 8px; display: inline-block;">&copy; 2026 Aimpoint Technology &middot; LexiPoint Policy Intelligence Infrastructure</span>
   </div>
 </footer>
 
