@@ -2265,33 +2265,8 @@ async function init() {
   renderRulesList();
   setupEventListeners();
 
-  // Render initial D3 graph in no-selection state
-  // Use ResizeObserver to wait for the SVG to have computed dimensions
-  const graphSvg = document.getElementById('dependencyGraph');
-  if (graphSvg) {
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-          observer.disconnect();
-          renderDependencyGraph();
-          return;
-        }
-      }
-    });
-    observer.observe(graphSvg);
-    // Fallback: if ResizeObserver doesn't fire within 2s, force render via rAF loop
-    let fallbackAttempts = 0;
-    const fallbackRender = () => {
-      fallbackAttempts++;
-      if (graphSvg.clientWidth > 0 && graphSvg.clientHeight > 0) {
-        observer.disconnect();
-        renderDependencyGraph();
-      } else if (fallbackAttempts < 30) {
-        requestAnimationFrame(fallbackRender);
-      }
-    };
-    requestAnimationFrame(fallbackRender);
-  }
+  // Render initial D3 graph — await directly (SVG has min-height so dimensions are ready)
+  await renderDependencyGraph();
 }
 
 // ── WHAT'S CHANGED (live from audit_log) ─────────────────────
@@ -3465,48 +3440,88 @@ function cbRefreshAI() {
 // ── Test Panel ──────────────────────────────────────────────
 function cbRenderTestPanel(container) {
   const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
-  const usedFields = new Set();
-  cbState.groups.forEach(g => g.conditions.forEach(c => { if (c.field && c.source !== 'ai') usedFields.add(c.field); }));
+  const usedFields = [];
+  const seen = new Set();
+  cbState.groups.forEach(g => g.conditions.forEach(c => {
+    if (c.field && c.source !== 'ai' && !seen.has(c.field)) { seen.add(c.field); usedFields.push(c.field); }
+  }));
 
   let html = `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin-bottom:10px;text-transform:uppercase;">Test with Sample Data</div>`;
-  html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Enter values to test whether a record would pass or fail the conditions.</div>`;
+  html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Enter values below and run the test to see which conditions pass or fail.</div>`;
 
-  if (usedFields.size === 0) {
+  if (usedFields.length === 0) {
     html += `<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:13px;">Add conditions first to enable testing.</div>`;
     container.innerHTML = html;
     return;
   }
 
+  // Pre-populate booleans that have no test value yet
+  usedFields.forEach(fieldName => {
+    const fieldDef = fields.find(f => f.value === fieldName) || { type: 'text' };
+    if (fieldDef.type === 'boolean' && !cbState.testCases.find(t => t.field === fieldName)) {
+      cbState.testCases.push({ field: fieldName, value: 'true' });
+    }
+  });
+
+  html += `<div id="cbTestInputs">`;
   usedFields.forEach(fieldName => {
     const fieldDef = fields.find(f => f.value === fieldName) || { label: fieldName, type: 'text' };
     const existing = cbState.testCases.find(t => t.field === fieldName);
     const val = existing ? existing.value : '';
+    // Find what the condition expects for this field (for the hint)
+    let hint = '';
+    cbState.groups.forEach(g => g.conditions.forEach(c => {
+      if (c.field === fieldName && c.source !== 'ai' && !hint) hint = `${c.operator} ${c.value}`;
+    }));
     html += `<div class="cb-test-row">
-      <label>${fieldDef.label}</label>
+      <label title="Condition expects: ${hint}">${fieldDef.label}</label>
       ${fieldDef.type === 'boolean'
-        ? `<select onchange="cbSetTestValue('${fieldName}', this.value)"><option value="true" ${val === 'true' ? 'selected' : ''}>True</option><option value="false" ${val === 'false' ? 'selected' : ''}>False</option></select>`
-        : `<input type="${fieldDef.type === 'number' ? 'number' : fieldDef.type === 'date' ? 'date' : 'text'}" value="${val}" onchange="cbSetTestValue('${fieldName}', this.value)" placeholder="${fieldDef.type}" />`
+        ? `<select oninput="cbSetTestValue('${fieldName}', this.value)">
+            <option value="true" ${val === 'true' ? 'selected' : ''}>True</option>
+            <option value="false" ${val !== 'true' ? 'selected' : ''}>False</option>
+          </select>`
+        : `<input type="${fieldDef.type === 'number' ? 'number' : fieldDef.type === 'date' ? 'date' : 'text'}"
+            value="${val}" oninput="cbSetTestValue('${fieldName}', this.value)"
+            placeholder="${hint ? 'expects ' + hint : fieldDef.type}" />`
       }
     </div>`;
   });
+  html += `</div>`;
 
   html += `<button class="slds-button slds-button_brand cb-btn-sm" style="width:100%;margin-top:8px;padding:8px;" onclick="cbRunTest()">▶ Run Test</button>`;
 
+  // Result area — separate div so we can update it without wiping inputs
+  html += `<div id="cbTestResultArea">`;
   if (cbState.lastTestResult) {
-    const r = cbState.lastTestResult;
-    html += `<div class="cb-test-result ${r.pass ? 'cb-test-pass' : 'cb-test-fail'}">
-      ${r.pass ? '✅ PASS' : '❌ FAIL'} — ${r.summary}
-      <div class="cb-test-detail">${r.details.join('<br>')}</div>
-    </div>`;
+    html += cbFormatTestResult(cbState.lastTestResult);
   }
+  html += `</div>`;
 
   html += `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--slds-border);">
     <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;">Quick Presets</div>
-    <button class="slds-button slds-button_neutral cb-btn-sm" style="margin-bottom:4px;width:100%;" onclick="cbLoadPreset('passing')">Load Passing Example</button>
-    <button class="slds-button slds-button_neutral cb-btn-sm" style="width:100%;" onclick="cbLoadPreset('failing')">Load Failing Example</button>
+    <button class="slds-button slds-button_neutral cb-btn-sm" style="margin-bottom:4px;width:100%;" onclick="cbLoadPreset('passing')">Load Passing Values</button>
+    <button class="slds-button slds-button_neutral cb-btn-sm" style="width:100%;" onclick="cbLoadPreset('failing')">Load Failing Values</button>
   </div>`;
 
   container.innerHTML = html;
+}
+
+function cbFormatTestResult(r) {
+  let html = `<div class="cb-test-result ${r.pass ? 'cb-test-pass' : 'cb-test-fail'}" style="margin-top:10px;">
+    <div style="font-size:14px;margin-bottom:6px;">${r.pass ? '✅ PASS' : '❌ FAIL'} — ${r.summary}</div>`;
+  r.details.forEach(d => {
+    html += `<div class="cb-test-detail" style="margin-bottom:3px;">${d}</div>`;
+  });
+  if (r.groupDetails) {
+    r.groupDetails.forEach(gd => {
+      html += `<div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.08);">
+        <div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin-bottom:4px;">${gd.label} — ${gd.pass ? '✅ Passed' : '❌ Failed'}</div>
+        ${gd.results.map(r => `<div class="cb-test-detail">${r}</div>`).join('')}
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
 }
 
 function cbSetTestValue(field, value) {
@@ -3515,8 +3530,58 @@ function cbSetTestValue(field, value) {
   else { cbState.testCases.push({ field, value }); }
 }
 
+function cbEvalCondition(cond, testVal) {
+  const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+  const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
+  let pass = false;
+
+  if (fieldDef.type === 'number') {
+    const a = parseFloat(testVal), b = parseFloat(cond.value);
+    if (isNaN(a) || isNaN(b)) return { pass: false, reason: `${cond.field}: cannot compare "${testVal}" to "${cond.value}" (not numbers)` };
+    if (cond.operator === '>=') pass = a >= b;
+    else if (cond.operator === '<=') pass = a <= b;
+    else if (cond.operator === '>') pass = a > b;
+    else if (cond.operator === '<') pass = a < b;
+    else if (cond.operator === '=') pass = a === b;
+    else if (cond.operator === '!=') pass = a !== b;
+  } else if (fieldDef.type === 'boolean') {
+    pass = (String(testVal).toLowerCase() === String(cond.value).toLowerCase());
+  } else if (fieldDef.type === 'date') {
+    const a = new Date(testVal), b = new Date(cond.value);
+    if (isNaN(a) || isNaN(b)) return { pass: false, reason: `${cond.field}: invalid date "${testVal}" or "${cond.value}"` };
+    if (cond.operator === '>=') pass = a >= b;
+    else if (cond.operator === '<=') pass = a <= b;
+    else if (cond.operator === '>') pass = a > b;
+    else if (cond.operator === '<') pass = a < b;
+    else if (cond.operator === '=') pass = a.getTime() === b.getTime();
+  } else {
+    const a = String(testVal).toLowerCase(), b = String(cond.value).toLowerCase();
+    if (cond.operator === '=') pass = a === b;
+    else if (cond.operator === '!=') pass = a !== b;
+    else if (cond.operator === 'contains') pass = a.includes(b);
+    else if (cond.operator === 'starts_with') pass = a.startsWith(b);
+  }
+
+  const fieldLabel = fieldDef.label || cond.field;
+  return {
+    pass,
+    reason: pass
+      ? `<span style="color:#2E844A;">✅</span> <strong>${fieldLabel}</strong> ${cond.operator} ${cond.value} — input: "${testVal}"`
+      : `<span style="color:var(--slds-error);">❌</span> <strong>${fieldLabel}</strong> ${cond.operator} ${cond.value} — input: "${testVal}" <span style="color:var(--slds-error);">(failed)</span>`
+  };
+}
+
 function cbRunTest() {
-  const results = [];
+  // Capture current input values from DOM in case oninput missed the last keystroke
+  const inputs = document.querySelectorAll('#cbTestInputs input, #cbTestInputs select');
+  inputs.forEach(el => {
+    const fieldName = el.closest('.cb-test-row')?.querySelector('label')?.textContent;
+    const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+    const fieldDef = fields.find(f => f.label === fieldName);
+    if (fieldDef) cbSetTestValue(fieldDef.value, el.value);
+  });
+
+  const groupDetails = [];
   let allGroupsPassed = true;
 
   cbState.groups.forEach((group, gi) => {
@@ -3526,30 +3591,12 @@ function cbRunTest() {
     const condResults = accepted.map(cond => {
       const testCase = cbState.testCases.find(t => t.field === cond.field);
       const testVal = testCase ? testCase.value : '';
-      if (!testVal && testVal !== '0') return { cond, pass: false, reason: `No test value for "${cond.field}"` };
-
-      let pass = false;
-      const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
-      const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
-
-      if (fieldDef.type === 'number') {
-        const a = parseFloat(testVal), b = parseFloat(cond.value);
-        if (cond.operator === '>=') pass = a >= b;
-        else if (cond.operator === '<=') pass = a <= b;
-        else if (cond.operator === '>') pass = a > b;
-        else if (cond.operator === '<') pass = a < b;
-        else if (cond.operator === '=') pass = a === b;
-        else if (cond.operator === '!=') pass = a !== b;
-      } else if (fieldDef.type === 'boolean') {
-        pass = (testVal.toLowerCase() === cond.value.toLowerCase());
-      } else {
-        const a = testVal.toLowerCase(), b = cond.value.toLowerCase();
-        if (cond.operator === '=') pass = a === b;
-        else if (cond.operator === '!=') pass = a !== b;
-        else if (cond.operator === 'contains') pass = a.includes(b);
-        else if (cond.operator === 'starts_with') pass = a.startsWith(b);
+      if (testVal === '' && testVal !== '0') {
+        const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+        const fieldLabel = (fields.find(f => f.value === cond.field) || {}).label || cond.field;
+        return { pass: false, reason: `<span style="color:var(--slds-error);">⚠️</span> <strong>${fieldLabel}</strong> — no test value provided` };
       }
-      return { cond, pass, reason: pass ? `${cond.field} ${cond.operator} ${cond.value} → ✅` : `${cond.field}: "${testVal}" does not satisfy ${cond.operator} "${cond.value}" → ❌` };
+      return cbEvalCondition(cond, testVal);
     });
 
     const groupPass = group.logic === 'AND'
@@ -3557,21 +3604,41 @@ function cbRunTest() {
       : condResults.some(r => r.pass);
 
     if (!groupPass) allGroupsPassed = false;
-    results.push(...condResults.map(r => r.reason));
+    groupDetails.push({
+      label: `Group ${gi + 1} (${group.logic})`,
+      pass: groupPass,
+      results: condResults.map(r => r.reason)
+    });
   });
+
+  const totalConds = groupDetails.reduce((s, g) => s + g.results.length, 0);
+  const passedConds = groupDetails.reduce((s, g) => s + g.results.filter((_, i) => {
+    const accepted = cbState.groups[groupDetails.indexOf(g)]?.conditions.filter(c => c.source !== 'ai' && c.field) || [];
+    return true; // counted in groupDetails
+  }).length, 0);
 
   cbState.lastTestResult = {
     pass: allGroupsPassed,
-    summary: allGroupsPassed ? 'All conditions satisfied.' : 'One or more conditions failed.',
-    details: results
+    summary: allGroupsPassed
+      ? `All ${cbState.groups.length > 1 ? cbState.groups.length + ' groups' : 'conditions'} satisfied.`
+      : `Failed — review details below.`,
+    details: [],
+    groupDetails
   };
 
-  cbSwitchSidebarTab('test');
+  // Update just the result area without wiping inputs
+  const resultArea = document.getElementById('cbTestResultArea');
+  if (resultArea) {
+    resultArea.innerHTML = cbFormatTestResult(cbState.lastTestResult);
+  } else {
+    cbSwitchSidebarTab('test');
+  }
 }
 
 function cbLoadPreset(type) {
   const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
   cbState.testCases = [];
+  cbState.lastTestResult = null;
 
   cbState.groups.forEach(g => g.conditions.filter(c => c.source !== 'ai' && c.field).forEach(cond => {
     const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
@@ -3580,34 +3647,39 @@ function cbLoadPreset(type) {
       if (fieldDef.type === 'number') {
         const num = parseFloat(cond.value) || 0;
         if (cond.operator === '>=' || cond.operator === '>') val = String(num + 10);
-        else if (cond.operator === '<=' || cond.operator === '<') val = String(num - 10);
+        else if (cond.operator === '<=' || cond.operator === '<') val = String(Math.max(0, num - 10));
         else val = cond.value;
-      } else if (fieldDef.type === 'boolean') {
-        val = cond.value;
-      } else {
-        val = cond.value;
-      }
+      } else if (fieldDef.type === 'boolean') { val = cond.value; }
+      else if (fieldDef.type === 'date') {
+        const d = new Date(cond.value);
+        if (cond.operator === '>=' || cond.operator === '>') { d.setFullYear(d.getFullYear() + 1); val = d.toISOString().split('T')[0]; }
+        else if (cond.operator === '<=' || cond.operator === '<') { d.setFullYear(d.getFullYear() - 1); val = d.toISOString().split('T')[0]; }
+        else val = cond.value;
+      } else { val = cond.value; }
     } else {
       if (fieldDef.type === 'number') {
         const num = parseFloat(cond.value) || 0;
-        if (cond.operator === '>=' || cond.operator === '>') val = String(num - 10);
+        if (cond.operator === '>=' || cond.operator === '>') val = String(Math.max(0, num - 10));
         else if (cond.operator === '<=' || cond.operator === '<') val = String(num + 10);
         else val = String(num + 1);
-      } else if (fieldDef.type === 'boolean') {
-        val = cond.value === 'true' ? 'false' : 'true';
-      } else {
-        val = 'INVALID_' + cond.value;
-      }
+      } else if (fieldDef.type === 'boolean') { val = cond.value === 'true' ? 'false' : 'true'; }
+      else if (fieldDef.type === 'date') {
+        const d = new Date(cond.value);
+        if (cond.operator === '>=' || cond.operator === '>') { d.setFullYear(d.getFullYear() - 2); val = d.toISOString().split('T')[0]; }
+        else if (cond.operator === '<=' || cond.operator === '<') { d.setFullYear(d.getFullYear() + 2); val = d.toISOString().split('T')[0]; }
+        else { d.setDate(d.getDate() + 1); val = d.toISOString().split('T')[0]; }
+      } else { val = ''; }
     }
     if (!cbState.testCases.find(t => t.field === cond.field)) {
       cbState.testCases.push({ field: cond.field, value: val });
     }
   }));
 
+  // Re-render to show preset values in inputs
   cbSwitchSidebarTab('test');
 }
 
-// ── Coverage Panel ──────────────────────────────────────────
+// ── Coverage Panel — Policy Requirement Validation ──────────
 function cbRenderCoverage(container) {
   const rule = cbState.rule;
   if (!rule) { container.innerHTML = '<div style="padding:16px;color:var(--text-secondary);">No rule selected.</div>'; return; }
@@ -3615,78 +3687,336 @@ function cbRenderCoverage(container) {
   const accepted = [];
   cbState.groups.forEach(g => g.conditions.filter(c => c.source !== 'ai' && c.field).forEach(c => accepted.push(c)));
 
-  // Source text mapping (simulated analysis)
-  const sourceMapping = {
+  // Deep policy requirement mappings — each requirement specifies the expected condition
+  // status: 'full' = field+operator+value correct, 'partial' = field exists but wrong op/value, 'missing' = no condition
+  const policyRequirements = {
     'OH-001': {
-      text: 'A hospital shall maintain a minimum capacity of not less than 25 licensed beds and shall operate under a license issued by the director of health.',
-      phrases: [
-        { text: 'minimum capacity of not less than 25 licensed beds', field: 'bed_count', covered: accepted.some(c => c.field === 'bed_count') },
-        { text: 'shall operate under a license', field: 'licensed', covered: accepted.some(c => c.field === 'licensed') },
-        { text: 'license issued by the director of health', field: 'license_authority', covered: accepted.some(c => c.field === 'license_authority') },
-        { text: 'hospital', field: 'facility_type', covered: accepted.some(c => c.field === 'facility_type') }
+      sourceText: 'A hospital shall maintain a minimum capacity of not less than 25 licensed beds and shall operate under a license issued by the director of health. The hospital shall be duly licensed as a hospital under the provisions of Chapter 3702 of the Revised Code.',
+      requirements: [
+        {
+          id: 'req-1', policyPhrase: 'minimum capacity of not less than 25 licensed beds',
+          description: 'Facility must have at least 25 licensed beds',
+          expectedField: 'bed_count', expectedOp: '>=', expectedValue: '25',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'bed_count');
+            if (!c) return { status: 'missing', detail: 'No condition checks bed count' };
+            if ((c.operator === '>=' || c.operator === '>') && parseFloat(c.value) <= 25) return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+            if (c.operator === '>=' && parseFloat(c.value) > 25) return { status: 'partial', detail: `Condition is stricter than policy requires (${c.value} vs. 25). Policy says "not less than 25."` };
+            if (c.operator === '<=' || c.operator === '<') return { status: 'partial', detail: `Wrong direction: condition uses "${c.operator}" but policy requires minimum (>=)` };
+            if (c.operator === '=') return { status: 'partial', detail: `Exact match "=" is too restrictive. Policy says "not less than" which means >=` };
+            return { status: 'partial', detail: `Field exists but operator "${c.operator}" doesn't match policy intent (>=)` };
+          }
+        },
+        {
+          id: 'req-2', policyPhrase: 'shall operate under a license',
+          description: 'Facility must hold a valid operating license',
+          expectedField: 'licensed', expectedOp: '=', expectedValue: 'true',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'licensed');
+            if (!c) return { status: 'missing', detail: 'No condition validates licensure status' };
+            if (c.value === 'true' || c.value === 'yes') return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+            return { status: 'partial', detail: `Condition exists but value "${c.value}" doesn't confirm active licensure` };
+          }
+        },
+        {
+          id: 'req-3', policyPhrase: 'license issued by the director of health',
+          description: 'License must be from the OH Director of Health (not just any authority)',
+          expectedField: 'license_authority', expectedOp: '=', expectedValue: 'OH Director of Health',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'license_authority');
+            if (!c) return { status: 'missing', detail: 'No condition verifies the issuing authority. A facility could have a license from a different jurisdiction.' };
+            return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+          }
+        },
+        {
+          id: 'req-4', policyPhrase: 'duly licensed as a hospital under Chapter 3702',
+          description: 'Facility type must be "hospital" and cite ORC Chapter 3702',
+          expectedField: 'facility_type', expectedOp: '=', expectedValue: 'hospital',
+          validate: (conds) => {
+            const ft = conds.find(c => c.field === 'facility_type');
+            const orc = conds.find(c => c.field === 'orc_chapter');
+            const ftOk = ft && (ft.value.toLowerCase().includes('hospital'));
+            const orcOk = orc && (orc.value.includes('3702'));
+            if (ftOk && orcOk) return { status: 'full', detail: `Both facility type and ORC chapter verified` };
+            if (ftOk) return { status: 'partial', detail: `Facility type checked but no condition validates ORC Chapter 3702 citation` };
+            if (orcOk) return { status: 'partial', detail: `ORC chapter checked but no condition confirms facility type is "hospital"` };
+            return { status: 'missing', detail: 'No conditions validate facility type or statutory authority' };
+          }
+        }
       ]
     },
     'OH-002': {
-      text: 'The hospital shall be duly licensed and maintain accreditation from a recognized body. Annual inspections are required for continued operation.',
-      phrases: [
-        { text: 'duly licensed', field: 'licensed', covered: accepted.some(c => c.field === 'licensed') },
-        { text: 'maintain accreditation from a recognized body', field: 'accreditation_body', covered: accepted.some(c => c.field === 'accreditation_body') },
-        { text: 'Annual inspections', field: 'inspection_date', covered: accepted.some(c => c.field === 'inspection_date') },
-        { text: 'continued operation', field: 'license_status', covered: accepted.some(c => c.field === 'license_status') }
+      sourceText: 'The hospital shall be duly licensed and maintain accreditation from a recognized national accrediting body. Annual inspections by the state licensing authority are required for continued operation.',
+      requirements: [
+        {
+          id: 'req-1', policyPhrase: 'shall be duly licensed',
+          description: 'Active license required',
+          expectedField: 'licensed', expectedOp: '=', expectedValue: 'true',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'licensed');
+            if (!c) return { status: 'missing', detail: 'No condition checks licensure' };
+            if (c.value === 'true') return { status: 'full', detail: `Covered: ${c.field} = ${c.value}` };
+            return { status: 'partial', detail: `Field exists but value "${c.value}" doesn't confirm licensure` };
+          }
+        },
+        {
+          id: 'req-2', policyPhrase: 'maintain accreditation from a recognized national accrediting body',
+          description: 'Must have current accreditation (e.g., Joint Commission, DNV, HFAP)',
+          expectedField: 'accreditation_body', expectedOp: '!=', expectedValue: '',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'accreditation_body');
+            if (!c) return { status: 'missing', detail: 'No condition validates accreditation body' };
+            if (c.operator === '=' && c.value) return { status: 'full', detail: `Covered: requires ${c.value}` };
+            if (c.operator === '!=' && c.value === '') return { status: 'full', detail: `Covered: ensures accreditation is not empty` };
+            return { status: 'partial', detail: `Condition exists but may not adequately validate accreditation` };
+          }
+        },
+        {
+          id: 'req-3', policyPhrase: 'Annual inspections by the state licensing authority',
+          description: 'Most recent inspection must be within 12 months',
+          expectedField: 'inspection_date', expectedOp: '>=', expectedValue: '(rolling 12-month)',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'inspection_date');
+            if (!c) return { status: 'missing', detail: 'No condition checks inspection recency. A facility could have a years-old inspection on record.' };
+            if (c.operator === '>=' || c.operator === '>') return { status: 'full', detail: `Covered: inspection_date ${c.operator} ${c.value}. Verify the date threshold is within 12 months.` };
+            if (c.operator === '=') return { status: 'partial', detail: `Exact date match is too rigid for an annual requirement. Use >= with a rolling date.` };
+            return { status: 'partial', detail: `Operator "${c.operator}" may not correctly enforce annual requirement` };
+          }
+        },
+        {
+          id: 'req-4', policyPhrase: 'continued operation',
+          description: 'License status must be active (not suspended/revoked/expired)',
+          expectedField: 'license_status', expectedOp: '=', expectedValue: 'active',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'license_status');
+            if (!c) return { status: 'missing', detail: 'No condition validates license is in active status. A licensed facility could have a suspended license.' };
+            if (c.value.toLowerCase() === 'active') return { status: 'full', detail: `Covered: ${c.field} = ${c.value}` };
+            return { status: 'partial', detail: `Status value "${c.value}" may not correctly validate active operation` };
+          }
+        }
       ]
     },
     'OH-003': {
-      text: 'The facility must demonstrate emergency department capability with adequate physician and nursing staff coverage at all times.',
-      phrases: [
-        { text: 'emergency department capability', field: 'emergency_capable', covered: accepted.some(c => c.field === 'emergency_capable') },
-        { text: 'adequate physician staff', field: 'physician_coverage', covered: accepted.some(c => c.field === 'physician_coverage') },
-        { text: 'nursing staff coverage', field: 'staff_ratio', covered: accepted.some(c => c.field === 'staff_ratio') },
-        { text: 'at all times', field: 'coverage_hours', covered: accepted.some(c => c.field === 'coverage_hours') }
+      sourceText: 'The facility must demonstrate emergency department capability with adequate physician and nursing staff coverage at all times. Minimum nursing ratio of 1.5 FTE per patient for acute care settings.',
+      requirements: [
+        {
+          id: 'req-1', policyPhrase: 'emergency department capability',
+          description: 'Facility must have an operational ED',
+          expectedField: 'emergency_capable', expectedOp: '=', expectedValue: 'true',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'emergency_capable');
+            if (!c) return { status: 'missing', detail: 'No condition checks emergency department capability' };
+            if (c.value === 'true') return { status: 'full', detail: `Covered: ${c.field} = ${c.value}` };
+            return { status: 'partial', detail: `Value "${c.value}" doesn't confirm ED capability` };
+          }
+        },
+        {
+          id: 'req-2', policyPhrase: 'adequate physician staff coverage',
+          description: '24-hour physician availability required',
+          expectedField: 'physician_coverage', expectedOp: '=', expectedValue: 'true',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'physician_coverage');
+            if (!c) return { status: 'missing', detail: 'No condition validates physician coverage. Policy explicitly requires physician staffing.' };
+            return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+          }
+        },
+        {
+          id: 'req-3', policyPhrase: 'nursing staff coverage — minimum 1.5 FTE per patient',
+          description: 'Nurse-to-patient ratio must be >= 1.5',
+          expectedField: 'staff_ratio', expectedOp: '>=', expectedValue: '1.5',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'staff_ratio');
+            if (!c) return { status: 'missing', detail: 'No condition checks nursing ratio. Policy specifies minimum 1.5 FTE.' };
+            if ((c.operator === '>=' || c.operator === '>') && parseFloat(c.value) <= 1.5) return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+            if ((c.operator === '>=' || c.operator === '>') && parseFloat(c.value) > 1.5) return { status: 'partial', detail: `Threshold ${c.value} is stricter than the policy minimum of 1.5. This may reject compliant facilities.` };
+            if (c.operator === '=' ) return { status: 'partial', detail: `Exact match "=" is too restrictive. Policy says "minimum" which means >=` };
+            return { status: 'partial', detail: `Operator "${c.operator}" doesn't match the minimum requirement (>=)` };
+          }
+        },
+        {
+          id: 'req-4', policyPhrase: 'at all times',
+          description: 'Coverage must be 24/7 — not just business hours',
+          expectedField: 'coverage_hours', expectedOp: '=', expectedValue: '24/7',
+          validate: (conds) => {
+            const c = conds.find(c => c.field === 'coverage_hours');
+            if (!c) return { status: 'missing', detail: 'No condition enforces 24/7 coverage. "At all times" means the ratio must apply around the clock, not just during day shifts.' };
+            return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+          }
+        }
       ]
     }
   };
 
-  const mapping = sourceMapping[rule.rule_id] || {
-    text: rule.rule_text || 'Source text not available for AI mapping.',
-    phrases: accepted.map(c => ({ text: c.field, field: c.field, covered: true }))
-  };
+  // Generic fallback — analyzes conditions against rule description/text
+  const policy = policyRequirements[rule.rule_id] || cbBuildGenericPolicy(rule, accepted);
 
-  const coveredCount = mapping.phrases.filter(p => p.covered).length;
-  const totalPhrases = mapping.phrases.length;
-  const pct = totalPhrases > 0 ? Math.round((coveredCount / totalPhrases) * 100) : 0;
-  const barColor = pct >= 80 ? '#2E844A' : pct >= 50 ? '#DD7A01' : '#BA0517';
-
-  let html = `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin-bottom:10px;text-transform:uppercase;">Source Coverage Analysis</div>`;
-
-  html += `<div class="cb-coverage">
-    <div class="cb-coverage-label"><span>Validation Score</span><span style="font-weight:700;color:${barColor};">${pct}%</span></div>
-    <div class="cb-coverage-bar"><div class="cb-coverage-fill" style="width:${pct}%;background:${barColor};"></div></div>
-    <div class="cb-coverage-label"><span>${coveredCount} of ${totalPhrases} key phrases covered</span></div>
-  </div>`;
-
-  html += `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin:16px 0 8px;text-transform:uppercase;">Source Text Mapping</div>`;
-  html += `<div style="font-size:12px;line-height:1.8;color:var(--text);background:#fff;padding:12px;border-radius:4px;border:1px solid var(--slds-border);">`;
-
-  mapping.phrases.forEach(p => {
-    const style = p.covered
-      ? 'background:rgba(46,132,74,0.15);padding:1px 4px;border-radius:2px;border-bottom:2px solid #2E844A;cursor:help;'
-      : 'background:rgba(186,5,23,0.1);padding:1px 4px;border-radius:2px;border-bottom:2px dashed #BA0517;cursor:help;';
-    const icon = p.covered ? '✅' : '❌';
-    html += `<span style="${style}" title="${p.covered ? 'Covered by: ' + p.field : 'NOT COVERED — needs condition for: ' + p.field}">${icon} ${p.text}</span> `;
+  // Run validation
+  const results = policy.requirements.map(req => {
+    const result = req.validate(accepted);
+    return { ...req, ...result };
   });
 
-  html += `</div>`;
+  const fullCount = results.filter(r => r.status === 'full').length;
+  const partialCount = results.filter(r => r.status === 'partial').length;
+  const missingCount = results.filter(r => r.status === 'missing').length;
+  const totalReqs = results.length;
+  // Score: full = 1, partial = 0.5, missing = 0
+  const score = totalReqs > 0 ? Math.round(((fullCount + partialCount * 0.5) / totalReqs) * 100) : 0;
+  const barColor = score >= 80 ? '#2E844A' : score >= 50 ? '#DD7A01' : '#BA0517';
 
-  // Uncovered phrases call-out
-  const uncovered = mapping.phrases.filter(p => !p.covered);
-  if (uncovered.length > 0) {
-    html += `<div style="margin-top:12px;padding:10px 12px;background:rgba(186,5,23,0.05);border:1px solid rgba(186,5,23,0.15);border-radius:4px;">
-      <div style="font-size:11px;font-weight:700;color:var(--slds-error);margin-bottom:6px;">Uncovered Requirements</div>
-      ${uncovered.map(u => `<div style="font-size:12px;color:var(--text);margin-bottom:4px;">• "${u.text}" → <span class="cb-suggestion-field">${u.field}</span></div>`).join('')}
+  let html = `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin-bottom:10px;text-transform:uppercase;">Policy Coverage Analysis</div>`;
+  html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Verifying that configured conditions fully implement the source policy requirements.</div>`;
+
+  // Score bar
+  html += `<div class="cb-coverage">
+    <div class="cb-coverage-label"><span>Policy Coverage Score</span><span style="font-weight:700;color:${barColor};">${score}%</span></div>
+    <div class="cb-coverage-bar"><div class="cb-coverage-fill" style="width:${score}%;background:${barColor};"></div></div>
+    <div class="cb-coverage-label">
+      <span><span style="color:#2E844A;font-weight:700;">${fullCount}</span> covered · <span style="color:#DD7A01;font-weight:700;">${partialCount}</span> partial · <span style="color:var(--slds-error);font-weight:700;">${missingCount}</span> missing</span>
+      <span>${totalReqs} requirements</span>
+    </div>
+  </div>`;
+
+  // Source text (if available)
+  if (policy.sourceText) {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin:16px 0 6px;text-transform:uppercase;">Source Policy Text</div>`;
+    // Highlight phrases in source text
+    let annotated = policy.sourceText;
+    results.forEach(r => {
+      const phrase = r.policyPhrase;
+      const color = r.status === 'full' ? 'rgba(46,132,74,0.15)' : r.status === 'partial' ? 'rgba(221,122,1,0.15)' : 'rgba(186,5,23,0.1)';
+      const border = r.status === 'full' ? '2px solid #2E844A' : r.status === 'partial' ? '2px solid #DD7A01' : '2px dashed #BA0517';
+      const icon = r.status === 'full' ? '✅' : r.status === 'partial' ? '⚠️' : '❌';
+      // Try to find and highlight the phrase in source text
+      const idx = annotated.toLowerCase().indexOf(phrase.toLowerCase().substring(0, 20));
+      if (idx >= 0) {
+        // Find end of the actual phrase region (approximate)
+        const end = Math.min(idx + phrase.length + 10, annotated.length);
+        const matchText = annotated.substring(idx, end).split(/[.;,]/).shift();
+        annotated = annotated.substring(0, idx) +
+          `<span style="background:${color};padding:1px 3px;border-radius:2px;border-bottom:${border};cursor:help;" title="${r.detail}">${icon} ${matchText}</span>` +
+          annotated.substring(idx + matchText.length);
+      }
+    });
+    html += `<div style="font-size:12px;line-height:1.9;color:var(--text);background:#fff;padding:12px;border-radius:4px;border:1px solid var(--slds-border);">${annotated}</div>`;
+  }
+
+  // Requirement-by-requirement breakdown
+  html += `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin:16px 0 8px;text-transform:uppercase;">Requirement Validation</div>`;
+
+  results.forEach((r, i) => {
+    const statusIcon = r.status === 'full' ? '✅' : r.status === 'partial' ? '⚠️' : '❌';
+    const statusLabel = r.status === 'full' ? 'Covered' : r.status === 'partial' ? 'Partial' : 'Missing';
+    const statusColor = r.status === 'full' ? '#2E844A' : r.status === 'partial' ? '#DD7A01' : 'var(--slds-error)';
+    const borderColor = r.status === 'full' ? '#2E844A' : r.status === 'partial' ? '#DD7A01' : '#BA0517';
+
+    html += `<div style="padding:10px 12px;background:#fff;border:1px solid var(--slds-border);border-left:3px solid ${borderColor};border-radius:4px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div style="font-size:12px;font-weight:700;color:var(--slds-navy);flex:1;">${statusIcon} ${r.description}</div>
+        <span style="font-size:10px;font-weight:700;color:${statusColor};padding:2px 8px;border-radius:10px;background:${r.status === 'full' ? 'rgba(46,132,74,0.1)' : r.status === 'partial' ? 'rgba(221,122,1,0.1)' : 'rgba(186,5,23,0.08)'};">${statusLabel}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-style:italic;">Policy: "${r.policyPhrase}"</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Expected: <strong>${r.expectedField}</strong> ${r.expectedOp} <strong>${r.expectedValue}</strong></div>
+      <div style="font-size:12px;color:var(--text);line-height:1.5;">${r.detail}</div>
+    </div>`;
+  });
+
+  // Conditions with no matching requirement (over-coverage)
+  const coveredFields = new Set(policy.requirements.map(r => r.expectedField));
+  const extraConditions = accepted.filter(c => !coveredFields.has(c.field));
+  if (extraConditions.length > 0) {
+    html += `<div style="margin-top:12px;padding:10px 12px;background:rgba(1,118,211,0.05);border:1px solid rgba(1,118,211,0.15);border-radius:4px;">
+      <div style="font-size:11px;font-weight:700;color:var(--slds-blue);margin-bottom:6px;">ℹ️ Additional Conditions (not in source policy)</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">These conditions don't map to a specific source policy phrase. They may be valid business rules or may need review.</div>
+      ${extraConditions.map(c => `<div style="font-size:12px;color:var(--text);margin-bottom:3px;">• <strong>${c.field}</strong> ${c.operator} ${c.value}</div>`).join('')}
     </div>`;
   }
 
   container.innerHTML = html;
+}
+
+// Build generic policy analysis for rules without explicit mappings
+function cbBuildGenericPolicy(rule, accepted) {
+  const ruleText = rule.rule_text || rule.description || rule.name || '';
+  const requirements = [];
+
+  // Extract numeric thresholds from rule text (e.g., "at least 25", "minimum 30", "not less than 10")
+  const numPatterns = [
+    { regex: /(?:at least|minimum|not less than|no fewer than|>=?)\s*(\d+)\s*([\w\s]+?)(?:\.|,|and|$)/gi, op: '>=' },
+    { regex: /(?:no more than|maximum|not (?:to )?exceed|at most|<=?)\s*(\d+)\s*([\w\s]+?)(?:\.|,|and|$)/gi, op: '<=' },
+    { regex: /(?:exactly|equal to|must be)\s*(\d+)\s*([\w\s]+?)(?:\.|,|and|$)/gi, op: '=' }
+  ];
+
+  numPatterns.forEach(pat => {
+    let match;
+    while ((match = pat.regex.exec(ruleText)) !== null) {
+      const value = match[1];
+      const context = match[2].trim().toLowerCase();
+      // Try to match context to a known field
+      const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+      const guessedField = fields.find(f =>
+        context.includes(f.value.replace(/_/g, ' ')) ||
+        f.label.toLowerCase().split(' ').some(w => context.includes(w))
+      );
+      const fieldName = guessedField ? guessedField.value : context.replace(/\s+/g, '_').substring(0, 30);
+      requirements.push({
+        id: `gen-${requirements.length}`,
+        policyPhrase: match[0].trim(),
+        description: `${pat.op === '>=' ? 'Minimum' : pat.op === '<=' ? 'Maximum' : 'Exact'} ${value} for ${guessedField ? guessedField.label : context}`,
+        expectedField: fieldName, expectedOp: pat.op, expectedValue: value,
+        validate: (conds) => {
+          const c = conds.find(c => c.field === fieldName);
+          if (!c) return { status: 'missing', detail: `No condition found for "${fieldName}". Policy states: "${match[0].trim()}"` };
+          if (c.operator === pat.op && c.value === value) return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+          if (c.field === fieldName) return { status: 'partial', detail: `Field exists but condition uses "${c.operator} ${c.value}" instead of expected "${pat.op} ${value}"` };
+          return { status: 'partial', detail: `Condition exists but may not fully match policy intent` };
+        }
+      });
+    }
+  });
+
+  // Extract boolean requirements (e.g., "must be licensed", "shall maintain", "is required")
+  const boolPatterns = /(?:must|shall|is required to|needs to)\s+(?:be\s+|have\s+|maintain\s+)?([\w\s]+?)(?:\.|,|and\s|under\s|by\s|from\s|$)/gi;
+  let bMatch;
+  while ((bMatch = boolPatterns.exec(ruleText)) !== null) {
+    const concept = bMatch[1].trim().toLowerCase();
+    if (concept.length < 3 || concept.length > 40) continue;
+    const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+    const guessedField = fields.find(f =>
+      concept.includes(f.value.replace(/_/g, ' ')) ||
+      concept.includes(f.label.toLowerCase()) ||
+      f.label.toLowerCase().split(' ').some(w => w.length > 3 && concept.includes(w))
+    );
+    if (guessedField && !requirements.find(r => r.expectedField === guessedField.value)) {
+      requirements.push({
+        id: `gen-${requirements.length}`,
+        policyPhrase: bMatch[0].trim(),
+        description: `${guessedField.label} is required`,
+        expectedField: guessedField.value, expectedOp: '=', expectedValue: guessedField.type === 'boolean' ? 'true' : '(any value)',
+        validate: (conds) => {
+          const c = conds.find(c => c.field === guessedField.value);
+          if (!c) return { status: 'missing', detail: `No condition found for "${guessedField.label}". Policy states: "${bMatch[0].trim()}"` };
+          return { status: 'full', detail: `Covered: ${c.field} ${c.operator} ${c.value}` };
+        }
+      });
+    }
+  }
+
+  // If no requirements extracted, create a generic notice
+  if (requirements.length === 0) {
+    requirements.push({
+      id: 'gen-notice',
+      policyPhrase: '(full source text not available for automated analysis)',
+      description: 'Manual review required — source text could not be parsed',
+      expectedField: 'N/A', expectedOp: 'N/A', expectedValue: 'N/A',
+      validate: () => ({ status: 'partial', detail: 'Automated analysis requires source policy text. Please verify conditions manually against the regulatory source.' })
+    });
+  }
+
+  return {
+    sourceText: ruleText || null,
+    requirements
+  };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -3700,14 +4030,14 @@ async function renderDependencyGraph() {
   // Clear previous graph
   svg.selectAll('*').remove();
 
-  let width = svg.node().clientWidth || svg.node().getBoundingClientRect().width;
-  let height = svg.node().clientHeight || svg.node().getBoundingClientRect().height;
+  // Use getBoundingClientRect (reliable for SVG elements)
+  const rect = svg.node().getBoundingClientRect();
+  let width = rect.width || svg.node().clientWidth || svg.node().parentElement?.clientWidth || 800;
+  let height = rect.height || svg.node().clientHeight || 500;
 
-  // Fallback dimensions if container hasn't laid out yet
-  if (width === 0) width = svg.node().parentElement?.clientWidth || 800;
-  if (height === 0) height = 500;
-
-  if (width === 0) return;
+  console.log(`[D3 Graph] SVG dimensions: ${width}x${height}, rules: ${rules.length}`);
+  if (width < 10) width = 800;
+  if (height < 10) height = 500;
 
   // Fetch all dependencies
   try {
