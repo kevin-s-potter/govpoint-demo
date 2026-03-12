@@ -14,6 +14,7 @@
 - **Database**: Supabase PostgreSQL (free tier)
   - URL: `https://fshdlcveidwwufdigekh.supabase.co`
   - Anon key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY`
+  - Service role key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzI2ODM5OCwiZXhwIjoyMDg4ODQ0Mzk4fQ.OPaz8JhFkj4IKAebBGAXfSwyFSyIA7BVlwug19iGNZ0` (bypasses RLS — use for migrations/seeding, never expose in client code)
 - **Hosting**: Vercel (auto-deploys from GitHub on push to main)
 - **API pattern**: Supabase REST API – every fetch uses both `apikey` and `Authorization: Bearer` headers
 - **Design system**: Salesforce Lightning Design System (SLDS) – CSS written to match SLDS aesthetic using SLDS color tokens, not the actual SLDS CDN

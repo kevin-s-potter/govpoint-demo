@@ -674,7 +674,7 @@
 let currentProgram = 'hosp-licensing';
 
 const PROGRAM_CONFIG = {
-  'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 23 },
+  'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 26 },
   'snap': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'SNAP Benefits', userId: 'user-001', ruleCount: 183 },
   'nursing-home': { tenant: 'ky-chfs', abbr: 'CHFS', name: 'Kentucky CHFS', programName: 'Nursing Home Licensing', userId: 'user-101', ruleCount: 8 }
 };
@@ -751,13 +751,15 @@ async function fetchRulesFromSupabase() {
 // ══════════════════════════════════════════ LIVE RULE OVERLAY ══════════════════════════════════════════
 
 // Maps Ontology Manager rule IDs to evaluation rule IDs.
-// OH-009 "CON Capital Expenditure Threshold" drives OH-006 (CON Applicability Check).
-// OH-020 "Swing Bed Authorization Threshold" drives FED-005 (Swing-Bed 100-Bed Threshold).
+// CAP-001 "CON Capital Expenditure Threshold" drives OH-006 (CON Applicability Check).
+// CAP-002 "CAH Inpatient Bed Limit" drives FED-004 (CAH Status Review).
+// CAP-003 "Swing Bed Authorization Threshold" drives FED-005 (Swing-Bed 100-Bed Threshold).
 // When these rules' conditions (edited in the Ontology Manager) evaluate differently
 // than the hardcoded result, the status is overridden and marked as a live rule.
 const CAP_RULE_MAP = {
-  'OH-009': { evalId: 'OH-006', triggeredStatus: 'flag' }, // CON Threshold → CON Applicability Check
-  'OH-020': { evalId: 'FED-005', triggeredStatus: 'flag' }, // Swing Bed Threshold → Swing-Bed Check
+  'CAP-001': { evalId: 'OH-006',  triggeredStatus: 'flag' }, // CON Capital Threshold → CON Applicability Check
+  'CAP-002': { evalId: 'FED-004', triggeredStatus: 'flag' }, // CAH Bed Limit → CAH Status Review
+  'CAP-003': { evalId: 'FED-005', triggeredStatus: 'flag' }, // Swing Bed Threshold → Swing-Bed Check
 };
 
 // Tracks which evaluation rules were overridden by live DB conditions this run.
@@ -765,13 +767,11 @@ const CAP_RULE_MAP = {
 let liveRuleOverrides = {};
 
 // Builds evaluation context from scenario data — maps form fields to DB condition field names.
-// Includes both the "ideal" field names (for future use) and the actual DB field names
-// used by OH-009 and OH-020 conditions as they exist in Supabase.
+// Includes field names used by CAP-001, CAP-002, and CAP-003 conditions in Supabase.
 function buildCapContext(data) {
   const newBeds  = data.beds + data.net_change;
   const capexNum = parseFloat(data.capex.replace(/[$,]/g, ''));
   return {
-    // Ideal eval-specific names (for future CAP rules):
     capital_expenditure:   capexNum,
     total_beds_proposed:   newBeds,
     net_bed_change:        data.net_change,
@@ -780,11 +780,6 @@ function buildCapContext(data) {
     construction_required: data.construction ? 'true' : 'false',
     work_category:         data.work_cat,
     swing_bed_authorized:  data.swing === 'true' ? 'true' : 'false',
-    // Aliases matching EXISTING DB condition field names (OH-009, OH-020):
-    project_cost:          capexNum,      // OH-009 condition 1 — maps to capital expenditure
-    bed_change:            data.net_change, // OH-009 condition 2 — maps to net bed change
-    telehealth_beds:       newBeds,       // OH-020 condition 1 — maps to total beds proposed
-    patient_satisfaction:  0,             // OH-020 condition 2 — always below threshold (4.0), prevents trigger
   };
 }
 
@@ -812,7 +807,7 @@ function evalCapCondition(cond, ctx) {
   }
 }
 
-// Fetches the live ontology rules (OH-009, OH-020) from Supabase, then merges
+// Fetches the live ontology rules (CAP-001, CAP-002, CAP-003) from Supabase, then merges
 // any localStorage overrides written by the Ontology Manager's condition builder.
 // localStorage takes precedence over DB conditions when the user has saved condition edits.
 async function fetchCapRulesFromSupabase() {

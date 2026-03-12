@@ -2342,7 +2342,7 @@ const lexipoint = new LexiPointAPI();
 let currentProgram = 'hosp-licensing';
 
 const PROGRAM_CONFIG = {
-  'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 23 },
+  'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 26 },
   'snap': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'SNAP Benefits', userId: 'user-001', ruleCount: 183 },
   'nursing-home': { tenant: 'ky-chfs', abbr: 'CHFS', name: 'Kentucky CHFS', programName: 'Nursing Home Licensing', userId: 'user-101', ruleCount: 8 }
 };
@@ -3378,18 +3378,16 @@ const CB_FIELDS = {
     { value: 'staff_ratio', label: 'Staff-to-Patient Ratio', type: 'number' },
     { value: 'emergency_capable', label: 'Emergency Capable', type: 'boolean' },
     { value: 'orc_chapter', label: 'ORC Chapter', type: 'text' },
-    // ── Capacity Change Evaluation Fields (drive live evaluation in New Request) ──
+    // ── Capacity Change Evaluation Fields (CAP-001, CAP-002, CAP-003) ──
     // These field names map directly to the evaluation context in the New Request form.
-    // Editing conditions using these fields and saving will immediately change evaluation outcomes.
-    { value: 'project_cost',       label: 'Capital Expenditure ($)',   type: 'number' },  // OH-009
-    { value: 'bed_change',         label: 'Net Bed Change',            type: 'number' },  // OH-009
-    { value: 'telehealth_beds',    label: 'Total Beds Proposed',       type: 'number' },  // OH-020
-    { value: 'capital_expenditure',label: 'Capital Expenditure (alt)', type: 'number' },
-    { value: 'total_beds_proposed',label: 'Total Beds Proposed (alt)', type: 'number' },
-    { value: 'net_bed_change',     label: 'Net Bed Change (alt)',      type: 'number' },
-    { value: 'facility_class',     label: 'Facility Class',            type: 'text' },
-    { value: 'involves_obstetric', label: 'Involves Obstetric/Newborn',type: 'boolean' },
-    { value: 'construction_required', label: 'Construction Required',  type: 'boolean' }
+    // Editing conditions on CAP rules and saving immediately changes evaluation outcomes.
+    { value: 'capital_expenditure',   label: 'Capital Expenditure ($)',    type: 'number' },
+    { value: 'total_beds_proposed',   label: 'Total Beds Proposed',        type: 'number' },
+    { value: 'net_bed_change',        label: 'Net Bed Change',             type: 'number' },
+    { value: 'facility_class',        label: 'Facility Class',             type: 'text' },
+    { value: 'involves_obstetric',    label: 'Involves Obstetric/Newborn', type: 'boolean' },
+    { value: 'construction_required', label: 'Construction Required',      type: 'boolean' },
+    { value: 'swing_bed_authorized',  label: 'Swing Bed Authorized',       type: 'boolean' }
   ],
   'snap': [
     { value: 'household_size', label: 'Household Size', type: 'number' },
