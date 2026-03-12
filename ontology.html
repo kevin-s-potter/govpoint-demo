@@ -312,13 +312,16 @@
   <div class="sidebar">
     <!-- What's Changed Digest -->
     <div class="whats-changed" id="whatsChanged">
-      <div class="whats-changed-header">
-        <span class="whats-changed-title">What's Changed</span>
-        <span class="whats-changed-dismiss">Dismiss</span>
+      <div class="whats-changed-header" id="whatsChangedToggle" style="cursor: pointer;">
+        <span class="whats-changed-title">What's Changed <span id="whatsChangedArrow" style="font-size: 10px; margin-left: 4px;">▼</span></span>
+        <span class="whats-changed-count" id="whatsChangedCount" style="font-size: 11px; color: var(--accent); font-weight: 600;"></span>
       </div>
-      <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Since your last login (Mar 8, 2026):</div>
-      <div class="whats-changed-items">
-        <div style="font-size: 12px; color: var(--text-secondary); padding: 8px;">Loading recent changes...</div>
+      <div id="whatsChangedBody">
+        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">Since your last login (Mar 8, 2026):</div>
+        <div class="whats-changed-items">
+          <div style="font-size: 12px; color: var(--text-secondary); padding: 8px;">Loading...</div>
+        </div>
+        <a href="audit-log.html" style="display: block; text-align: center; font-size: 11px; color: var(--accent); margin-top: 8px; text-decoration: none; font-weight: 600;">View Full Audit Log →</a>
       </div>
     </div>
 
@@ -688,8 +691,12 @@ async function loadWhatsChanged() {
       const ruleName = rule ? rule.name : entry.target_id;
       const meta = actionLabels[entry.action] || { label: entry.action.toUpperCase(), css: 'active' };
       items.push({ ruleId: entry.target_id, ruleName, detail: entry.detail, ...meta });
-      if (items.length >= 5) break;
+      if (items.length >= 3) break;
     }
+
+    // Update count badge
+    const countEl = document.getElementById('whatsChangedCount');
+    if (countEl) countEl.textContent = `${items.length} change${items.length !== 1 ? 's' : ''}`;
 
     const container = document.querySelector('.whats-changed-items');
     if (container && items.length > 0) {
@@ -1004,8 +1011,12 @@ function setupEventListeners() {
     document.getElementById('notificationBell').classList.remove('active');
   });
 
-  document.querySelector('.whats-changed-dismiss').addEventListener('click', () => {
-    document.getElementById('whatsChanged').style.display = 'none';
+  document.getElementById('whatsChangedToggle').addEventListener('click', () => {
+    const body = document.getElementById('whatsChangedBody');
+    const arrow = document.getElementById('whatsChangedArrow');
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    arrow.textContent = isOpen ? '▶' : '▼';
   });
 
   document.getElementById('importBtn').addEventListener('click', () => {

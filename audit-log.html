@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovPoint | Audit Log</title>
+<style>
+  :root {
+    --navy: #003366;
+    --navy-deep: #0E3F75;
+    --accent: #14499E;
+    --accent-light: #E8EFF8;
+    --ohio-red: #C41230;
+    --ohio-red-light: #FDEDEF;
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --amber: #D84315;
+    --amber-light: #FFF3E0;
+    --red: #C41230;
+    --red-light: #FDEDEF;
+    --purple: #7B1FA2;
+    --purple-light: #F3E5F5;
+    --gray: #4E4D4D;
+    --light-gray: #F2F2F2;
+    --border: #D0D5DD;
+    --white: #FFFFFF;
+    --text: #1A1A2E;
+    --text-secondary: #4A5568;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 6px;
+    --radius-lg: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--light-gray); color: var(--text); line-height: 1.6; }
+
+  /* ── STATE BANNER ── */
+  .state-banner { background: var(--light-gray); padding: 4px 32px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .state-banner a { color: var(--ohio-red); text-decoration: none; font-weight: 600; }
+
+  /* ── NAV ── */
+  .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
+  .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+
+  .topnav .nav-spacer { margin-left: auto; }
+  .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
+  .topnav .nav-links { display: flex; gap: 24px; }
+  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
+  .topnav .nav-links a:hover { color: var(--ohio-red); }
+  .topnav .nav-links a.active { color: var(--ohio-red); }
+
+  .notification-bell { position: relative; cursor: pointer; font-size: 18px; margin-right: 16px; }
+  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--ohio-red); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
+  .notification-dropdown.show { display: block; }
+  .notification-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; line-height: 1.4; }
+  .notification-item:last-child { border-bottom: none; }
+  .notification-time { color: #888; font-size: 11px; margin-top: 4px; }
+
+  .role-indicator { display: flex; align-items: center; gap: 12px; }
+  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .role-text { font-size: 13px; line-height: 1.4; }
+  .role-text .user-name { color: var(--navy); font-weight: 600; }
+  .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
+
+  /* ── MAIN ── */
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+  .page-title { font-size: 28px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .page-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+
+  /* ── FILTERS ── */
+  .filters-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 24px; background: var(--white); padding: 16px 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px; }
+  .filter-select, .filter-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; color: var(--text); background: var(--white); min-width: 160px; }
+  .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(20,73,158,0.1); }
+  .filter-btn { padding: 8px 20px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; align-self: flex-end; transition: background 0.2s; }
+  .filter-btn:hover { background: var(--navy); }
+  .filter-btn.secondary { background: var(--white); color: var(--text-secondary); border: 1px solid var(--border); }
+  .filter-btn.secondary:hover { background: var(--light-gray); }
+  .filter-spacer { flex: 1; }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: flex; gap: 16px; margin-bottom: 24px; }
+  .stat-chip { background: var(--white); padding: 12px 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; }
+  .stat-number { font-size: 20px; font-weight: 700; color: var(--navy); }
+  .stat-label { font-size: 12px; color: var(--text-secondary); }
+
+  /* ── TABLE ── */
+  .audit-table-wrap { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+  .audit-table { width: 100%; border-collapse: collapse; }
+  .audit-table th { background: var(--navy); color: white; text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; position: sticky; top: 64px; z-index: 10; }
+  .audit-table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--light-gray); vertical-align: top; }
+  .audit-table tr:hover { background: var(--accent-light); }
+  .audit-table tr:last-child td { border-bottom: none; }
+
+  .action-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .action-badge.edit_conditions { background: var(--accent-light); color: var(--accent); }
+  .action-badge.approve { background: var(--green-light); color: var(--green); }
+  .action-badge.submit_for_review { background: var(--amber-light); color: var(--amber); }
+  .action-badge.create_draft { background: var(--purple-light); color: var(--purple); }
+  .action-badge.publish { background: var(--green-light); color: var(--green); }
+  .action-badge.login { background: var(--light-gray); color: var(--gray); }
+  .action-badge.view { background: var(--light-gray); color: var(--gray); }
+  .action-badge.comment { background: var(--accent-light); color: var(--accent); }
+
+  .role-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .role-badge.publisher { background: var(--accent-light); color: var(--accent); }
+  .role-badge.reviewer { background: var(--amber-light); color: var(--amber); }
+  .role-badge.system { background: var(--light-gray); color: var(--gray); }
+  .role-badge.auditor { background: var(--purple-light); color: var(--purple); }
+
+  .target-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .target-link:hover { text-decoration: underline; }
+
+  .empty-state { text-align: center; padding: 48px; color: var(--text-secondary); font-size: 14px; }
+  .loading-state { text-align: center; padding: 48px; color: var(--text-secondary); font-size: 14px; }
+
+  /* ── PAGINATION ── */
+  .pagination { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--white); border-top: 1px solid var(--light-gray); }
+  .page-info { font-size: 13px; color: var(--text-secondary); }
+  .page-controls { display: flex; gap: 8px; }
+  .page-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; font-weight: 600; cursor: pointer; background: var(--white); color: var(--text); transition: all 0.2s; }
+  .page-btn:hover:not(:disabled) { background: var(--accent-light); border-color: var(--accent); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── FOOTER ── */
+  .footer { text-align: center; padding: 24px; font-size: 12px; color: var(--text-secondary); margin-top: 16px; }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .container { padding: 16px; }
+    .filters-bar { flex-direction: column; align-items: stretch; }
+    .filter-select, .filter-input { min-width: auto; }
+    .stats-row { flex-wrap: wrap; }
+    .audit-table { font-size: 12px; }
+    .audit-table td, .audit-table th { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="state-banner">
+  <span>Ohio Revised Code Ontology System</span>
+  <span style="margin-left: auto;"><a href="#">Documentation</a> · <a href="#">Support</a></span>
+</div>
+
+<nav class="topnav">
+  <div class="logo">
+    <span class="ohio-mark">⟨°⟩</span>
+    <span>GovPoint</span>
+  </div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-links">
+    <a href="index.html">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+
+  <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span>🔔</span>
+      <span class="notification-badge">3</span>
+      <div class="notification-dropdown">
+        <div class="notification-item">
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>FED-003 CMS CoP updated — affects 4 rules</strong>
+          <div class="notification-time">1 day ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+          <div class="notification-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-indicator">
+      <div class="avatar-circle">SC</div>
+      <div class="role-text">
+        <div class="user-name">Sarah Chen</div>
+        <div class="user-role">Publisher | Hospital Licensing</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-title">Audit Log</div>
+  <div class="page-subtitle">Complete compliance trail for all rule changes, reviews, and system events</div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <span class="filter-label">Action</span>
+      <select class="filter-select" id="filterAction">
+        <option value="">All Actions</option>
+        <option value="edit_conditions">Edit Conditions</option>
+        <option value="approve">Approve</option>
+        <option value="submit_for_review">Submit for Review</option>
+        <option value="create_draft">Create Draft</option>
+        <option value="publish">Publish</option>
+        <option value="login">Login</option>
+        <option value="view">View</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Role</span>
+      <select class="filter-select" id="filterRole">
+        <option value="">All Roles</option>
+        <option value="publisher">Publisher</option>
+        <option value="reviewer">Reviewer</option>
+        <option value="system">System</option>
+        <option value="auditor">Auditor</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Target Rule</span>
+      <select class="filter-select" id="filterTarget">
+        <option value="">All Rules</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Search Detail</span>
+      <input type="text" class="filter-input" id="filterSearch" placeholder="e.g. threshold, conditions...">
+    </div>
+
+    <div class="filter-spacer"></div>
+
+    <button class="filter-btn" onclick="applyFilters()">Apply</button>
+    <button class="filter-btn secondary" onclick="clearFilters()">Clear</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-chip"><span class="stat-number" id="statTotal">-</span><span class="stat-label">Total Entries</span></div>
+    <div class="stat-chip"><span class="stat-number" id="statEdits">-</span><span class="stat-label">Edits</span></div>
+    <div class="stat-chip"><span class="stat-number" id="statReviews">-</span><span class="stat-label">Reviews</span></div>
+    <div class="stat-chip"><span class="stat-number" id="statApprovals">-</span><span class="stat-label">Approvals</span></div>
+    <div class="stat-chip"><span class="stat-number" id="statPublishes">-</span><span class="stat-label">Publishes</span></div>
+  </div>
+
+  <!-- Table -->
+  <div class="audit-table-wrap">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th style="width: 160px;">Timestamp</th>
+          <th style="width: 110px;">Action</th>
+          <th style="width: 90px;">Role</th>
+          <th style="width: 100px;">User</th>
+          <th style="width: 100px;">Target</th>
+          <th>Detail</th>
+          <th style="width: 100px;">IP Address</th>
+        </tr>
+      </thead>
+      <tbody id="auditTableBody">
+        <tr><td colspan="7" class="loading-state">Loading audit data...</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="pagination">
+      <span class="page-info" id="pageInfo">Showing 0 entries</span>
+      <div class="page-controls">
+        <button class="page-btn" id="prevBtn" disabled onclick="prevPage()">← Previous</button>
+        <button class="page-btn" id="nextBtn" disabled onclick="nextPage()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="ontology.html">← Back to Ontology Manager</a> &middot; Live data from Supabase
+</div>
+
+<script>
+  // ── SUPABASE ──
+  const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+
+  async function query(table, params = '') {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) { console.error(`Query error for ${table}: ${res.status}`); return []; }
+      return await res.json();
+    } catch (e) { console.error(`Error querying ${table}:`, e); return []; }
+  }
+
+  // ── STATE ──
+  let allEntries = [];
+  let filteredEntries = [];
+  let usersMap = {};
+  let currentPage = 0;
+  const PAGE_SIZE = 25;
+
+  // ── INIT ──
+  async function init() {
+    const [entries, users, rules] = await Promise.all([
+      query('audit_log', 'order=timestamp.desc&limit=500'),
+      query('users', 'select=user_id,full_name'),
+      query('rules', 'select=rule_id,name')
+    ]);
+
+    allEntries = entries;
+
+    // Build user lookup
+    users.forEach(u => { usersMap[u.user_id] = u.full_name; });
+
+    // Populate target rule filter
+    const targetSelect = document.getElementById('filterTarget');
+    const ruleIds = [...new Set(entries.filter(e => e.target_type === 'rule').map(e => e.target_id))].sort();
+    ruleIds.forEach(id => {
+      const rule = rules.find(r => r.rule_id === id);
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = rule ? `${id} — ${rule.name}` : id;
+      targetSelect.appendChild(opt);
+    });
+
+    applyFilters();
+  }
+
+  // ── FILTERS ──
+  function applyFilters() {
+    const action = document.getElementById('filterAction').value;
+    const role = document.getElementById('filterRole').value;
+    const target = document.getElementById('filterTarget').value;
+    const search = document.getElementById('filterSearch').value.toLowerCase();
+
+    filteredEntries = allEntries.filter(e => {
+      if (action && e.action !== action) return false;
+      if (role && e.role !== role) return false;
+      if (target && e.target_id !== target) return false;
+      if (search && !(e.detail || '').toLowerCase().includes(search)) return false;
+      return true;
+    });
+
+    currentPage = 0;
+    updateStats();
+    renderTable();
+  }
+
+  function clearFilters() {
+    document.getElementById('filterAction').value = '';
+    document.getElementById('filterRole').value = '';
+    document.getElementById('filterTarget').value = '';
+    document.getElementById('filterSearch').value = '';
+    applyFilters();
+  }
+
+  // ── STATS ──
+  function updateStats() {
+    document.getElementById('statTotal').textContent = filteredEntries.length;
+    document.getElementById('statEdits').textContent = filteredEntries.filter(e => e.action === 'edit_conditions' || e.action === 'edit').length;
+    document.getElementById('statReviews').textContent = filteredEntries.filter(e => e.action === 'submit_for_review').length;
+    document.getElementById('statApprovals').textContent = filteredEntries.filter(e => e.action === 'approve').length;
+    document.getElementById('statPublishes').textContent = filteredEntries.filter(e => e.action === 'publish').length;
+  }
+
+  // ── TABLE RENDER ──
+  function renderTable() {
+    const start = currentPage * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    const page = filteredEntries.slice(start, end);
+
+    const tbody = document.getElementById('auditTableBody');
+
+    if (page.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No audit entries match your filters.</td></tr>';
+    } else {
+      tbody.innerHTML = page.map(e => {
+        const ts = new Date(e.timestamp);
+        const timeStr = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const userName = usersMap[e.user_id] || e.role || '—';
+        const actionLabel = (e.action || '').replace(/_/g, ' ');
+        const targetDisplay = e.target_type === 'rule'
+          ? `<a href="ontology.html#${e.target_id}" class="target-link">${e.target_id}</a>`
+          : (e.target_id || '—');
+
+        return `<tr>
+          <td style="white-space: nowrap; color: var(--text-secondary); font-size: 12px;">${timeStr}</td>
+          <td><span class="action-badge ${e.action}">${actionLabel}</span></td>
+          <td><span class="role-badge ${e.role}">${e.role || '—'}</span></td>
+          <td>${userName}</td>
+          <td>${targetDisplay}</td>
+          <td>${e.detail || '—'}</td>
+          <td style="font-family: monospace; font-size: 11px; color: var(--text-secondary);">${e.ip_address || '—'}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Pagination
+    const totalPages = Math.ceil(filteredEntries.length / PAGE_SIZE);
+    const showing = page.length === 0 ? 'No entries' : `Showing ${start + 1}–${Math.min(end, filteredEntries.length)} of ${filteredEntries.length}`;
+    document.getElementById('pageInfo').textContent = showing;
+    document.getElementById('prevBtn').disabled = currentPage === 0;
+    document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+  }
+
+  function prevPage() { if (currentPage > 0) { currentPage--; renderTable(); } }
+  function nextPage() { const totalPages = Math.ceil(filteredEntries.length / PAGE_SIZE); if (currentPage < totalPages - 1) { currentPage++; renderTable(); } }
+
+  // ── KEYBOARD ──
+  document.getElementById('filterSearch').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') applyFilters();
+  });
+
+  // ── GO ──
+  init();
+</script>
+</body>
+</html>
