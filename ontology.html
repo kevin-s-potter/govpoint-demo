@@ -301,6 +301,9 @@
     </div>
   </div>
 
+  <!-- Back to Demo Button -->
+  <a href="index.html" style="margin-left: 32px; display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--ohio-red); color: white; border-radius: var(--radius); font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.background='#A30F28'" onmouseout="this.style.background='var(--ohio-red)'">← New Request</a>
+
   <div class="nav-spacer"></div>
 
   <div class="nav-controls">
@@ -587,21 +590,112 @@ function renderDetailPanel() {
   document.getElementById('detailProgram').textContent = `Program: ${currentRule.program}`;
   document.getElementById('detailVersion').textContent = `v${currentRule.version}`;
 
-  // Overview
+  // Overview — editable fields
+  const ruleDescriptions = {
+    'OH-001': 'Hospital must maintain a minimum of 25 licensed beds to qualify for full hospital licensure under ORC § 3702.30.',
+    'OH-002': 'Emergency departments must maintain minimum physician staffing levels and bed counts per OAC 3701-59-01.',
+    'OH-003': 'ICU units must maintain isolation capacity of at least 50% of ICU beds per infection control standards.',
+    'OH-005': 'Hospitals must establish an infection control committee and conduct quarterly surveillance audits.',
+    'OH-011': 'Telehealth services must be provided by licensed practitioners with documented patient consent.',
+    'OH-020': 'Virtual bed equivalency for telehealth monitoring programs with minimum patient satisfaction thresholds.',
+    'FED-001': 'Medicare-participating hospitals must meet CMS Conditions of Participation with quality scores at or above 85%.',
+    'FED-002': 'Medicaid-enrolled hospitals must undergo annual rate review to maintain program participation.',
+    'FED-003': 'Hospitals must pass CMS survey with no more than 5 deficiencies to maintain deemed status.'
+  };
+  const ruleDesc = ruleDescriptions[currentRule.id] || `Rule definition and implementation guidelines for ${currentRule.name.toLowerCase()}.`;
+  const citationMap = {
+    'OH-001': 'ORC § 3702.30(A)(1)', 'OH-002': 'OAC 3701-59-01(B)', 'OH-003': 'OAC 3701-59-03(C)',
+    'OH-005': 'OAC 3701-59-05', 'OH-009': 'ORC § 3702.52(A)', 'OH-011': 'ORC § 3702.30(B)(2)',
+    'OH-020': 'ORC § 3702.30(B)(4)', 'FED-001': '42 CFR § 482.1', 'FED-002': '42 CFR § 447.253',
+    'FED-003': '42 CFR § 488.5'
+  };
+  const ruleCitation = citationMap[currentRule.id] || 'ORC § 3702.30';
+  const juris = currentRule.id.startsWith('FED') ? 'Federal' : 'Ohio';
+  const ruleType = currentRule.id === 'OH-009' ? 'ROUTE' : (currentRule.id === 'OH-010' ? 'INFO' : 'GATE');
+  const phase = currentRule.id.startsWith('FED') ? 'COMPLIANCE' : 'LICENSING';
+
+  const fieldStyle = 'width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; background: var(--white); transition: border-color 0.2s, box-shadow 0.2s;';
+  const fieldFocus = 'onfocus="this.style.borderColor=\'var(--accent)\';this.style.boxShadow=\'0 0 0 3px var(--accent-light)\'" onblur="this.style.borderColor=\'var(--border)\';this.style.boxShadow=\'none\'"';
+
   document.getElementById('overviewContent').innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">RULE ID</div>
-        <div style="font-size: 14px; color: var(--navy); font-weight: 600;">${currentRule.id}</div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">RULE ID</div>
+        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">${currentRule.id}</div>
       </div>
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">CURRENT VERSION</div>
-        <div style="font-size: 14px; color: var(--navy); font-weight: 600;">v${currentRule.version}</div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CURRENT VERSION</div>
+        <div style="font-size: 14px; color: var(--navy); font-weight: 600; padding: 8px 0;">v${currentRule.version}</div>
       </div>
       <div style="grid-column: 1 / -1;">
-        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">DESCRIPTION</div>
-        <div style="font-size: 13px; color: var(--text);">Rule definition and implementation guidelines for ${currentRule.name.toLowerCase()}.</div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">NAME</div>
+        <input type="text" value="${currentRule.name}" style="${fieldStyle}" ${fieldFocus} />
       </div>
+      <div style="grid-column: 1 / -1;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">DESCRIPTION</div>
+        <textarea rows="3" style="${fieldStyle} resize: vertical;" ${fieldFocus}>${ruleDesc}</textarea>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">CITATION</div>
+        <input type="text" value="${ruleCitation}" style="${fieldStyle}" ${fieldFocus} />
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">JURISDICTION</div>
+        <select style="${fieldStyle}">
+          <option ${juris === 'Ohio' ? 'selected' : ''}>Ohio</option>
+          <option ${juris === 'Federal' ? 'selected' : ''}>Federal</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">STATUS</div>
+        <select style="${fieldStyle}">
+          <option ${currentRule.status === 'draft' ? 'selected' : ''}>Draft</option>
+          <option ${currentRule.status === 'review' ? 'selected' : ''}>Review</option>
+          <option ${currentRule.status === 'active' ? 'selected' : ''}>Active</option>
+          <option>Sunset</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">RULE TYPE</div>
+        <select style="${fieldStyle}">
+          <option ${ruleType === 'GATE' ? 'selected' : ''}>GATE — Must pass to proceed</option>
+          <option ${ruleType === 'FILTER' ? 'selected' : ''}>FILTER — Narrows eligibility</option>
+          <option ${ruleType === 'CALC' ? 'selected' : ''}>CALC — Computes a value</option>
+          <option ${ruleType === 'ROUTE' ? 'selected' : ''}>ROUTE — Determines pathway</option>
+          <option ${ruleType === 'INFO' ? 'selected' : ''}>INFO — Documentation requirement</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">PRIORITY</div>
+        <select style="${fieldStyle}">
+          <option selected>P1 — Critical</option>
+          <option>P2 — Required</option>
+          <option>P3 — Recommended</option>
+          <option>P4 — Informational</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">PHASE</div>
+        <select style="${fieldStyle}">
+          <option ${phase === 'LICENSING' ? 'selected' : ''}>LICENSING</option>
+          <option ${phase === 'COMPLIANCE' ? 'selected' : ''}>COMPLIANCE</option>
+          <option>APPLICATION_PROCESSING</option>
+          <option>REPORTING_VERIFICATION</option>
+          <option>RECERTIFICATION</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">EFFECTIVE DATE</div>
+        <input type="date" value="2024-01-01" style="${fieldStyle}" ${fieldFocus} />
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">SUNSET DATE</div>
+        <input type="date" value="" style="${fieldStyle}" ${fieldFocus} placeholder="None" />
+      </div>
+    </div>
+    <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border);">
+      <button onclick="showToast('Changes discarded')" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: white; border-radius: var(--radius); cursor: pointer;">Discard</button>
+      <button onclick="showToast('Rule saved successfully')" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: none; background: var(--navy); color: white; border-radius: var(--radius); cursor: pointer;">Save Changes</button>
     </div>
   `;
 
