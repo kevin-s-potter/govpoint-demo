@@ -43,44 +43,26 @@
   .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
   .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
 
-  /* Program Switcher */
-  .program-switcher { margin-left: 40px; position: relative; }
-  .program-switcher-btn { background: var(--accent-light); color: var(--navy); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
-  .program-switcher-btn:hover { background: var(--accent); color: white; }
-  .program-switcher-dropdown { position: absolute; top: 100%; left: 0; margin-top: 8px; background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); min-width: 240px; display: none; z-index: 1000; }
-  .program-switcher.active .program-switcher-dropdown { display: block; }
-  .program-switcher-item { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; font-size: 13px; }
-  .program-switcher-item:last-child { border-bottom: none; }
-  .program-switcher-item:hover { background: var(--accent-light); }
-  .program-switcher-item.active { background: var(--accent-light); color: var(--navy); font-weight: 600; }
-  .program-switcher-item.disabled { color: var(--text-secondary); cursor: not-allowed; }
-  .program-switcher-item.disabled .coming-soon { font-size: 11px; color: var(--amber); margin-left: 8px; }
-
-  /* Nav spacer and right controls */
   .topnav .nav-spacer { margin-left: auto; }
   .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
+  .topnav .nav-links { display: flex; gap: 24px; }
+  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
+  .topnav .nav-links a:hover { color: var(--ohio-red); }
+  .topnav .nav-links a.active { color: var(--ohio-red); }
 
-  /* Notification Bell */
-  .notification-bell { position: relative; cursor: pointer; font-size: 20px; }
-  .notification-badge { position: absolute; top: -6px; right: -6px; background: var(--red); color: white; font-size: 10px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .notification-dropdown { position: absolute; top: 100%; right: 0; margin-top: 8px; background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); min-width: 380px; display: none; z-index: 1000; max-height: 400px; overflow-y: auto; }
-  .notification-bell.active .notification-dropdown { display: block; }
-  .notification-item { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; font-size: 13px; }
+  .notification-bell { position: relative; cursor: pointer; font-size: 18px; margin-right: 16px; }
+  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--ohio-red, #C41230); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
+  .notification-dropdown.show { display: block; }
+  .notification-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; line-height: 1.4; }
   .notification-item:last-child { border-bottom: none; }
-  .notification-item:hover { background: var(--light-gray); }
-  .notification-time { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+  .notification-time { color: #888; font-size: 11px; margin-top: 4px; }
 
-  /* Role Indicator */
   .role-indicator { display: flex; align-items: center; gap: 12px; }
   .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
   .role-text { font-size: 13px; line-height: 1.4; }
   .role-text .user-name { color: var(--navy); font-weight: 600; }
   .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
-
-  .topnav .nav-links { margin-left: auto; display: flex; gap: 24px; }
-  .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
-  .topnav .nav-links a:hover, .topnav .nav-links a.active { color: var(--ohio-red); }
-  .topnav .env-badge { margin-left: 24px; background: var(--ohio-red); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px; }
 
   /* ── LAYOUT ── */
   .container { display: flex; height: calc(100vh - 64px - 18px); }
@@ -288,36 +270,25 @@
     <span>GovPoint</span>
   </div>
 
-  <!-- Program Switcher -->
-  <div class="program-switcher" id="programSwitcher">
-    <button class="program-switcher-btn">
-      Hospital Licensing <span style="font-size: 11px;">▼</span>
-    </button>
-    <div class="program-switcher-dropdown">
-      <div class="program-switcher-item active">Hospital Licensing</div>
-      <div class="program-switcher-item disabled">SNAP <span class="coming-soon">Coming Soon</span></div>
-      <div class="program-switcher-item disabled">Medicaid <span class="coming-soon">Coming Soon</span></div>
-      <div class="program-switcher-item disabled">Child Care Licensing <span class="coming-soon">Coming Soon</span></div>
-    </div>
-  </div>
-
-  <!-- Back to Demo Button -->
-  <a href="index.html" style="margin-left: 32px; display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--ohio-red); color: white; border-radius: var(--radius); font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.background='#A30F28'" onmouseout="this.style.background='var(--ohio-red)'">← New Request</a>
-
   <div class="nav-spacer"></div>
 
+  <div class="nav-links">
+    <a href="index.html">New Request</a>
+    <a href="ontology.html" class="active">Ontology</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+
   <div class="nav-controls">
-    <!-- Notification Bell -->
-    <div class="notification-bell" id="notificationBell">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
       <span>🔔</span>
       <span class="notification-badge">3</span>
       <div class="notification-dropdown">
         <div class="notification-item">
-          <strong>OH-020 Telehealth Bed Equivalency submitted for review by James Miller</strong>
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
           <div class="notification-time">2 hours ago</div>
         </div>
         <div class="notification-item">
-          <strong>Shared rule FED-003 CMS CoP updated — affects 4 rules in your program</strong>
+          <strong>FED-003 CMS CoP updated — affects 4 rules</strong>
           <div class="notification-time">1 day ago</div>
         </div>
         <div class="notification-item">
@@ -327,7 +298,6 @@
       </div>
     </div>
 
-    <!-- Role Indicator -->
     <div class="role-indicator">
       <div class="avatar-circle">SC</div>
       <div class="role-text">

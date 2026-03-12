@@ -40,11 +40,27 @@
   .topnav { background: var(--white); padding: 0 32px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--navy); }
   .topnav .logo { color: var(--navy); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
   .topnav .logo .ohio-mark { color: var(--ohio-red); font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
-  .topnav .logo span { color: var(--accent); }
-  .topnav .nav-links { margin-left: auto; display: flex; gap: 24px; }
+
+  .topnav .nav-spacer { margin-left: auto; }
+  .topnav .nav-controls { display: flex; align-items: center; gap: 24px; }
+  .topnav .nav-links { display: flex; gap: 24px; }
   .topnav .nav-links a { color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.3px; }
-  .topnav .nav-links a:hover, .topnav .nav-links a.active { color: var(--ohio-red); }
-  .topnav .env-badge { margin-left: 24px; background: var(--ohio-red); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px; }
+  .topnav .nav-links a:hover { color: var(--ohio-red); }
+  .topnav .nav-links a.active { color: var(--ohio-red); }
+
+  .notification-bell { position: relative; cursor: pointer; font-size: 18px; margin-right: 16px; }
+  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--ohio-red, #C41230); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
+  .notification-dropdown.show { display: block; }
+  .notification-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; line-height: 1.4; }
+  .notification-item:last-child { border-bottom: none; }
+  .notification-time { color: #888; font-size: 11px; margin-top: 4px; }
+
+  .role-indicator { display: flex; align-items: center; gap: 12px; }
+  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .role-text { font-size: 13px; line-height: 1.4; }
+  .role-text .user-name { color: var(--navy); font-weight: 600; }
+  .role-text .user-role { color: var(--text-secondary); font-size: 12px; }
 
   /* ── LAYOUT ── */
   .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
@@ -230,19 +246,53 @@
 </head>
 <body>
 
-<!-- ── STATE BANNER ── -->
-<div class="state-banner">An official State of Ohio application. <a href="#">Powered by GovPoint</a></div>
+<div class="state-banner">
+  <span>Ohio Revised Code Ontology System</span>
+  <span style="margin-left: auto;"><a href="#">Documentation</a> · <a href="#">Support</a></span>
+</div>
 
-<!-- ── TOP NAV ── -->
 <nav class="topnav">
-  <div class="logo"><span class="ohio-mark">Ohio</span> Department of Health</div>
-  <div class="nav-links">
-    <a href="#" class="active" onclick="showPage('intake')">New Request</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="ontology.html">Ontology</a>
-    <a href="#" onclick="showPage('intake')">Admin</a>
+  <div class="logo">
+    <span class="ohio-mark">⟨°⟩</span>
+    <span>GovPoint</span>
   </div>
-  <div class="env-badge">GOVPOINT DEMO</div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-links">
+    <a href="index.html" class="active">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+
+  <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span>🔔</span>
+      <span class="notification-badge">3</span>
+      <div class="notification-dropdown">
+        <div class="notification-item">
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>FED-003 CMS CoP updated — affects 4 rules</strong>
+          <div class="notification-time">1 day ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+          <div class="notification-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-indicator">
+      <div class="avatar-circle">SC</div>
+      <div class="role-text">
+        <div class="user-name">Sarah Chen</div>
+        <div class="user-role">Publisher | Hospital Licensing</div>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <!-- ── STEPPER ── -->
@@ -523,6 +573,7 @@ async function fetchRulesFromSupabase() {
     const rulesResponse = await fetch(`${SUPABASE_URL}/rest/v1/rules?select=*`, {
       headers: {
         'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json'
       }
     });
@@ -533,6 +584,7 @@ async function fetchRulesFromSupabase() {
     const conditionsResponse = await fetch(`${SUPABASE_URL}/rest/v1/rule_conditions?select=*`, {
       headers: {
         'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json'
       }
     });

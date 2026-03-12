@@ -51,6 +51,14 @@
   .topnav .nav-links a:hover { color: var(--ohio-red); }
   .topnav .nav-links a.active { color: var(--ohio-red); }
 
+  .notification-bell { position: relative; cursor: pointer; font-size: 18px; margin-right: 16px; }
+  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--ohio-red, #C41230); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
+  .notification-dropdown.show { display: block; }
+  .notification-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; line-height: 1.4; }
+  .notification-item:last-child { border-bottom: none; }
+  .notification-time { color: #888; font-size: 11px; margin-top: 4px; }
+
   .role-indicator { display: flex; align-items: center; gap: 12px; }
   .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
   .role-text { font-size: 13px; line-height: 1.4; }
@@ -158,6 +166,25 @@
   </div>
 
   <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span>🔔</span>
+      <span class="notification-badge">3</span>
+      <div class="notification-dropdown">
+        <div class="notification-item">
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>FED-003 CMS CoP updated — affects 4 rules</strong>
+          <div class="notification-time">1 day ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+          <div class="notification-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
     <div class="role-indicator">
       <div class="avatar-circle">SC</div>
       <div class="role-text">
@@ -365,6 +392,7 @@
       try {
         const response = await fetch(query + params.toString(), {
           headers: {
+            'apikey': this.key,
             'Authorization': `Bearer ${this.key}`,
             'Content-Type': 'application/json'
           }
