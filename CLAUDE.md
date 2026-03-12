@@ -29,10 +29,10 @@ lexipoint-demo/
 ├── audit-log.html      # Audit Log – filterable/paginated table with stats
 ├── vercel.json         # Vercel config
 ├── database/
-│   ├── 01_create_tables.sql    # Schema definition (11 tables)
-│   ├── 02_seed_data.sql        # Ohio hospital licensing seed data
+│   ├── 01_create_tables.sql        # Schema definition (11 tables)
+│   ├── 02_seed_data.sql            # Ohio hospital licensing seed data
 │   ├── 04_add_kentucky_tenant.sql  # Kentucky nursing home program
-│   └── 05_add_snap_program.sql     # SNAP benefits (183 rules)
+│   └── 07_snap_ohio_rules.sql      # SNAP benefits – 183 rules (137 federal 7 CFR 271-283 + 46 Ohio OAC 5101:4), 510 conditions, 152 dependencies
 └── data/
     └── schema.json     # Reference data model (JSON)
 ```
@@ -90,11 +90,13 @@ tenants ──┬── programs ──── rules ───┬── rule_cond
 
 ### Current data
 - 2 tenants: `ohio-odh` (Ohio Dept of Health), `ky-chfs` (Kentucky CHFS)
-- 3 programs: Hospital Licensing (23 rules), SNAP Benefits (183 rules), Nursing Home Licensing (8 rules)
+- 3 programs: Hospital Licensing (23 rules), SNAP Benefits (183 rules active — 137 federal + 46 Ohio), Nursing Home Licensing (8 rules)
 - 214 total rules
+- SNAP rule IDs: `SNAP-FED-001` – `SNAP-FED-200` (federal), `SNAP-OH-001` – `SNAP-OH-109` (Ohio)
+- SNAP conditions: 510 | SNAP dependencies: 152 | source: `snap_ohio_ontology.json` (FY2026)
 
 ### ID conventions
-- `rule_id`: 2-3 letter prefix + number (OH-001, SNAP-001, NH-001)
+- `rule_id`: prefix + number — Hospital: `OH-001`, Nursing Home: `NH-001`, SNAP federal: `SNAP-FED-001`, SNAP Ohio: `SNAP-OH-001`
 - `condition_id`: cond-{rule_id}-{seq} (cond-OH-001-01)
 - `dep_id`: dep-{rule_id}-{seq}
 - `status` values: always **lowercase** – 'active', 'draft', 'review', 'sunset'
