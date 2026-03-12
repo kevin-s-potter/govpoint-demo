@@ -231,8 +231,8 @@
     </div>
 
     <div class="filter-group">
-      <span class="filter-label">Search Detail</span>
-      <input type="text" class="filter-input" id="filterSearch" placeholder="e.g. threshold, conditions...">
+      <span class="filter-label">Search All Fields</span>
+      <input type="text" class="filter-input" id="filterSearch" placeholder="e.g. OH-001, Sarah, threshold...">
     </div>
 
     <div class="filter-spacer"></div>
@@ -346,7 +346,12 @@
       if (action && e.action !== action) return false;
       if (role && e.role !== role) return false;
       if (target && e.target_id !== target) return false;
-      if (search && !(e.detail || '').toLowerCase().includes(search)) return false;
+      if (search) {
+        const userName = usersMap[e.user_id] || '';
+        const searchable = [e.detail, e.action, e.role, e.target_id, e.target_type, userName, e.ip_address]
+          .filter(Boolean).join(' ').toLowerCase();
+        if (!searchable.includes(search)) return false;
+      }
       return true;
     });
 
