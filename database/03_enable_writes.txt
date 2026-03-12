@@ -1,0 +1,49 @@
+-- ============================================================
+-- GovPoint — Enable anonymous writes for demo
+-- Run this in Supabase SQL Editor (same as before)
+-- ============================================================
+
+-- Allow anonymous users to read and write rules
+ALTER TABLE rules ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON rules FOR SELECT USING (true);
+CREATE POLICY "Allow public update" ON rules FOR UPDATE USING (true) WITH CHECK (true);
+
+-- Allow anonymous users to insert comments
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON comments FOR SELECT USING (true);
+CREATE POLICY "Allow public insert" ON comments FOR INSERT WITH CHECK (true);
+
+-- Allow anonymous users to insert audit log entries
+ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON audit_log FOR SELECT USING (true);
+CREATE POLICY "Allow public insert" ON audit_log FOR INSERT WITH CHECK (true);
+
+-- Keep other tables read-only (they already work for SELECT via anon key)
+ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON tenants FOR SELECT USING (true);
+
+ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON programs FOR SELECT USING (true);
+
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON users FOR SELECT USING (true);
+
+ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON user_roles FOR SELECT USING (true);
+
+ALTER TABLE rule_conditions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON rule_conditions FOR SELECT USING (true);
+
+ALTER TABLE rule_dependencies ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON rule_dependencies FOR SELECT USING (true);
+
+ALTER TABLE rule_versions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON rule_versions FOR SELECT USING (true);
+
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON notifications FOR SELECT USING (true);
+
+-- ============================================================
+-- DONE. The demo can now save rule edits and post comments.
+-- All other tables remain read-only.
+-- ============================================================
