@@ -3464,50 +3464,51 @@ function cbRefreshAI() {
 
 // ── Test Panel ──────────────────────────────────────────────
 function cbRenderTestPanel(container) {
-  const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
-  const usedFields = [];
+  // Collect unique conditions (not from AI) to build test inputs
+  const usedConds = [];  // {field, cond} — one per unique field
   const seen = new Set();
   cbState.groups.forEach(g => g.conditions.forEach(c => {
-    if (c.field && c.source !== 'ai' && !seen.has(c.field)) { seen.add(c.field); usedFields.push(c.field); }
+    if (c.field && c.source !== 'ai' && !seen.has(c.field)) { seen.add(c.field); usedConds.push(c); }
   }));
 
   let html = `<div style="font-size:11px;font-weight:700;color:var(--slds-navy);margin-bottom:10px;text-transform:uppercase;">Test with Sample Data</div>`;
   html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Enter values below and run the test to see which conditions pass or fail.</div>`;
 
-  if (usedFields.length === 0) {
+  if (usedConds.length === 0) {
     html += `<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:13px;">Add conditions first to enable testing.</div>`;
     container.innerHTML = html;
     return;
   }
 
   // Pre-populate booleans that have no test value yet
-  usedFields.forEach(fieldName => {
-    const fieldDef = fields.find(f => f.value === fieldName) || { type: 'text' };
-    if (fieldDef.type === 'boolean' && !cbState.testCases.find(t => t.field === fieldName)) {
-      cbState.testCases.push({ field: fieldName, value: 'true' });
+  usedConds.forEach(cond => {
+    const resolvedType = cbResolveType(cond);
+    if (resolvedType === 'boolean' && !cbState.testCases.find(t => t.field === cond.field)) {
+      cbState.testCases.push({ field: cond.field, value: 'true' });
     }
   });
 
   html += `<div id="cbTestInputs">`;
-  usedFields.forEach(fieldName => {
-    const fieldDef = fields.find(f => f.value === fieldName) || { label: fieldName, type: 'text' };
-    const existing = cbState.testCases.find(t => t.field === fieldName);
+  usedConds.forEach(cond => {
+    const resolvedType = cbResolveType(cond);
+    const label = cbFieldLabel(cond);
+    const existing = cbState.testCases.find(t => t.field === cond.field);
     const val = existing ? existing.value : '';
     // Find what the condition expects for this field (for the hint)
     let hint = '';
     cbState.groups.forEach(g => g.conditions.forEach(c => {
-      if (c.field === fieldName && c.source !== 'ai' && !hint) hint = `${c.operator} ${c.value}`;
+      if (c.field === cond.field && c.source !== 'ai' && !hint) hint = `${c.operator} ${c.value}`;
     }));
-    html += `<div class="cb-test-row">
-      <label title="Condition expects: ${hint}">${fieldDef.label}</label>
-      ${fieldDef.type === 'boolean'
-        ? `<select oninput="cbSetTestValue('${fieldName}', this.value)">
+    html += `<div class="cb-test-row" data-field="${cond.field}">
+      <label title="Condition expects: ${hint}">${label}</label>
+      ${resolvedType === 'boolean'
+        ? `<select oninput="cbSetTestValue('${cond.field}', this.value)">
             <option value="true" ${val === 'true' ? 'selected' : ''}>True</option>
             <option value="false" ${val !== 'true' ? 'selected' : ''}>False</option>
           </select>`
-        : `<input type="${fieldDef.type === 'number' ? 'number' : fieldDef.type === 'date' ? 'date' : 'text'}"
-            value="${val}" oninput="cbSetTestValue('${fieldName}', this.value)"
-            placeholder="${hint ? 'expects ' + hint : fieldDef.type}" />`
+        : `<input type="${resolvedType === 'number' ? 'number' : resolvedType === 'date' ? 'date' : 'text'}"
+            value="${val}" oninput="cbSetTestValue('${cond.field}', this.value)"
+            placeholder="${hint ? 'expects ' + hint : resolvedType}" />`
       }
     </div>`;
   });
@@ -3555,39 +3556,78 @@ function cbSetTestValue(field, value) {
   else { cbState.testCases.push({ field, value }); }
 }
 
-function cbEvalCondition(cond, testVal) {
+// Resolve data type from condition's own valueType (from DB), CB_FIELDS, or heuristics
+function cbResolveType(cond) {
+  const vt = (cond.valueType || '').toLowerCase();
+  if (vt === 'integer' || vt === 'number' || vt === 'numeric' || vt === 'float' || vt === 'decimal' || vt === 'int') return 'number';
+  if (vt === 'boolean' || vt === 'bool') return 'boolean';
+  if (vt === 'date' || vt === 'datetime' || vt === 'timestamp') return 'date';
+  if (vt === 'text' || vt === 'string' || vt === 'varchar') return 'text';
+  // Fallback: CB_FIELDS
   const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
-  const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
+  const fieldDef = fields.find(f => f.value === cond.field);
+  if (fieldDef) return fieldDef.type;
+  // Heuristic
+  if (cond.value && !isNaN(cond.value) && cond.value.trim() !== '') return 'number';
+  if (cond.value === 'true' || cond.value === 'false') return 'boolean';
+  return 'text';
+}
+
+// Resolve field label — CB_FIELDS first, then prettified field name
+function cbFieldLabel(cond) {
+  const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
+  const fieldDef = fields.find(f => f.value === cond.field);
+  return fieldDef ? fieldDef.label : cond.field;
+}
+
+// Normalize operator — DB may store == or <> instead of = or !=
+function cbNormalizeOp(op) {
+  if (op === '==' || op === '===') return '=';
+  if (op === '!==' || op === '<>') return '!=';
+  return op;
+}
+
+function cbEvalCondition(cond, testVal) {
+  const type = cbResolveType(cond);
+  const op = cbNormalizeOp(cond.operator);
+  const fieldLabel = cbFieldLabel(cond);
   let pass = false;
 
-  if (fieldDef.type === 'number') {
+  if (type === 'number') {
     const a = parseFloat(testVal), b = parseFloat(cond.value);
-    if (isNaN(a) || isNaN(b)) return { pass: false, reason: `${cond.field}: cannot compare "${testVal}" to "${cond.value}" (not numbers)` };
-    if (cond.operator === '>=') pass = a >= b;
-    else if (cond.operator === '<=') pass = a <= b;
-    else if (cond.operator === '>') pass = a > b;
-    else if (cond.operator === '<') pass = a < b;
-    else if (cond.operator === '=') pass = a === b;
-    else if (cond.operator === '!=') pass = a !== b;
-  } else if (fieldDef.type === 'boolean') {
-    pass = (String(testVal).toLowerCase() === String(cond.value).toLowerCase());
-  } else if (fieldDef.type === 'date') {
+    if (isNaN(a) || isNaN(b)) return { pass: false, reason: `<span style="color:var(--slds-error);">❌</span> <strong>${fieldLabel}</strong>: cannot compare "${testVal}" to "${cond.value}" (not numbers)` };
+    if (op === '>=') pass = a >= b;
+    else if (op === '<=') pass = a <= b;
+    else if (op === '>') pass = a > b;
+    else if (op === '<') pass = a < b;
+    else if (op === '=') pass = a === b;
+    else if (op === '!=') pass = a !== b;
+    else pass = a >= b; // default for unknown numeric ops
+  } else if (type === 'boolean') {
+    const a = String(testVal).toLowerCase().trim();
+    const b = String(cond.value).toLowerCase().trim();
+    if (op === '!=' || op === '<>') pass = (a !== b);
+    else pass = (a === b); // = and == both mean equality for booleans
+  } else if (type === 'date') {
     const a = new Date(testVal), b = new Date(cond.value);
-    if (isNaN(a) || isNaN(b)) return { pass: false, reason: `${cond.field}: invalid date "${testVal}" or "${cond.value}"` };
-    if (cond.operator === '>=') pass = a >= b;
-    else if (cond.operator === '<=') pass = a <= b;
-    else if (cond.operator === '>') pass = a > b;
-    else if (cond.operator === '<') pass = a < b;
-    else if (cond.operator === '=') pass = a.getTime() === b.getTime();
+    if (isNaN(a.getTime()) || isNaN(b.getTime())) return { pass: false, reason: `<span style="color:var(--slds-error);">❌</span> <strong>${fieldLabel}</strong>: invalid date "${testVal}" or "${cond.value}"` };
+    if (op === '>=') pass = a >= b;
+    else if (op === '<=') pass = a <= b;
+    else if (op === '>') pass = a > b;
+    else if (op === '<') pass = a < b;
+    else if (op === '=') pass = a.getTime() === b.getTime();
+    else if (op === '!=') pass = a.getTime() !== b.getTime();
   } else {
-    const a = String(testVal).toLowerCase(), b = String(cond.value).toLowerCase();
-    if (cond.operator === '=') pass = a === b;
-    else if (cond.operator === '!=') pass = a !== b;
-    else if (cond.operator === 'contains') pass = a.includes(b);
-    else if (cond.operator === 'starts_with') pass = a.startsWith(b);
+    // Text comparison
+    const a = String(testVal).toLowerCase().trim();
+    const b = String(cond.value).toLowerCase().trim();
+    if (op === '=' || op === '==') pass = a === b;
+    else if (op === '!=') pass = a !== b;
+    else if (op === 'contains') pass = a.includes(b);
+    else if (op === 'starts_with') pass = a.startsWith(b);
+    else pass = a === b; // fallback
   }
 
-  const fieldLabel = fieldDef.label || cond.field;
   return {
     pass,
     reason: pass
@@ -3597,13 +3637,12 @@ function cbEvalCondition(cond, testVal) {
 }
 
 function cbRunTest() {
-  // Capture current input values from DOM in case oninput missed the last keystroke
-  const inputs = document.querySelectorAll('#cbTestInputs input, #cbTestInputs select');
-  inputs.forEach(el => {
-    const fieldName = el.closest('.cb-test-row')?.querySelector('label')?.textContent;
-    const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
-    const fieldDef = fields.find(f => f.label === fieldName);
-    if (fieldDef) cbSetTestValue(fieldDef.value, el.value);
+  // Capture current input values from DOM using data-field attribute
+  const rows = document.querySelectorAll('#cbTestInputs .cb-test-row');
+  rows.forEach(row => {
+    const fieldKey = row.getAttribute('data-field');
+    const inputEl = row.querySelector('input, select');
+    if (fieldKey && inputEl) cbSetTestValue(fieldKey, inputEl.value);
   });
 
   const groupDetails = [];
@@ -3617,8 +3656,7 @@ function cbRunTest() {
       const testCase = cbState.testCases.find(t => t.field === cond.field);
       const testVal = testCase ? testCase.value : '';
       if (testVal === '' && testVal !== '0') {
-        const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
-        const fieldLabel = (fields.find(f => f.value === cond.field) || {}).label || cond.field;
+        const fieldLabel = cbFieldLabel(cond);
         return { pass: false, reason: `<span style="color:var(--slds-error);">⚠️</span> <strong>${fieldLabel}</strong> — no test value provided` };
       }
       return cbEvalCondition(cond, testVal);
@@ -3661,37 +3699,37 @@ function cbRunTest() {
 }
 
 function cbLoadPreset(type) {
-  const fields = CB_FIELDS[currentProgram] || CB_FIELDS['hosp-licensing'];
   cbState.testCases = [];
   cbState.lastTestResult = null;
 
   cbState.groups.forEach(g => g.conditions.filter(c => c.source !== 'ai' && c.field).forEach(cond => {
-    const fieldDef = fields.find(f => f.value === cond.field) || { type: 'text' };
+    const resolvedType = cbResolveType(cond);
+    const normOp = cbNormalizeOp(cond.operator);
     let val;
     if (type === 'passing') {
-      if (fieldDef.type === 'number') {
+      if (resolvedType === 'number') {
         const num = parseFloat(cond.value) || 0;
-        if (cond.operator === '>=' || cond.operator === '>') val = String(num + 10);
-        else if (cond.operator === '<=' || cond.operator === '<') val = String(Math.max(0, num - 10));
+        if (normOp === '>=' || normOp === '>') val = String(num + 10);
+        else if (normOp === '<=' || normOp === '<') val = String(Math.max(0, num - 10));
         else val = cond.value;
-      } else if (fieldDef.type === 'boolean') { val = cond.value; }
-      else if (fieldDef.type === 'date') {
+      } else if (resolvedType === 'boolean') { val = cond.value; }
+      else if (resolvedType === 'date') {
         const d = new Date(cond.value);
-        if (cond.operator === '>=' || cond.operator === '>') { d.setFullYear(d.getFullYear() + 1); val = d.toISOString().split('T')[0]; }
-        else if (cond.operator === '<=' || cond.operator === '<') { d.setFullYear(d.getFullYear() - 1); val = d.toISOString().split('T')[0]; }
+        if (normOp === '>=' || normOp === '>') { d.setFullYear(d.getFullYear() + 1); val = d.toISOString().split('T')[0]; }
+        else if (normOp === '<=' || normOp === '<') { d.setFullYear(d.getFullYear() - 1); val = d.toISOString().split('T')[0]; }
         else val = cond.value;
       } else { val = cond.value; }
     } else {
-      if (fieldDef.type === 'number') {
+      if (resolvedType === 'number') {
         const num = parseFloat(cond.value) || 0;
-        if (cond.operator === '>=' || cond.operator === '>') val = String(Math.max(0, num - 10));
-        else if (cond.operator === '<=' || cond.operator === '<') val = String(num + 10);
+        if (normOp === '>=' || normOp === '>') val = String(Math.max(0, num - 10));
+        else if (normOp === '<=' || normOp === '<') val = String(num + 10);
         else val = String(num + 1);
-      } else if (fieldDef.type === 'boolean') { val = cond.value === 'true' ? 'false' : 'true'; }
-      else if (fieldDef.type === 'date') {
+      } else if (resolvedType === 'boolean') { val = cond.value === 'true' ? 'false' : 'true'; }
+      else if (resolvedType === 'date') {
         const d = new Date(cond.value);
-        if (cond.operator === '>=' || cond.operator === '>') { d.setFullYear(d.getFullYear() - 2); val = d.toISOString().split('T')[0]; }
-        else if (cond.operator === '<=' || cond.operator === '<') { d.setFullYear(d.getFullYear() + 2); val = d.toISOString().split('T')[0]; }
+        if (normOp === '>=' || normOp === '>') { d.setFullYear(d.getFullYear() - 2); val = d.toISOString().split('T')[0]; }
+        else if (normOp === '<=' || normOp === '<') { d.setFullYear(d.getFullYear() + 2); val = d.toISOString().split('T')[0]; }
         else { d.setDate(d.getDate() + 1); val = d.toISOString().split('T')[0]; }
       } else { val = ''; }
     }
