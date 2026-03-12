@@ -2263,9 +2263,14 @@ async function init() {
   await loadWhatsChanged();
 
   renderRulesList();
-  setupEventListeners();
 
-  // Render initial D3 graph — await directly (SVG has min-height so dimensions are ready)
+  try {
+    setupEventListeners();
+  } catch (e) {
+    console.warn('[init] setupEventListeners error (non-fatal):', e);
+  }
+
+  // Render initial D3 graph — always execute even if event listeners had issues
   await renderDependencyGraph();
 }
 
@@ -2581,80 +2586,100 @@ async function renderDetailPanel() {
 }
 
 // ── EVENT LISTENERS ──────────────────────────────────────────
+// Null-safe helper — prevents init() from crashing if any element is missing
+function _on(selectorOrId, event, handler, useQuery) {
+  try {
+    const el = useQuery ? document.querySelector(selectorOrId) : document.getElementById(selectorOrId);
+    if (el) el.addEventListener(event, handler);
+    else console.warn(`[setupEventListeners] Element not found: ${selectorOrId}`);
+  } catch (e) { console.warn(`[setupEventListeners] Error binding ${selectorOrId}:`, e); }
+}
+
 function setupEventListeners() {
-  document.getElementById('searchInput').addEventListener('input', renderRulesList);
+  _on('searchInput', 'input', renderRulesList);
 
-  document.getElementById('programSwitcher').addEventListener('click', function(e) {
+  _on('programSwitcher', 'click', function(e) {
     e.stopPropagation();
     this.classList.toggle('active');
   });
   document.addEventListener('click', () => {
-    document.getElementById('programSwitcher').classList.remove('active');
+    const ps = document.getElementById('programSwitcher');
+    if (ps) ps.classList.remove('active');
   });
 
-  document.getElementById('notificationBell').addEventListener('click', function(e) {
+  _on('notificationBell', 'click', function(e) {
     e.stopPropagation();
     this.classList.toggle('active');
   });
   document.addEventListener('click', () => {
-    document.getElementById('notificationBell').classList.remove('active');
+    const nb = document.getElementById('notificationBell');
+    if (nb) nb.classList.remove('active');
   });
 
-  document.getElementById('whatsChangedToggle').addEventListener('click', () => {
+  _on('whatsChangedToggle', 'click', () => {
     const body = document.getElementById('whatsChangedBody');
     const arrow = document.getElementById('whatsChangedArrow');
+    if (!body || !arrow) return;
     const isOpen = body.style.display !== 'none';
     body.style.display = isOpen ? 'none' : 'block';
     arrow.textContent = isOpen ? '▶' : '▼';
   });
 
-  document.getElementById('importBtn').addEventListener('click', () => {
-    document.getElementById('uploadModal').classList.add('active');
+  _on('importBtn', 'click', () => {
+    const modal = document.getElementById('uploadModal');
+    if (modal) modal.classList.add('active');
     resetUploadModal();
   });
 
-  document.querySelector('.upload-close').addEventListener('click', () => {
-    document.getElementById('uploadModal').classList.remove('active');
-  });
+  _on('.upload-close', 'click', () => {
+    const modal = document.getElementById('uploadModal');
+    if (modal) modal.classList.remove('active');
+  }, true);
 
   const uploadZone = document.getElementById('uploadZone');
-  uploadZone.addEventListener('click', simulateUpload);
-  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('active'); });
-  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('active'));
+  if (uploadZone) {
+    uploadZone.addEventListener('click', simulateUpload);
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('active'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('active'));
+  }
 
-  document.getElementById('simulateBtn').addEventListener('click', async () => {
+  _on('simulateBtn', 'click', async () => {
     if (!currentRule) return;
     const deps = await govpoint.getDependencies(currentRule.rule_id);
-    document.getElementById('impactModal').classList.add('active');
-    document.getElementById('impactTitle').textContent = `Impact Analysis: ${currentRule.name}`;
-    document.getElementById('impactDirect').innerHTML = deps.dependsOn.length > 0
+    const modal = document.getElementById('impactModal');
+    if (modal) modal.classList.add('active');
+    const title = document.getElementById('impactTitle');
+    if (title) title.textContent = `Impact Analysis: ${currentRule.name}`;
+    const direct = document.getElementById('impactDirect');
+    if (direct) direct.innerHTML = deps.dependsOn.length > 0
       ? deps.dependsOn.map(d => `<div class="impact-item">✓ ${d.targetRule?.rule_id || d.depends_on} ${d.targetRule?.name || ''}</div>`).join('')
       : '<div class="impact-item" style="color: var(--text-secondary);">No direct impacts found</div>';
-    document.getElementById('impactIndirect').innerHTML = deps.dependedOnBy.length > 0
+    const indirect = document.getElementById('impactIndirect');
+    if (indirect) indirect.innerHTML = deps.dependedOnBy.length > 0
       ? deps.dependedOnBy.map(d => `<div class="impact-item">→ ${d.sourceRule?.rule_id || d.rule_id} ${d.sourceRule?.name || ''}</div>`).join('')
       : '<div class="impact-item" style="color: var(--text-secondary);">No indirect impacts found</div>';
-    document.getElementById('impactConflicts').innerHTML = `<div class="impact-item">⚠ Run full simulation to detect conflicts</div>`;
+    const conflicts = document.getElementById('impactConflicts');
+    if (conflicts) conflicts.innerHTML = `<div class="impact-item">⚠ Run full simulation to detect conflicts</div>`;
   });
 
-  document.getElementById('impactClose').addEventListener('click', () => {
-    document.getElementById('impactModal').classList.remove('active');
+  _on('impactClose', 'click', () => {
+    const modal = document.getElementById('impactModal');
+    if (modal) modal.classList.remove('active');
   });
 
   // Export buttons
-  const footer = document.createElement('div');
-  footer.style.cssText = 'display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--slds-border);';
-  footer.innerHTML = `
-    <button class="slds-button slds-button_neutral" id="exportJson" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export JSON</button>
-    <button class="slds-button slds-button_neutral" id="exportPdf" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export PDF</button>
-  `;
-  document.querySelector('.sidebar').appendChild(footer);
-
-  document.getElementById('exportJson').addEventListener('click', () => {
-    showToast(`Exported ${rules.length} rules to ontology-export.json`);
-  });
-  document.getElementById('exportPdf').addEventListener('click', () => {
-    showToast(`Exported ${rules.length} rules to ontology-export.pdf`);
-  });
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    const footer = document.createElement('div');
+    footer.style.cssText = 'display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--slds-border);';
+    footer.innerHTML = `
+      <button class="slds-button slds-button_neutral" id="exportJson" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export JSON</button>
+      <button class="slds-button slds-button_neutral" id="exportPdf" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export PDF</button>
+    `;
+    sidebar.appendChild(footer);
+    _on('exportJson', 'click', () => { showToast(`Exported ${rules.length} rules to ontology-export.json`); });
+    _on('exportPdf', 'click', () => { showToast(`Exported ${rules.length} rules to ontology-export.pdf`); });
+  }
 }
 
 function resetUploadModal() {
