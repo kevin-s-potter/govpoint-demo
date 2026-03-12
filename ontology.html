@@ -1363,32 +1363,55 @@
   .d3-node {
     stroke: white;
     stroke-width: 2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .d3-node:hover {
+    opacity: 0.85;
+    stroke-width: 3px;
+  }
+
+  .d3-node:focus {
+    outline: 2px solid #0176D3;
+    outline-offset: 2px;
   }
 
   .d3-link {
-    stroke: #999;
+    stroke: #6B7280;
+    stroke-opacity: 0.5;
+  }
+
+  .d3-link.requires {
+    stroke: #0176D3;
     stroke-opacity: 0.6;
   }
 
-  .d3-link.conflict {
+  .d3-link.conflict, .d3-link.conflicts {
     stroke: var(--slds-error);
+    stroke-opacity: 0.7;
+    stroke-dasharray: 5,3;
   }
 
   .d3-link.supersedes {
     stroke: var(--slds-warning);
+    stroke-opacity: 0.7;
   }
 
   .d3-tooltip {
     position: absolute;
     background: var(--slds-navy);
     color: white;
-    padding: 6px 12px;
-    border-radius: 2px;
-    font-size: 11px;
-    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
     pointer-events: none;
     z-index: 1000;
     display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    max-width: 280px;
   }
 
   .d3-tooltip.show {
@@ -1844,7 +1867,14 @@
         <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Rule Dependency Network</div>
         <div style="font-size: 13px; margin-bottom: 16px;">Showing <span id="graphRuleCount">0</span> rules with <span id="graphLinkCount">0</span> dependencies</div>
       </div>
-      <svg id="dependencyGraph" style="flex: 1; width: 100%; border-radius: 2px; background: white;"></svg>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; font-weight: 600;" role="legend" aria-label="Graph legend">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#2E844A;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Active</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#B25E00;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Draft</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#0176D3;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> In Review</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#BA0517;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Sunset</span>
+        <span style="display:flex;align-items:center;gap:5px;color:#6B7280;">— Dependency &nbsp; <span style="border-top:2px dashed #BA0517;width:20px;display:inline-block;"></span> Conflict</span>
+      </div>
+      <svg id="dependencyGraph" style="flex: 1; width: 100%; border-radius: 4px; background: #FAFAFB; border: 1px solid var(--slds-border);"></svg>
       <div id="d3Tooltip" class="d3-tooltip"></div>
     </div>
   </div>
@@ -2835,12 +2865,15 @@ async function renderDependencyGraph() {
     document.getElementById('graphRuleCount').textContent = nodes.length;
     document.getElementById('graphLinkCount').textContent = links.length;
 
+    // ARIA: label the SVG for screen readers
+    svg.attr('role', 'img').attr('aria-label', `Rule dependency network showing ${nodes.length} rules and ${links.length} connections`);
+
     // Create simulation
     const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id(d => d.id).distance(80))
-      .force('charge', d3.forceManyBody().strength(-300))
+      .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+      .force('charge', d3.forceManyBody().strength(-400))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(25));
+      .force('collision', d3.forceCollide().radius(35));
 
     // Add links
     const link = svg.append('g').attr('class', 'd3-links').selectAll('line')
@@ -2868,16 +2901,21 @@ async function renderDependencyGraph() {
       .enter().append('circle')
       .attr('class', 'd3-node')
       .attr('r', d => {
-        const priorityMap = { P1: 12, P2: 10, P3: 8, P4: 6 };
-        return priorityMap[d.priority] || 8;
+        const priorityMap = { P1: 18, P2: 15, P3: 12, P4: 10 };
+        return priorityMap[d.priority] || 12;
       })
       .attr('fill', d => {
-        const statusColorMap = { active: '#2E844A', draft: '#DD7A01', review: '#0176D3', sunset: '#BA0517' };
+        const statusColorMap = { active: '#2E844A', draft: '#B25E00', review: '#0176D3', sunset: '#BA0517' };
         return statusColorMap[d.status] || '#0176D3';
       })
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2)
+      .attr('role', 'button')
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `Rule ${d.id}: ${d.name}, status ${d.status}`)
       .on('mouseenter', (e, d) => {
         const tooltip = document.getElementById('d3Tooltip');
-        tooltip.innerHTML = `<strong>${d.id}</strong><br>${d.name}<br><span style="font-size:10px;">${d.status.toUpperCase()}</span>`;
+        tooltip.innerHTML = `<strong style="font-size:13px;">${d.id}</strong><br><span style="font-size:12px;">${d.name}</span><br><span style="font-size:12px; text-transform:uppercase; font-weight:600;">${d.status}</span>`;
         const rect = svg.node().getBoundingClientRect();
         tooltip.style.left = (e.pageX - rect.left + 10) + 'px';
         tooltip.style.top = (e.pageY - rect.top - 20) + 'px';
@@ -2890,21 +2928,32 @@ async function renderDependencyGraph() {
         e.stopPropagation();
         openWorkspaceTab(d.id);
       })
+      .on('keydown', (e, d) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWorkspaceTab(d.id); }
+      })
       .call(d3.drag()
         .on('start', dragStarted)
         .on('drag', dragged)
         .on('end', dragEnded));
 
-    // Add labels
+    // Add labels below nodes for readability
     const labels = svg.append('g').attr('class', 'd3-labels').selectAll('text')
       .data(nodes)
       .enter().append('text')
-      .attr('font-size', '10px')
-      .attr('font-weight', 600)
+      .attr('font-size', '12px')
+      .attr('font-weight', 700)
+      .attr('font-family', "'Salesforce Sans', 'Inter', -apple-system, sans-serif")
       .attr('text-anchor', 'middle')
-      .attr('dy', '.3em')
+      .attr('dy', d => {
+        const priorityMap = { P1: 30, P2: 27, P3: 24, P4: 22 };
+        return (priorityMap[d.priority] || 24) + 'px';
+      })
       .attr('pointer-events', 'none')
-      .attr('fill', 'white')
+      .attr('fill', '#032D60')
+      .style('paint-order', 'stroke')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 3)
+      .attr('stroke-linejoin', 'round')
       .text(d => d.id);
 
     // Add zoom
@@ -3189,11 +3238,13 @@ function renderMiniGraph(nodes, links) {
 
   svg.selectAll('*').remove();
 
+  svg.attr('role', 'img').attr('aria-label', 'Dependency graph for selected rule');
+
   const simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id(d => d.id).distance(60))
-    .force('charge', d3.forceManyBody().strength(-200))
+    .force('link', d3.forceLink(links).id(d => d.id).distance(80))
+    .force('charge', d3.forceManyBody().strength(-250))
     .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collision', d3.forceCollide().radius(20));
+    .force('collision', d3.forceCollide().radius(28));
 
   const g = svg.append('g');
 
@@ -3218,14 +3269,18 @@ function renderMiniGraph(nodes, links) {
   const node = g.append('g').selectAll('circle')
     .data(nodes)
     .enter().append('circle')
-    .attr('r', d => d.isCentral ? 12 : 8)
+    .attr('r', d => d.isCentral ? 16 : 10)
     .attr('fill', d => {
       if (d.isCentral) return '#0176D3';
-      const statusColorMap = { active: '#2E844A', draft: '#DD7A01', review: '#0176D3', sunset: '#BA0517' };
+      const statusColorMap = { active: '#2E844A', draft: '#B25E00', review: '#0176D3', sunset: '#BA0517' };
       return statusColorMap[d.status] || '#0176D3';
     })
     .attr('stroke', 'white')
     .attr('stroke-width', d => d.isCentral ? 3 : 2)
+    .attr('role', 'button')
+    .attr('aria-label', d => `Rule ${d.id}: ${d.name}, status ${d.status}`)
+    .style('cursor', 'pointer')
+    .on('click', (e, d) => { if (!d.isCentral) openWorkspaceTab(d.id); })
     .call(d3.drag()
       .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
       .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
@@ -3234,11 +3289,17 @@ function renderMiniGraph(nodes, links) {
   const labels = g.append('g').selectAll('text')
     .data(nodes)
     .enter().append('text')
-    .attr('font-size', '9px')
-    .attr('font-weight', 600)
+    .attr('font-size', '12px')
+    .attr('font-weight', 700)
+    .attr('font-family', "'Salesforce Sans', 'Inter', -apple-system, sans-serif")
     .attr('text-anchor', 'middle')
-    .attr('dy', '.3em')
-    .attr('fill', 'white')
+    .attr('dy', d => d.isCentral ? '28px' : '22px')
+    .attr('fill', '#032D60')
+    .attr('pointer-events', 'none')
+    .style('paint-order', 'stroke')
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 3)
+    .attr('stroke-linejoin', 'round')
     .text(d => d.id);
 
   simulation.on('tick', () => {
