@@ -158,6 +158,13 @@ The key question GovPoint answers: *"Why was this license denied?"* — with a s
 - Montana CCL POC complete: 24 statutory exemptions mapped, Title 37 Ch. 45 + HB 239 (2026) encoded
 - Integration story: API-first, complements existing stack, data stays on-premise
 
+### Core Positioning Line
+"SharePoint manages documents about your policy. GovPoint manages your policy as executable code with legal accountability."
+
+The longer form: A CMS manages documents about policy. GovPoint manages policy as executable code with legal accountability. The same way you wouldn't manage a production database schema with a word processor, you can't manage a live regulatory decision engine with SharePoint — the consequences of an undetected dependency conflict aren't a broken link, they're a legally incorrect licensing decision that exposes the agency to liability.
+
+Use this framing when thinking about feature work: every UI decision should reinforce that this is infrastructure, not software. The stakes of getting rules wrong are legal, not just technical.
+
 ### Demo Goals
 The demo should make buyers feel:
 - "This is exactly the audit trail our legal team has been asking for"
