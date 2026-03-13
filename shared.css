@@ -483,7 +483,13 @@ body {
   border-radius: 8px;
   margin-bottom: 10px;
   overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+.phase-card.phase-running  { border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124,58,237,0.08); }
+.phase-card.phase-passed   { border-color: var(--lp-green); }
+.phase-card.phase-flagged  { border-color: var(--lp-amber); }
+.phase-card.phase-blocked  { border-color: var(--lp-red); }
 
 .phase-header {
   display: flex; align-items: center; gap: 12px;
