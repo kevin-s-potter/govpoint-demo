@@ -2222,6 +2222,54 @@ class LexiPointAPI {
     if (!res.ok) { console.error(`[LexiPoint API] addAuditEntry failed: ${res.status}`); }
     this.clearCache();
   }
+
+  async saveConditions(ruleId, tenantId, conditions) {
+    // Delete all existing conditions for this rule, then insert the new set.
+    const delUrl = `${SUPABASE_URL}/rest/v1/rule_conditions?rule_id=eq.${encodeURIComponent(ruleId)}`;
+    const delRes = await fetch(delUrl, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!delRes.ok) {
+      const err = await delRes.text();
+      throw new Error(`Delete conditions failed (${delRes.status}): ${err}`);
+    }
+
+    if (conditions.length === 0) { this.clearCache(); return []; }
+
+    const rows = conditions.map((c, i) => ({
+      condition_id: `cond-${ruleId}-${String(i + 1).padStart(2, '0')}`,
+      rule_id: ruleId,
+      tenant_id: tenantId,
+      field: c.field,
+      operator: c.operator,
+      value: String(c.value ?? ''),
+      value_type: c.value_type || 'text',
+      order: i + 1
+    }));
+
+    const insUrl = `${SUPABASE_URL}/rest/v1/rule_conditions`;
+    const insRes = await fetch(insUrl, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(rows)
+    });
+    if (!insRes.ok) {
+      const err = await insRes.text();
+      throw new Error(`Insert conditions failed (${insRes.status}): ${err}`);
+    }
+    this.clearCache();
+    return await insRes.json();
+  }
 }
 const lexipoint = new LexiPointAPI();
 </script>
@@ -2817,6 +2865,33 @@ function simulateUpload() {
   }, 1500);
 }
 
+// ── CONDITION CHANGE HELPERS ──────────────────────────────────
+// Flatten cbState groups into a plain array matching rule_conditions schema.
+function cbGetCurrentConditions() {
+  if (!cbState.groups) return [];
+  return cbState.groups
+    .flatMap(g => g.conditions.map((c, ci) => ({
+      field: c.field,
+      operator: c.operator,
+      value: String(c.value ?? ''),
+      value_type: c.valueType || 'text',
+      order: ci + 1
+    })))
+    .filter(c => c.field); // exclude empty/incomplete conditions
+}
+
+// Return true if the Logic Builder state differs from what was loaded from DB.
+function cbConditionsChanged() {
+  if (!cbState.groups) return false;
+  const current = cbGetCurrentConditions();
+  const raw = cbState.rawConditions || [];
+  if (current.length !== raw.length) return true;
+  return current.some((c, i) => {
+    const r = raw[i];
+    return c.field !== r.field || c.operator !== r.operator || String(c.value) !== String(r.value);
+  });
+}
+
 // ── WRITE-BACK: Save Rule — collect changes, show pre-flight ──
 async function saveRule() {
   if (!currentRule) return;
@@ -2856,7 +2931,11 @@ async function saveRule() {
     }
   }
 
-  if (changes.length === 0) {
+  // Detect condition changes independently of Overview field changes
+  const conditionsChanged = cbConditionsChanged();
+  const newConditions = conditionsChanged ? cbGetCurrentConditions() : [];
+
+  if (changes.length === 0 && !conditionsChanged) {
     showToast('No changes to save');
     return;
   }
@@ -2864,9 +2943,20 @@ async function saveRule() {
   // Populate and show pre-flight modal
   const deps = await lexipoint.getDependencies(currentRule.rule_id);
 
-  document.getElementById('preflightChanges').innerHTML = changes.map(c =>
+  let preflightHtml = changes.map(c =>
     `<div class="impact-item"><strong>${c.label}:</strong> <span style="color:var(--slds-error);text-decoration:line-through;">${c.from || '(none)'}</span> → <span style="color:var(--slds-success);">${c.to}</span></div>`
   ).join('');
+
+  if (conditionsChanged) {
+    const rawCount = (cbState.rawConditions || []).length;
+    const newCount = newConditions.length;
+    const condDetail = newConditions.map(c =>
+      `<div style="font-size:11px;color:var(--text-secondary);margin-left:8px;">• ${c.field} ${c.operator} ${c.value}</div>`
+    ).join('');
+    preflightHtml += `<div class="impact-item"><strong>CONDITIONS:</strong> <span style="color:var(--slds-error);text-decoration:line-through;">${rawCount} condition${rawCount !== 1 ? 's' : ''}</span> → <span style="color:var(--slds-success);">${newCount} condition${newCount !== 1 ? 's' : ''}</span>${condDetail}</div>`;
+  }
+
+  document.getElementById('preflightChanges').innerHTML = preflightHtml;
 
   const depsEl = document.getElementById('preflightDeps');
   if (deps.dependedOnBy.length > 0) {
@@ -2877,7 +2967,12 @@ async function saveRule() {
     depsEl.innerHTML = '<div class="impact-item" style="color:var(--text-secondary);">No other rules depend on this one.</div>';
   }
 
-  preflightPendingAction = { fields, changes: changes.map(c => `${c.label}: "${c.from}" → "${c.to}"`) };
+  preflightPendingAction = {
+    fields,
+    changes: changes.map(c => `${c.label}: "${c.from}" → "${c.to}"`),
+    conditionsChanged,
+    newConditions
+  };
   document.getElementById('preflightModal').classList.add('active');
 }
 
@@ -2885,7 +2980,7 @@ async function saveRule() {
 async function executeSave() {
   const pending = preflightPendingAction;
   if (!pending || !currentRule) return;
-  const { fields, changes } = pending;
+  const { fields, changes, conditionsChanged, newConditions } = pending;
   preflightPendingAction = null;
   document.getElementById('preflightModal').classList.remove('active');
 
@@ -2894,10 +2989,37 @@ async function executeSave() {
 
   try {
     const config = PROGRAM_CONFIG[currentProgram];
-    const updated = await lexipoint.updateRule(currentRule.rule_id, fields);
+
+    // 1. Save Overview field changes (skip if only conditions changed)
+    let updated = currentRule;
+    if (changes.length > 0) {
+      updated = await lexipoint.updateRule(currentRule.rule_id, fields);
+    }
+
+    // 2. Persist condition changes to Supabase
+    if (conditionsChanged) {
+      await lexipoint.saveConditions(currentRule.rule_id, config.tenant, newConditions);
+      // Update rawConditions so subsequent saves detect the new baseline correctly
+      cbState.rawConditions = newConditions.map((c, i) => ({
+        condition_id: `cond-${currentRule.rule_id}-${String(i + 1).padStart(2, '0')}`,
+        rule_id: currentRule.rule_id,
+        tenant_id: config.tenant,
+        field: c.field,
+        operator: c.operator,
+        value: c.value,
+        value_type: c.value_type,
+        order: c.order
+      }));
+    }
+
+    // 3. Write audit entry covering all changes
+    const auditParts = [...changes];
+    if (conditionsChanged) {
+      auditParts.push(`CONDITIONS: ${newConditions.length} condition${newConditions.length !== 1 ? 's' : ''} saved`);
+    }
     await lexipoint.addAuditEntry(
       config.tenant, config.userId, 'publisher', 'edit_rule',
-      'rule', currentRule.rule_id, changes.join('; ')
+      'rule', currentRule.rule_id, auditParts.join('; ')
     );
 
     currentRule = updated;
@@ -2912,13 +3034,11 @@ async function executeSave() {
     document.getElementById('detailCitation').textContent = updated.citation || '';
     document.getElementById('detailVersion').textContent = `v${updated.version}`;
 
-    showToast(`Saved ${changes.length} change${changes.length > 1 ? 's' : ''} to ${updated.rule_id}`);
+    const savedCount = changes.length + (conditionsChanged ? 1 : 0);
+    showToast(`Saved ${savedCount} change${savedCount !== 1 ? 's' : ''} to ${updated.rule_id}`);
 
     // ── Live Evaluation Bridge ──────────────────────────────────────
-    // Save current condition builder state to localStorage so the New Request
-    // evaluation engine picks up any condition changes immediately (no DB required).
-    // This is how editing a rule in the Ontology Manager deterministically affects
-    // evaluation outcomes in the New Request form.
+    // Mirror saved conditions to localStorage so index.html picks them up immediately.
     if (cbState && cbState.groups) {
       try {
         const liveConds = cbState.groups.flatMap(g =>
@@ -2926,7 +3046,7 @@ async function executeSave() {
             field:      c.field,
             operator:   c.operator,
             value:      String(c.value),
-            value_type: c.value_type || 'string'
+            value_type: c.valueType || 'string'
           }))
         );
         localStorage.setItem(`lp_live_conds_${currentRule.rule_id}`, JSON.stringify(liveConds));
