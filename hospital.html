@@ -129,21 +129,26 @@
   .step-line { flex: 1; height: 1px; background: var(--slds-border); margin: 0 8px; min-width: 16px; transition: background 0.3s; }
   .step-line.done { background: var(--slds-success); }
 
+  /* ── EVALUATION PROGRESS BAR ── */
+  .eval-progress-bar { height: 3px; background: #E5E5E5; border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+  .eval-progress-fill { height: 100%; background: linear-gradient(90deg, #0176D3, #2E844A); border-radius: 2px; transition: width 0.4s ease; width: 0%; }
+
   /* ── EVALUATION VIEW (SLDS Expandable Section) ── */
-  .eval-phase { background: white; border-radius: 3px; border: 1px solid var(--slds-border); margin-bottom: 12px; overflow: hidden; transition: all 0.3s; }
-  .eval-phase.processing { border-color: var(--slds-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1); }
+  .eval-phase { background: white; border-radius: 8px; border: 1px solid var(--slds-border); margin-bottom: 10px; overflow: hidden; transition: all 0.3s; }
+  .eval-phase.processing { border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1); }
   .eval-phase.passed { border-color: var(--slds-success); }
   .eval-phase.flagged { border-color: var(--slds-warning); }
   .eval-phase.blocked { border-color: var(--slds-error); }
-  .eval-phase-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #F7F7F7; }
-  .eval-phase-header .phase-icon { width: 28px; height: 28px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-  .eval-phase.waiting .phase-icon { background: var(--slds-bg); color: var(--gray); }
-  .eval-phase.processing .phase-icon { background: #E9F3FF; color: var(--slds-blue); }
-  .eval-phase.passed .phase-icon { background: #E8F5E9; color: var(--slds-success); }
-  .eval-phase.flagged .phase-icon { background: #FFF3E0; color: var(--slds-warning); }
-  .eval-phase.blocked .phase-icon { background: #FDEDEF; color: var(--slds-error); }
-  .eval-phase-header h3 { font-size: 14px; color: var(--text-primary); font-weight: 600; flex: 1; }
-  .eval-phase-header .phase-status { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 3px; }
+  .eval-phase-header { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.1s; user-select: none; }
+  .eval-phase-header:hover { background: #F8FAFC; }
+  .eval-phase-header .phase-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .eval-phase.waiting .phase-icon { background: #F3F3F3; color: #54698D; }
+  .eval-phase.processing .phase-icon { background: #EDE9FE; color: #7C3AED; }
+  .eval-phase.passed .phase-icon { background: #D1FAE5; color: #059669; }
+  .eval-phase.flagged .phase-icon { background: #FEF3C7; color: #D97706; }
+  .eval-phase.blocked .phase-icon { background: #FEE2E2; color: #DC2626; }
+  .eval-phase-header h3 { font-size: 13px; color: var(--text-primary); font-weight: 600; flex: 1; }
+  .eval-phase-header .phase-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
   .eval-phase-body { padding: 0 16px 16px; display: none; }
   .eval-phase.open .eval-phase-body { display: block; }
 
@@ -182,42 +187,46 @@
   .audit-row { display: grid; grid-template-columns: 100px 1fr 120px; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F0F0F0; font-size: 12px; }
   .audit-row.audit-header { font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.3px; font-size: 11px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
 
-  /* ── ENHANCED AUDIT (SLDS Expandable Sections) ── */
-  .audit-entry { border: 1px solid var(--slds-border); border-radius: 3px; margin-bottom: 12px; overflow: hidden; transition: all 0.2s; }
-  .audit-entry:hover { box-shadow: var(--shadow); }
-  .audit-entry-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #F7F7F7; }
-  .audit-entry-header:hover { background: #F0F0F0; }
-  .audit-entry .entry-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #E9F3FF; color: var(--slds-blue); flex-shrink: 0; }
-  .audit-entry .entry-id { font-size: 11px; font-weight: 700; color: var(--slds-blue); background: #E9F3FF; padding: 3px 8px; border-radius: 3px; flex-shrink: 0; }
-  .audit-entry .entry-name { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; }
-  .audit-entry .entry-status { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 3px; flex-shrink: 0; }
-  .audit-entry .entry-arrow { color: var(--gray); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; }
-  .audit-entry.open .entry-arrow { transform: rotate(90deg); }
-  .audit-entry-body { display: none; padding: 16px; background: white; border-top: 1px solid var(--slds-border); }
+  /* ── AUDIT PAGE ── */
+  .chain-verified-banner { display: flex; align-items: center; gap: 8px; background: #D1FAE5; border: 1px solid #A7F3D0; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #065F46; font-weight: 500; margin-bottom: 16px; }
+  .chain-icon { font-size: 14px; }
+  .audit-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: #E5E5E5; border: 1px solid #E5E5E5; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .audit-meta-cell { background: white; padding: 12px 16px; }
+  .audit-meta-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #54698D; margin-bottom: 4px; }
+  .audit-meta-value { font-size: 12px; font-weight: 500; color: #032D60; word-break: break-all; }
+  .audit-hash { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 10px; }
+
+  /* ── ENHANCED AUDIT (Expandable Sections) ── */
+  .audit-entry { background: white; border: 1px solid var(--slds-border); border-radius: 6px; margin-bottom: 8px; overflow: hidden; }
+  .audit-entry-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s; }
+  .audit-entry-header:hover { background: #F8FAFC; }
+  .audit-entry .entry-num { font-size: 10px; font-weight: 700; color: #54698D; min-width: 28px; }
+  .audit-entry .entry-id { font-size: 12px; font-weight: 600; color: #032D60; min-width: 80px; flex-shrink: 0; }
+  .audit-entry .entry-name { font-size: 12px; color: #54698D; flex: 1; }
+  .audit-entry .entry-status { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
+  .audit-entry .entry-arrow { color: #9CA3AF; font-size: 11px; transition: transform 0.2s; flex-shrink: 0; }
+  .audit-entry.open .entry-arrow { transform: rotate(180deg); }
+  .audit-entry-body { display: none; padding: 12px 14px; border-top: 1px solid #F3F3F3; font-size: 12px; }
   .audit-entry.open .audit-entry-body { display: block; }
-  .audit-section { margin-bottom: 16px; }
+  .audit-section { margin-bottom: 10px; }
   .audit-section:last-child { margin-bottom: 0; }
-  .audit-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray); margin-bottom: 8px; }
-  .audit-condition { background: #1A1A2E; color: #E0E0E0; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; padding: 12px; border-radius: 3px; line-height: 1.6; overflow-x: auto; }
-  .audit-condition .kw { color: #7CB3F5; }
-  .audit-condition .val { color: #8BDB81; }
-  .audit-condition .op { color: #F5C97C; }
-  .audit-condition .cmt { color: #6A7A8A; }
-  .audit-facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
-  .audit-fact { display: flex; justify-content: space-between; padding: 6px 8px; border-radius: 3px; font-size: 12px; }
-  .audit-fact:nth-child(odd) { background: var(--slds-bg); }
-  .audit-fact .fact-name { font-weight: 600; color: var(--text-primary); }
-  .audit-fact .fact-val { font-family: monospace; color: var(--text-secondary); }
-  .audit-reasoning { font-size: 13px; color: var(--text-secondary); line-height: 1.6; padding: 12px; border-left: 3px solid var(--slds-blue); background: #E9F3FF; border-radius: 0 3px 3px 0; }
+  .audit-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #54698D; margin-bottom: 4px; }
+  .audit-section-value { color: #16325C; line-height: 1.6; }
+  .audit-code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11px; background: #F8FAFC; padding: 8px 10px; border-radius: 4px; line-height: 1.7; white-space: pre-wrap; color: #16325C; }
+  .audit-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .audit-fact { display: inline-flex; align-items: center; gap: 4px; background: #F3F3F3; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .fact-key { color: #54698D; }
+  .fact-val { color: #032D60; font-weight: 500; }
+  .audit-reasoning { font-size: 12px; color: #16325C; line-height: 1.6; }
   .audit-deps { display: flex; flex-wrap: wrap; gap: 6px; }
-  .audit-dep-tag { font-size: 11px; padding: 4px 10px; border-radius: 3px; font-weight: 600; }
-  .dep-gate { background: #FDEDEF; color: var(--slds-error); }
-  .dep-requires { background: #E9F3FF; color: var(--slds-blue); }
-  .dep-exempts { background: #E8F5E9; color: var(--slds-success); }
-  .dep-triggers { background: #FFF3E0; color: var(--slds-warning); }
-  .dep-routes { background: #F3E5F5; color: #7B1FA2; }
-  .audit-phase-divider { font-size: 12px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px; padding: 16px 0 8px; border-bottom: 1px solid var(--slds-border); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-  .audit-phase-divider .phase-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .audit-dep-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  .dep-gate { background: #FEE2E2; color: #991B1B; }
+  .dep-requires { background: #DBEAFE; color: #1E40AF; }
+  .dep-exempts { background: #D1FAE5; color: #065F46; }
+  .dep-triggers { background: #FEF3C7; color: #92400E; }
+  .dep-routes { background: #EDE9FE; color: #5B21B6; }
+  .audit-phase-divider { font-size: 11px; font-weight: 700; color: #54698D; text-transform: uppercase; letter-spacing: 0.4px; padding: 12px 0 6px; border-bottom: 1px solid #F3F3F3; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .audit-phase-divider .phase-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
   /* ── BED TABLE (SLDS Data Table) ── */
   .bed-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -524,6 +533,7 @@
   <div class="page-header">
     <h1>Policy Evaluation in Progress</h1>
     <p id="eval-subtitle">Evaluating <strong id="eval-hospital-name"></strong> against 40 rules across 9 regulatory domains</p>
+    <div class="eval-progress-bar" style="margin-top: 16px;"><div class="eval-progress-fill" id="eval-progress-fill"></div></div>
   </div>
   <div id="eval-phases"></div>
   <div class="btn-group" style="justify-content: space-between; margin-top: 24px;">
@@ -593,33 +603,14 @@
     <p>Complete decision lineage | Tamper-evident hash chain | Every rule evaluated, every fact checked</p>
   </div>
 
-  <article class="slds-card">
-  <div class="slds-card__header slds-grid">
-    <header class="slds-media slds-media_center slds-has-flexi-truncate">
-      <div class="slds-media__body">
-        <h2 class="slds-card__header-title">Decision Metadata</h2>
-      </div>
-    </header>
-    <span class="slds-badge" style="background: #E8F5E9; color: #2E844A;">IMMUTABLE RECORD</span>
+  <div class="chain-verified-banner">
+    <span class="chain-icon">🔐</span>
+    HASH CHAIN VERIFIED — Record integrity confirmed. This decision is immutable and exhibit-ready.
   </div>
-  <div class="slds-card__body slds-card__body_inner">
-    <div id="audit-metadata" style="display: grid; grid-template-columns: 200px 1fr; gap: 8px 16px; font-size: 13px;"></div>
-  </div>
-</article>
 
-  <article class="slds-card">
-  <div class="slds-card__header slds-grid">
-    <header class="slds-media slds-media_center slds-has-flexi-truncate">
-      <div class="slds-media__body">
-        <h2 class="slds-card__header-title">Rule Evaluation Sequence</h2>
-      </div>
-    </header>
-    <span class="slds-badge" style="background: #E9F3FF; color: #014486;">40 RULES EVALUATED</span>
-  </div>
-  <div class="slds-card__body slds-card__body_inner">
-    <div id="audit-sequence"></div>
-  </div>
-</article>
+  <div class="audit-meta-grid" id="audit-metadata"></div>
+
+  <div id="audit-sequence"></div>
 
   <div class="btn-group" style="justify-content: space-between;">
     <button class="slds-button slds-button_neutral" onclick="showPage('results')">&#8592; Back to Results</button>
@@ -1626,9 +1617,9 @@ function buildEvaluation(hospitalName) {
     div.id = 'phase-' + phase.id;
     div.innerHTML = `
       <div class="eval-phase-header" onclick="this.parentElement.classList.toggle('open')">
-        <div class="phase-icon">${phase.icon}</div>
+        <div class="phase-icon">—</div>
         <h3>${phase.name}</h3>
-        <span class="phase-status" style="background: var(--light-gray); color: var(--gray);">Waiting</span>
+        <span class="phase-status" style="background:#F3F3F3;color:#9CA3AF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;">Pending</span>
       </div>
       <div class="eval-phase-body">
         ${phase.rules.map(r => {
@@ -1659,7 +1650,9 @@ function buildEvaluation(hospitalName) {
 }
 
 function animatePhases(index) {
+  const progressFill = document.getElementById('eval-progress-fill');
   if (index >= PHASES.length) {
+    if (progressFill) progressFill.style.width = '100%';
     document.getElementById('btn-view-results').style.display = 'inline-flex';
     document.getElementById('btn-view-results').classList.add('animate-in');
     buildResults();
@@ -1667,9 +1660,13 @@ function animatePhases(index) {
   }
   const phase = PHASES[index];
   const el = document.getElementById('phase-' + phase.id);
-  el.className = 'eval-phase processing';
+  const progress = Math.round(((index + 1) / PHASES.length) * 95);
+  if (progressFill) progressFill.style.width = progress + '%';
+
+  el.className = 'eval-phase processing open';
   el.querySelector('.phase-status').textContent = 'Evaluating...';
-  el.querySelector('.phase-status').style.cssText = 'background: var(--accent-light); color: var(--accent);';
+  el.querySelector('.phase-status').style.cssText = 'background:#EDE9FE;color:#7C3AED;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;';
+  el.querySelector('.phase-icon').textContent = '⟳';
   el.querySelector('.phase-icon').classList.add('pulsing');
 
   setTimeout(() => {
@@ -1680,19 +1677,23 @@ function animatePhases(index) {
     if (hasBlock) {
       el.className = 'eval-phase blocked open';
       el.querySelector('.phase-status').textContent = 'BLOCKED';
-      el.querySelector('.phase-status').style.cssText = 'background: var(--red-light); color: var(--red);';
+      el.querySelector('.phase-status').style.cssText = 'background:#FEE2E2;color:#991B1B;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;';
+      el.querySelector('.phase-icon').textContent = '✕';
     } else if (hasFlag) {
-      el.className = 'eval-phase flagged';
+      el.className = 'eval-phase flagged open';
       el.querySelector('.phase-status').textContent = 'ACTION NEEDED';
-      el.querySelector('.phase-status').style.cssText = 'background: var(--amber-light); color: var(--amber);';
+      el.querySelector('.phase-status').style.cssText = 'background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;';
+      el.querySelector('.phase-icon').textContent = '!';
     } else if (allSkip) {
       el.className = 'eval-phase passed';
       el.querySelector('.phase-status').textContent = 'BYPASSED';
-      el.querySelector('.phase-status').style.cssText = 'background: var(--light-gray); color: var(--gray);';
+      el.querySelector('.phase-status').style.cssText = 'background:#F3F3F3;color:#9CA3AF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;';
+      el.querySelector('.phase-icon').textContent = '—';
     } else {
       el.className = 'eval-phase passed';
       el.querySelector('.phase-status').textContent = 'PASSED';
-      el.querySelector('.phase-status').style.cssText = 'background: var(--green-light); color: var(--green);';
+      el.querySelector('.phase-status').style.cssText = 'background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;';
+      el.querySelector('.phase-icon').textContent = '✓';
     }
     el.querySelector('.phase-icon').classList.remove('pulsing');
     animatePhases(index + 1);
@@ -1857,8 +1858,10 @@ function buildAudit() {
     ['Hash Chain Status', 'VERIFIED - Chain integrity confirmed'],
   ];
   meta.innerHTML = fields.map(([k, v]) => `
-    <div style="font-weight: 600; color: var(--navy); padding: 4px 0;">${k}</div>
-    <div style="color: var(--text-secondary); font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 11px; padding: 4px 0; word-break: break-all;">${v}</div>
+    <div class="audit-meta-cell">
+      <div class="audit-meta-label">${k}</div>
+      <div class="audit-meta-value${k.includes('Hash') ? ' audit-hash' : ''}">${v}</div>
+    </div>
   `).join('');
 
   // Build enhanced audit sequence
@@ -1884,53 +1887,46 @@ function buildAudit() {
 
       html += `<div class="audit-entry" id="audit-${r.id}">
         <div class="audit-entry-header" onclick="document.getElementById('audit-${r.id}').classList.toggle('open')">
-          <div class="entry-num">${stepNum}</div>
+          <span class="entry-num">#${stepNum}</span>
           <span class="entry-id">${r.id}</span>
           <span class="entry-name">${r.name}</span>
           <span class="entry-status ${statusColorMap[res.status]}">${statusMap[res.status]}</span>
-          <span class="entry-arrow">&#9654;</span>
+          <span class="entry-arrow">▾</span>
         </div>
         <div class="audit-entry-body">
 
-          <!-- Citation -->
           <div class="audit-section">
             <div class="audit-section-label">Regulatory Citation</div>
-            <div style="font-size: 13px; color: var(--text-secondary); font-style: italic;">${r.citation}</div>
+            <div class="audit-section-value" style="font-style:italic;">${r.citation}</div>
           </div>
 
-          <!-- Condition Logic -->
           ${res.condition ? `<div class="audit-section">
-            <div class="audit-section-label">Condition Evaluated</div>
-            <div class="audit-condition">${res.condition.replace(/\n/g, '<br>').replace(/(IF|THEN|AND|OR|ELSE|MUST|NOT|IN|CLASSIFY|EVALUATE|RESOLVE|INCLUDE|EXCLUDE|NOTE|FOR|TO|BY)/g, '<span class="kw">$1</span>').replace(/(TRUE|FALSE|APPROVED|REVOKED|REQUIRED|ACTIVE|MATCH|NO|YES|MANDATORY|ELIGIBLE)/g, '<span class="val">$1</span>').replace(/(=|!=|>=|<=|>|<|\+)/g, '<span class="op">$1</span>').replace(/(\/\/.*?)(<br>|$)/g, '<span class="cmt">$1</span>$2')}</div>
+            <div class="audit-section-label">Condition Logic</div>
+            <div class="audit-code">${res.condition}</div>
           </div>` : ''}
 
-          <!-- Facts Evaluated -->
           ${hasFacts ? `<div class="audit-section">
-            <div class="audit-section-label">Input Facts Evaluated</div>
-            <div class="audit-facts-grid">
-              ${Object.entries(res.facts).map(([k, v]) => `<div class="audit-fact"><span class="fact-name">${k}</span><span class="fact-val">${v}</span></div>`).join('')}
+            <div class="audit-section-label">Facts Applied</div>
+            <div class="audit-facts">
+              ${Object.entries(res.facts).map(([k, v]) => `<span class="audit-fact"><span class="fact-key">${k}</span>: <span class="fact-val">${v}</span></span>`).join('')}
             </div>
           </div>` : ''}
 
-          <!-- Reasoning -->
           ${res.reasoning ? `<div class="audit-section">
-            <div class="audit-section-label">Reasoning Chain</div>
+            <div class="audit-section-label">Reasoning</div>
             <div class="audit-reasoning">${res.reasoning}</div>
           </div>` : ''}
 
-          <!-- Dependencies -->
           ${hasDeps ? `<div class="audit-section">
             <div class="audit-section-label">Dependency Edges</div>
             <div class="audit-deps">
               ${res.deps.map(d => `<span class="audit-dep-tag ${depTypeClass[d.type] || 'dep-requires'}">${d.type.toUpperCase()}: ${d.target}</span>`).join('')}
             </div>
-            <div style="font-size: 11px; color: var(--gray); margin-top: 6px;">${res.deps.map(d => d.label).join(' | ')}</div>
           </div>` : ''}
 
-          <!-- Result -->
-          <div class="audit-section" style="margin-bottom: 0;">
-            <div class="audit-section-label">Evaluation Result</div>
-            <div style="font-size: 13px; font-weight: 600; color: var(--text);">${res.result}</div>
+          <div class="audit-section" style="margin-bottom:0;">
+            <div class="audit-section-label">Outcome</div>
+            <div class="audit-section-value">${res.result}</div>
           </div>
 
         </div>

@@ -138,25 +138,64 @@ body {
 .intake-header-left h2 { font-size: 17px; font-weight: 700; color: #032D60; margin-bottom: 2px; }
 .intake-header-left p { font-size: 12px; color: #54698D; }
 
-.intake-header-right {
+.quick-demo-card {
+  background: #E8F4FD;
+  border: 1px solid #A8C6E8;
+  border-radius: 8px;
+  padding: 14px 16px 16px;
+  margin-bottom: 16px;
+}
+
+.quick-demo-header {
   display: flex;
+  align-items: center;
   gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quick-demo-icon { font-size: 16px; }
+
+.quick-demo-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #032D60;
+}
+
+.scenario-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .scenario-btn {
-  padding: 6px 12px;
-  border: 1px solid #E5E5E5;
-  border-radius: 4px;
+  padding: 14px;
+  border-radius: 6px;
+  border: 1px solid #C9DFFE;
   background: white;
-  font-size: 12px;
-  font-weight: 500;
-  color: #54698D;
   cursor: pointer;
-  transition: all 0.15s;
+  text-align: left;
+  flex: 1;
+  min-width: 180px;
+  transition: all 0.2s;
+  font-family: inherit;
 }
 
-.scenario-btn:hover { border-color: #0176D3; color: #0176D3; }
-.scenario-btn.selected { border-color: #0176D3; background: #E8F4FD; color: #0176D3; }
+.scenario-btn:hover { border-color: #0176D3; background: #F0F7FF; }
+.scenario-btn.selected { border-color: #0176D3; background: #E8F4FD; }
+
+.scenario-btn h4 {
+  font-size: 12px;
+  color: #032D60;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.scenario-btn p {
+  font-size: 11px;
+  color: #54698D;
+  line-height: 1.5;
+  margin: 0;
+}
 
 /* Form sections */
 .form-card {
@@ -687,6 +726,52 @@ body {
 
 .btn-reveal:hover { background: #E8F4FD; }
 
+/* AI Decision Summary */
+.ai-summary-card {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.ai-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E5E5E5;
+  font-size: 12px;
+  font-weight: 600;
+  color: #032D60;
+}
+
+.ai-summary-label { flex: 1; }
+
+.ai-summary-status {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #7C3AED;
+  background: #EDE9FE;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ai-summary-body {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #16325C;
+  line-height: 1.7;
+}
+
+.ai-summary-loading {
+  color: #9CA3AF;
+  font-style: italic;
+}
+
 .results-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
 
 /* ── Audit Page ── */
@@ -883,10 +968,26 @@ body {
       <h2>Child Care Facility License Application</h2>
       <p>Ohio Department of Job &amp; Family Services — ORC Chapter 5104 / OAC 5101:2-12</p>
     </div>
-    <div class="intake-header-right">
-      <button class="scenario-btn" id="sBtn-A" onclick="loadScenario('A')">Scenario A</button>
-      <button class="scenario-btn" id="sBtn-B" onclick="loadScenario('B')">Scenario B</button>
-      <button class="scenario-btn" id="sBtn-C" onclick="loadScenario('C')">Scenario C</button>
+  </div>
+
+  <div class="quick-demo-card">
+    <div class="quick-demo-header">
+      <span class="quick-demo-icon">✨</span>
+      <span class="quick-demo-title">Quick Demo: Choose a scenario to auto-populate the form</span>
+    </div>
+    <div class="scenario-bar">
+      <button class="scenario-btn" id="sBtn-A" onclick="loadScenario('A')">
+        <h4>Scenario A: License Approved</h4>
+        <p>Sunshine Learning Center — 40 capacity, Columbus. All director, background, space, and ratio requirements met.</p>
+      </button>
+      <button class="scenario-btn" id="sBtn-B" onclick="loadScenario('B')">
+        <h4>Scenario B: Approved with Conditions</h4>
+        <p>Happy Hearts Academy — 55 capacity, publicly funded. Staff ratio flag + SUTQ enrollment required.</p>
+      </button>
+      <button class="scenario-btn" id="sBtn-C" onclick="loadScenario('C')">
+        <h4>Scenario C: License Denied</h4>
+        <p>Brighter Days Child Care — Director age 19 (under 21 minimum), BCI/FBI background checks missing.</p>
+      </button>
     </div>
   </div>
 
@@ -1232,6 +1333,17 @@ body {
       <div class="result-card-body">
         <ul class="triggered-rules" id="triggeredRules"></ul>
       </div>
+    </div>
+  </div>
+
+  <div class="ai-summary-card" id="aiSummaryCard" style="display:none;">
+    <div class="ai-summary-header">
+      <span>🤖</span>
+      <span class="ai-summary-label">AI Decision Narrative</span>
+      <span class="ai-summary-status" id="aiSummaryStatus">Generating...</span>
+    </div>
+    <div class="ai-summary-body" id="aiSummaryText">
+      <span class="ai-summary-loading">Analyzing decision factors...</span>
     </div>
   </div>
 
@@ -2046,6 +2158,50 @@ function buildResults() {
   } else {
     liveBanner.style.display = 'none';
   }
+
+  // AI decision summary
+  generateAISummary(blocked, flagged, passed, skipped);
+}
+
+async function generateAISummary(blocked, flagged, passed, skipped) {
+  const card = document.getElementById('aiSummaryCard');
+  const statusEl = document.getElementById('aiSummaryStatus');
+  const textEl = document.getElementById('aiSummaryText');
+
+  card.style.display = 'block';
+  statusEl.textContent = 'Generating...';
+  statusEl.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#7C3AED;background:#EDE9FE;padding:2px 8px;border-radius:4px;';
+  textEl.innerHTML = '<span class="ai-summary-loading">Analyzing decision factors...</span>';
+
+  const decision = blocked > 0 ? 'DENIED' : flagged > 0 ? 'APPROVED WITH CONDITIONS' : 'APPROVED';
+  const flags = [];
+  PHASES.forEach(phase => {
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id];
+      if (res && (res.status === 'flag' || res.status === 'block')) {
+        flags.push(`${r.id}: ${res.result}`);
+      }
+    });
+  });
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/generate-decision-summary`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ facilityName, decision, flags, passCount: passed, flagCount: flagged, blockCount: blocked })
+    });
+
+    if (!resp.ok) throw new Error('Service error');
+    const { summary } = await resp.json();
+
+    textEl.textContent = summary;
+    statusEl.textContent = 'Complete';
+    statusEl.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#065F46;background:#D1FAE5;padding:2px 8px;border-radius:4px;';
+  } catch {
+    textEl.textContent = 'Summary unavailable — evaluation data recorded in audit trail.';
+    statusEl.textContent = 'Unavailable';
+    statusEl.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#9CA3AF;background:#F3F3F3;padding:2px 8px;border-radius:4px;';
+  }
 }
 
 function goToOntology() {
@@ -2211,7 +2367,7 @@ async function handleFileSelected(input) {
       { method: 'PUT', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type }, body: file }
     );
 
-    if (!uploadResp.ok) throw new Error('Upload failed');
+    if (!uploadResp.ok) throw new Error(`Storage upload failed (${uploadResp.status})`);
 
     const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/childcare-documents/${path}`;
 
@@ -2239,7 +2395,10 @@ async function handleFileSelected(input) {
       }
     );
 
-    if (!classifyResp.ok) throw new Error('Classification failed');
+    if (!classifyResp.ok) {
+      const errBody = await classifyResp.json().catch(() => ({}));
+      throw new Error(errBody.detail || errBody.error || `Classification service error (${classifyResp.status})`);
+    }
 
     const { confidence, summary } = await classifyResp.json();
 
@@ -2254,7 +2413,7 @@ async function handleFileSelected(input) {
 
   } catch (err) {
     console.error('[LexiPoint] Document upload/classify error:', err);
-    updateDocRow(rowId, null, 'Classification error — please try again', 'error');
+    updateDocRow(rowId, null, String(err).replace('Error: ', ''), 'error');
   }
 }
 
