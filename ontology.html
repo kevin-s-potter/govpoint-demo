@@ -893,7 +893,7 @@ async function renderDetailPanel() {
       <div class="source-right">
         <div class="source-citation">Source: ${r.citation || 'No citation'}</div>
         <div class="source-text">
-          A hospital shall maintain a minimum capacity of <span class="source-highlight">not less than 25 licensed beds</span> and shall operate under a license issued by the director of health. The hospital shall be duly licensed as a hospital under <span class="source-highlight">the provisions of Chapter 3702 of the Revised Code</span>. The hospital shall maintain compliance with all statutory requirements...
+          ${r.source_text || '<em style="color:#54698D;">Statutory text not yet available for this rule.</em>'}
         </div>
       </div>
     </div>
