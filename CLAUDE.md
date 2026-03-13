@@ -4,8 +4,8 @@
 
 **LexiPoint** is a "Policy Intelligence Infrastructure for Government" – a clickable demo that lets government agencies manage regulatory rules, evaluate license applications, and track compliance changes.
 
-- **Live URL**: https://lexipoint-demo-8j38.vercel.app
-- **GitHub repo**: kevin-s-potter/lexipoint-demo (auto-deploys to Vercel on push)
+- **Live URL**: https://govpoint-demo.vercel.app
+- **GitHub repo**: kevin-s-potter/govpoint-demo (auto-deploys to Vercel on push)
 - **Owner**: Kevin Potter, Aimpoint Technology (kevin@aimpointtechnology.com)
 
 ## Architecture
