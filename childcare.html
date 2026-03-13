@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiPoint | Child Care Facility Licensing</title>
+<script src="program-switcher.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #F3F3F3;
+  color: #16325C;
+  font-size: 14px;
+}
+
+/* ── Header ── */
+.app-header {
+  background: #032D60;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-wrap { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+.logo-box {
+  width: 30px; height: 30px; background: #0176D3; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: white; letter-spacing: -0.5px;
+}
+.logo-name { font-size: 17px; font-weight: 700; color: white; letter-spacing: -0.2px; }
+
+#programSwitcherMount { flex: 1; min-width: 0; }
+
+.nav-links { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.nav-links a {
+  color: rgba(255,255,255,0.75); text-decoration: none;
+  font-size: 13px; font-weight: 500; padding: 6px 10px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.nav-links a:hover { color: white; background: rgba(255,255,255,0.1); }
+.nav-links a.active { color: white; background: rgba(255,255,255,0.15); }
+
+.nav-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.notif-btn {
+  background: none; border: none; color: rgba(255,255,255,0.7); font-size: 16px;
+  cursor: pointer; padding: 4px 6px; border-radius: 4px; position: relative;
+  transition: all 0.15s;
+}
+.notif-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+
+.user-indicator {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1); border-radius: 20px;
+  padding: 4px 10px 4px 4px;
+}
+.avatar {
+  width: 26px; height: 26px; background: #0176D3; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: white;
+}
+.user-name { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 500; }
+
+/* ── Stepper ── */
+.stepper {
+  background: white;
+  border-bottom: 1px solid #E5E5E5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 24px;
+  height: 52px;
+  overflow-x: auto;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #54698D;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.step.active { color: #0176D3; }
+.step.done { color: #2E844A; }
+
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+  background: transparent;
+}
+
+.step.active .step-num { background: #0176D3; border-color: #0176D3; color: white; }
+.step.done .step-num { background: #2E844A; border-color: #2E844A; color: white; }
+
+.step-divider {
+  width: 32px; height: 1px; background: #E5E5E5; flex-shrink: 0;
+}
+
+/* ── Pages ── */
+.page { display: none; }
+.page.visible { display: block; }
+
+/* ── Intake ── */
+.intake-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.intake-header {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.intake-header-left h2 { font-size: 17px; font-weight: 700; color: #032D60; margin-bottom: 2px; }
+.intake-header-left p { font-size: 12px; color: #54698D; }
+
+.intake-header-right {
+  display: flex;
+  gap: 8px;
+}
+
+.scenario-btn {
+  padding: 6px 12px;
+  border: 1px solid #E5E5E5;
+  border-radius: 4px;
+  background: white;
+  font-size: 12px;
+  font-weight: 500;
+  color: #54698D;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.scenario-btn:hover { border-color: #0176D3; color: #0176D3; }
+.scenario-btn.selected { border-color: #0176D3; background: #E8F4FD; color: #0176D3; }
+
+/* Form sections */
+.form-card {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.form-card-header {
+  background: #F8FAFC;
+  border-bottom: 1px solid #E5E5E5;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-card-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #032D60;
+  letter-spacing: 0.1px;
+}
+
+.form-section-icon {
+  width: 22px; height: 22px;
+  background: #0176D3;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: white; flex-shrink: 0;
+}
+
+.form-body { padding: 16px 20px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 11px; font-weight: 600; color: #54698D; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-group input,
+.form-group select {
+  padding: 7px 10px;
+  border: 1px solid #D8D8D8;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #16325C;
+  background: white;
+  transition: border-color 0.15s;
+}
+.form-group input:focus,
+.form-group select:focus { outline: none; border-color: #0176D3; box-shadow: 0 0 0 2px rgba(1,118,211,0.12); }
+
+.form-group.full { grid-column: 1 / -1; }
+
+/* ── Document Upload ── */
+.doc-upload-intro {
+  font-size: 13px;
+  color: #54698D;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.doc-add-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.doc-add-row select {
+  flex: 1;
+  min-width: 220px;
+  padding: 7px 10px;
+  border: 1px solid #D8D8D8;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #16325C;
+}
+
+.doc-add-row select:focus { outline: none; border-color: #0176D3; }
+
+.btn-upload-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #0176D3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btn-upload-file:hover { background: #0158A8; }
+.btn-upload-file:disabled { background: #A8C6E8; cursor: not-allowed; }
+
+.doc-file-input { display: none; }
+
+/* Doc table */
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  display: none;
+}
+
+.doc-table.has-rows { display: table; }
+
+.doc-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #54698D;
+  border-bottom: 2px solid #E5E5E5;
+  background: #F8FAFC;
+}
+
+.doc-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid #F3F3F3;
+  vertical-align: middle;
+}
+
+.doc-table tr:last-child td { border-bottom: none; }
+
+.doc-file-name {
+  font-weight: 500;
+  color: #16325C;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc-classification-label { color: #54698D; }
+
+/* Confidence bar */
+.confidence-cell { min-width: 120px; }
+
+.confidence-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.confidence-bar-track {
+  flex: 1;
+  height: 6px;
+  background: #E5E5E5;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidence-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.confidence-pct {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 32px;
+  text-align: right;
+}
+
+.conf-high .confidence-bar-fill { background: #2E844A; }
+.conf-high .confidence-pct { color: #2E844A; }
+.conf-med .confidence-bar-fill { background: #DD7A01; }
+.conf-med .confidence-pct { color: #DD7A01; }
+.conf-low .confidence-bar-fill { background: #BA0517; }
+.conf-low .confidence-pct { color: #BA0517; }
+
+.doc-summary {
+  color: #54698D;
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.doc-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.status-uploading { background: #FEF3C7; color: #92400E; }
+.status-processing { background: #EDE9FE; color: #5B21B6; }
+.status-classified { background: #D1FAE5; color: #065F46; }
+.status-error { background: #FEE2E2; color: #991B1B; }
+
+.doc-spinner {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Intake bottom ── */
+.intake-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  border: 1px solid #D8D8D8;
+  border-radius: 4px;
+  background: white;
+  font-size: 13px;
+  font-weight: 500;
+  color: #54698D;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-secondary:hover { border-color: #0176D3; color: #0176D3; }
+
+.btn-primary {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  background: #0176D3;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary:hover { background: #0158A8; }
+.btn-primary:disabled { background: #A8C6E8; cursor: not-allowed; }
+
+/* ── Evaluation Page ── */
+.eval-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.eval-header {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.eval-header h2 { font-size: 16px; font-weight: 700; color: #032D60; margin-bottom: 4px; }
+.eval-header p { font-size: 12px; color: #54698D; }
+
+.eval-progress-bar {
+  height: 3px;
+  background: #E5E5E5;
+  border-radius: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.eval-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0176D3, #2E844A);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.phase-card {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+  user-select: none;
+}
+
+.phase-header:hover { background: #F8FAFC; }
+
+.phase-status-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.phase-pending   .phase-status-icon { background: #F3F3F3; color: #54698D; }
+.phase-running   .phase-status-icon { background: #EDE9FE; color: #7C3AED; }
+.phase-passed    .phase-status-icon { background: #D1FAE5; color: #059669; }
+.phase-flagged   .phase-status-icon { background: #FEF3C7; color: #D97706; }
+.phase-blocked   .phase-status-icon { background: #FEE2E2; color: #DC2626; }
+.phase-bypassed  .phase-status-icon { background: #F3F3F3; color: #9CA3AF; }
+
+.phase-title { font-size: 13px; font-weight: 600; color: #16325C; flex: 1; }
+
+.phase-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.badge-pending   { background: #F3F3F3; color: #9CA3AF; }
+.badge-evaluating { background: #EDE9FE; color: #7C3AED; }
+.badge-passed    { background: #D1FAE5; color: #065F46; }
+.badge-flagged   { background: #FEF3C7; color: #92400E; }
+.badge-blocked   { background: #FEE2E2; color: #991B1B; }
+.badge-bypassed  { background: #F3F3F3; color: #9CA3AF; }
+
+.phase-chevron {
+  color: #9CA3AF;
+  font-size: 12px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.phase-card.open .phase-chevron { transform: rotate(180deg); }
+
+.phase-rules {
+  display: none;
+  border-top: 1px solid #F3F3F3;
+}
+
+.phase-card.open .phase-rules { display: block; }
+
+.rule-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #F9F9F9;
+  font-size: 12px;
+}
+
+.rule-row:last-child { border-bottom: none; }
+
+.rule-status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.dot-pass    { background: #2E844A; }
+.dot-flag    { background: #DD7A01; }
+.dot-block   { background: #BA0517; }
+.dot-skip    { background: #C9C9C9; }
+.dot-wait    { background: #9050E9; }
+.dot-pending { background: #C9C9C9; border: 1px solid #9CA3AF; }
+
+.rule-info { flex: 1; }
+.rule-id   { font-weight: 600; color: #032D60; }
+.rule-name { color: #54698D; }
+.rule-result { color: #16325C; margin-top: 2px; }
+
+.rule-citation {
+  font-size: 10px;
+  color: #9CA3AF;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Results Page ── */
+.results-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.decision-banner {
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.decision-approved { background: linear-gradient(135deg, #065F46 0%, #059669 100%); color: white; }
+.decision-conditions { background: linear-gradient(135deg, #92400E 0%, #D97706 100%); color: white; }
+.decision-denied { background: linear-gradient(135deg, #7F1D1D 0%, #DC2626 100%); color: white; }
+
+.decision-icon { font-size: 32px; flex-shrink: 0; }
+.decision-text h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.decision-text p { font-size: 13px; opacity: 0.85; }
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) { .results-grid { grid-template-columns: 1fr; } }
+
+.result-card {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.result-card-header {
+  padding: 10px 16px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E5E5E5;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #54698D;
+}
+
+.result-card-body { padding: 14px 16px; }
+
+.result-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.result-stat { text-align: center; }
+.result-stat-value { font-size: 24px; font-weight: 700; color: #032D60; }
+.result-stat-label { font-size: 10px; color: #54698D; text-transform: uppercase; letter-spacing: 0.3px; }
+
+.triggered-rules { list-style: none; padding: 0; margin: 0; }
+.triggered-rules li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #F3F3F3;
+  font-size: 12px;
+}
+.triggered-rules li:last-child { border-bottom: none; }
+
+.trig-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.trig-info { flex: 1; }
+.trig-rule { font-weight: 600; color: #032D60; }
+.trig-result { color: #54698D; line-height: 1.4; }
+
+/* Live ontology banner */
+.live-banner {
+  background: #EDE9FE;
+  border: 1px solid #C4B5FD;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.live-banner-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.live-banner-text { color: #4C1D95; }
+.live-banner-title { font-weight: 600; margin-bottom: 2px; }
+
+/* Reveal CTA */
+.reveal-cta {
+  background: linear-gradient(135deg, #032D60 0%, #0176D3 100%);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reveal-cta-text h3 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 4px; }
+.reveal-cta-text p { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+.btn-reveal {
+  padding: 10px 20px;
+  background: white;
+  color: #032D60;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-reveal:hover { background: #E8F4FD; }
+
+.results-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+
+/* ── Audit Page ── */
+.audit-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.audit-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: #E5E5E5;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.audit-meta-cell {
+  background: white;
+  padding: 12px 16px;
+}
+
+.audit-meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #54698D;
+  margin-bottom: 4px;
+}
+
+.audit-meta-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: #032D60;
+  word-break: break-all;
+}
+
+.audit-hash { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 10px; }
+
+.audit-entry {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.audit-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.audit-entry-header:hover { background: #F8FAFC; }
+
+.audit-step-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: #54698D;
+  min-width: 24px;
+}
+
+.audit-rule-id { font-size: 12px; font-weight: 600; color: #032D60; min-width: 100px; }
+.audit-rule-name { font-size: 12px; color: #54698D; flex: 1; }
+
+.audit-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.abadge-pass   { background: #D1FAE5; color: #065F46; }
+.abadge-flag   { background: #FEF3C7; color: #92400E; }
+.abadge-block  { background: #FEE2E2; color: #991B1B; }
+.abadge-skip   { background: #F3F3F3; color: #9CA3AF; }
+
+.audit-chevron { color: #9CA3AF; font-size: 11px; transition: transform 0.2s; }
+.audit-entry.open .audit-chevron { transform: rotate(180deg); }
+
+.audit-entry-body {
+  display: none;
+  padding: 12px 14px;
+  border-top: 1px solid #F3F3F3;
+  font-size: 12px;
+}
+
+.audit-entry.open .audit-entry-body { display: block; }
+
+.audit-section { margin-bottom: 10px; }
+.audit-section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: #54698D; margin-bottom: 4px; }
+.audit-section-value { color: #16325C; line-height: 1.6; }
+.audit-code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11px; background: #F8FAFC; padding: 6px 10px; border-radius: 4px; line-height: 1.7; white-space: pre-wrap; }
+
+.audit-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.audit-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #F3F3F3;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+.fact-key { color: #54698D; }
+.fact-val { color: #032D60; font-weight: 500; }
+
+.chain-verified {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #D1FAE5;
+  border: 1px solid #A7F3D0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #065F46;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.chain-icon { font-size: 14px; }
+
+.audit-actions { display: flex; gap: 10px; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="app-header">
+  <a href="index.html" class="logo-wrap">
+    <div class="logo-box">LP</div>
+    <span class="logo-name">LexiPoint</span>
+  </a>
+
+  <div id="programSwitcherMount"></div>
+
+  <div class="nav-links">
+    <a href="index.html" class="active">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+
+  <div class="nav-controls">
+    <button class="notif-btn" title="Notifications">🔔</button>
+    <div class="user-indicator">
+      <div class="avatar" id="userAvatar">MT</div>
+      <span class="user-name" id="userName">Michelle Thompson</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Stepper ── -->
+<div class="stepper">
+  <div class="step active" id="step1">
+    <div class="step-num">1</div>
+    <span>Application</span>
+  </div>
+  <div class="step-divider"></div>
+  <div class="step" id="step2">
+    <div class="step-num">2</div>
+    <span>Evaluation</span>
+  </div>
+  <div class="step-divider"></div>
+  <div class="step" id="step3">
+    <div class="step-num">3</div>
+    <span>Decision</span>
+  </div>
+  <div class="step-divider"></div>
+  <div class="step" id="step4">
+    <div class="step-num">4</div>
+    <span>Audit Trail</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 1: INTAKE
+═══════════════════════════════════════════════ -->
+<div id="page-intake" class="page visible">
+<div class="intake-wrap">
+
+  <div class="intake-header">
+    <div class="intake-header-left">
+      <h2>Child Care Facility License Application</h2>
+      <p>Ohio Department of Job &amp; Family Services — ORC Chapter 5104 / OAC 5101:2-12</p>
+    </div>
+    <div class="intake-header-right">
+      <button class="scenario-btn" id="sBtn-A" onclick="loadScenario('A')">Scenario A</button>
+      <button class="scenario-btn" id="sBtn-B" onclick="loadScenario('B')">Scenario B</button>
+      <button class="scenario-btn" id="sBtn-C" onclick="loadScenario('C')">Scenario C</button>
+    </div>
+  </div>
+
+  <!-- Section 1: Applicant Info -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">1</div>
+      <h3>Applicant Information</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Facility Name</label><input type="text" id="f-name" placeholder="e.g. Sunshine Learning Center"></div>
+        <div class="form-group">
+          <label>Facility Type</label>
+          <select id="f-type">
+            <option value="center">Child Care Center</option>
+            <option value="type_a">Type A Family Home</option>
+            <option value="type_b">Type B Family Home</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Licensed Capacity (children)</label><input type="number" id="f-capacity" placeholder="e.g. 40"></div>
+        <div class="form-group full"><label>Address</label><input type="text" id="f-address" placeholder="Street, City, State, ZIP"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Director -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">2</div>
+      <h3>Director / Administrator</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Director Name</label><input type="text" id="f-dir-name" placeholder="Full name"></div>
+        <div class="form-group"><label>Director Age</label><input type="number" id="f-dir-age" placeholder="Must be ≥ 21"></div>
+        <div class="form-group">
+          <label>Education Credentials Met</label>
+          <select id="f-edu">
+            <option value="true">Yes — Appendix A requirements satisfied</option>
+            <option value="false">No — Does not meet requirements</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>On-Site Hours Compliance</label>
+          <select id="f-onsite">
+            <option value="true">Yes — ½ of operating hours or 40 hrs/wk</option>
+            <option value="false">No — Below minimum on-site hours</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Background Checks -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">3</div>
+      <h3>Background Checks</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>BCI Check Completed</label>
+          <select id="f-bci">
+            <option value="true">Yes — BCI results on file</option>
+            <option value="false">No — Not yet completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>FBI Check Completed</label>
+          <select id="f-fbi">
+            <option value="true">Yes — FBI fingerprint results on file</option>
+            <option value="false">No — Not yet completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>All Staff Cleared</label>
+          <select id="f-staff-cleared">
+            <option value="true">Yes — All staff background checks complete</option>
+            <option value="false">No — Pending for one or more staff</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Physical Environment -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">4</div>
+      <h3>Physical Environment</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Indoor Space Per Child (sq ft)</label><input type="number" id="f-indoor" placeholder="Min 35 sq ft"></div>
+        <div class="form-group"><label>Outdoor Space Per Child (sq ft)</label><input type="number" id="f-outdoor" placeholder="Min 60 sq ft"></div>
+        <div class="form-group">
+          <label>Outdoor Area Fenced / Natural Barrier</label>
+          <select id="f-fenced">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Equipment Safe &amp; Hazard-Free</label>
+          <select id="f-equip">
+            <option value="true">Yes — No sharp points, splinters, lead paint</option>
+            <option value="false">No — Hazards present</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>No Firearms on Premises</label>
+          <select id="f-firearms">
+            <option value="true">Confirmed — No firearms present</option>
+            <option value="false">No — Firearms on premises</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Toxic Substances Secured</label>
+          <select id="f-toxic">
+            <option value="true">Yes — Inaccessible to children</option>
+            <option value="false">No — Not properly secured</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Staffing -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">5</div>
+      <h3>Staffing &amp; Ratios</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Primary Age Group Served</label>
+          <select id="f-age-group">
+            <option value="infant_0_12mo">Infants (0–12 months)</option>
+            <option value="young_toddler_12_18mo">Young Toddlers (12–18 months)</option>
+            <option value="older_toddler_18_30mo">Older Toddlers (18–30 months)</option>
+            <option value="preschool_3_5yr" selected>Preschool (3–5 years)</option>
+            <option value="school_age_k_11yr">School-Age (K–11 years)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Children Per Staff Member</label><input type="number" id="f-ratio" placeholder="e.g. 11"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Health & Safety -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">6</div>
+      <h3>Health &amp; Safety</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Written Health / Safety Policies</label>
+          <select id="f-policies">
+            <option value="true">Yes — Policies on file</option>
+            <option value="false">No — Not yet developed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>CPR / First Aid Certified Staff</label>
+          <select id="f-cpr">
+            <option value="true">Yes — At least one certified staff on premises</option>
+            <option value="false">No — No certified staff</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Emergency Action Plan on File</label>
+          <select id="f-emergency">
+            <option value="true">Yes — Written plan on file</option>
+            <option value="false">No — Not developed</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Funding & Quality -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">7</div>
+      <h3>Funding &amp; Quality</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Receives Public Funding / CCDF</label>
+          <select id="f-public-funded">
+            <option value="false">No</option>
+            <option value="true">Yes — Receives state or federal child care subsidy</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Enrolled in Step Up To Quality (SUTQ)</label>
+          <select id="f-sutq">
+            <option value="false">No</option>
+            <option value="true">Yes — Active SUTQ participation</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8: Supporting Documents -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">8</div>
+      <h3>Supporting Documents</h3>
+    </div>
+    <div class="form-body">
+      <p class="doc-upload-intro">
+        Upload supporting documentation. Select a document type, then upload the file.
+        Our AI will verify that each document matches its selected classification and provide a confidence score.
+      </p>
+
+      <div class="doc-add-row">
+        <select id="docClassSelect">
+          <option value="">— Select document type —</option>
+          <option value="director_credentials">Director / Administrator Credentials</option>
+          <option value="background_check_bci">BCI Background Check Results</option>
+          <option value="background_check_fbi">FBI Background Check Results</option>
+          <option value="floor_plan">Facility Floor Plan / Layout</option>
+          <option value="proof_of_insurance">Proof of Liability Insurance</option>
+          <option value="staff_roster">Staff Roster</option>
+          <option value="health_safety_policies">Written Health &amp; Safety Policies</option>
+          <option value="emergency_action_plan">Emergency Action Plan</option>
+          <option value="cpr_certification">CPR / First Aid Certifications</option>
+          <option value="sutq_certificate">Step Up To Quality (SUTQ) Certificate</option>
+          <option value="incorporation_docs">Business Formation Documents</option>
+          <option value="other">Other Supporting Documentation</option>
+        </select>
+        <button class="btn-upload-file" id="btnChooseFile" onclick="triggerFileInput()">
+          📎 Choose File
+        </button>
+        <input type="file" id="docFileInput" class="doc-file-input"
+          accept=".pdf,.jpg,.jpeg,.png,.webp"
+          onchange="handleFileSelected(this)">
+      </div>
+
+      <table class="doc-table" id="docTable">
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Document Type</th>
+            <th>AI Confidence</th>
+            <th>Summary</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="docTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Section 9: Authorized Rep -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">9</div>
+      <h3>Authorized Representative</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Name</label><input type="text" id="f-auth-name" placeholder="Full legal name"></div>
+        <div class="form-group"><label>Title</label><input type="text" id="f-auth-title" placeholder="e.g. Director / Owner"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="f-auth-email" placeholder="email@example.com"></div>
+        <div class="form-group"><label>Approval Date</label><input type="date" id="f-auth-date"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="intake-actions">
+    <button class="btn-secondary" onclick="clearForm()">Clear</button>
+    <button class="btn-primary" onclick="startEvaluation()">
+      Start Evaluation ▶
+    </button>
+  </div>
+
+</div>
+</div><!-- /page-intake -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 2: EVALUATION
+═══════════════════════════════════════════════ -->
+<div id="page-evaluation" class="page">
+<div class="eval-wrap">
+
+  <div class="eval-header">
+    <h2 id="evalFacilityName">Evaluating Application...</h2>
+    <p>LexiPoint is applying ORC Chapter 5104, OAC 5101:2-12, and 45 CFR Part 98 to this application</p>
+    <div class="eval-progress-bar"><div class="eval-progress-fill" id="evalProgressFill"></div></div>
+  </div>
+
+  <div id="phasesContainer"></div>
+
+  <div class="intake-actions" id="evalContinueBtn" style="display:none;">
+    <button class="btn-primary" onclick="showPage('results')">View Decision Report →</button>
+  </div>
+
+</div>
+</div><!-- /page-evaluation -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 3: RESULTS
+═══════════════════════════════════════════════ -->
+<div id="page-results" class="page">
+<div class="results-wrap">
+
+  <div id="decisionBanner" class="decision-banner decision-approved">
+    <div class="decision-icon" id="decisionIcon">✅</div>
+    <div class="decision-text">
+      <h2 id="decisionTitle">LICENSE APPROVED</h2>
+      <p id="decisionSubtitle">All requirements satisfied. License may be issued.</p>
+    </div>
+  </div>
+
+  <div id="liveBanner" class="live-banner" style="display:none;">
+    <div class="live-banner-icon">⚡</div>
+    <div class="live-banner-text">
+      <div class="live-banner-title">Live Ontology Override Active</div>
+      <div id="liveBannerDetail"></div>
+    </div>
+  </div>
+
+  <div class="results-grid">
+    <div class="result-card">
+      <div class="result-card-header">Evaluation Summary</div>
+      <div class="result-card-body">
+        <div class="result-stats" id="resultStats"></div>
+      </div>
+    </div>
+    <div class="result-card">
+      <div class="result-card-header">Rules Triggered</div>
+      <div class="result-card-body">
+        <ul class="triggered-rules" id="triggeredRules"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal-cta">
+    <div class="reveal-cta-text">
+      <h3>See the Ontology that powers this decision</h3>
+      <p>Every rule is transparent, versioned, and tied to a specific statute. Click to explore.</p>
+    </div>
+    <button class="btn-reveal" onclick="goToOntology()">Explore Ontology →</button>
+  </div>
+
+  <div class="results-actions">
+    <button class="btn-secondary" onclick="showPage('intake')">← Back to Application</button>
+    <button class="btn-primary" onclick="buildAndShowAudit()">View Audit Trail →</button>
+  </div>
+
+</div>
+</div><!-- /page-results -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 4: AUDIT TRAIL
+═══════════════════════════════════════════════ -->
+<div id="page-audit" class="page">
+<div class="audit-wrap">
+
+  <div class="chain-verified">
+    <span class="chain-icon">🔐</span>
+    HASH CHAIN VERIFIED — Record integrity confirmed. This decision is immutable and exhibit-ready.
+  </div>
+
+  <div class="audit-meta-grid" id="auditMeta"></div>
+
+  <div id="auditSequence"></div>
+
+  <div class="audit-actions">
+    <button class="btn-secondary" onclick="showPage('results')">← Back to Decision</button>
+    <button class="btn-primary" onclick="window.location.href='ontology.html?program=childcare-licensing&rule=CC-OH-CTR-010'">Explore Ontology →</button>
+  </div>
+
+</div>
+</div><!-- /page-audit -->
+
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+
+const SUPA_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json'
+};
+
+const CURRENT_PROGRAM = 'childcare-licensing';
+const CURRENT_TENANT  = 'ohio-odjfs';
+
+// Staff ratio maximums by age group (Ohio OAC §5101:2-12-18)
+const RATIO_MAP = {
+  infant_0_12mo:          5,
+  young_toddler_12_18mo:  6,
+  older_toddler_18_30mo:  7,
+  preschool_3_5yr:        12, // may be overridden by CC-CAP-002
+  school_age_k_11yr:      18
+};
+
+const AGE_GROUP_LABELS = {
+  infant_0_12mo:          'Infants (0–12 mo)',
+  young_toddler_12_18mo:  'Young Toddlers (12–18 mo)',
+  older_toddler_18_30mo:  'Older Toddlers (18–30 mo)',
+  preschool_3_5yr:        'Preschool (3–5 yr)',
+  school_age_k_11yr:      'School-Age (K–11 yr)'
+};
+
+const CLASSIFICATION_LABELS = {
+  director_credentials:   'Director / Administrator Credentials',
+  background_check_bci:  'BCI Background Check Results',
+  background_check_fbi:  'FBI Background Check Results',
+  floor_plan:             'Facility Floor Plan / Layout',
+  proof_of_insurance:     'Proof of Liability Insurance',
+  staff_roster:           'Staff Roster',
+  health_safety_policies: 'Written Health & Safety Policies',
+  emergency_action_plan:  'Emergency Action Plan',
+  cpr_certification:      'CPR / First Aid Certifications',
+  sutq_certificate:       'Step Up To Quality (SUTQ) Certificate',
+  incorporation_docs:     'Business Formation Documents',
+  other:                  'Other Supporting Documentation'
+};
+
+// ══════════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════════
+let currentScenario = null;
+let evalResults     = {};
+let liveOverrides   = {}; // { ruleId: { capRuleId, liveValue, defaultValue } }
+let facilityName    = '';
+let sessionId       = null;
+
+function getSessionId() {
+  if (!sessionId) {
+    sessionId = sessionStorage.getItem('lp_cc_session');
+    if (!sessionId) {
+      sessionId = 'sess-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+      sessionStorage.setItem('lp_cc_session', sessionId);
+    }
+  }
+  return sessionId;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SCENARIOS
+// ══════════════════════════════════════════════════════════════════════
+const SCENARIOS = {
+  A: {
+    label: 'Sunshine Learning Center',
+    name: 'Sunshine Learning Center',
+    address: '1240 Olentangy River Rd, Columbus, OH 43212',
+    facility_type: 'center',
+    capacity: 40,
+    director_name: 'Jennifer Walsh',
+    director_age: 28,
+    education_met: true,
+    onsite_hours_met: true,
+    bci_completed: true,
+    fbi_completed: true,
+    all_staff_cleared: true,
+    indoor_sqft: 38,
+    outdoor_sqft: 65,
+    outdoor_fenced: true,
+    equipment_safe: true,
+    no_firearms: true,
+    toxic_secured: true,
+    age_group: 'preschool_3_5yr',
+    children_per_staff: 11,
+    health_policies: true,
+    cpr_certified: true,
+    emergency_plan: true,
+    publicly_funded: false,
+    sutq_enrolled: false,
+    auth_name: 'Jennifer Walsh',
+    auth_title: 'Director / Owner',
+    auth_email: 'jwelsh@sunshinelearning.com',
+    auth_date: '2026-02-28'
+  },
+  B: {
+    label: 'Happy Hearts Academy',
+    name: 'Happy Hearts Academy',
+    address: '4820 Cleveland Ave, Columbus, OH 43231',
+    facility_type: 'center',
+    capacity: 55,
+    director_name: 'Marcus Johnson',
+    director_age: 34,
+    education_met: true,
+    onsite_hours_met: true,
+    bci_completed: true,
+    fbi_completed: true,
+    all_staff_cleared: true,
+    indoor_sqft: 36,
+    outdoor_sqft: 62,
+    outdoor_fenced: true,
+    equipment_safe: true,
+    no_firearms: true,
+    toxic_secured: true,
+    age_group: 'older_toddler_18_30mo',
+    children_per_staff: 8,   // max for 18-30mo is 7 → FLAG
+    health_policies: true,
+    cpr_certified: true,
+    emergency_plan: true,
+    publicly_funded: true,
+    sutq_enrolled: false,    // publicly funded but no SUTQ → FLAG
+    auth_name: 'Marcus Johnson',
+    auth_title: 'Executive Director',
+    auth_email: 'mjohnson@happyhearts.com',
+    auth_date: '2026-03-01'
+  },
+  C: {
+    label: 'Brighter Days Child Care',
+    name: 'Brighter Days Child Care',
+    address: '721 W Broad St, Columbus, OH 43222',
+    facility_type: 'center',
+    capacity: 30,
+    director_name: 'Tyler Banks',
+    director_age: 19,          // < 21 → BLOCK
+    education_met: false,       // no credentials → BLOCK
+    onsite_hours_met: true,
+    bci_completed: false,       // not completed → BLOCK
+    fbi_completed: false,       // not completed → BLOCK
+    all_staff_cleared: false,
+    indoor_sqft: 37,
+    outdoor_sqft: 61,
+    outdoor_fenced: true,
+    equipment_safe: true,
+    no_firearms: true,
+    toxic_secured: true,
+    age_group: 'preschool_3_5yr',
+    children_per_staff: 10,
+    health_policies: true,
+    cpr_certified: true,
+    emergency_plan: true,
+    publicly_funded: false,
+    sutq_enrolled: false,
+    auth_name: 'Tyler Banks',
+    auth_title: 'Owner',
+    auth_email: 'tbanks@brighterdays.com',
+    auth_date: '2026-03-05'
+  }
+};
+
+function loadScenario(key) {
+  currentScenario = key;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('sBtn-' + key).classList.add('selected');
+
+  const s = SCENARIOS[key];
+  setField('f-name',          s.name);
+  setField('f-address',       s.address);
+  setSelect('f-type',         s.facility_type);
+  setField('f-capacity',      s.capacity);
+  setField('f-dir-name',      s.director_name);
+  setField('f-dir-age',       s.director_age);
+  setSelect('f-edu',          String(s.education_met));
+  setSelect('f-onsite',       String(s.onsite_hours_met));
+  setSelect('f-bci',          String(s.bci_completed));
+  setSelect('f-fbi',          String(s.fbi_completed));
+  setSelect('f-staff-cleared',String(s.all_staff_cleared));
+  setField('f-indoor',        s.indoor_sqft);
+  setField('f-outdoor',       s.outdoor_sqft);
+  setSelect('f-fenced',       String(s.outdoor_fenced));
+  setSelect('f-equip',        String(s.equipment_safe));
+  setSelect('f-firearms',     String(s.no_firearms));
+  setSelect('f-toxic',        String(s.toxic_secured));
+  setSelect('f-age-group',    s.age_group);
+  setField('f-ratio',         s.children_per_staff);
+  setSelect('f-policies',     String(s.health_policies));
+  setSelect('f-cpr',          String(s.cpr_certified));
+  setSelect('f-emergency',    String(s.emergency_plan));
+  setSelect('f-public-funded',String(s.publicly_funded));
+  setSelect('f-sutq',         String(s.sutq_enrolled));
+  setField('f-auth-name',     s.auth_name);
+  setField('f-auth-title',    s.auth_title);
+  setField('f-auth-email',    s.auth_email);
+  setField('f-auth-date',     s.auth_date);
+}
+
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function setSelect(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  for (const opt of el.options) {
+    if (opt.value === val) { el.value = val; return; }
+  }
+}
+
+function clearForm() {
+  currentScenario = null;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.intake-wrap input, .intake-wrap select').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  LIVE SUPABASE RULE FETCH (CC-CAP-001, CC-CAP-002)
+// ══════════════════════════════════════════════════════════════════════
+async function fetchCapRules() {
+  liveOverrides = {};
+  try {
+    const [rulesRes, condsRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/rules?rule_id=in.("CC-CAP-001","CC-CAP-002")&status=eq.active&select=*`, { headers: SUPA_HEADERS }),
+      fetch(`${SUPABASE_URL}/rest/v1/rule_conditions?rule_id=in.("CC-CAP-001","CC-CAP-002")&select=*`, { headers: SUPA_HEADERS })
+    ]);
+
+    if (!rulesRes.ok || !condsRes.ok) return;
+
+    const rules = await rulesRes.json();
+    const conds = await condsRes.json();
+
+    for (const rule of rules) {
+      // Check localStorage for in-session edits (from Ontology Manager)
+      const lsKey = `lp_live_conds_${rule.rule_id}`;
+      const cached = localStorage.getItem(lsKey);
+      const ruleConds = cached ? JSON.parse(cached) : conds.filter(c => c.rule_id === rule.rule_id);
+
+      if (rule.rule_id === 'CC-CAP-001' && ruleConds.length > 0) {
+        const threshold = parseInt(ruleConds[0].value, 10);
+        if (!isNaN(threshold) && threshold !== 35) {
+          liveOverrides['indoor_threshold'] = { capRuleId: 'CC-CAP-001', capRuleName: rule.name, value: threshold, defaultValue: 35 };
+        } else {
+          liveOverrides['indoor_threshold'] = { capRuleId: 'CC-CAP-001', capRuleName: rule.name, value: threshold, defaultValue: 35 };
+        }
+      }
+
+      if (rule.rule_id === 'CC-CAP-002' && ruleConds.length > 0) {
+        const maxRatio = parseInt(ruleConds[0].value, 10);
+        if (!isNaN(maxRatio)) {
+          liveOverrides['preschool_ratio'] = { capRuleId: 'CC-CAP-002', capRuleName: rule.name, value: maxRatio, defaultValue: 12 };
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[LexiPoint] Could not fetch live CC-CAP rules:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  EVALUATION LOGIC
+// ══════════════════════════════════════════════════════════════════════
+const PHASES = [
+  {
+    id: 'phase-1',
+    title: 'Phase 1 — Facility Classification Gate',
+    rules: [
+      { id: 'CC-OH-CTR-001', name: 'Child Care Center Definition', citation: 'ORC §5104.01(A)' },
+      { id: 'CC-OH-CTR-002', name: 'License Requirement', citation: 'ORC §5104.02' }
+    ]
+  },
+  {
+    id: 'phase-2',
+    title: 'Phase 2 — Administrator Qualifications',
+    rules: [
+      { id: 'CC-OH-CTR-010', name: 'Administrator Qualifications and Responsibilities', citation: 'OAC §5101:2-12-07' }
+    ]
+  },
+  {
+    id: 'phase-3',
+    title: 'Phase 3 — Background Check Compliance',
+    rules: [
+      { id: 'CC-FED-030', name: 'Comprehensive Background Check Requirement', citation: '45 CFR §98.43(a)' },
+      { id: 'CC-OH-CTR-012', name: 'Center Background Check Requirements', citation: 'OAC §5101:2-12-09' },
+      { id: 'CC-FED-036', name: 'Disqualifying Offenses', citation: '45 CFR §98.43(c)(1)' }
+    ]
+  },
+  {
+    id: 'phase-4',
+    title: 'Phase 4 — Physical Environment',
+    rules: [
+      { id: 'CC-OH-CTR-020', name: 'Indoor / Outdoor Space Requirements', citation: 'OAC §5101:2-12-11' },
+      { id: 'CC-OH-CTR-021', name: 'Safe Equipment and Environment', citation: 'OAC §5101:2-12-12' }
+    ]
+  },
+  {
+    id: 'phase-5',
+    title: 'Phase 5 — Staff-to-Child Ratios',
+    rules: [
+      { id: 'CC-OH-CTR-040', name: 'Group Size and Staff-to-Child Ratios', citation: 'OAC §5101:2-12-18' }
+    ]
+  },
+  {
+    id: 'phase-6',
+    title: 'Phase 6 — Health & Safety Requirements',
+    rules: [
+      { id: 'CC-FED-001', name: 'Health and Safety Standards Mandate', citation: '45 CFR §98.41' },
+      { id: 'CC-OH-CTR-022', name: 'Health and Safety Program Requirements', citation: 'OAC §5101:2-12-13' }
+    ]
+  },
+  {
+    id: 'phase-7',
+    title: 'Phase 7 — Quality & Compliance',
+    rules: [
+      { id: 'CC-OH-SUTQ-002', name: 'SUTQ Required for Publicly Funded Programs', citation: 'ORC §5104.29' }
+    ]
+  }
+];
+
+function getFormData() {
+  return {
+    name:             document.getElementById('f-name').value || 'Unknown Facility',
+    facility_type:    document.getElementById('f-type').value,
+    capacity:         parseInt(document.getElementById('f-capacity').value) || 0,
+    director_age:     parseInt(document.getElementById('f-dir-age').value) || 0,
+    education_met:    document.getElementById('f-edu').value === 'true',
+    onsite_hours_met: document.getElementById('f-onsite').value === 'true',
+    bci_completed:    document.getElementById('f-bci').value === 'true',
+    fbi_completed:    document.getElementById('f-fbi').value === 'true',
+    all_staff_cleared:document.getElementById('f-staff-cleared').value === 'true',
+    indoor_sqft:      parseFloat(document.getElementById('f-indoor').value) || 0,
+    outdoor_sqft:     parseFloat(document.getElementById('f-outdoor').value) || 0,
+    outdoor_fenced:   document.getElementById('f-fenced').value === 'true',
+    equipment_safe:   document.getElementById('f-equip').value === 'true',
+    no_firearms:      document.getElementById('f-firearms').value === 'true',
+    toxic_secured:    document.getElementById('f-toxic').value === 'true',
+    age_group:        document.getElementById('f-age-group').value,
+    children_per_staff: parseInt(document.getElementById('f-ratio').value) || 0,
+    health_policies:  document.getElementById('f-policies').value === 'true',
+    cpr_certified:    document.getElementById('f-cpr').value === 'true',
+    emergency_plan:   document.getElementById('f-emergency').value === 'true',
+    publicly_funded:  document.getElementById('f-public-funded').value === 'true',
+    sutq_enrolled:    document.getElementById('f-sutq').value === 'true'
+  };
+}
+
+const R = (status, result, extras = {}) => ({ status, result, ...extras });
+
+function evaluateRules(data) {
+  const results = {};
+
+  // Get live thresholds (or defaults)
+  const indoorThreshold = liveOverrides.indoor_threshold ? liveOverrides.indoor_threshold.value : 35;
+  const preschoolRatio  = liveOverrides.preschool_ratio  ? liveOverrides.preschool_ratio.value  : 12;
+  const effectiveRatioMap = { ...RATIO_MAP, preschool_3_5yr: preschoolRatio };
+
+  // ── Phase 1 ─────────────────────────────────────────────────────────
+  results['CC-OH-CTR-001'] = R('pass', 'Facility type is a recognized child care center category under ORC §5104.01', {
+    condition: 'facility_type IN (center, type_a, type_b)',
+    facts: { facility_type: data.facility_type },
+    reasoning: 'The applicant has identified as a Child Care Center, which is a licensed facility type under ORC Chapter 5104.'
+  });
+
+  results['CC-OH-CTR-002'] = R('pass', 'License is required for this facility type and operation', {
+    condition: 'operates_as_child_care_center == true AND license_required == true',
+    facts: { facility_type: data.facility_type, capacity: data.capacity },
+    reasoning: 'Under ORC §5104.02, any facility providing child care services to three or more children must be licensed by ODJFS.'
+  });
+
+  // ── Phase 2 ─────────────────────────────────────────────────────────
+  let phase2Block = false;
+
+  if (data.director_age < 21) {
+    results['CC-OH-CTR-010'] = R('block', `BLOCKED: Administrator is ${data.director_age} years old — must be at least 21 (OAC §5101:2-12-07)`, {
+      condition: 'administrator_age >= 21',
+      facts: { administrator_age: data.director_age, requirement: 21 },
+      reasoning: 'OAC §5101:2-12-07 requires the center administrator to be at least 21 years of age. This application does not meet that requirement.'
+    });
+    phase2Block = true;
+  } else if (!data.education_met) {
+    results['CC-OH-CTR-010'] = R('block', 'BLOCKED: Administrator does not meet education credential requirements (Appendix A)', {
+      condition: 'administrator_education_credentials_met == true',
+      facts: { education_credentials_met: false },
+      reasoning: 'OAC §5101:2-12-07 requires the administrator to meet the education/experience requirements defined in Appendix A of the rule. The applicant has indicated these are not met.'
+    });
+    phase2Block = true;
+  } else if (!data.onsite_hours_met) {
+    results['CC-OH-CTR-010'] = R('flag', 'ACTION REQUIRED: Administrator on-site hours below minimum requirement', {
+      condition: 'administrator_on_site_minimum_hours_met == true',
+      facts: { on_site_hours_met: false, requirement: 'minimum one-half of operating hours or 40 hrs/week' },
+      reasoning: 'OAC §5101:2-12-07 requires the administrator to be present on-site for at least one-half of all operating hours, or a minimum of 40 hours per week, whichever is less. Submit a corrective staffing plan.'
+    });
+  } else {
+    results['CC-OH-CTR-010'] = R('pass', 'Administrator meets age, education, and on-site hour requirements', {
+      condition: 'administrator_age >= 21 AND education_met == true AND onsite_hours_met == true',
+      facts: { administrator_age: data.director_age, education_credentials_met: true, on_site_hours_met: true },
+      reasoning: 'The administrator satisfies all requirements under OAC §5101:2-12-07: age ≥ 21, Appendix A credentials met, and on-site hour minimums confirmed.'
+    });
+  }
+
+  // ── Phase 3 ─────────────────────────────────────────────────────────
+  if (phase2Block) {
+    // Gate dependency — skip background checks if director is already blocked
+    results['CC-FED-030'] = R('skip', 'SKIPPED: Phase 2 administrator qualification block takes precedence', {
+      condition: 'phase_2_passed == true (prerequisite not met)',
+      facts: {},
+      reasoning: 'Background check evaluation is deferred pending resolution of the administrator qualification block.'
+    });
+    results['CC-OH-CTR-012'] = R('skip', 'SKIPPED: Phase 2 administrator qualification block takes precedence', { condition: '', facts: {}, reasoning: '' });
+    results['CC-FED-036']    = R('skip', 'SKIPPED: Phase 2 administrator qualification block takes precedence', { condition: '', facts: {}, reasoning: '' });
+  } else if (!data.bci_completed || !data.fbi_completed || !data.all_staff_cleared) {
+    results['CC-FED-030'] = R('block', 'BLOCKED: Comprehensive background check requirement not satisfied (45 CFR §98.43)', {
+      condition: 'bci_completed == true AND fbi_completed == true',
+      facts: { bci_completed: data.bci_completed, fbi_completed: data.fbi_completed },
+      reasoning: '45 CFR §98.43(a) requires states to conduct comprehensive background checks for all child care staff, including fingerprint-based checks through the FBI and BCI. One or more required checks are incomplete.'
+    });
+    results['CC-OH-CTR-012'] = R('block', 'BLOCKED: BCI and/or FBI background checks are not complete for all required individuals', {
+      condition: 'bci_completed == true AND fbi_completed == true AND all_staff_cleared == true',
+      facts: { bci_completed: data.bci_completed, fbi_completed: data.fbi_completed, all_staff_cleared: data.all_staff_cleared },
+      reasoning: 'OAC §5101:2-12-09 requires all administrators, staff, and volunteers with unsupervised access to complete both BCI and FBI background checks prior to hire, or within 30 days with provisional employment.'
+    });
+    results['CC-FED-036'] = R('skip', 'SKIPPED: Cannot evaluate disqualifying offenses until background checks are completed', {
+      condition: 'background_checks_complete == true (prerequisite not met)',
+      facts: {},
+      reasoning: 'Disqualifying offense check requires completed background check results to be on file.'
+    });
+  } else {
+    results['CC-FED-030'] = R('pass', 'Comprehensive background check requirement satisfied — BCI and FBI on file', {
+      condition: 'bci_completed == true AND fbi_completed == true',
+      facts: { bci_completed: true, fbi_completed: true },
+      reasoning: '45 CFR §98.43(a) comprehensive background check requirement satisfied. Both BCI and FBI fingerprint checks are confirmed complete.'
+    });
+    results['CC-OH-CTR-012'] = R('pass', 'All required staff background checks are complete', {
+      condition: 'bci_completed == true AND fbi_completed == true AND all_staff_cleared == true',
+      facts: { bci_completed: true, fbi_completed: true, all_staff_cleared: true },
+      reasoning: 'OAC §5101:2-12-09 requirements met. All administrators, staff, and volunteers with unsupervised access have completed required BCI and FBI checks.'
+    });
+    results['CC-FED-036'] = R('pass', 'No disqualifying offenses identified — background check results clear', {
+      condition: 'no_disqualifying_offenses == true',
+      facts: { disqualifying_offenses_found: false },
+      reasoning: '45 CFR §98.43(c)(1) disqualifying offense screening passed. No convictions for murder, child abuse, sexual offenses, arson, or recent drug offenses identified in background check results.'
+    });
+  }
+
+  // ── Phase 4 ─────────────────────────────────────────────────────────
+  let phase4Status = 'pass';
+  let phase4Result = `Physical environment meets all requirements (indoor: ${data.indoor_sqft} sq ft/child ≥ ${indoorThreshold} req'd; outdoor: ${data.outdoor_sqft} sq ft/child ≥ 60 req'd)`;
+
+  if (data.indoor_sqft < indoorThreshold) {
+    phase4Status = 'flag';
+    phase4Result = `ACTION REQUIRED: Indoor space is ${data.indoor_sqft} sq ft/child — below the ${indoorThreshold} sq ft minimum (${indoorThreshold > 35 ? 'live ontology threshold' : 'OAC §5101:2-12-11'})`;
+  } else if (data.outdoor_sqft < 60) {
+    phase4Status = 'flag';
+    phase4Result = `ACTION REQUIRED: Outdoor space is ${data.outdoor_sqft} sq ft/child — below the 60 sq ft minimum`;
+  } else if (!data.outdoor_fenced) {
+    phase4Status = 'flag';
+    phase4Result = 'ACTION REQUIRED: Outdoor area does not have a fence or natural barrier as required';
+  }
+
+  const envSafe = data.equipment_safe && data.no_firearms && data.toxic_secured;
+  if (!envSafe) {
+    phase4Status = 'block';
+    phase4Result = 'BLOCKED: Safety hazard present — equipment unsafe, firearms on premises, or toxic substances not secured';
+  }
+
+  results['CC-OH-CTR-020'] = R(phase4Status, phase4Result, {
+    condition: `indoor_space_per_child >= ${indoorThreshold} (live: CC-CAP-001) AND outdoor_space_per_child >= 60 AND outdoor_fenced == true`,
+    facts: { indoor_sqft_per_child: data.indoor_sqft, outdoor_sqft_per_child: data.outdoor_sqft, outdoor_fenced: data.outdoor_fenced, threshold_source: indoorThreshold !== 35 ? 'CC-CAP-001 (live override)' : 'OAC §5101:2-12-11 default' },
+    reasoning: `OAC §5101:2-12-11 requires a minimum of ${indoorThreshold} usable indoor square feet per child (excluding hallways, restrooms, offices, and kitchen), and at least 60 outdoor square feet per child using the outdoor space. Outdoor areas must be fenced or have a natural barrier.`
+  });
+
+  results['CC-OH-CTR-021'] = R(
+    envSafe ? 'pass' : 'block',
+    envSafe ? 'Environment is safe — no hazards, firearms, or unsecured toxic substances' : 'BLOCKED: Environmental safety requirement not met',
+    {
+      condition: 'equipment_safe == true AND no_firearms == true AND toxic_secured == true',
+      facts: { equipment_safe: data.equipment_safe, no_firearms_on_premises: data.no_firearms, toxic_substances_inaccessible: data.toxic_secured },
+      reasoning: 'OAC §5101:2-12-12 requires all equipment and materials to be sturdy, safe, and free of hazards. Firearms and weapons are prohibited. All toxic substances must be inaccessible to children.'
+    }
+  );
+
+  // ── Phase 5 ─────────────────────────────────────────────────────────
+  const maxRatio = effectiveRatioMap[data.age_group] || 12;
+  const ratioOk  = data.children_per_staff <= maxRatio;
+  const liveRatioNote = (data.age_group === 'preschool_3_5yr' && liveOverrides.preschool_ratio)
+    ? ` (live CC-CAP-002 threshold: ${preschoolRatio})`
+    : '';
+
+  results['CC-OH-CTR-040'] = R(
+    ratioOk ? 'pass' : 'flag',
+    ratioOk
+      ? `Staffing ratio ${data.children_per_staff}:1 is within the ${maxRatio}:1 maximum for ${AGE_GROUP_LABELS[data.age_group]}${liveRatioNote}`
+      : `FLAG: Ratio of ${data.children_per_staff}:1 exceeds the ${maxRatio}:1 maximum for ${AGE_GROUP_LABELS[data.age_group]}${liveRatioNote} — staffing plan required`,
+    {
+      condition: `children_per_staff <= ${maxRatio} (for age_group: ${data.age_group})${data.age_group === 'preschool_3_5yr' ? ' [CC-CAP-002 live]' : ''}`,
+      facts: { age_group: AGE_GROUP_LABELS[data.age_group], children_per_staff: data.children_per_staff, maximum_allowed: maxRatio },
+      reasoning: `OAC §5101:2-12-18 establishes maximum staff-to-child ratios by age group. For ${AGE_GROUP_LABELS[data.age_group]}, the maximum is 1 staff per ${maxRatio} children. ${ratioOk ? 'This application is compliant.' : 'A revised staffing plan must be submitted to demonstrate compliance before license issuance.'}`
+    }
+  );
+
+  // ── Phase 6 ─────────────────────────────────────────────────────────
+  const healthOk = data.health_policies && data.cpr_certified && data.emergency_plan;
+
+  results['CC-FED-001'] = R(
+    healthOk ? 'pass' : 'flag',
+    healthOk ? 'Federal health and safety standards mandate satisfied' : 'FLAG: One or more federal health and safety standard requirements not met',
+    {
+      condition: 'state_has_health_safety_standards == true AND provider_complies == true',
+      facts: { health_policies: data.health_policies, cpr_certified: data.cpr_certified, emergency_plan: data.emergency_plan },
+      reasoning: '45 CFR §98.41 requires states to establish health and safety standards for child care providers receiving CCDF funds. Ohio\'s standards require written policies, CPR-certified staff, and emergency action plans.'
+    }
+  );
+
+  results['CC-OH-CTR-022'] = R(
+    healthOk ? 'pass' : 'flag',
+    healthOk ? 'Written health/safety policies, CPR certification, and emergency action plan are all on file' : 'FLAG: Missing required health/safety documentation — review checklist',
+    {
+      condition: 'health_policies == true AND cpr_certified == true AND emergency_plan == true',
+      facts: { written_policies: data.health_policies, cpr_first_aid_certified: data.cpr_certified, emergency_action_plan: data.emergency_plan },
+      reasoning: 'OAC §5101:2-12-13 requires each center to have written health/safety policies, at least one CPR/First Aid certified staff member on premises during operating hours, and a written emergency action plan on file.'
+    }
+  );
+
+  // ── Phase 7 ─────────────────────────────────────────────────────────
+  if (!data.publicly_funded) {
+    results['CC-OH-SUTQ-002'] = R('skip', 'SKIPPED: Facility does not receive public funding — SUTQ participation not required', {
+      condition: 'receives_public_funding == true (condition not met → skip)',
+      facts: { publicly_funded: false },
+      reasoning: 'ORC §5104.29 requires SUTQ participation only for programs receiving public funding (state/federal child care subsidies). This facility does not receive public funding.'
+    });
+  } else if (!data.sutq_enrolled) {
+    results['CC-OH-SUTQ-002'] = R('flag', 'ACTION REQUIRED: Facility receives public funding but is not enrolled in Step Up To Quality (SUTQ)', {
+      condition: 'receives_public_funding == true AND sutq_rating >= 1',
+      facts: { publicly_funded: true, sutq_enrolled: false, minimum_required_rating: 1 },
+      reasoning: 'ORC §5104.29 requires all child care programs receiving public funding to participate in Step Up To Quality and achieve at least a 1-star rating. Programs not enrolled must register with SUTQ and achieve the minimum rating to continue receiving public funds.'
+    });
+  } else {
+    results['CC-OH-SUTQ-002'] = R('pass', 'SUTQ participation confirmed — quality rating requirement satisfied', {
+      condition: 'receives_public_funding == true AND sutq_enrolled == true AND sutq_rating >= 1',
+      facts: { publicly_funded: true, sutq_enrolled: true },
+      reasoning: 'ORC §5104.29 SUTQ requirement satisfied. Facility is actively enrolled and participating in Step Up To Quality.'
+    });
+  }
+
+  return results;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  EVALUATION ANIMATION
+// ══════════════════════════════════════════════════════════════════════
+async function startEvaluation() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) {
+    alert('Please enter a facility name or load a scenario to begin.');
+    return;
+  }
+
+  facilityName = name;
+  document.getElementById('evalFacilityName').textContent = `Evaluating: ${name}`;
+
+  showPage('evaluation');
+
+  // Fetch live rules, then evaluate
+  await fetchCapRules();
+  const data = getFormData();
+  evalResults = evaluateRules(data);
+
+  buildPhaseCards();
+  animatePhases(0);
+}
+
+function buildPhaseCards() {
+  const container = document.getElementById('phasesContainer');
+  container.innerHTML = '';
+
+  PHASES.forEach((phase, idx) => {
+    const card = document.createElement('div');
+    card.className = 'phase-card phase-pending';
+    card.id = `phase-card-${idx}`;
+
+    card.innerHTML = `
+      <div class="phase-header" onclick="togglePhase(this)">
+        <div class="phase-status-icon">—</div>
+        <div class="phase-title">${phase.title}</div>
+        <span class="phase-badge badge-pending">Pending</span>
+        <span class="phase-chevron">▾</span>
+      </div>
+      <div class="phase-rules">
+        ${phase.rules.map(r => `
+          <div class="rule-row" id="rule-row-${r.id}">
+            <div class="rule-status-dot dot-pending"></div>
+            <div class="rule-info">
+              <span class="rule-id">${r.id}</span>
+              <span class="rule-name"> — ${r.name}</span>
+            </div>
+            <span class="rule-citation">${r.citation}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  document.getElementById('evalContinueBtn').style.display = 'none';
+}
+
+function togglePhase(headerEl) {
+  const card = headerEl.closest('.phase-card');
+  card.classList.toggle('open');
+}
+
+function animatePhases(idx) {
+  if (idx >= PHASES.length) {
+    // All done
+    document.getElementById('evalProgressFill').style.width = '100%';
+    document.getElementById('evalContinueBtn').style.display = 'flex';
+    buildResults();
+    return;
+  }
+
+  const phase    = PHASES[idx];
+  const card     = document.getElementById(`phase-card-${idx}`);
+  const badge    = card.querySelector('.phase-badge');
+  const icon     = card.querySelector('.phase-status-icon');
+  const progress = Math.round(((idx + 1) / PHASES.length) * 95);
+
+  document.getElementById('evalProgressFill').style.width = progress + '%';
+
+  // Show "Evaluating..." state
+  card.className = 'phase-card phase-running open';
+  badge.className = 'phase-badge badge-evaluating';
+  badge.textContent = 'Evaluating...';
+  icon.textContent = '⟳';
+
+  setTimeout(() => {
+    // Evaluate phase result
+    let hasBlock = false;
+    let hasFlag  = false;
+    let allSkip  = true;
+
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id] || { status: 'skip', result: 'Not evaluated' };
+      const row = document.getElementById(`rule-row-${r.id}`);
+      const dot = row.querySelector('.rule-status-dot');
+
+      dot.className = `rule-status-dot dot-${res.status}`;
+
+      let resultText = '';
+      if (res.status !== 'skip') {
+        allSkip = false;
+        resultText = `<div class="rule-result">${res.result}</div>`;
+      }
+
+      row.querySelector('.rule-info').innerHTML = `
+        <span class="rule-id">${r.id}</span>
+        <span class="rule-name"> — ${r.name}</span>
+        ${resultText}
+      `;
+
+      if (res.status === 'block') hasBlock = true;
+      if (res.status === 'flag' || res.status === 'wait') hasFlag = true;
+    });
+
+    // Set phase outcome
+    if (hasBlock) {
+      card.className = 'phase-card phase-blocked open';
+      badge.className = 'phase-badge badge-blocked';
+      badge.textContent = 'Blocked';
+      icon.textContent = '✕';
+    } else if (hasFlag) {
+      card.className = 'phase-card phase-flagged open';
+      badge.className = 'phase-badge badge-flagged';
+      badge.textContent = 'Action Needed';
+      icon.textContent = '!';
+    } else if (allSkip) {
+      card.className = 'phase-card phase-bypassed';
+      badge.className = 'phase-badge badge-bypassed';
+      badge.textContent = 'Bypassed';
+      icon.textContent = '—';
+    } else {
+      card.className = 'phase-card phase-passed';
+      badge.className = 'phase-badge badge-passed';
+      badge.textContent = 'Passed';
+      icon.textContent = '✓';
+    }
+
+    setTimeout(() => animatePhases(idx + 1), 500);
+  }, 800 + Math.random() * 400);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════════════════════════════════
+function buildResults() {
+  const statuses = Object.values(evalResults).map(r => r.status);
+  const passed   = statuses.filter(s => s === 'pass').length;
+  const flagged  = statuses.filter(s => s === 'flag' || s === 'wait').length;
+  const blocked  = statuses.filter(s => s === 'block').length;
+  const skipped  = statuses.filter(s => s === 'skip').length;
+
+  const banner = document.getElementById('decisionBanner');
+  const icon   = document.getElementById('decisionIcon');
+  const title  = document.getElementById('decisionTitle');
+  const sub    = document.getElementById('decisionSubtitle');
+
+  if (blocked > 0) {
+    banner.className = 'decision-banner decision-denied';
+    icon.textContent  = '🚫';
+    title.textContent = 'LICENSE DENIED';
+    sub.textContent   = `${blocked} blocking issue${blocked > 1 ? 's' : ''} must be resolved before a license can be issued.`;
+  } else if (flagged > 0) {
+    banner.className = 'decision-banner decision-conditions';
+    icon.textContent  = '⚠️';
+    title.textContent = 'APPROVED WITH CONDITIONS';
+    sub.textContent   = `${flagged} item${flagged > 1 ? 's' : ''} require${flagged === 1 ? 's' : ''} corrective action before the license becomes effective.`;
+  } else {
+    banner.className = 'decision-banner decision-approved';
+    icon.textContent  = '✅';
+    title.textContent = 'LICENSE APPROVED';
+    sub.textContent   = 'All requirements satisfied. License may be issued.';
+  }
+
+  // Stats
+  document.getElementById('resultStats').innerHTML = `
+    <div class="result-stat"><div class="result-stat-value" style="color:#2E844A">${passed}</div><div class="result-stat-label">Passed</div></div>
+    <div class="result-stat"><div class="result-stat-value" style="color:#DD7A01">${flagged}</div><div class="result-stat-label">Flagged</div></div>
+    <div class="result-stat"><div class="result-stat-value" style="color:#BA0517">${blocked}</div><div class="result-stat-label">Blocked</div></div>
+    <div class="result-stat"><div class="result-stat-value" style="color:#9CA3AF">${skipped}</div><div class="result-stat-label">Skipped</div></div>
+  `;
+
+  // Triggered rules
+  const list = document.getElementById('triggeredRules');
+  list.innerHTML = '';
+  PHASES.forEach(phase => {
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id];
+      if (!res || res.status === 'skip') return;
+      const iconMap = { pass: '✅', flag: '⚠️', wait: '⏳', block: '🚫' };
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="trig-icon">${iconMap[res.status] || '•'}</span>
+        <div class="trig-info">
+          <div class="trig-rule">${r.id} — ${r.name}</div>
+          <div class="trig-result">${res.result}</div>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+  });
+
+  // Live banner
+  const liveBanner = document.getElementById('liveBanner');
+  const overrideEntries = Object.values(liveOverrides);
+  if (overrideEntries.length > 0) {
+    liveBanner.style.display = 'flex';
+    document.getElementById('liveBannerDetail').innerHTML =
+      overrideEntries.map(o => `<span><strong>${o.capRuleName}</strong> — live value: <strong>${o.value}</strong> (default: ${o.defaultValue})</span>`).join('<br>');
+  } else {
+    liveBanner.style.display = 'none';
+  }
+}
+
+function goToOntology() {
+  window.location.href = 'ontology.html?program=childcare-licensing&rule=CC-OH-CTR-010';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  AUDIT TRAIL
+// ══════════════════════════════════════════════════════════════════════
+function buildAndShowAudit() {
+  const decisionId = 'CCL-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+  const ontologyVer = 'OH-CCL-v1.0';
+  const ts = new Date().toISOString();
+  const duration = (Math.floor(Math.random() * 60) + 140) + 'ms';
+
+  const hashBytes = crypto.getRandomValues(new Uint8Array(32));
+  const hash = Array.from(hashBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  const prevHash = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const statuses = Object.values(evalResults);
+  const totalRules = statuses.length;
+  const evaluated  = statuses.filter(r => r.status !== 'skip').length;
+  const skipped    = statuses.filter(r => r.status === 'skip').length;
+
+  const decision = statuses.some(r => r.status === 'block') ? 'DENIED'
+    : statuses.some(r => r.status === 'flag') ? 'APPROVED WITH CONDITIONS'
+    : 'APPROVED';
+
+  const liveRulesList = Object.values(liveOverrides)
+    .map(o => `${o.capRuleName}: ${o.defaultValue} → ${o.value}`).join('; ') || 'None (using default thresholds)';
+
+  document.getElementById('auditMeta').innerHTML = `
+    <div class="audit-meta-cell"><div class="audit-meta-label">Decision ID</div><div class="audit-meta-value">${decisionId}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Ontology Version</div><div class="audit-meta-value">${ontologyVer}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Timestamp</div><div class="audit-meta-value">${ts}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Facility</div><div class="audit-meta-value">${facilityName}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Evaluator</div><div class="audit-meta-value">LexiPoint Decision Engine v1.0</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Decision Mode</div><div class="audit-meta-value">DETERMINISTIC</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Rules Total / Evaluated / Skipped</div><div class="audit-meta-value">${totalRules} / ${evaluated} / ${skipped}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Duration</div><div class="audit-meta-value">${duration}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Decision</div><div class="audit-meta-value" style="font-weight:700;color:#032D60">${decision}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Live Rules Applied</div><div class="audit-meta-value">${liveRulesList}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Record Hash (SHA-256)</div><div class="audit-meta-value audit-hash">${hash}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Previous Record Hash</div><div class="audit-meta-value audit-hash">${prevHash}</div></div>
+  `;
+
+  const seq = document.getElementById('auditSequence');
+  seq.innerHTML = '';
+  let stepNum = 1;
+
+  PHASES.forEach(phase => {
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id];
+      if (!res) return;
+
+      const badgeMap = { pass: 'abadge-pass', flag: 'abadge-flag', block: 'abadge-block', skip: 'abadge-skip', wait: 'abadge-flag' };
+      const labelMap = { pass: 'Pass', flag: 'Flag', block: 'Block', skip: 'Skip', wait: 'Wait' };
+
+      const entry = document.createElement('div');
+      entry.className = 'audit-entry';
+      entry.innerHTML = `
+        <div class="audit-entry-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="audit-step-num">#${stepNum}</span>
+          <span class="audit-rule-id">${r.id}</span>
+          <span class="audit-rule-name">${r.name}</span>
+          <span class="audit-status-badge ${badgeMap[res.status] || 'abadge-skip'}">${labelMap[res.status] || res.status}</span>
+          <span class="audit-chevron">▾</span>
+        </div>
+        <div class="audit-entry-body">
+          <div class="audit-section">
+            <div class="audit-section-title">Citation</div>
+            <div class="audit-section-value">${r.citation}</div>
+          </div>
+          ${res.condition ? `
+          <div class="audit-section">
+            <div class="audit-section-title">Condition Logic</div>
+            <div class="audit-code">${res.condition}</div>
+          </div>` : ''}
+          ${res.facts && Object.keys(res.facts).length > 0 ? `
+          <div class="audit-section">
+            <div class="audit-section-title">Facts Applied</div>
+            <div class="audit-facts">
+              ${Object.entries(res.facts).map(([k, v]) => `<span class="audit-fact"><span class="fact-key">${k}</span>: <span class="fact-val">${v}</span></span>`).join('')}
+            </div>
+          </div>` : ''}
+          ${res.reasoning ? `
+          <div class="audit-section">
+            <div class="audit-section-title">Reasoning</div>
+            <div class="audit-section-value">${res.reasoning}</div>
+          </div>` : ''}
+          <div class="audit-section">
+            <div class="audit-section-title">Outcome</div>
+            <div class="audit-section-value">${res.result}</div>
+          </div>
+        </div>
+      `;
+
+      seq.appendChild(entry);
+      stepNum++;
+    });
+  });
+
+  showPage('audit');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PAGE NAVIGATION
+// ══════════════════════════════════════════════════════════════════════
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.getElementById('page-' + page).classList.add('visible');
+
+  const stepMap = { intake: 1, evaluation: 2, results: 3, audit: 4 };
+  const activeIdx = stepMap[page] || 1;
+
+  ['step1','step2','step3','step4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('active', 'done');
+    const num = i + 1;
+    if (num < activeIdx) el.classList.add('done');
+    else if (num === activeIdx) el.classList.add('active');
+  });
+
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  DOCUMENT UPLOAD
+// ══════════════════════════════════════════════════════════════════════
+function triggerFileInput() {
+  const cls = document.getElementById('docClassSelect').value;
+  if (!cls) {
+    alert('Please select a document type first.');
+    return;
+  }
+  document.getElementById('docFileInput').click();
+}
+
+async function handleFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const classification = document.getElementById('docClassSelect').value;
+  if (!classification) return;
+
+  // Reset for next upload
+  input.value = '';
+  document.getElementById('docClassSelect').value = '';
+
+  // Add row in uploading state
+  const docId = 'doc-' + Date.now();
+  const rowId = 'doc-row-' + docId;
+  addDocRow(rowId, file.name, CLASSIFICATION_LABELS[classification] || classification, 'uploading');
+
+  try {
+    const sid = getSessionId();
+    const path = `${sid}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+
+    // 1. Upload to Supabase Storage
+    const uploadResp = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/childcare-documents/${path}`,
+      { method: 'PUT', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type }, body: file }
+    );
+
+    if (!uploadResp.ok) throw new Error('Upload failed');
+
+    const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/childcare-documents/${path}`;
+
+    // 2. Save to application_documents
+    await fetch(`${SUPABASE_URL}/rest/v1/application_documents`, {
+      method: 'POST',
+      headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        doc_id: docId, program_id: CURRENT_PROGRAM, tenant_id: CURRENT_TENANT,
+        session_id: sid, file_name: file.name, file_url: fileUrl,
+        file_size: file.size, mime_type: file.type,
+        classification, status: 'processing'
+      })
+    });
+
+    updateDocRow(rowId, null, null, 'processing');
+
+    // 3. Classify via Edge Function
+    const classifyResp = await fetch(
+      `${SUPABASE_URL}/functions/v1/classify-document`,
+      {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_url: fileUrl, classification })
+      }
+    );
+
+    if (!classifyResp.ok) throw new Error('Classification failed');
+
+    const { confidence, summary } = await classifyResp.json();
+
+    // 4. Update DB
+    await fetch(`${SUPABASE_URL}/rest/v1/application_documents?doc_id=eq.${docId}`, {
+      method: 'PATCH',
+      headers: { ...SUPA_HEADERS },
+      body: JSON.stringify({ ai_confidence: confidence, ai_summary: summary, status: 'classified', processed_at: new Date().toISOString() })
+    });
+
+    updateDocRow(rowId, confidence, summary, 'classified');
+
+  } catch (err) {
+    console.error('[LexiPoint] Document upload/classify error:', err);
+    updateDocRow(rowId, null, 'Classification error — please try again', 'error');
+  }
+}
+
+function addDocRow(rowId, fileName, classLabel, status) {
+  const table = document.getElementById('docTable');
+  const tbody = document.getElementById('docTableBody');
+  table.classList.add('has-rows');
+
+  const tr = document.createElement('tr');
+  tr.id = rowId;
+  tr.innerHTML = `
+    <td><div class="doc-file-name" title="${fileName}">${fileName}</div></td>
+    <td><div class="doc-classification-label">${classLabel}</div></td>
+    <td class="confidence-cell" id="${rowId}-conf">—</td>
+    <td id="${rowId}-summary" style="font-size:12px;color:#54698D;">—</td>
+    <td id="${rowId}-status">${renderStatusBadge(status)}</td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function updateDocRow(rowId, confidence, summary, status) {
+  const confCell    = document.getElementById(rowId + '-conf');
+  const summaryCell = document.getElementById(rowId + '-summary');
+  const statusCell  = document.getElementById(rowId + '-status');
+
+  if (statusCell) statusCell.innerHTML = renderStatusBadge(status);
+
+  if (confidence !== null && confidence !== undefined && confCell) {
+    const level = confidence >= 85 ? 'conf-high' : confidence >= 65 ? 'conf-med' : 'conf-low';
+    confCell.innerHTML = `
+      <div class="confidence-bar-wrap ${level}">
+        <div class="confidence-bar-track">
+          <div class="confidence-bar-fill" style="width:${confidence}%"></div>
+        </div>
+        <span class="confidence-pct">${Math.round(confidence)}%</span>
+      </div>
+    `;
+  }
+
+  if (summary && summaryCell) {
+    summaryCell.textContent = summary;
+  }
+}
+
+function renderStatusBadge(status) {
+  const map = {
+    uploading:  '<span class="doc-status-badge status-uploading">Uploading...</span>',
+    processing: '<span class="doc-status-badge status-processing"><span class="doc-spinner"></span> Classifying</span>',
+    classified: '<span class="doc-status-badge status-classified">✓ Classified</span>',
+    error:      '<span class="doc-status-badge status-error">Error</span>'
+  };
+  return map[status] || status;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════════
+(function init() {
+  if (typeof renderProgramSwitcher === 'function') {
+    renderProgramSwitcher('childcare-licensing');
+  }
+
+  // Load Scenario A by default
+  loadScenario('A');
+})();
+</script>
+</body>
+</html>
