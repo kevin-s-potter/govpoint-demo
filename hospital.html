@@ -388,29 +388,29 @@
   <!-- Live Ontology Override Banner -->
   <div id="live-ontology-banner"></div>
 
-  <!-- 2-col grid: Stats + Triggered Rules -->
+  <!-- Evaluation Summary (full width) -->
+  <div class="result-card" style="margin-bottom: 16px;">
+    <div class="result-card-header">Evaluation Summary</div>
+    <div class="result-card-body" id="result-stats"></div>
+  </div>
+
+  <!-- 2-col grid: AI Narrative + Triggered Rules -->
   <div class="results-grid">
-    <div class="result-card">
-      <div class="result-card-header">Evaluation Summary</div>
-      <div class="result-card-body" id="result-stats"></div>
+    <div class="ai-summary-card" id="aiSummaryCard">
+      <div class="ai-summary-header">
+        <span>🤖</span>
+        <span class="ai-summary-label">AI Decision Narrative</span>
+        <span class="ai-summary-status" id="aiSummaryStatus">Generating...</span>
+      </div>
+      <div class="ai-summary-body" id="aiSummaryText">
+        <span class="ai-summary-loading">Analyzing decision factors...</span>
+      </div>
     </div>
     <div class="result-card">
       <div class="result-card-header">Rules Triggered</div>
       <div class="result-card-body">
         <div id="triggered-rules-list"></div>
       </div>
-    </div>
-  </div>
-
-  <!-- AI Decision Narrative -->
-  <div class="ai-summary-card" id="aiSummaryCard" style="display:none; margin-bottom: 16px;">
-    <div class="ai-summary-header">
-      <span>🤖</span>
-      <span class="ai-summary-label">AI Decision Narrative</span>
-      <span class="ai-summary-status" id="aiSummaryStatus">Generating...</span>
-    </div>
-    <div class="ai-summary-body" id="aiSummaryText">
-      <span class="ai-summary-loading">Analyzing decision factors...</span>
     </div>
   </div>
 
