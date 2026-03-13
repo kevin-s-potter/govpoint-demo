@@ -728,11 +728,22 @@
     </div>
   </div>
 
+  <div class="result-card" style="margin-bottom: 16px;">
+    <div class="result-card-header">Evaluation Summary</div>
+    <div class="result-card-body">
+      <div class="result-stats" id="resultStats"></div>
+    </div>
+  </div>
+
   <div class="results-grid">
-    <div class="result-card">
-      <div class="result-card-header">Evaluation Summary</div>
-      <div class="result-card-body">
-        <div class="result-stats" id="resultStats"></div>
+    <div class="ai-summary-card" id="aiSummaryCard">
+      <div class="ai-summary-header">
+        <span>🤖</span>
+        <span class="ai-summary-label">AI Decision Narrative</span>
+        <span class="ai-summary-status" id="aiSummaryStatus">Generating...</span>
+      </div>
+      <div class="ai-summary-body" id="aiSummaryText">
+        <span class="ai-summary-loading">Analyzing decision factors...</span>
       </div>
     </div>
     <div class="result-card">
@@ -740,17 +751,6 @@
       <div class="result-card-body">
         <ul class="triggered-rules" id="triggeredRules"></ul>
       </div>
-    </div>
-  </div>
-
-  <div class="ai-summary-card" id="aiSummaryCard" style="display:none;">
-    <div class="ai-summary-header">
-      <span>🤖</span>
-      <span class="ai-summary-label">AI Decision Narrative</span>
-      <span class="ai-summary-status" id="aiSummaryStatus">Generating...</span>
-    </div>
-    <div class="ai-summary-body" id="aiSummaryText">
-      <span class="ai-summary-loading">Analyzing decision factors...</span>
     </div>
   </div>
 
