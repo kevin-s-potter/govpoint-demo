@@ -57,12 +57,6 @@
   .rule-detail .rule-result { font-size: 12px; margin-top: 4px; color: var(--lp-text-2); }
   .rule-status { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
 
-  /* ── RESULTS DASHBOARD (SLDS Metric Cards) ── */
-  .result-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .result-stat { background: white; border-radius: 3px; padding: 20px; border: 1px solid var(--lp-border); text-align: center; }
-  .result-stat .stat-value { font-size: 32px; font-weight: 700; line-height: 1; }
-  .result-stat .stat-label { font-size: 11px; color: var(--lp-gray); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 8px; font-weight: 600; }
-
   .timeline { position: relative; padding-left: 28px; }
   .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: var(--lp-border); }
   .timeline-item { position: relative; margin-bottom: 20px; }
@@ -92,7 +86,6 @@
 
   @media (max-width: 768px) {
     .form-grid { grid-template-columns: 1fr; }
-    .result-summary { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -357,82 +350,98 @@
   </div>
 </article>
 
-  <div class="btn-group" style="justify-content: flex-end;">
-    <button class="slds-button slds-button_neutral" onclick="clearForm()">Clear Form</button>
-    <button class="slds-button slds-button_brand" onclick="startEvaluation()">&#9654; Evaluate Capacity Change</button>
+  <div class="btn-actions">
+    <button class="btn-ghost" onclick="clearForm()">Clear Form</button>
+    <button class="btn-primary" onclick="startEvaluation()">▶ Evaluate Capacity Change</button>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════ PAGE 2: EVALUATION ══════════════════════════════════════════ -->
 <div class="container page" id="page-evaluation">
+<div class="page-wrap">
   <div class="page-header">
     <h1>Policy Evaluation in Progress</h1>
     <p id="eval-subtitle">Evaluating <strong id="eval-hospital-name"></strong> against 40 rules across 9 regulatory domains</p>
     <div class="eval-progress-bar" style="margin-top: 16px;"><div class="eval-progress-fill" id="eval-progress-fill"></div></div>
   </div>
   <div id="eval-phases"></div>
-  <div class="btn-group" style="justify-content: space-between; margin-top: 24px;">
-    <button class="slds-button slds-button_neutral" onclick="showPage('intake')">&#8592; Back to Intake</button>
-    <button class="slds-button slds-button_success" id="btn-view-results" style="display:none;" onclick="showPage('results')">View Decision Report &#8594;</button>
+  <div class="btn-actions">
+    <button class="btn-ghost" onclick="showPage('intake')">← Back to Intake</button>
+    <button class="btn-primary" id="btn-view-results" style="display:none;" onclick="showPage('results')">View Decision Report →</button>
   </div>
+</div>
 </div>
 
 <!-- ══════════════════════════════════════════ PAGE 3: RESULTS ══════════════════════════════════════════ -->
 <div class="container page" id="page-results">
-  <div class="page-header">
-    <h1>Decision Report</h1>
-    <p><span id="res-hospital-name"></span> | Hospital Capacity Change Evaluation</p>
-  </div>
-
-  <!-- Summary Stats -->
-  <div class="result-summary" id="result-stats"></div>
-
-  <!-- Live Ontology Banner (shown when CAP rules overrode hardcoded results) -->
-  <div id="live-ontology-banner"></div>
+<div class="results-wrap">
 
   <!-- Decision Banner -->
-  <article class="slds-card" id="decision-banner" style="text-align: center; padding: 32px;">
-    <div class="slds-card__body slds-card__body_inner"></div>
-  </article>
+  <div id="decision-banner" class="decision-banner decision-approved">
+    <div class="decision-icon" id="decision-icon">✅</div>
+    <div class="decision-text">
+      <h2 id="decision-title">CAPACITY CHANGE: APPROVED</h2>
+      <p id="decision-subtitle">All regulatory requirements satisfied.</p>
+    </div>
+  </div>
 
-  <!-- Triggered Rules -->
-  <article class="slds-card">
-  <div class="slds-card__header slds-grid">
-    <header class="slds-media slds-media_center slds-has-flexi-truncate">
-      <div class="slds-media__body">
-        <h2 class="slds-card__header-title">Triggered Rules &amp; Requirements</h2>
+  <!-- Live Ontology Override Banner -->
+  <div id="live-ontology-banner"></div>
+
+  <!-- 2-col grid: Stats + Triggered Rules -->
+  <div class="results-grid">
+    <div class="result-card">
+      <div class="result-card-header">Evaluation Summary</div>
+      <div class="result-card-body" id="result-stats"></div>
+    </div>
+    <div class="result-card">
+      <div class="result-card-header">Rules Triggered</div>
+      <div class="result-card-body">
+        <div id="triggered-rules-list"></div>
       </div>
-    </header>
-    <span class="slds-badge" style="background: #E9F3FF; color: #014486;">COMPLIANCE CHECKLIST</span>
+    </div>
   </div>
-  <div class="slds-card__body slds-card__body_inner">
-    <div id="triggered-rules-list"></div>
-  </div>
-</article>
 
-  <!-- Action Timeline -->
-  <article class="slds-card">
-  <div class="slds-card__header slds-grid">
-    <header class="slds-media slds-media_center slds-has-flexi-truncate">
-      <div class="slds-media__body">
-        <h2 class="slds-card__header-title">Required Actions Timeline</h2>
-      </div>
-    </header>
-    <span class="slds-badge" style="background: #FFF3E0; color: #DD7A01;">CRITICAL PATH</span>
+  <!-- AI Decision Narrative -->
+  <div class="ai-summary-card" id="aiSummaryCard" style="display:none; margin-bottom: 16px;">
+    <div class="ai-summary-header">
+      <span>🤖</span>
+      <span class="ai-summary-label">AI Decision Narrative</span>
+      <span class="ai-summary-status" id="aiSummaryStatus">Generating...</span>
+    </div>
+    <div class="ai-summary-body" id="aiSummaryText">
+      <span class="ai-summary-loading">Analyzing decision factors...</span>
+    </div>
   </div>
-  <div class="slds-card__body slds-card__body_inner">
-    <div class="timeline" id="action-timeline"></div>
-  </div>
-</article>
 
-  <div class="btn-group" style="justify-content: space-between;">
-    <button class="slds-button slds-button_neutral" onclick="showPage('evaluation')">&#8592; Back to Evaluation</button>
-    <button class="slds-button slds-button_brand" onclick="showPage('audit')">View Full Audit Trail &#8594;</button>
+  <!-- Action Timeline (hospital-specific) -->
+  <div class="result-card" id="timeline-card" style="margin-bottom: 16px;">
+    <div class="result-card-header">Required Actions Timeline</div>
+    <div class="result-card-body">
+      <div class="timeline" id="action-timeline"></div>
+    </div>
   </div>
+
+  <!-- Reveal CTA -->
+  <div class="reveal-cta">
+    <div class="reveal-cta-text">
+      <h3>See the Ontology that powers this decision</h3>
+      <p>Every rule is transparent, versioned, and tied to a specific statute. Click to explore.</p>
+    </div>
+    <button class="btn-reveal" onclick="window.location.href='ontology.html?program=hosp-licensing'">Explore Ontology →</button>
+  </div>
+
+  <div class="results-actions">
+    <button class="btn-ghost" onclick="showPage('evaluation')">← Back to Evaluation</button>
+    <button class="btn-primary" onclick="showPage('audit')">View Full Audit Trail →</button>
+  </div>
+
+</div>
 </div>
 
 <!-- ══════════════════════════════════════════ PAGE 4: AUDIT TRAIL ══════════════════════════════════════════ -->
 <div class="container page" id="page-audit">
+<div class="page-wrap">
   <div class="page-header">
     <h1>Audit Trail</h1>
     <p>Complete decision lineage | Tamper-evident hash chain | Every rule evaluated, every fact checked</p>
@@ -447,10 +456,11 @@
 
   <div id="audit-sequence"></div>
 
-  <div class="btn-group" style="justify-content: space-between;">
-    <button class="slds-button slds-button_neutral" onclick="showPage('results')">&#8592; Back to Results</button>
-    <button class="slds-button slds-button_brand" onclick="showPage('intake')">&#8634; New Evaluation</button>
+  <div class="btn-actions">
+    <button class="btn-ghost" onclick="showPage('results')">← Back to Results</button>
+    <button class="btn-primary" onclick="showPage('intake')">↺ New Evaluation</button>
   </div>
+</div>
 </div>
 
 <script>
@@ -472,9 +482,9 @@ function switchProgram(programId) {
   updateSwitcherUI(programId);
 
   // Update user indicator
-  document.querySelector('.user-name').textContent = user.name;
-  document.querySelector('.avatar-circle').textContent = user.initials;
-  document.querySelector('.user-role').textContent = `${user.role} | ${config.programName}`;
+  document.querySelector('.lp-user-name').textContent = user.name;
+  document.querySelector('.lp-avatar').textContent = user.initials;
+  document.querySelector('.lp-user-role').textContent = `${user.role} | ${config.programName}`;
 }
 
 // ══════════════════════════════════════════ SUPABASE INITIALIZATION ══════════════════════════════════════════
@@ -1548,10 +1558,12 @@ function buildResults() {
   const total = passed + flagged + blocked;
 
   document.getElementById('result-stats').innerHTML = `
-    <div class="result-stat"><div class="stat-value" style="color: var(--navy);">${total}</div><div class="stat-label">Rules Evaluated</div></div>
-    <div class="result-stat"><div class="stat-value" style="color: var(--green);">${passed}</div><div class="stat-label">Passed</div></div>
-    <div class="result-stat"><div class="stat-value" style="color: var(--amber);">${flagged}</div><div class="stat-label">Action Required</div></div>
-    <div class="result-stat"><div class="stat-value" style="color: var(--red);">${blocked}</div><div class="stat-label">Blocked</div></div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <div style="text-align:center;"><div style="font-size:24px;font-weight:700;color:#032D60;">${total}</div><div style="font-size:10px;color:#54698D;text-transform:uppercase;letter-spacing:0.3px;">Rules Evaluated</div></div>
+      <div style="text-align:center;"><div style="font-size:24px;font-weight:700;color:#2E844A;">${passed}</div><div style="font-size:10px;color:#54698D;text-transform:uppercase;letter-spacing:0.3px;">Passed</div></div>
+      <div style="text-align:center;"><div style="font-size:24px;font-weight:700;color:#DD7A01;">${flagged}</div><div style="font-size:10px;color:#54698D;text-transform:uppercase;letter-spacing:0.3px;">Action Required</div></div>
+      <div style="text-align:center;"><div style="font-size:24px;font-weight:700;color:#BA0517;">${blocked}</div><div style="font-size:10px;color:#54698D;text-transform:uppercase;letter-spacing:0.3px;">Blocked</div></div>
+    </div>
   `;
 
   // Live ontology banner
@@ -1566,15 +1578,11 @@ function buildResults() {
         return `<span style="margin-right:16px;"><strong>${evalId}</strong>: <span class="lo-old">${fromLabel}</span> → <strong style="color:${toColor}">${toLabel}</strong> <span style="color:var(--gray);font-size:11px;">(${info.capRuleId}: ${info.condSummary})</span></span>`;
       }).join('');
       loBanner.innerHTML = `
-        <div class="live-ontology-notice">
-          <div class="lo-icon">&#128994;</div>
-          <div>
-            <div class="lo-title">Live Ontology: ${liveCount} rule${liveCount > 1 ? 's' : ''} from the current ontology changed this evaluation</div>
-            <div class="lo-detail lo-change">${changeLines}</div>
-            <div style="font-size:11px;color:var(--gray);margin-top:6px;">
-              These outcomes reflect active conditions in the LexiPoint Ontology Manager.
-              <a href="ontology.html" style="color:var(--slds-blue);">Edit rules in Ontology Manager →</a>
-            </div>
+        <div class="live-banner">
+          <div class="live-banner-icon">⚡</div>
+          <div class="live-banner-text">
+            <div class="live-banner-title">Live Ontology Override Active — ${liveCount} rule${liveCount > 1 ? 's' : ''} changed this evaluation</div>
+            <div>${changeLines} <a href="ontology.html" style="color:#4C1D95;font-size:11px;">Edit in Ontology Manager →</a></div>
           </div>
         </div>`;
     } else {
@@ -1584,18 +1592,25 @@ function buildResults() {
 
   // Decision banner
   const banner = document.getElementById('decision-banner');
+  const icon = document.getElementById('decision-icon');
+  const title = document.getElementById('decision-title');
+  const subtitle = document.getElementById('decision-subtitle');
+  banner.classList.remove('decision-approved', 'decision-conditions', 'decision-denied');
   if (blocked > 0) {
-    banner.style.background = 'var(--red-light)';
-    banner.style.borderColor = 'var(--red)';
-    banner.innerHTML = `<div style="font-size: 36px; margin-bottom: 8px;">&#9940;</div><h2 style="color: var(--red); font-size: 22px;">CAPACITY CHANGE: BLOCKED</h2><p style="color: var(--text-secondary); margin-top: 8px;">${blocked} blocking condition(s) must be resolved before this change can proceed.</p>`;
+    banner.classList.add('decision-denied');
+    icon.textContent = '🚫';
+    title.textContent = 'CAPACITY CHANGE: BLOCKED';
+    subtitle.textContent = `${blocked} blocking condition(s) must be resolved before this change can proceed.`;
   } else if (flagged > 0) {
-    banner.style.background = 'var(--green-light)';
-    banner.style.borderColor = 'var(--green)';
-    banner.innerHTML = `<div style="font-size: 36px; margin-bottom: 8px;">&#9989;</div><h2 style="color: var(--green); font-size: 22px;">CAPACITY CHANGE: APPROVED WITH CONDITIONS</h2><p style="color: var(--text-secondary); margin-top: 8px;">${flagged} action item(s) required. See compliance checklist below.</p>`;
+    banner.classList.add('decision-conditions');
+    icon.textContent = '✅';
+    title.textContent = 'CAPACITY CHANGE: APPROVED WITH CONDITIONS';
+    subtitle.textContent = `${flagged} action item(s) required. See compliance checklist below.`;
   } else {
-    banner.style.background = 'var(--green-light)';
-    banner.style.borderColor = 'var(--green)';
-    banner.innerHTML = `<div style="font-size: 36px; margin-bottom: 8px;">&#9989;</div><h2 style="color: var(--green); font-size: 22px;">CAPACITY CHANGE: APPROVED</h2><p style="color: var(--text-secondary); margin-top: 8px;">All regulatory requirements satisfied.</p>`;
+    banner.classList.add('decision-approved');
+    icon.textContent = '✅';
+    title.textContent = 'CAPACITY CHANGE: APPROVED';
+    subtitle.textContent = 'All regulatory requirements satisfied.';
   }
 
   // Triggered rules list
@@ -1654,8 +1669,46 @@ function buildResults() {
     </div>
   `).join('');
 
+  // Generate AI Summary
+  generateAISummary();
+
   // Build Audit page
   buildAudit();
+}
+
+async function generateAISummary() {
+  const card = document.getElementById('aiSummaryCard');
+  if (!card) return;
+  card.style.display = 'block';
+  document.getElementById('aiSummaryStatus').textContent = 'Generating...';
+  document.getElementById('aiSummaryText').innerHTML = '<span class="ai-summary-loading">Analyzing decision factors...</span>';
+
+  const name = document.getElementById('f_name').value || 'the facility';
+  let passed = 0, flagged = 0, blocked = 0;
+  Object.values(evalResults).forEach(r => {
+    if (r.status === 'pass') passed++;
+    else if (r.status === 'flag' || r.status === 'wait') flagged++;
+    else if (r.status === 'block') blocked++;
+  });
+  const flags = [];
+  Object.values(evalResults).forEach(r => { if (r.status !== 'pass' && r.status !== 'skip' && r.result) flags.push(r.result); });
+  const decision = blocked > 0 ? 'BLOCKED' : flagged > 0 ? 'APPROVED WITH CONDITIONS' : 'APPROVED';
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/generate-decision-summary`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ facilityName: name, decision, flags, passCount: passed, flagCount: flagged, blockCount: blocked })
+    });
+    const data = await resp.json();
+    document.getElementById('aiSummaryText').textContent = data.summary || 'Summary unavailable.';
+    document.getElementById('aiSummaryStatus').textContent = 'Complete';
+    document.getElementById('aiSummaryStatus').style.background = '#D1FAE5';
+    document.getElementById('aiSummaryStatus').style.color = '#065F46';
+  } catch {
+    document.getElementById('aiSummaryText').textContent = 'Summary generation failed.';
+    document.getElementById('aiSummaryStatus').textContent = 'Error';
+  }
 }
 
 function buildAudit() {

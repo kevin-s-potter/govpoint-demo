@@ -35,6 +35,21 @@
   --text-secondary: #54698D;
   --shadow: 0 2px 2px rgba(0,0,0,0.05);
   --gray: #54698D;
+  /* Convenience aliases used by hospital inline CSS */
+  --lp-card:    #FFFFFF;
+  --lp-text-2:  #54698D;
+  --lp-dark:    #014486;
+  --lp-success: #2E844A;
+  --lp-warning: #DD7A01;
+  --lp-error:   #BA0517;
+  --lp-gray:    #54698D;
+  /* Old short-name vars used in hospital JS inline styles */
+  --navy:       #032D60;
+  --green:      #2E844A;
+  --amber:      #DD7A01;
+  --red:        #BA0517;
+  --red-light:  #FDEDEF;
+  --green-light:#F0FDF4;
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────── */
@@ -697,3 +712,137 @@ body {
 @keyframes spin    { to { transform: rotate(360deg); } }
 @keyframes pulse   { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .pulsing { animation: pulse 1.2s ease-in-out infinite; }
+
+/* ── Decision / Results page (shared) ────────────────────────────── */
+.results-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.decision-banner {
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.decision-approved   { background: linear-gradient(135deg, #065F46 0%, #059669 100%); color: white; }
+.decision-conditions { background: linear-gradient(135deg, #92400E 0%, #D97706 100%); color: white; }
+.decision-denied     { background: linear-gradient(135deg, #7F1D1D 0%, #DC2626 100%); color: white; }
+
+.decision-icon { font-size: 32px; flex-shrink: 0; }
+.decision-text h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.decision-text p  { font-size: 13px; opacity: 0.85; }
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) { .results-grid { grid-template-columns: 1fr; } }
+
+.result-card {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.result-card-header {
+  padding: 10px 16px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E5E5E5;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #54698D;
+}
+
+.result-card-body { padding: 14px 16px; }
+
+.triggered-rules { list-style: none; padding: 0; margin: 0; }
+.triggered-rules li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #F3F3F3;
+  font-size: 12px;
+}
+.triggered-rules li:last-child { border-bottom: none; }
+.trig-icon  { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.trig-info  { flex: 1; }
+.trig-rule  { font-weight: 600; color: #032D60; }
+.trig-result { color: #54698D; line-height: 1.4; }
+
+.live-banner {
+  background: #EDE9FE;
+  border: 1px solid #C4B5FD;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+}
+.live-banner-icon  { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.live-banner-text  { color: #4C1D95; }
+.live-banner-title { font-weight: 600; margin-bottom: 2px; }
+
+.reveal-cta {
+  background: linear-gradient(135deg, #032D60 0%, #0176D3 100%);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.reveal-cta-text h3 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 4px; }
+.reveal-cta-text p  { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+.btn-reveal {
+  padding: 10px 20px;
+  background: white;
+  color: #032D60;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.btn-reveal:hover { background: #F0F7FF; }
+
+.results-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* ── Page wrap (inner content width constraint) ───────────────────── */
+.page-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* ── Btn-actions right-justified ─────────────────────────────────── */
+.btn-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
