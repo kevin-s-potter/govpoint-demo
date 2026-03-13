@@ -5,257 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Hospital Capacity Change</title>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
+<link rel="stylesheet" href="shared.css">
 <script src="program-switcher.js"></script>
 <style>
-  :root {
-    --slds-blue: #0176D3;
-    --slds-dark: #014486;
-    --slds-light: #1B96FF;
-    --slds-navy: #032D60;
-    --slds-success: #2E844A;
-    --slds-warning: #DD7A01;
-    --slds-error: #BA0517;
-    --slds-bg: #F3F3F3;
-    --slds-card: #FFFFFF;
-    --slds-border: #E5E5E5;
-    --slds-radius: 0.25rem;
-    --text-primary: #1A1A2E;
-    --text-secondary: #4A5568;
-    --shadow: 0 2px 2px rgba(0,0,0,0.05);
-    --gray: #4E4D4D;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: (--slds-font), 'Salesforce Sans', 'Inter', -apple-system, system-ui, sans-serif; background: var(--slds-bg); color: var(--text-primary); line-height: 1.6; }
-
   /* ── STATE BANNER ── */
-  .state-banner { background: var(--slds-bg); padding: 6px 24px; font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--slds-border); }
-  .state-banner a { color: var(--slds-dark); text-decoration: none; font-weight: 600; }
-
-  /* ── NAV (SLDS Dark Navy Header) ── */
-  .topnav { background: var(--slds-navy); padding: 0 24px; display: flex; align-items: center; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
-  .topnav .logo { color: white; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
-  .topnav .logo .ohio-mark { color: white; font-style: italic; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; }
-
-  .topnav .nav-spacer { margin-left: auto; }
-  .topnav .nav-controls { display: flex; align-items: center; gap: 20px; }
-  .topnav .nav-links { display: flex; gap: 20px; }
-  .topnav .nav-links a { color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
-  .topnav .nav-links a:hover { color: white; }
-  .topnav .nav-links a.active { color: white; font-weight: 600; border-bottom: 2px solid var(--slds-light); padding-bottom: 3px; }
-
-  .notification-bell { position: relative; cursor: pointer; font-size: 18px; color: rgba(255, 255, 255, 0.8); }
-  .notification-bell:hover { color: white; }
-  .notification-badge { position: absolute; top: -6px; right: -8px; background: var(--slds-error); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .notification-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--slds-border); border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 320px; z-index: 200; margin-top: 8px; }
-  .notification-dropdown.show { display: block; }
-  .notification-item { padding: 12px 16px; border-bottom: 1px solid var(--slds-border); font-size: 12px; line-height: 1.5; }
-  .notification-item:last-child { border-bottom: none; }
-  .notification-item strong { color: var(--text-primary); }
-  .notification-time { color: var(--gray); font-size: 11px; margin-top: 4px; }
-
-  .role-indicator { display: flex; align-items: center; gap: 12px; }
-  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--slds-light); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
-  .role-text { font-size: 13px; line-height: 1.4; color: rgba(255, 255, 255, 0.9); }
-  .role-text .user-name { color: white; font-weight: 600; }
-  .role-text .user-role { color: rgba(255, 255, 255, 0.7); font-size: 11px; }
+  .state-banner { background: var(--lp-bg); padding: 6px 24px; font-size: 12px; color: var(--lp-gray); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--lp-border); }
+  .state-banner a { color: var(--lp-dark); text-decoration: none; font-weight: 600; }
 
   /* ── LAYOUT ── */
   .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
   .page-header { margin-bottom: 32px; }
-  .page-header h1 { font-size: 28px; color: var(--text-primary); font-weight: 700; letter-spacing: -0.4px; }
-  .page-header p { color: var(--text-secondary); font-size: 14px; margin-top: 6px; }
+  .page-header h1 { font-size: 28px; color: var(--lp-text); font-weight: 700; letter-spacing: -0.4px; }
+  .page-header p { color: var(--lp-text-2); font-size: 14px; margin-top: 6px; }
 
   /* ── CARDS (SLDS Style) ── */
-  .card { background: var(--slds-card); border-radius: 3px; box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; border: 1px solid var(--slds-border); }
-  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--slds-border); }
-  .card-header h2 { font-size: 16px; color: var(--text-primary); font-weight: 700; }
+  .card { background: var(--lp-card); border-radius: 3px; box-shadow: var(--lp-shadow); padding: 24px; margin-bottom: 20px; border: 1px solid var(--lp-border); }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--lp-border); }
+  .card-header h2 { font-size: 16px; color: var(--lp-text); font-weight: 700; }
   .card-header .badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 3px; letter-spacing: 0.2px; }
-  .badge-blue { background: #E9F3FF; color: var(--slds-dark); }
-  .badge-green { background: #E8F5E9; color: var(--slds-success); }
-  .badge-amber { background: #FFF3E0; color: var(--slds-warning); }
-  .badge-red { background: #FDEDEF; color: var(--slds-error); }
-  .live-rule-badge { display: inline-block; font-size: 10px; font-weight: 700; background: var(--slds-blue); color: white; padding: 1px 7px; border-radius: 10px; letter-spacing: 0.3px; margin-left: 6px; vertical-align: middle; }
-  .live-ontology-notice { background: #E8F3FF; border: 1px solid var(--slds-blue); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
+  .badge-blue { background: #E9F3FF; color: var(--lp-dark); }
+  .badge-green { background: #E8F5E9; color: var(--lp-success); }
+  .badge-amber { background: #FFF3E0; color: var(--lp-warning); }
+  .badge-red { background: #FDEDEF; color: var(--lp-error); }
+  .live-ontology-notice { background: #E8F3FF; border: 1px solid var(--lp-blue); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
   .live-ontology-notice .lo-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-  .live-ontology-notice .lo-title { font-weight: 700; color: var(--slds-blue); font-size: 13px; }
-  .live-ontology-notice .lo-detail { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .live-ontology-notice .lo-title { font-weight: 700; color: var(--lp-blue); font-size: 13px; }
+  .live-ontology-notice .lo-detail { font-size: 12px; color: var(--lp-text-2); margin-top: 4px; }
   .live-ontology-notice .lo-change { display: inline-block; margin-top: 4px; font-size: 12px; }
-  .lo-old { color: var(--gray); text-decoration: line-through; }
-  .lo-new { color: var(--slds-blue); font-weight: 700; }
+  .lo-old { color: var(--lp-gray); text-decoration: line-through; }
+  .lo-new { color: var(--lp-blue); font-weight: 700; }
 
   /* ── FORMS (SLDS Style) ── */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
   .form-group { display: flex; flex-direction: column; }
   .form-group.full { grid-column: 1 / -1; }
-  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .form-group input, .form-group select { padding: 8px 12px; border: 1px solid var(--slds-border); border-radius: 3px; font-size: 13px; color: var(--text-primary); background: white; transition: border 0.2s; }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--slds-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15); }
-  .form-group .hint { font-size: 12px; color: var(--gray); margin-top: 4px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--lp-text-2); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .form-group input, .form-group select { padding: 8px 12px; border: 1px solid var(--lp-border); border-radius: 3px; font-size: 13px; color: var(--lp-text); background: white; transition: border 0.2s; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--lp-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15); }
+  .form-group .hint { font-size: 12px; color: var(--lp-gray); margin-top: 4px; }
   .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--slds-blue); cursor: pointer; }
-  .checkbox-group label { font-size: 13px; font-weight: 400; color: var(--text-primary); text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer; }
+  .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--lp-blue); cursor: pointer; }
+  .checkbox-group label { font-size: 13px; font-weight: 400; color: var(--lp-text); text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer; }
 
-  /* ── BUTTONS (SLDS Style) ── */
-  .btn { padding: 8px 16px; border-radius: 3px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-  .btn-primary { background: var(--slds-blue); color: white; }
-  .btn-primary:hover { background: var(--slds-dark); }
-  .btn-secondary { background: white; color: var(--slds-blue); border: 1px solid var(--slds-blue); }
-  .btn-secondary:hover { background: #E9F3FF; }
-  .btn-success { background: var(--slds-success); color: white; }
-  .btn-success:hover { background: #1E5631; }
-  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--slds-border); }
-  .btn-ghost:hover { background: var(--slds-bg); }
-  .btn-lg { padding: 12px 24px; font-size: 14px; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* ── SCENARIO PICKER (Card-based) ── */
-  .scenario-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-  .scenario-btn { padding: 16px; border-radius: 3px; border: 1px solid var(--slds-border); background: white; cursor: pointer; text-align: left; flex: 1; min-width: 200px; transition: all 0.2s; }
-  .scenario-btn:hover { border-color: var(--slds-blue); background: #E9F3FF; }
-  .scenario-btn h4 { font-size: 13px; color: var(--text-primary); margin-bottom: 4px; font-weight: 700; }
-  .scenario-btn p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-
-  /* ── STEPPER (SLDS Path Component) ── */
-  .stepper { display: flex; align-items: center; margin-bottom: 32px; padding: 0; }
-  .step { display: flex; align-items: center; gap: 12px; flex: 1; }
-  .step-num { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 2px solid var(--slds-border); color: var(--text-secondary); background: white; transition: all 0.3s; flex-shrink: 0; }
-  .step.active .step-num { background: var(--slds-blue); color: white; border-color: var(--slds-blue); }
-  .step.done .step-num { background: var(--slds-success); color: white; border-color: var(--slds-success); }
-  .step-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; }
-  .step.active .step-label { color: var(--slds-blue); font-weight: 600; }
-  .step.done .step-label { color: var(--slds-success); }
-  .step-line { flex: 1; height: 1px; background: var(--slds-border); margin: 0 8px; min-width: 16px; transition: background 0.3s; }
-  .step-line.done { background: var(--slds-success); }
-
-  /* ── EVALUATION PROGRESS BAR ── */
-  .eval-progress-bar { height: 3px; background: #E5E5E5; border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
-  .eval-progress-fill { height: 100%; background: linear-gradient(90deg, #0176D3, #2E844A); border-radius: 2px; transition: width 0.4s ease; width: 0%; }
-
-  /* ── EVALUATION VIEW (SLDS Expandable Section) ── */
-  .eval-phase { background: white; border-radius: 8px; border: 1px solid var(--slds-border); margin-bottom: 10px; overflow: hidden; transition: all 0.3s; }
-  .eval-phase.processing { border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1); }
-  .eval-phase.passed { border-color: var(--slds-success); }
-  .eval-phase.flagged { border-color: var(--slds-warning); }
-  .eval-phase.blocked { border-color: var(--slds-error); }
-  .eval-phase-header { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.1s; user-select: none; }
-  .eval-phase-header:hover { background: #F8FAFC; }
-  .eval-phase-header .phase-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
-  .eval-phase.waiting .phase-icon { background: #F3F3F3; color: #54698D; }
-  .eval-phase.processing .phase-icon { background: #EDE9FE; color: #7C3AED; }
-  .eval-phase.passed .phase-icon { background: #D1FAE5; color: #059669; }
-  .eval-phase.flagged .phase-icon { background: #FEF3C7; color: #D97706; }
-  .eval-phase.blocked .phase-icon { background: #FEE2E2; color: #DC2626; }
-  .eval-phase-header h3 { font-size: 13px; color: var(--text-primary); font-weight: 600; flex: 1; }
-  .eval-phase-header .phase-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .eval-phase-body { padding: 0 16px 16px; display: none; }
-  .eval-phase.open .eval-phase-body { display: block; }
-
-  /* ── RULE ROWS ── */
+  /* ── RULE ROWS (hospital-specific) ── */
   .rule-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0F0F0; }
   .rule-row:last-child { border-bottom: none; }
-  .rule-id { font-size: 11px; font-weight: 700; color: var(--slds-blue); background: #E9F3FF; padding: 3px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .rule-id { font-size: 11px; font-weight: 700; color: var(--lp-blue); background: #E9F3FF; padding: 3px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
   .rule-detail { flex: 1; }
-  .rule-detail .rule-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-  .rule-detail .rule-citation { font-size: 11px; color: var(--gray); font-style: italic; }
-  .rule-detail .rule-result { font-size: 12px; margin-top: 4px; color: var(--text-secondary); }
+  .rule-detail .rule-name { font-size: 13px; font-weight: 600; color: var(--lp-text); }
+  .rule-detail .rule-citation { font-size: 11px; color: var(--lp-gray); font-style: italic; }
+  .rule-detail .rule-result { font-size: 12px; margin-top: 4px; color: var(--lp-text-2); }
   .rule-status { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
-  .status-pass { background: #E8F5E9; color: var(--slds-success); }
-  .status-flag { background: #FFF3E0; color: var(--slds-warning); }
-  .status-block { background: #FDEDEF; color: var(--slds-error); }
-  .status-skip { background: var(--slds-bg); color: var(--gray); }
-  .status-wait { background: #F3E5F5; color: #7B1FA2; }
 
   /* ── RESULTS DASHBOARD (SLDS Metric Cards) ── */
   .result-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .result-stat { background: white; border-radius: 3px; padding: 20px; border: 1px solid var(--slds-border); text-align: center; }
+  .result-stat { background: white; border-radius: 3px; padding: 20px; border: 1px solid var(--lp-border); text-align: center; }
   .result-stat .stat-value { font-size: 32px; font-weight: 700; line-height: 1; }
-  .result-stat .stat-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 8px; font-weight: 600; }
+  .result-stat .stat-label { font-size: 11px; color: var(--lp-gray); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 8px; font-weight: 600; }
 
   .timeline { position: relative; padding-left: 28px; }
-  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: var(--slds-border); }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: var(--lp-border); }
   .timeline-item { position: relative; margin-bottom: 20px; }
-  .timeline-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--slds-blue); background: white; }
-  .timeline-item.critical::before { background: var(--slds-error); border-color: var(--slds-error); }
-  .timeline-item.warning::before { background: var(--slds-warning); border-color: var(--slds-warning); }
-  .timeline-item.done::before { background: var(--slds-success); border-color: var(--slds-success); }
-  .timeline-item h4 { font-size: 13px; color: var(--text-primary); font-weight: 600; }
-  .timeline-item p { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-  .timeline-item .tl-date { font-size: 11px; color: var(--gray); font-weight: 600; }
+  .timeline-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--lp-blue); background: white; }
+  .timeline-item.critical::before { background: var(--lp-error); border-color: var(--lp-error); }
+  .timeline-item.warning::before { background: var(--lp-warning); border-color: var(--lp-warning); }
+  .timeline-item.done::before { background: var(--lp-success); border-color: var(--lp-success); }
+  .timeline-item h4 { font-size: 13px; color: var(--lp-text); font-weight: 600; }
+  .timeline-item p { font-size: 12px; color: var(--lp-text-2); margin-top: 4px; }
+  .timeline-item .tl-date { font-size: 11px; color: var(--lp-gray); font-weight: 600; }
 
   .audit-row { display: grid; grid-template-columns: 100px 1fr 120px; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F0F0F0; font-size: 12px; }
-  .audit-row.audit-header { font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.3px; font-size: 11px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-
-  /* ── AUDIT PAGE ── */
-  .chain-verified-banner { display: flex; align-items: center; gap: 8px; background: #D1FAE5; border: 1px solid #A7F3D0; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #065F46; font-weight: 500; margin-bottom: 16px; }
-  .chain-icon { font-size: 14px; }
-  .audit-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: #E5E5E5; border: 1px solid #E5E5E5; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
-  .audit-meta-cell { background: white; padding: 12px 16px; }
-  .audit-meta-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #54698D; margin-bottom: 4px; }
-  .audit-meta-value { font-size: 12px; font-weight: 500; color: #032D60; word-break: break-all; }
-  .audit-hash { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 10px; }
-
-  /* ── ENHANCED AUDIT (Expandable Sections) ── */
-  .audit-entry { background: white; border: 1px solid var(--slds-border); border-radius: 6px; margin-bottom: 8px; overflow: hidden; }
-  .audit-entry-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s; }
-  .audit-entry-header:hover { background: #F8FAFC; }
-  .audit-entry .entry-num { font-size: 10px; font-weight: 700; color: #54698D; min-width: 28px; }
-  .audit-entry .entry-id { font-size: 12px; font-weight: 600; color: #032D60; min-width: 80px; flex-shrink: 0; }
-  .audit-entry .entry-name { font-size: 12px; color: #54698D; flex: 1; }
-  .audit-entry .entry-status { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
-  .audit-entry .entry-arrow { color: #9CA3AF; font-size: 11px; transition: transform 0.2s; flex-shrink: 0; }
-  .audit-entry.open .entry-arrow { transform: rotate(180deg); }
-  .audit-entry-body { display: none; padding: 12px 14px; border-top: 1px solid #F3F3F3; font-size: 12px; }
-  .audit-entry.open .audit-entry-body { display: block; }
-  .audit-section { margin-bottom: 10px; }
-  .audit-section:last-child { margin-bottom: 0; }
-  .audit-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #54698D; margin-bottom: 4px; }
-  .audit-section-value { color: #16325C; line-height: 1.6; }
-  .audit-code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11px; background: #F8FAFC; padding: 8px 10px; border-radius: 4px; line-height: 1.7; white-space: pre-wrap; color: #16325C; }
-  .audit-facts { display: flex; flex-wrap: wrap; gap: 6px; }
-  .audit-fact { display: inline-flex; align-items: center; gap: 4px; background: #F3F3F3; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
-  .fact-key { color: #54698D; }
-  .fact-val { color: #032D60; font-weight: 500; }
-  .audit-reasoning { font-size: 12px; color: #16325C; line-height: 1.6; }
-  .audit-deps { display: flex; flex-wrap: wrap; gap: 6px; }
-  .audit-dep-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-  .dep-gate { background: #FEE2E2; color: #991B1B; }
-  .dep-requires { background: #DBEAFE; color: #1E40AF; }
-  .dep-exempts { background: #D1FAE5; color: #065F46; }
-  .dep-triggers { background: #FEF3C7; color: #92400E; }
-  .dep-routes { background: #EDE9FE; color: #5B21B6; }
-  .audit-phase-divider { font-size: 11px; font-weight: 700; color: #54698D; text-transform: uppercase; letter-spacing: 0.4px; padding: 12px 0 6px; border-bottom: 1px solid #F3F3F3; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-  .audit-phase-divider .phase-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .audit-row.audit-header { font-weight: 700; color: var(--lp-navy); text-transform: uppercase; letter-spacing: 0.3px; font-size: 11px; border-bottom: 2px solid var(--lp-border); padding-bottom: 10px; }
 
   /* ── BED TABLE (SLDS Data Table) ── */
   .bed-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .bed-table th { background: var(--slds-navy); color: white; padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2px; }
+  .bed-table th { background: var(--lp-navy); color: white; padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2px; }
   .bed-table th:first-child { text-align: left; min-width: 220px; }
-  .bed-table td { padding: 8px; border-bottom: 1px solid var(--slds-border); vertical-align: middle; }
-  .bed-table td:first-child { font-size: 12px; color: var(--text-primary); font-weight: 500; text-align: left; }
-  .bed-table td input { width: 100%; padding: 6px 8px; border: 1px solid var(--slds-border); border-radius: 3px; font-size: 12px; text-align: center; background: white; }
-  .bed-table td input:focus { outline: none; border-color: var(--slds-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1); }
+  .bed-table td { padding: 8px; border-bottom: 1px solid var(--lp-border); vertical-align: middle; }
+  .bed-table td:first-child { font-size: 12px; color: var(--lp-text); font-weight: 500; text-align: left; }
+  .bed-table td input { width: 100%; padding: 6px 8px; border: 1px solid var(--lp-border); border-radius: 3px; font-size: 12px; text-align: center; background: white; }
+  .bed-table td input:focus { outline: none; border-color: var(--lp-blue); box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.1); }
   .bed-table tr:hover { background: #F7F7F7; }
   .bed-table .section-row { background: #F3F3F3; }
-  .bed-table .section-row td { font-weight: 700; color: var(--text-primary); font-size: 12px; padding: 10px 8px; text-transform: uppercase; letter-spacing: 0.2px; border-bottom: 2px solid var(--slds-navy); }
-  .bed-table .sub-row td:first-child { padding-left: 32px; font-size: 11px; color: var(--text-secondary); }
-
-  /* ── HIDDEN PAGES ── */
-  .page { display: none; }
-  .page.visible { display: block; }
-
-  /* ── ANIMATIONS ── */
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-in { animation: fadeIn 0.3s ease-out; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .pulsing { animation: pulse 1.2s ease-in-out infinite; }
+  .bed-table .section-row td { font-weight: 700; color: var(--lp-text); font-size: 12px; padding: 10px 8px; text-transform: uppercase; letter-spacing: 0.2px; border-bottom: 2px solid var(--lp-navy); }
+  .bed-table .sub-row td:first-child { padding-left: 32px; font-size: 11px; color: var(--lp-text-2); }
 
   @media (max-width: 768px) {
     .form-grid { grid-template-columns: 1fr; }
     .result-summary { grid-template-columns: 1fr 1fr; }
-    .scenario-bar { flex-direction: column; }
-    .stepper { overflow-x: auto; }
   }
 </style>
 </head>
@@ -267,63 +104,61 @@
   <span style="margin-left: auto;"><a href="#">Documentation</a> · <a href="#">Support</a></span>
 </div>
 
-<nav class="topnav">
-  <div class="logo">
-    <span class="ohio-mark">⌘</span>
-    <span>LexiPoint</span>
-  </div>
+<nav class="lp-nav">
+  <a href="index.html" class="lp-logo">
+    <span class="lp-logo-mark">⌘</span>
+    <span class="lp-logo-name">LexiPoint</span>
+  </a>
 
   <div id="programSwitcherMount" class="tenant-switcher"></div>
 
-  <div class="nav-spacer"></div>
+  <div class="lp-nav-spacer"></div>
 
-  <div class="nav-links">
+  <div class="lp-nav-links">
     <a href="index.html" class="active">New Request</a>
     <a href="ontology.html">Ontology</a>
     <a href="dashboard.html">Dashboard</a>
   </div>
 
-  <div class="nav-controls">
-    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+  <div class="lp-nav-controls">
+    <div class="lp-notif" id="notificationBell" onclick="this.querySelector('.lp-notif-dropdown').classList.toggle('show')">
       <span>🔔</span>
-      <span class="notification-badge">3</span>
-      <div class="notification-dropdown">
-        <div class="notification-item">
+      <span class="lp-notif-badge">3</span>
+      <div class="lp-notif-dropdown">
+        <div class="lp-notif-item">
           <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
-          <div class="notification-time">2 hours ago</div>
+          <div class="lp-notif-time">2 hours ago</div>
         </div>
-        <div class="notification-item">
+        <div class="lp-notif-item">
           <strong>FED-003 CMS CoP updated — affects 4 rules</strong>
-          <div class="notification-time">1 day ago</div>
+          <div class="lp-notif-time">1 day ago</div>
         </div>
-        <div class="notification-item">
+        <div class="lp-notif-item">
           <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
-          <div class="notification-time">1 week ago</div>
+          <div class="lp-notif-time">1 week ago</div>
         </div>
       </div>
     </div>
 
-    <div class="role-indicator">
-      <div class="avatar-circle">SC</div>
-      <div class="role-text">
-        <div class="user-name">Sarah Chen</div>
-        <div class="user-role">Publisher | Hospital Licensing</div>
+    <div class="lp-user">
+      <div class="lp-avatar">SC</div>
+      <div class="lp-user-text">
+        <span class="lp-user-name">Sarah Chen</span>
+        <span class="lp-user-role">Publisher | Hospital Licensing</span>
       </div>
     </div>
   </div>
 </nav>
 
 <!-- ── STEPPER ── -->
-<div class="container" style="padding-bottom: 0;">
-  <div class="stepper" id="stepper">
-    <div class="step active" data-step="1"><div class="step-num">1</div><div class="step-label">Intake</div></div>
-    <div class="step-line"></div>
-    <div class="step" data-step="2"><div class="step-num">2</div><div class="step-label">Evaluation</div></div>
-    <div class="step-line"></div>
-    <div class="step" data-step="3"><div class="step-num">3</div><div class="step-label">Results</div></div>
-    <div class="step-line"></div>
-    <div class="step" data-step="4"><div class="step-num">4</div><div class="step-label">Audit Trail</div></div>
-  </div>
+<div class="lp-stepper" id="stepper">
+  <div class="lp-step active" data-step="1" onclick="showPage('intake')"><div class="lp-step-num">1</div><span>Intake</span></div>
+  <div class="lp-step-line"></div>
+  <div class="lp-step" data-step="2" onclick="showPage('evaluation')"><div class="lp-step-num">2</div><span>Evaluation</span></div>
+  <div class="lp-step-line"></div>
+  <div class="lp-step" data-step="3" onclick="showPage('results')"><div class="lp-step-num">3</div><span>Results</span></div>
+  <div class="lp-step-line"></div>
+  <div class="lp-step" data-step="4" onclick="showPage('audit')"><div class="lp-step-num">4</div><span>Audit Trail</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════ PAGE 1: INTAKE ══════════════════════════════════════════ -->
@@ -1485,17 +1320,15 @@ function showPage(page) {
   document.getElementById('page-' + page).classList.add('visible');
   const stepMap = { intake: 1, evaluation: 2, results: 3, audit: 4 };
   const current = stepMap[page] || 1;
-  document.querySelectorAll('.step').forEach(s => {
+  document.querySelectorAll('.lp-step').forEach(s => {
     const n = parseInt(s.dataset.step);
     s.classList.remove('active', 'done');
     if (n === current) s.classList.add('active');
     else if (n < current) s.classList.add('done');
   });
-  document.querySelectorAll('.step-line').forEach((line, i) => {
+  document.querySelectorAll('.lp-step-line').forEach((line, i) => {
     line.classList.toggle('done', i < current - 1);
   });
-  document.querySelectorAll('.topnav .nav-links a').forEach(a => a.classList.remove('active'));
-  document.querySelectorAll('.topnav .nav-links a')[0].classList.add('active');
   window.scrollTo(0, 0);
 }
 

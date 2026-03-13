@@ -4,118 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Child Care Facility Licensing</title>
+<link rel="stylesheet" href="shared.css">
 <script src="program-switcher.js"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #F3F3F3;
-  color: #16325C;
-  font-size: 14px;
-}
-
-/* ── Header ── */
-.app-header {
-  background: #032D60;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.logo-wrap { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
-.logo-box {
-  width: 30px; height: 30px; background: #0176D3; border-radius: 5px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 13px; color: white; letter-spacing: -0.5px;
-}
-.logo-name { font-size: 17px; font-weight: 700; color: white; letter-spacing: -0.2px; }
-
 #programSwitcherMount { flex: 1; min-width: 0; }
-
-.nav-links { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-.nav-links a {
-  color: rgba(255,255,255,0.75); text-decoration: none;
-  font-size: 13px; font-weight: 500; padding: 6px 10px; border-radius: 4px;
-  transition: all 0.15s;
-}
-.nav-links a:hover { color: white; background: rgba(255,255,255,0.1); }
-.nav-links a.active { color: white; background: rgba(255,255,255,0.15); }
-
-.nav-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
-.notif-btn {
-  background: none; border: none; color: rgba(255,255,255,0.7); font-size: 16px;
-  cursor: pointer; padding: 4px 6px; border-radius: 4px; position: relative;
-  transition: all 0.15s;
-}
-.notif-btn:hover { color: white; background: rgba(255,255,255,0.1); }
-
-.user-indicator {
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.1); border-radius: 20px;
-  padding: 4px 10px 4px 4px;
-}
-.avatar {
-  width: 26px; height: 26px; background: #0176D3; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: white;
-}
-.user-name { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 500; }
-
-/* ── Stepper ── */
-.stepper {
-  background: white;
-  border-bottom: 1px solid #E5E5E5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: 0 24px;
-  height: 52px;
-  overflow-x: auto;
-}
-
-.step {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 16px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #54698D;
-  white-space: nowrap;
-  cursor: default;
-}
-
-.step.active { color: #0176D3; }
-.step.done { color: #2E844A; }
-
-.step-num {
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 2px solid currentColor;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; flex-shrink: 0;
-  background: transparent;
-}
-
-.step.active .step-num { background: #0176D3; border-color: #0176D3; color: white; }
-.step.done .step-num { background: #2E844A; border-color: #2E844A; color: white; }
-
-.step-divider {
-  width: 32px; height: 1px; background: #E5E5E5; flex-shrink: 0;
-}
-
-/* ── Pages ── */
-.page { display: none; }
-.page.visible { display: block; }
 
 /* ── Intake ── */
 .intake-wrap {
@@ -137,65 +29,6 @@ body {
 
 .intake-header-left h2 { font-size: 17px; font-weight: 700; color: #032D60; margin-bottom: 2px; }
 .intake-header-left p { font-size: 12px; color: #54698D; }
-
-.quick-demo-card {
-  background: #E8F4FD;
-  border: 1px solid #A8C6E8;
-  border-radius: 8px;
-  padding: 14px 16px 16px;
-  margin-bottom: 16px;
-}
-
-.quick-demo-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.quick-demo-icon { font-size: 16px; }
-
-.quick-demo-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #032D60;
-}
-
-.scenario-bar {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.scenario-btn {
-  padding: 14px;
-  border-radius: 6px;
-  border: 1px solid #C9DFFE;
-  background: white;
-  cursor: pointer;
-  text-align: left;
-  flex: 1;
-  min-width: 180px;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.scenario-btn:hover { border-color: #0176D3; background: #F0F7FF; }
-.scenario-btn.selected { border-color: #0176D3; background: #E8F4FD; }
-
-.scenario-btn h4 {
-  font-size: 12px;
-  color: #032D60;
-  margin-bottom: 4px;
-  font-weight: 700;
-}
-
-.scenario-btn p {
-  font-size: 11px;
-  color: #54698D;
-  line-height: 1.5;
-  margin: 0;
-}
 
 /* Form sections */
 .form-card {
@@ -415,8 +248,6 @@ body {
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
-
 /* ── Intake bottom ── */
 .intake-actions {
   display: flex;
@@ -424,36 +255,6 @@ body {
   gap: 12px;
   margin-top: 20px;
 }
-
-.btn-secondary {
-  padding: 10px 20px;
-  border: 1px solid #D8D8D8;
-  border-radius: 4px;
-  background: white;
-  font-size: 13px;
-  font-weight: 500;
-  color: #54698D;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-secondary:hover { border-color: #0176D3; color: #0176D3; }
-
-.btn-primary {
-  padding: 10px 24px;
-  border: none;
-  border-radius: 4px;
-  background: #0176D3;
-  font-size: 13px;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  transition: background 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.btn-primary:hover { background: #0158A8; }
-.btn-primary:disabled { background: #A8C6E8; cursor: not-allowed; }
 
 /* ── Evaluation Page ── */
 .eval-wrap {
@@ -472,128 +273,6 @@ body {
 
 .eval-header h2 { font-size: 16px; font-weight: 700; color: #032D60; margin-bottom: 4px; }
 .eval-header p { font-size: 12px; color: #54698D; }
-
-.eval-progress-bar {
-  height: 3px;
-  background: #E5E5E5;
-  border-radius: 2px;
-  margin-top: 12px;
-  overflow: hidden;
-}
-
-.eval-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #0176D3, #2E844A);
-  border-radius: 2px;
-  transition: width 0.4s ease;
-  width: 0%;
-}
-
-.phase-card {
-  background: white;
-  border: 1px solid #E5E5E5;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  overflow: hidden;
-}
-
-.phase-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.1s;
-  user-select: none;
-}
-
-.phase-header:hover { background: #F8FAFC; }
-
-.phase-status-icon {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
-  flex-shrink: 0;
-}
-
-.phase-pending   .phase-status-icon { background: #F3F3F3; color: #54698D; }
-.phase-running   .phase-status-icon { background: #EDE9FE; color: #7C3AED; }
-.phase-passed    .phase-status-icon { background: #D1FAE5; color: #059669; }
-.phase-flagged   .phase-status-icon { background: #FEF3C7; color: #D97706; }
-.phase-blocked   .phase-status-icon { background: #FEE2E2; color: #DC2626; }
-.phase-bypassed  .phase-status-icon { background: #F3F3F3; color: #9CA3AF; }
-
-.phase-title { font-size: 13px; font-weight: 600; color: #16325C; flex: 1; }
-
-.phase-badge {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.badge-pending   { background: #F3F3F3; color: #9CA3AF; }
-.badge-evaluating { background: #EDE9FE; color: #7C3AED; }
-.badge-passed    { background: #D1FAE5; color: #065F46; }
-.badge-flagged   { background: #FEF3C7; color: #92400E; }
-.badge-blocked   { background: #FEE2E2; color: #991B1B; }
-.badge-bypassed  { background: #F3F3F3; color: #9CA3AF; }
-
-.phase-chevron {
-  color: #9CA3AF;
-  font-size: 12px;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-
-.phase-card.open .phase-chevron { transform: rotate(180deg); }
-
-.phase-rules {
-  display: none;
-  border-top: 1px solid #F3F3F3;
-}
-
-.phase-card.open .phase-rules { display: block; }
-
-.rule-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 16px;
-  border-bottom: 1px solid #F9F9F9;
-  font-size: 12px;
-}
-
-.rule-row:last-child { border-bottom: none; }
-
-.rule-status-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  margin-top: 3px;
-  flex-shrink: 0;
-}
-
-.dot-pass    { background: #2E844A; }
-.dot-flag    { background: #DD7A01; }
-.dot-block   { background: #BA0517; }
-.dot-skip    { background: #C9C9C9; }
-.dot-wait    { background: #9050E9; }
-.dot-pending { background: #C9C9C9; border: 1px solid #9CA3AF; }
-
-.rule-info { flex: 1; }
-.rule-id   { font-weight: 600; color: #032D60; }
-.rule-name { color: #54698D; }
-.rule-result { color: #16325C; margin-top: 2px; }
-
-.rule-citation {
-  font-size: 10px;
-  color: #9CA3AF;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
 
 /* ── Results Page ── */
 .results-wrap {
@@ -781,59 +460,6 @@ body {
   padding: 24px 16px 48px;
 }
 
-.audit-meta-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1px;
-  background: #E5E5E5;
-  border: 1px solid #E5E5E5;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-
-.audit-meta-cell {
-  background: white;
-  padding: 12px 16px;
-}
-
-.audit-meta-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #54698D;
-  margin-bottom: 4px;
-}
-
-.audit-meta-value {
-  font-size: 12px;
-  font-weight: 500;
-  color: #032D60;
-  word-break: break-all;
-}
-
-.audit-hash { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 10px; }
-
-.audit-entry {
-  background: white;
-  border: 1px solid #E5E5E5;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  overflow: hidden;
-}
-
-.audit-entry-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: background 0.1s;
-}
-
-.audit-entry-header:hover { background: #F8FAFC; }
-
 .audit-step-num {
   font-size: 10px;
   font-weight: 700;
@@ -862,97 +488,57 @@ body {
 .audit-chevron { color: #9CA3AF; font-size: 11px; transition: transform 0.2s; }
 .audit-entry.open .audit-chevron { transform: rotate(180deg); }
 
-.audit-entry-body {
-  display: none;
-  padding: 12px 14px;
-  border-top: 1px solid #F3F3F3;
-  font-size: 12px;
-}
-
-.audit-entry.open .audit-entry-body { display: block; }
-
-.audit-section { margin-bottom: 10px; }
-.audit-section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: #54698D; margin-bottom: 4px; }
-.audit-section-value { color: #16325C; line-height: 1.6; }
-.audit-code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11px; background: #F8FAFC; padding: 6px 10px; border-radius: 4px; line-height: 1.7; white-space: pre-wrap; }
-
-.audit-facts { display: flex; flex-wrap: wrap; gap: 6px; }
-.audit-fact {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: #F3F3F3;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-}
-.fact-key { color: #54698D; }
-.fact-val { color: #032D60; font-weight: 500; }
-
-.chain-verified {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #D1FAE5;
-  border: 1px solid #A7F3D0;
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-size: 12px;
-  color: #065F46;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.chain-icon { font-size: 14px; }
-
 .audit-actions { display: flex; gap: 10px; margin-top: 8px; }
 </style>
 </head>
 <body>
 
-<!-- ── Header ── -->
-<header class="app-header">
-  <a href="index.html" class="logo-wrap">
-    <div class="logo-box">LP</div>
-    <span class="logo-name">LexiPoint</span>
+<nav class="lp-nav">
+  <a href="index.html" class="lp-logo">
+    <span class="lp-logo-mark">⌘</span>
+    <span class="lp-logo-name">LexiPoint</span>
   </a>
 
   <div id="programSwitcherMount"></div>
 
-  <div class="nav-links">
+  <div class="lp-nav-spacer"></div>
+
+  <div class="lp-nav-links">
     <a href="index.html" class="active">New Request</a>
     <a href="ontology.html">Ontology</a>
     <a href="dashboard.html">Dashboard</a>
   </div>
 
-  <div class="nav-controls">
-    <button class="notif-btn" title="Notifications">🔔</button>
-    <div class="user-indicator">
-      <div class="avatar" id="userAvatar">MT</div>
-      <span class="user-name" id="userName">Michelle Thompson</span>
+  <div class="lp-nav-controls">
+    <button class="lp-notif" title="Notifications">🔔</button>
+    <div class="lp-user">
+      <div class="lp-avatar" id="userAvatar">MT</div>
+      <div class="lp-user-text">
+        <span class="lp-user-name" id="userName">Michelle Thompson</span>
+        <span class="lp-user-role">Licensing Specialist</span>
+      </div>
     </div>
   </div>
-</header>
+</nav>
 
-<!-- ── Stepper ── -->
-<div class="stepper">
-  <div class="step active" id="step1">
-    <div class="step-num">1</div>
+<div class="lp-stepper">
+  <div class="lp-step active" id="step1" onclick="showPage('intake')">
+    <div class="lp-step-num">1</div>
     <span>Application</span>
   </div>
-  <div class="step-divider"></div>
-  <div class="step" id="step2">
-    <div class="step-num">2</div>
+  <div class="lp-step-line" id="line1"></div>
+  <div class="lp-step" id="step2" onclick="showPage('evaluation')">
+    <div class="lp-step-num">2</div>
     <span>Evaluation</span>
   </div>
-  <div class="step-divider"></div>
-  <div class="step" id="step3">
-    <div class="step-num">3</div>
+  <div class="lp-step-line" id="line2"></div>
+  <div class="lp-step" id="step3" onclick="showPage('results')">
+    <div class="lp-step-num">3</div>
     <span>Decision</span>
   </div>
-  <div class="step-divider"></div>
-  <div class="step" id="step4">
-    <div class="step-num">4</div>
+  <div class="lp-step-line" id="line3"></div>
+  <div class="lp-step" id="step4" onclick="showPage('audit')">
+    <div class="lp-step-num">4</div>
     <span>Audit Trail</span>
   </div>
 </div>
@@ -2324,6 +1910,12 @@ function showPage(page) {
     const num = i + 1;
     if (num < activeIdx) el.classList.add('done');
     else if (num === activeIdx) el.classList.add('active');
+  });
+
+  ['line1','line2','line3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('done', i < activeIdx - 1);
   });
 
   window.scrollTo(0, 0);
