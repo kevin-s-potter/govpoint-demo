@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Analytics Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
+<script src="program-switcher.js"></script>
 <style>
   :root {
     --slds-blue-brand: #0176D3;
@@ -206,94 +207,6 @@
   .role-text .user-role {
     color: rgba(255, 255, 255, 0.75);
     font-size: 11px;
-  }
-
-  /* -- PROGRAM SWITCHER (Tenant) -- */
-  .tenant-switcher {
-    position: relative;
-    margin-left: 32px;
-  }
-
-  .tenant-switcher-btn {
-    background: transparent;
-    color: var(--slds-white);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 16px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-
-  .tenant-switcher-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-  }
-
-  .tenant-switcher-dropdown {
-    display: none;
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    background: var(--slds-white);
-    border: 1px solid var(--slds-border);
-    border-radius: var(--slds-radius);
-    box-shadow: 0 10px 15px rgba(0,0,0,0.15);
-    min-width: 320px;
-    z-index: 200;
-    overflow: hidden;
-  }
-
-  .tenant-switcher-dropdown.show { display: block; }
-
-  .tenant-group-header {
-    padding: 8px 16px;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--slds-text-label);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--slds-border);
-    background: var(--slds-bg-alt);
-  }
-
-  .tenant-option {
-    padding: 10px 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    transition: all 0.1s;
-  }
-
-  .tenant-option:hover { background: #E8F4FD; }
-  .tenant-option.active { background: #F3F7FB; }
-
-  .tenant-option .tenant-check {
-    width: 16px;
-    color: var(--slds-blue-brand);
-    font-weight: 700;
-    font-size: 14px;
-  }
-
-  .tenant-option .tenant-info { flex: 1; }
-
-  .tenant-option .tenant-name {
-    color: var(--slds-text-dark);
-    font-weight: 600;
-    font-size: 13px;
-  }
-
-  .tenant-option .tenant-detail {
-    font-size: 11px;
-    color: var(--slds-text-label);
-    margin-top: 1px;
   }
 
   /* -- MAIN CONTENT -- */
@@ -961,52 +874,7 @@
     <span>LexiPoint</span>
   </div>
 
-  <div class="tenant-switcher">
-    <button class="tenant-switcher-btn" onclick="document.querySelector('.tenant-switcher-dropdown').classList.toggle('show')">
-      <span id="tenantLabel">ODH &middot; Hospital Licensing</span> <span style="font-size: 10px;">&blacktriangledown;</span>
-    </button>
-    <div class="tenant-switcher-dropdown">
-      <div class="tenant-group-header">Ohio Department of Health</div>
-      <div class="tenant-option active" data-program="hosp-licensing" onclick="switchProgram('hosp-licensing')">
-        <span class="tenant-check">&check;</span>
-        <div class="tenant-info">
-          <div class="tenant-name">Hospital Licensing</div>
-          <div class="tenant-detail">HEA-3614 &middot; 23 rules</div>
-        </div>
-      </div>
-      <div class="tenant-option" data-program="snap" onclick="switchProgram('snap')">
-        <span class="tenant-check"></span>
-        <div class="tenant-info">
-          <div class="tenant-name">SNAP Benefits</div>
-          <div class="tenant-detail">SNAP-OH &middot; 183 rules</div>
-        </div>
-      </div>
-      <div class="tenant-group-header">Kentucky CHFS</div>
-      <div class="tenant-option" data-program="nursing-home" onclick="switchProgram('nursing-home')">
-        <span class="tenant-check"></span>
-        <div class="tenant-info">
-          <div class="tenant-name">Nursing Home Licensing</div>
-          <div class="tenant-detail">NH-902 &middot; 8 rules</div>
-        </div>
-      </div>
-      <div class="tenant-group-header">Michigan LARA</div>
-      <div class="tenant-option" data-program="contractor-licensing" onclick="switchProgram('contractor-licensing')">
-        <span class="tenant-check"></span>
-        <div class="tenant-info">
-          <div class="tenant-name">Contractor Licensing</div>
-          <div class="tenant-detail">MCL-339 &middot; 100 rules</div>
-        </div>
-      </div>
-      <div class="tenant-group-header">Ohio ODJFS</div>
-      <div class="tenant-option" data-program="childcare-licensing" onclick="switchProgram('childcare-licensing')">
-        <span class="tenant-check"></span>
-        <div class="tenant-info">
-          <div class="tenant-name">Child Care Facility Licensing</div>
-          <div class="tenant-detail">ORC-5104 &middot; 113 rules</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="programSwitcherMount" class="tenant-switcher"></div>
 
   <div class="nav-spacer"></div>
 
@@ -1225,21 +1093,6 @@
   let cachedRules = [];
   let isRefreshing = false;
 
-  const PROGRAM_CONFIG = {
-    'hosp-licensing':       { tenant: 'ohio-odh',     abbr: 'ODH',   name: 'Ohio Department of Health',                   programName: 'Hospital Licensing',            userId: 'user-001', ruleCount: 26 },
-    'snap':                 { tenant: 'ohio-odh',     abbr: 'ODH',   name: 'Ohio Department of Health',                   programName: 'SNAP Benefits',                 userId: 'user-001', ruleCount: 183 },
-    'nursing-home':         { tenant: 'ky-chfs',      abbr: 'CHFS',  name: 'Kentucky CHFS',                               programName: 'Nursing Home Licensing',         userId: 'user-101', ruleCount: 8 },
-    'contractor-licensing': { tenant: 'michigan-lara', abbr: 'LARA', name: 'Michigan LARA Bureau of Construction Codes',  programName: 'Contractor Licensing',          userId: 'user-201', ruleCount: 100 },
-    'childcare-licensing':  { tenant: 'ohio-odjfs',   abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',        programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113 }
-  };
-
-  const USER_DISPLAY = {
-    'user-001': { name: 'Sarah Chen',        initials: 'SC', role: 'Publisher' },
-    'user-101': { name: 'Maria Torres',      initials: 'MT', role: 'Publisher' },
-    'user-201': { name: 'James Wilson',      initials: 'JW', role: 'Publisher' },
-    'user-301': { name: 'Michelle Thompson', initials: 'MT', role: 'Publisher' }
-  };
-
   // ============================================================
   //  SUPABASE CLIENT
   // ============================================================
@@ -1268,13 +1121,7 @@
     const config = PROGRAM_CONFIG[programId];
     const user = USER_DISPLAY[config.userId];
 
-    // Update dropdown UI
-    document.getElementById('tenantLabel').textContent = `${config.abbr} \u00B7 ${config.programName}`;
-    document.querySelectorAll('.tenant-option').forEach(opt => {
-      opt.classList.toggle('active', opt.dataset.program === programId);
-      opt.querySelector('.tenant-check').textContent = opt.dataset.program === programId ? '\u2713' : '';
-    });
-    document.querySelector('.tenant-switcher-dropdown').classList.remove('show');
+    updateSwitcherUI(programId);
 
     // Update user indicator
     document.getElementById('userName').textContent = user.name;
@@ -1286,11 +1133,8 @@
     loadDashboardData();
   }
 
-  // Close dropdown when clicking outside
+  // Close notification dropdown when clicking outside (switcher handled by program-switcher.js)
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.tenant-switcher')) {
-      document.querySelector('.tenant-switcher-dropdown')?.classList.remove('show');
-    }
     if (!e.target.closest('.notification-bell')) {
       document.querySelector('.notification-dropdown')?.classList.remove('show');
     }
@@ -1762,6 +1606,7 @@
   //  INIT
   // ============================================================
   document.addEventListener('DOMContentLoaded', () => {
+    renderProgramSwitcher(currentProgram);
     loadDashboardData();
   });
 </script>

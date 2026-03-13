@@ -27,6 +27,7 @@ lexipoint-demo/
 ├── ontology.html       # Ontology Manager – rule CRUD, 7-tab detail panel, Supabase write-back
 ├── dashboard.html      # Analytics Dashboard – metrics, charts, activity table from audit_log
 ├── audit-log.html      # Audit Log – filterable/paginated table with stats
+├── program-switcher.js # SHARED – PROGRAM_CONFIG, USER_DISPLAY, renderProgramSwitcher(), updateSwitcherUI()
 ├── vercel.json         # Vercel config
 ├── database/
 │   ├── 01_create_tables.sql        # Schema definition (11 tables)
@@ -46,7 +47,7 @@ Every table has `tenant_id`. Programs live within tenants. Each HTML file has a 
 ```javascript
 const PROGRAM_CONFIG = {
   'hosp-licensing':       { tenant: 'ohio-odh',    abbr: 'ODH',   name: 'Ohio Department of Health',                    programName: 'Hospital Licensing',            userId: 'user-001', ruleCount: 26 },
-  'snap':                 { tenant: 'ohio-odh',    abbr: 'ODH',   name: 'Ohio Department of Health',                    programName: 'SNAP Benefits',                 userId: 'user-001', ruleCount: 183 },
+  'snap':                 { tenant: 'ohio-odjfs',  abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',         programName: 'SNAP Benefits',                 userId: 'user-301', ruleCount: 183 },
   'nursing-home':         { tenant: 'ky-chfs',     abbr: 'CHFS',  name: 'Kentucky CHFS',                                programName: 'Nursing Home Licensing',         userId: 'user-101', ruleCount: 8 },
   'contractor-licensing': { tenant: 'michigan-lara', abbr: 'LARA', name: 'Michigan LARA Bureau of Construction Codes',  programName: 'Contractor Licensing',          userId: 'user-201', ruleCount: 100 },
   'childcare-licensing':  { tenant: 'ohio-odjfs',  abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',         programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113 }
@@ -64,7 +65,7 @@ Dark navy header (#032D60) with:
 4. Notification bell with dropdown
 5. User indicator (Sarah Chen / SC for Ohio, Maria Torres / MT for Kentucky)
 
-When adding a new program, ALL 4 HTML files need their PROGRAM_CONFIG and tenant-switcher dropdown updated.
+When adding a new program, edit **only `program-switcher.js`** — the HTML files load it as a shared asset. Also run the SQL migration on Supabase.
 
 ## SLDS Color Tokens
 
