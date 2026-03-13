@@ -2241,15 +2241,16 @@ class LexiPointAPI {
 
     if (conditions.length === 0) { this.clearCache(); return []; }
 
+    // Normalize UI value_type values to DB-canonical values
+    const vtMap = { text: 'string', number: 'integer' };
+
     const rows = conditions.map((c, i) => ({
-      condition_id: `cond-${ruleId}-${String(i + 1).padStart(2, '0')}`,
       rule_id: ruleId,
-      tenant_id: tenantId,
       field: c.field,
       operator: c.operator,
       value: String(c.value ?? ''),
-      value_type: c.value_type || 'text',
-      order: i + 1
+      value_type: vtMap[c.value_type] || c.value_type || 'string',
+      "order": i + 1
     }));
 
     const insUrl = `${SUPABASE_URL}/rest/v1/rule_conditions`;
@@ -2999,16 +3000,15 @@ async function executeSave() {
     // 2. Persist condition changes to Supabase
     if (conditionsChanged) {
       await lexipoint.saveConditions(currentRule.rule_id, config.tenant, newConditions);
-      // Update rawConditions so subsequent saves detect the new baseline correctly
+      // Update rawConditions in UI-canonical format (operator/valueType as UI values)
+      // so cbConditionsChanged() compares apples-to-apples on the next save.
       cbState.rawConditions = newConditions.map((c, i) => ({
-        condition_id: `cond-${currentRule.rule_id}-${String(i + 1).padStart(2, '0')}`,
         rule_id: currentRule.rule_id,
-        tenant_id: config.tenant,
         field: c.field,
         operator: c.operator,
         value: c.value,
         value_type: c.value_type,
-        order: c.order
+        order: i + 1
       }));
     }
 
@@ -3420,6 +3420,10 @@ function cbInitialize(conditions, rule) {
   cbState.testCases = [];
   cbState.lastTestResult = null;
 
+  // Normalize DB operator/value_type values to UI-canonical values on load
+  const opNorm  = { '==': '=', 'CONTAINS': 'contains' };
+  const vtNorm  = { string: 'text', integer: 'number', decimal: 'number' };
+
   // Convert flat conditions into a single AND group
   if (conditions.length > 0) {
     cbState.groups = [{
@@ -3428,9 +3432,9 @@ function cbInitialize(conditions, rule) {
       conditions: conditions.map(c => ({
         id: cbState.nextId++,
         field: c.field,
-        operator: c.operator,
+        operator: opNorm[c.operator] ?? c.operator,
         value: c.value,
-        valueType: c.value_type || 'text',
+        valueType: vtNorm[c.value_type] ?? c.value_type ?? 'text',
         editing: false,
         source: 'db'
       }))
