@@ -156,6 +156,7 @@
 
 <!-- ══════════════════════════════════════════ PAGE 1: INTAKE ══════════════════════════════════════════ -->
 <div class="container page visible" id="page-intake">
+<div class="page-wrap">
   <div class="page-header">
     <h1>Hospital Capacity Change Request</h1>
     <p>Ohio Department of Health | Policy Decision Point Evaluation</p>
@@ -354,6 +355,7 @@
     <button class="btn-ghost" onclick="clearForm()">Clear Form</button>
     <button class="btn-primary" onclick="startEvaluation()">▶ Evaluate Capacity Change</button>
   </div>
+</div>
 </div>
 
 <!-- ══════════════════════════════════════════ PAGE 2: EVALUATION ══════════════════════════════════════════ -->
@@ -1545,7 +1547,6 @@ function animatePhases(index) {
 
 function buildResults() {
   const name = document.getElementById('f_name').value;
-  document.getElementById('res-hospital-name').textContent = name;
 
   // Count results
   let passed = 0, flagged = 0, blocked = 0, skipped = 0;
@@ -1600,17 +1601,17 @@ function buildResults() {
     banner.classList.add('decision-denied');
     icon.textContent = '🚫';
     title.textContent = 'CAPACITY CHANGE: BLOCKED';
-    subtitle.textContent = `${blocked} blocking condition(s) must be resolved before this change can proceed.`;
+    subtitle.textContent = `${name} — ${blocked} blocking condition(s) must be resolved before this change can proceed.`;
   } else if (flagged > 0) {
     banner.classList.add('decision-conditions');
     icon.textContent = '✅';
     title.textContent = 'CAPACITY CHANGE: APPROVED WITH CONDITIONS';
-    subtitle.textContent = `${flagged} action item(s) required. See compliance checklist below.`;
+    subtitle.textContent = `${name} — ${flagged} action item(s) required. See compliance checklist below.`;
   } else {
     banner.classList.add('decision-approved');
     icon.textContent = '✅';
     title.textContent = 'CAPACITY CHANGE: APPROVED';
-    subtitle.textContent = 'All regulatory requirements satisfied.';
+    subtitle.textContent = `${name} — All regulatory requirements satisfied.`;
   }
 
   // Triggered rules list

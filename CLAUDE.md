@@ -148,6 +148,27 @@ This is a **demo project** — not production. All data is publicly available re
 - `rm -rf` or any bulk file deletion
 - Anything that writes to or migrates the Supabase database directly (use Supabase MCP instead)
 
+## Merge Workflow (PR-based)
+
+All changes to `main` go through a pull request. Direct pushes to `main` are blocked by branch protection.
+
+**Standard flow for every task:**
+1. `/new-branch` — create a feature branch from clean main
+2. Make changes, commit (running `/ui-check` first per the pre-commit gate below)
+3. `git push origin <branch-name>` (auto-approved)
+4. `gh pr create` — open a PR; share the URL with Kevin
+5. Kevin reviews the diff on GitHub
+6. Merge via `gh pr merge <number> --merge` or GitHub UI — **always ask Kevin before running this**
+7. After merge: automatically run `/demo-ready` and report results
+
+**Branch naming conventions:**
+- `feature/` — new functionality
+- `fix/` — bug fixes
+- `chore/` — repo maintenance, tooling, non-functional changes
+- `data/` — database migrations or seed data changes only
+
+Never open a PR from `main`. Never merge your own PR without Kevin's explicit approval.
+
 ## Critical Rules
 
 1. **No external JS files** – all Supabase API code is inlined in each HTML file
