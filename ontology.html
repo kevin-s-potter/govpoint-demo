@@ -606,6 +606,9 @@ async function init() {
 
   // Render initial D3 graph — always execute even if event listeners had issues
   await renderDependencyGraph();
+
+  // Auto-select first rule so tabs are visible on load
+  if (rules.length > 0) await selectRule(rules[0].rule_id);
 }
 
 // ── WHAT'S CHANGED (live from audit_log) ─────────────────────

@@ -45,15 +45,18 @@ async function renderDependencyGraph() {
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius(35));
 
+    // Single container group — zoom applies to this one group only (correct D3 pattern)
+    const container = svg.append('g').attr('class', 'd3-container');
+
     // Add links
-    const link = svg.append('g').attr('class', 'd3-links').selectAll('line')
+    const link = container.append('g').attr('class', 'd3-links').selectAll('line')
       .data(links)
       .enter().append('line')
       .attr('class', d => `d3-link ${d.type}`)
       .attr('stroke-width', 1.5)
       .attr('marker-end', 'url(#arrowhead)');
 
-    // Add arrow marker
+    // Add arrow marker (outside container — defs are coordinate-independent)
     svg.append('defs').append('marker')
       .attr('id', 'arrowhead')
       .attr('markerWidth', 10)
@@ -66,7 +69,7 @@ async function renderDependencyGraph() {
       .attr('fill', '#999');
 
     // Add nodes
-    const node = svg.append('g').attr('class', 'd3-nodes').selectAll('circle')
+    const node = container.append('g').attr('class', 'd3-nodes').selectAll('circle')
       .data(nodes)
       .enter().append('circle')
       .attr('class', 'd3-node')
@@ -127,7 +130,7 @@ async function renderDependencyGraph() {
         .on('end', dragEnded));
 
     // Add labels below nodes for readability
-    const labels = svg.append('g').attr('class', 'd3-labels').selectAll('text')
+    const labels = container.append('g').attr('class', 'd3-labels').selectAll('text')
       .data(nodes)
       .enter().append('text')
       .attr('font-size', '12px')
@@ -158,11 +161,23 @@ async function renderDependencyGraph() {
       .attr('font-family', "'Salesforce Sans', 'Inter', -apple-system, sans-serif")
       .text('Hover to highlight connections · Click to open rule · Scroll to zoom');
 
-    // Add zoom
+    // Add zoom — applied to single container group only
     const zoom = d3.zoom().on('zoom', (e) => {
-      svg.selectAll('g').attr('transform', e.transform);
+      container.attr('transform', e.transform);
     });
     svg.call(zoom);
+
+    // Fit view once simulation settles
+    simulation.on('end', () => {
+      const xs = nodes.map(d => d.x), ys = nodes.map(d => d.y);
+      const x0 = Math.min(...xs), x1 = Math.max(...xs);
+      const y0 = Math.min(...ys), y1 = Math.max(...ys);
+      const dx = x1 - x0 || 1, dy = y1 - y0 || 1;
+      const scale = Math.min(0.85 / (dx / width), 0.85 / (dy / height), 1.5);
+      const tx = width / 2 - scale * (x0 + dx / 2);
+      const ty = height / 2 - scale * (y0 + dy / 2);
+      svg.call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+    });
 
     // Update positions on simulation tick
     simulation.on('tick', () => {
