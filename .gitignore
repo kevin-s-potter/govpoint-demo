@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Generated script output — not source code
+scripts/*.json
+
+# Supabase CLI temp files
+supabase/.temp/
+
+# Environment / secrets (never commit)
+.env
+.env.local
+
+# Node (if ever added)
+node_modules/

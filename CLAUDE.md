@@ -126,6 +126,28 @@ async function query(table, params = '') {
 }
 ```
 
+## Bash Command Permissions
+
+This is a **demo project** — not production. All data is publicly available regulatory/government data. Proceed without asking for approval on the following:
+
+**Auto-approved (run without confirmation):**
+- All `git` commands: `status`, `diff`, `log`, `branch`, `checkout`, `add`, `commit`, `rebase`, `stash`, `pull`
+- `git push` to any branch **other than main**
+- File inspection: `ls`, `cat`, `head`, `tail`, `wc`, `find`, `grep`
+- `open` to preview files/URLs in browser
+- `cp`, `mv`, `mkdir` for local file operations
+- Vercel CLI: `vercel`, `vercel deploy`, `vercel ls`
+- `curl` for read-only API checks (GET requests only)
+- `node`, `npm` if needed for scripting
+
+**Always ask before running:**
+- Any command that calls the **Claude/Anthropic API** — API usage is metered on a tight budget
+- `git push origin main` or any direct push to main
+- `git merge` into main (any form) — merging to main triggers a live Vercel deploy; after user approves and merge completes, automatically run `/demo-ready` and report results
+- `git reset --hard`
+- `rm -rf` or any bulk file deletion
+- Anything that writes to or migrates the Supabase database directly (use Supabase MCP instead)
+
 ## Critical Rules
 
 1. **No external JS files** – all Supabase API code is inlined in each HTML file
@@ -181,6 +203,18 @@ The demo should make buyers feel:
 - "This could plug into what we already have"
 
 The ontology manager is the key differentiator to show IT buyers — it proves the rules are transparent, editable, and versioned, not a black box.
+
+## Pre-Commit Gate (mandatory)
+
+**Before any `git commit`, you must:**
+
+1. Run `/ui-check` as a background subagent
+2. If all checks PASS: commit silently, no need to notify the user
+3. If there are FAIL results: fix them, re-run the check, then commit silently if clean
+4. If there are WARN results you cannot resolve: stop, show the user the full report, and wait for explicit approval before committing
+5. Never commit with unresolved FAILs
+
+This applies to every agent working in this repo, no exceptions.
 
 ## Adding a New Program (checklist)
 
