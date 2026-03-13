@@ -32,7 +32,9 @@ lexipoint-demo/
 │   ├── 01_create_tables.sql        # Schema definition (11 tables)
 │   ├── 02_seed_data.sql            # Ohio hospital licensing seed data
 │   ├── 04_add_kentucky_tenant.sql  # Kentucky nursing home program
-│   └── 07_snap_ohio_rules.sql      # SNAP benefits – 183 rules (137 federal 7 CFR 271-283 + 46 Ohio OAC 5101:4), 510 conditions, 152 dependencies
+│   ├── 07_snap_ohio_rules.sql      # SNAP benefits – 183 rules (137 federal 7 CFR 271-283 + 46 Ohio OAC 5101:4), 510 conditions, 152 dependencies
+│   ├── 08_michigan_contractor_rules.sql  # Michigan contractor licensing – 100 rules, 350 conditions, 102 dependencies
+│   └── 09_ohio_childcare_rules.sql       # Ohio child care facility licensing – 113 rules, 393 conditions, 111 dependencies
 └── data/
     └── schema.json     # Reference data model (JSON)
 ```
@@ -43,9 +45,11 @@ Every table has `tenant_id`. Programs live within tenants. Each HTML file has a 
 
 ```javascript
 const PROGRAM_CONFIG = {
-  'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 23 },
-  'snap':           { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'SNAP Benefits',      userId: 'user-001', ruleCount: 183 },
-  'nursing-home':   { tenant: 'ky-chfs',  abbr: 'CHFS', name: 'Kentucky CHFS',            programName: 'Nursing Home Licensing', userId: 'user-101', ruleCount: 8 }
+  'hosp-licensing':       { tenant: 'ohio-odh',    abbr: 'ODH',   name: 'Ohio Department of Health',                    programName: 'Hospital Licensing',            userId: 'user-001', ruleCount: 26 },
+  'snap':                 { tenant: 'ohio-odh',    abbr: 'ODH',   name: 'Ohio Department of Health',                    programName: 'SNAP Benefits',                 userId: 'user-001', ruleCount: 183 },
+  'nursing-home':         { tenant: 'ky-chfs',     abbr: 'CHFS',  name: 'Kentucky CHFS',                                programName: 'Nursing Home Licensing',         userId: 'user-101', ruleCount: 8 },
+  'contractor-licensing': { tenant: 'michigan-lara', abbr: 'LARA', name: 'Michigan LARA Bureau of Construction Codes',  programName: 'Contractor Licensing',          userId: 'user-201', ruleCount: 100 },
+  'childcare-licensing':  { tenant: 'ohio-odjfs',  abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',         programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113 }
 };
 ```
 
@@ -89,18 +93,19 @@ tenants ──┬── programs ──── rules ───┬── rule_cond
 ```
 
 ### Current data
-- 2 tenants: `ohio-odh` (Ohio Dept of Health), `ky-chfs` (Kentucky CHFS)
-- 3 programs: Hospital Licensing (23 rules), SNAP Benefits (183 rules active — 137 federal + 46 Ohio), Nursing Home Licensing (8 rules)
-- 214 total rules
+- 4 tenants: `ohio-odh` (Ohio Dept of Health), `ky-chfs` (Kentucky CHFS), `michigan-lara` (Michigan LARA), `ohio-odjfs` (Ohio ODJFS)
+- 5 programs: Hospital Licensing (26 rules), SNAP Benefits (183 rules), Nursing Home Licensing (8 rules), Contractor Licensing (100 rules), Child Care Facility Licensing (113 rules)
+- 430 total rules
 - SNAP rule IDs: `SNAP-FED-001` – `SNAP-FED-200` (federal), `SNAP-OH-001` – `SNAP-OH-109` (Ohio)
-- SNAP conditions: 510 | SNAP dependencies: 152 | source: `snap_ohio_ontology.json` (FY2026)
+- Michigan contractor rule IDs: `CL-FED-001` – `CL-MI-ADM-xxx` | conditions: 350 | dependencies: 102 | source: `contractor_michigan_ontology.json`
+- Ohio child care rule IDs: `CC-FED-001` – `CC-OH-SUTQ-xxx` | conditions: 393 | dependencies: 111 | source: `childcare_ohio_ontology.json`
 
 ### ID conventions
-- `rule_id`: prefix + number — Hospital: `OH-001`, Nursing Home: `NH-001`, SNAP federal: `SNAP-FED-001`, SNAP Ohio: `SNAP-OH-001`
+- `rule_id`: prefix + number — Hospital: `OH-001`, Nursing Home: `NH-001`, SNAP federal: `SNAP-FED-001`, SNAP Ohio: `SNAP-OH-001`, Michigan contractor: `CL-FED-001`/`CL-MI-001`, Ohio child care: `CC-FED-001`/`CC-OH-001`
 - `condition_id`: cond-{rule_id}-{seq} (cond-OH-001-01)
 - `dep_id`: dep-{rule_id}-{seq}
 - `status` values: always **lowercase** – 'active', 'draft', 'review', 'sunset'
-- User IDs: user-001 to user-003 (Ohio), user-101 to user-102 (Kentucky)
+- User IDs: user-001 to user-003 (Ohio ODH), user-101 to user-102 (Kentucky CHFS), user-201 to user-202 (Michigan LARA), user-301 to user-302 (Ohio ODJFS)
 - Timestamps: ISO format with timezone (-05 for Eastern)
 
 ### Supabase query pattern
