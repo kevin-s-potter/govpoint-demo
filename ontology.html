@@ -2932,11 +2932,7 @@ async function saveRule() {
     }
   }
 
-  // Detect condition changes independently of Overview field changes
-  const conditionsChanged = cbConditionsChanged();
-  const newConditions = conditionsChanged ? cbGetCurrentConditions() : [];
-
-  if (changes.length === 0 && !conditionsChanged) {
+  if (changes.length === 0) {
     showToast('No changes to save');
     return;
   }
@@ -2944,20 +2940,9 @@ async function saveRule() {
   // Populate and show pre-flight modal
   const deps = await lexipoint.getDependencies(currentRule.rule_id);
 
-  let preflightHtml = changes.map(c =>
+  document.getElementById('preflightChanges').innerHTML = changes.map(c =>
     `<div class="impact-item"><strong>${c.label}:</strong> <span style="color:var(--slds-error);text-decoration:line-through;">${c.from || '(none)'}</span> → <span style="color:var(--slds-success);">${c.to}</span></div>`
   ).join('');
-
-  if (conditionsChanged) {
-    const rawCount = (cbState.rawConditions || []).length;
-    const newCount = newConditions.length;
-    const condDetail = newConditions.map(c =>
-      `<div style="font-size:11px;color:var(--text-secondary);margin-left:8px;">• ${c.field} ${c.operator} ${c.value}</div>`
-    ).join('');
-    preflightHtml += `<div class="impact-item"><strong>CONDITIONS:</strong> <span style="color:var(--slds-error);text-decoration:line-through;">${rawCount} condition${rawCount !== 1 ? 's' : ''}</span> → <span style="color:var(--slds-success);">${newCount} condition${newCount !== 1 ? 's' : ''}</span>${condDetail}</div>`;
-  }
-
-  document.getElementById('preflightChanges').innerHTML = preflightHtml;
 
   const depsEl = document.getElementById('preflightDeps');
   if (deps.dependedOnBy.length > 0) {
@@ -2970,9 +2955,7 @@ async function saveRule() {
 
   preflightPendingAction = {
     fields,
-    changes: changes.map(c => `${c.label}: "${c.from}" → "${c.to}"`),
-    conditionsChanged,
-    newConditions
+    changes: changes.map(c => `${c.label}: "${c.from}" → "${c.to}"`)
   };
   document.getElementById('preflightModal').classList.add('active');
 }
@@ -2981,7 +2964,7 @@ async function saveRule() {
 async function executeSave() {
   const pending = preflightPendingAction;
   if (!pending || !currentRule) return;
-  const { fields, changes, conditionsChanged, newConditions } = pending;
+  const { fields, changes } = pending;
   preflightPendingAction = null;
   document.getElementById('preflightModal').classList.remove('active');
 
@@ -2997,29 +2980,10 @@ async function executeSave() {
       updated = await lexipoint.updateRule(currentRule.rule_id, fields);
     }
 
-    // 2. Persist condition changes to Supabase
-    if (conditionsChanged) {
-      await lexipoint.saveConditions(currentRule.rule_id, config.tenant, newConditions);
-      // Update rawConditions in UI-canonical format (operator/valueType as UI values)
-      // so cbConditionsChanged() compares apples-to-apples on the next save.
-      cbState.rawConditions = newConditions.map((c, i) => ({
-        rule_id: currentRule.rule_id,
-        field: c.field,
-        operator: c.operator,
-        value: c.value,
-        value_type: c.value_type,
-        order: i + 1
-      }));
-    }
-
-    // 3. Write audit entry covering all changes
-    const auditParts = [...changes];
-    if (conditionsChanged) {
-      auditParts.push(`CONDITIONS: ${newConditions.length} condition${newConditions.length !== 1 ? 's' : ''} saved`);
-    }
+    // 2. Write audit entry
     await lexipoint.addAuditEntry(
       config.tenant, config.userId, 'publisher', 'edit_rule',
-      'rule', currentRule.rule_id, auditParts.join('; ')
+      'rule', currentRule.rule_id, changes.join('; ')
     );
 
     currentRule = updated;
@@ -3034,8 +2998,7 @@ async function executeSave() {
     document.getElementById('detailCitation').textContent = updated.citation || '';
     document.getElementById('detailVersion').textContent = `v${updated.version}`;
 
-    const savedCount = changes.length + (conditionsChanged ? 1 : 0);
-    showToast(`Saved ${savedCount} change${savedCount !== 1 ? 's' : ''} to ${updated.rule_id}`);
+    showToast(`Saved ${changes.length} change${changes.length !== 1 ? 's' : ''} to ${updated.rule_id}`);
 
     // ── Live Evaluation Bridge ──────────────────────────────────────
     // Mirror saved conditions to localStorage so index.html picks them up immediately.
@@ -3508,7 +3471,7 @@ function cbRender() {
         }
         html += `<span class="cb-type-badge">${fieldDef.type}</span>`;
         html += `<div class="cb-row-actions">
-          <button class="cb-btn-sm cb-btn-edit" onclick="cbToggleEdit(${group.id}, ${cond.id})">Done</button>
+          <button class="cb-btn-sm" style="background:var(--slds-success);color:#fff;border:none;" onclick="cbSaveCondition(${group.id}, ${cond.id})">Save</button>
           <button class="cb-btn-sm cb-btn-remove" onclick="cbRemoveCondition(${group.id}, ${cond.id})">✕</button>
         </div>`;
         html += `</div>`;
@@ -3615,11 +3578,65 @@ function cbAddConditionToGroup(groupId) {
   cbRender();
 }
 
-function cbRemoveCondition(groupId, condId) {
+async function cbRemoveCondition(groupId, condId) {
   const group = cbState.groups.find(g => g.id === groupId);
   if (!group) return;
   group.conditions = group.conditions.filter(c => c.id !== condId);
   cbRender();
+  try {
+    await cbPersistConditions('Condition removed');
+    showToast('Condition removed');
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+  }
+}
+
+// ── Shared helper: persist current cbState conditions to Supabase ──
+async function cbPersistConditions(auditSummary) {
+  if (!currentRule) return;
+  const config = PROGRAM_CONFIG[currentProgram];
+  const conditions = cbGetCurrentConditions();
+  await lexipoint.saveConditions(currentRule.rule_id, config.tenant, conditions);
+  cbState.rawConditions = conditions.map((c, i) => ({
+    rule_id: currentRule.rule_id,
+    field: c.field,
+    operator: c.operator,
+    value: c.value,
+    value_type: c.value_type,
+    order: i + 1
+  }));
+  await lexipoint.addAuditEntry(
+    config.tenant, config.userId, 'publisher', 'edit_rule',
+    'rule', currentRule.rule_id, auditSummary
+  );
+  try {
+    localStorage.setItem(`lp_live_conds_${currentRule.rule_id}`, JSON.stringify(conditions));
+  } catch (e) {}
+}
+
+// ── Row-level Save: persist a single condition edit immediately ──
+async function cbSaveCondition(groupId, condId) {
+  const group = cbState.groups.find(g => g.id === groupId);
+  if (!group) return;
+  const cond = group.conditions.find(c => c.id === condId);
+  if (!cond) return;
+
+  if (!cond.field || String(cond.value).trim() === '') {
+    showToast('Field and value are required before saving');
+    return;
+  }
+
+  cond.editing = false;
+  cond.source = cond.source === 'ai' ? 'accepted' : 'user';
+  cbRender();
+
+  try {
+    await cbPersistConditions(`Condition saved: ${cond.field} ${cond.operator} ${cond.value}`);
+    showToast('Condition saved');
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[cbSaveCondition] Failed:', e);
+  }
 }
 
 function cbRemoveGroup(groupId) {
