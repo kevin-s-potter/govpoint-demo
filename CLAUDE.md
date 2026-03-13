@@ -185,7 +185,9 @@ The ontology manager is the key differentiator to show IT buyers — it proves t
 ## Adding a New Program (checklist)
 
 1. Create SQL file: `database/XX_add_<program>.sql` with INSERTs for programs, rules, rule_conditions, rule_dependencies, audit_log, notifications
-2. Add PROGRAM_CONFIG entry to all 4 HTML files
-3. Add tenant-switcher dropdown option to all 4 HTML files
-4. Update USER_DISPLAY if new tenant needs new users
-5. Test that program switcher loads data correctly on all pages
+2. Update `program-switcher.js` (the only file that needs editing for the switcher):
+   - Add entry to `PROGRAM_CONFIG`
+   - Add entry to `PROGRAM_DETAIL_LABELS`
+   - Add program ID to the correct group in `TENANT_GROUPS` (or add a new group)
+   - Add entry to `USER_DISPLAY` if the new tenant has new users
+3. Test that the program switcher loads data correctly on all 4 pages
