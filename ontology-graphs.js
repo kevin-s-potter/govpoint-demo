@@ -167,16 +167,17 @@ async function renderDependencyGraph() {
     });
     svg.call(zoom);
 
-    // Fit view once simulation settles
+    // Fit view once simulation settles — scale down to fit if needed, never zoom in past 0.85x
     simulation.on('end', () => {
       const xs = nodes.map(d => d.x), ys = nodes.map(d => d.y);
       const x0 = Math.min(...xs), x1 = Math.max(...xs);
       const y0 = Math.min(...ys), y1 = Math.max(...ys);
       const dx = x1 - x0 || 1, dy = y1 - y0 || 1;
-      const scale = Math.min(0.85 / (dx / width), 0.85 / (dy / height), 1.5);
+      const scale = Math.min(0.75 / (dx / width), 0.75 / (dy / height), 0.85);
       const tx = width / 2 - scale * (x0 + dx / 2);
       const ty = height / 2 - scale * (y0 + dy / 2);
-      svg.call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+      svg.transition().duration(600)
+        .call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
     });
 
     // Update positions on simulation tick
