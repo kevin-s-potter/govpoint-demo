@@ -305,6 +305,22 @@
           <div class="tenant-detail">NH-902 · 8 rules</div>
         </div>
       </div>
+      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--light-gray); border-top: 1px solid var(--light-gray);">Michigan LARA</div>
+      <div class="tenant-option" data-program="contractor-licensing" onclick="switchProgram('contractor-licensing')">
+        <span class="tenant-check"></span>
+        <div class="tenant-info">
+          <div class="tenant-name">Contractor Licensing</div>
+          <div class="tenant-detail">MCL-339 · 100 rules</div>
+        </div>
+      </div>
+      <div style="padding: 8px 16px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--light-gray); border-top: 1px solid var(--light-gray);">Ohio ODJFS</div>
+      <div class="tenant-option" data-program="childcare-licensing" onclick="switchProgram('childcare-licensing')">
+        <span class="tenant-check"></span>
+        <div class="tenant-info">
+          <div class="tenant-name">Child Care Facility Licensing</div>
+          <div class="tenant-detail">ORC-5104 · 113 rules</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -674,14 +690,18 @@
 let currentProgram = 'hosp-licensing';
 
 const PROGRAM_CONFIG = {
-  'hosp-licensing': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'Hospital Licensing', userId: 'user-001', ruleCount: 26 },
-  'snap': { tenant: 'ohio-odh', abbr: 'ODH', name: 'Ohio Department of Health', programName: 'SNAP Benefits', userId: 'user-001', ruleCount: 183 },
-  'nursing-home': { tenant: 'ky-chfs', abbr: 'CHFS', name: 'Kentucky CHFS', programName: 'Nursing Home Licensing', userId: 'user-101', ruleCount: 8 }
+  'hosp-licensing':       { tenant: 'ohio-odh',     abbr: 'ODH',   name: 'Ohio Department of Health',                   programName: 'Hospital Licensing',            userId: 'user-001', ruleCount: 26 },
+  'snap':                 { tenant: 'ohio-odh',     abbr: 'ODH',   name: 'Ohio Department of Health',                   programName: 'SNAP Benefits',                 userId: 'user-001', ruleCount: 183 },
+  'nursing-home':         { tenant: 'ky-chfs',      abbr: 'CHFS',  name: 'Kentucky CHFS',                               programName: 'Nursing Home Licensing',         userId: 'user-101', ruleCount: 8 },
+  'contractor-licensing': { tenant: 'michigan-lara', abbr: 'LARA', name: 'Michigan LARA Bureau of Construction Codes',  programName: 'Contractor Licensing',          userId: 'user-201', ruleCount: 100 },
+  'childcare-licensing':  { tenant: 'ohio-odjfs',   abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',        programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113 }
 };
 
 const USER_DISPLAY = {
-  'user-001': { name: 'Sarah Chen', initials: 'SC', role: 'Publisher' },
-  'user-101': { name: 'Maria Torres', initials: 'MT', role: 'Publisher' }
+  'user-001': { name: 'Sarah Chen',        initials: 'SC', role: 'Publisher' },
+  'user-101': { name: 'Maria Torres',      initials: 'MT', role: 'Publisher' },
+  'user-201': { name: 'James Wilson',      initials: 'JW', role: 'Publisher' },
+  'user-301': { name: 'Michelle Thompson', initials: 'MT', role: 'Publisher' }
 };
 
 // ══════════════════════════════════════════ PROGRAM SWITCHER ══════════════════════════════════════════
