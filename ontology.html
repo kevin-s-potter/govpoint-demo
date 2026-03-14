@@ -285,8 +285,8 @@
       <div id="preflightDeps"></div>
     </div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--slds-border);">
-      <button id="preflightCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
-      <button id="preflightConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Save Changes</button>
+      <button id="preflightCancelBtn" class="modal-btn modal-btn-neutral" type="button">Cancel</button>
+      <button id="preflightConfirmBtn" class="modal-btn modal-btn-brand" type="button">Save Changes</button>
     </div>
   </div>
 </div>
@@ -307,9 +307,18 @@
     <span class="impact-close" id="reviewDiffClose">✕</span>
     <h2 class="impact-title">Review Proposed Changes</h2>
     <div id="reviewDiffContent"></div>
+
+    <!-- Rejection reason — shown when Reject is clicked -->
+    <div id="rejectionReasonSection" class="rejection-reason-section" style="display:none;">
+      <label for="rejectionReasonText">Rejection Reason <span style="color:var(--slds-error);">*</span></label>
+      <textarea id="rejectionReasonText" placeholder="Explain why this rule is being returned to draft…"></textarea>
+    </div>
+
     <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--slds-border);">
-      <button id="rejectRuleBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-error); color: var(--slds-error); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Reject — Return to Draft</button>
-      <button id="approveRuleBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-success); color: white; border-radius: 2px; cursor: pointer;">Approve — Activate Rule</button>
+      <button id="rejectRuleBtn" class="modal-btn modal-btn-neutral" type="button" style="border-color: var(--slds-error); color: var(--slds-error);">Reject — Return to Draft</button>
+      <button id="cancelRejectionBtn" class="modal-btn modal-btn-neutral" type="button" style="display:none;">Cancel</button>
+      <button id="confirmRejectBtn" class="modal-btn modal-btn-danger" type="button" style="display:none;" disabled>Confirm Rejection</button>
+      <button id="approveRuleBtn" class="modal-btn modal-btn-success" type="button">Approve — Activate Rule</button>
     </div>
   </div>
 </div>
@@ -325,8 +334,8 @@
       <input type="date" id="scheduleReviewDate" class="slds-input" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;" />
     </div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
-      <button id="scheduleReviewCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
-      <button id="scheduleReviewConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Schedule Review</button>
+      <button id="scheduleReviewCancelBtn" class="modal-btn modal-btn-neutral" type="button">Cancel</button>
+      <button id="scheduleReviewConfirmBtn" class="modal-btn modal-btn-brand" type="button">Schedule Review</button>
     </div>
   </div>
 </div>
@@ -338,8 +347,8 @@
     <h2 class="impact-title">Clone as New Version</h2>
     <div id="cloneRuleBody" style="margin-bottom: 20px;"></div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
-      <button id="cloneRuleCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
-      <button id="cloneRuleConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Create Draft Version</button>
+      <button id="cloneRuleCancelBtn" class="modal-btn modal-btn-neutral" type="button">Cancel</button>
+      <button id="cloneRuleConfirmBtn" class="modal-btn modal-btn-brand" type="button">Create Draft Version</button>
     </div>
   </div>
 </div>
@@ -356,8 +365,8 @@
       <div id="approveVersionHint" style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;"></div>
     </div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
-      <button id="approveVersionCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
-      <button id="approveVersionConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-success); color: white; border-radius: 2px; cursor: pointer;">Approve &amp; Activate</button>
+      <button id="approveVersionCancelBtn" class="modal-btn modal-btn-neutral" type="button">Cancel</button>
+      <button id="approveVersionConfirmBtn" class="modal-btn modal-btn-success" type="button">Approve &amp; Activate</button>
     </div>
   </div>
 </div>
@@ -369,8 +378,8 @@
     <h2 class="impact-title">Rollback to This Version</h2>
     <div id="rollbackBody" style="margin-bottom: 20px;"></div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
-      <button id="rollbackCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
-      <button id="rollbackConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-warning); color: white; border-radius: 2px; cursor: pointer;">Confirm Rollback</button>
+      <button id="rollbackCancelBtn" class="modal-btn modal-btn-neutral" type="button">Cancel</button>
+      <button id="rollbackConfirmBtn" class="modal-btn modal-btn-warning" type="button">Confirm Rollback</button>
     </div>
   </div>
 </div>
@@ -431,8 +440,8 @@
       </div>
     </div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
-      <button id="newRuleCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
-      <button id="newRuleConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Create Rule</button>
+      <button id="newRuleCancelBtn" class="modal-btn modal-btn-neutral" type="button">Cancel</button>
+      <button id="newRuleConfirmBtn" class="modal-btn modal-btn-brand" type="button">Create Rule</button>
     </div>
   </div>
 </div>
@@ -1278,7 +1287,7 @@ async function renderDetailPanel() {
       </div>
     </div>
     <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--slds-border);">
-      <button class="slds-button slds-button_neutral" onclick="discardChanges()" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Discard</button>
+      <button class="slds-button slds-button_neutral" onclick="discardChanges()" type="button" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); color: #16325C; border-radius: 2px; cursor: pointer;">Discard</button>
       <button class="slds-button slds-button_brand" id="saveRuleBtn" onclick="saveRule()" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Save Changes</button>
     </div>
   `;
@@ -1514,8 +1523,8 @@ function setupEventListeners() {
     const footer = document.createElement('div');
     footer.style.cssText = 'display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--slds-border);';
     footer.innerHTML = `
-      <button class="slds-button slds-button_neutral" id="exportJson" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export JSON</button>
-      <button class="slds-button slds-button_neutral" id="exportPdf" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Export PDF</button>
+      <button class="slds-button slds-button_neutral" id="exportJson" type="button" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); color: #16325C; border-radius: 2px; cursor: pointer;">Export JSON</button>
+      <button class="slds-button slds-button_neutral" id="exportPdf" type="button" style="flex: 1; padding: 10px; font-size: 12px; border: 1px solid var(--slds-border); background: var(--slds-card); color: #16325C; border-radius: 2px; cursor: pointer;">Export PDF</button>
     `;
     sidebar.appendChild(footer);
     _on('exportJson', 'click', () => { showToast(`Exported ${rules.length} rules to ontology-export.json`); });
@@ -1831,6 +1840,33 @@ function renderWorkflowRail(status) {
 }
 
 // ── STATUS TRANSITION ────────────────────────────────────────
+async function runRejectWithReason(reason) {
+  if (!currentRule || !reason) return;
+  const config = PROGRAM_CONFIG[currentProgram];
+  document.getElementById('reviewDiffModal')?.classList.remove('active');
+  try {
+    await lexipoint.updateRule(currentRule.rule_id, { status: 'draft' });
+    await lexipoint.addAuditEntry(
+      config.tenant, config.userId, 'publisher', 'reject',
+      'rule', currentRule.rule_id,
+      `Rejected — returned to draft. Reason: ${reason}`
+    );
+    await lexipoint.addComment(currentRule.rule_id, config.userId, `❌ Rejected — returned to draft.\n\nReason: ${reason}`);
+    lexipoint.clearCache();
+    currentRule = await lexipoint.getRule(currentRule.rule_id);
+    rules = await lexipoint.getRules(currentProgram);
+    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
+    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
+    renderRulesList();
+    renderWorkspaceTabs();
+    await renderDetailPanel();
+    showToast(`Rule returned to draft — rejection reason recorded.`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[Reject] Failed:', e);
+  }
+}
+
 async function transitionStatus(newStatus) {
   if (!currentRule) return;
   const config = PROGRAM_CONFIG[currentProgram];
@@ -1924,7 +1960,47 @@ async function openReviewDiff() {
 
   document.getElementById('reviewDiffContent').innerHTML = html;
   document.getElementById('approveRuleBtn').onclick = () => transitionStatus('active');
-  document.getElementById('rejectRuleBtn').onclick = () => transitionStatus('draft');
+
+  // Rejection two-step: first click reveals reason field
+  const rejectBtn = document.getElementById('rejectRuleBtn');
+  const cancelRejectionBtn = document.getElementById('cancelRejectionBtn');
+  const confirmRejectBtn = document.getElementById('confirmRejectBtn');
+  const reasonSection = document.getElementById('rejectionReasonSection');
+  const reasonText = document.getElementById('rejectionReasonText');
+
+  // Reset state each time modal opens
+  reasonSection.style.display = 'none';
+  cancelRejectionBtn.style.display = 'none';
+  confirmRejectBtn.style.display = 'none';
+  rejectBtn.style.display = '';
+  document.getElementById('approveRuleBtn').style.display = '';
+  if (reasonText) reasonText.value = '';
+
+  rejectBtn.onclick = () => {
+    reasonSection.style.display = 'block';
+    rejectBtn.style.display = 'none';
+    document.getElementById('approveRuleBtn').style.display = 'none';
+    cancelRejectionBtn.style.display = '';
+    confirmRejectBtn.style.display = '';
+    confirmRejectBtn.disabled = true;
+    reasonText.focus();
+  };
+
+  reasonText.oninput = () => {
+    confirmRejectBtn.disabled = reasonText.value.trim().length === 0;
+  };
+
+  cancelRejectionBtn.onclick = () => {
+    reasonSection.style.display = 'none';
+    cancelRejectionBtn.style.display = 'none';
+    confirmRejectBtn.style.display = 'none';
+    rejectBtn.style.display = '';
+    document.getElementById('approveRuleBtn').style.display = '';
+    reasonText.value = '';
+  };
+
+  confirmRejectBtn.onclick = () => runRejectWithReason(reasonText.value.trim());
+
   modal.classList.add('active');
 }
 

@@ -1,4 +1,5 @@
   :root {
+    --text-dark: #16325C;
     --slds-blue: #0176D3;
     --slds-blue-dark: #014486;
     --slds-blue-light: #1B96FF;
@@ -16,7 +17,61 @@
     --text-secondary: #4A5568;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── Modal Button System ─────────────────────────────────────── */
+.modal-btn {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: filter 0.12s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+.modal-btn:hover { filter: brightness(0.9); }
+.modal-btn:focus-visible { outline: 3px solid #0176D3; outline-offset: 2px; }
+.modal-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+.modal-btn-neutral { background: #fff; color: #16325C; border: 1px solid #dddbda; }
+.modal-btn-brand   { background: #0176D3; color: #fff; }
+.modal-btn-success { background: #2E844A; color: #fff; }
+.modal-btn-warning { background: #DD7A01; color: #fff; }
+.modal-btn-danger  { background: #BA0517; color: #fff; }
+
+/* Rejection reason section */
+.rejection-reason-section {
+  margin-top: 14px;
+  padding: 14px;
+  background: #FFF5F5;
+  border: 1px solid #FCA5A5;
+  border-radius: 4px;
+}
+.rejection-reason-section label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #BA0517;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.rejection-reason-section textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #FCA5A5;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 72px;
+  color: #16325C;
+}
+.rejection-reason-section textarea:focus {
+  outline: none;
+  border-color: #BA0517;
+  box-shadow: 0 0 0 2px rgba(186,5,23,0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Salesforce Sans', 'Inter', -apple-system, system-ui, sans-serif;
