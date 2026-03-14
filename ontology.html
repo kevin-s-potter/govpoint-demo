@@ -303,7 +303,7 @@
 
 <!-- Review Diff Modal -->
 <div class="impact-modal" id="reviewDiffModal">
-  <div class="impact-content" style="max-width: 600px;">
+  <div class="impact-content" style="max-width: 860px;">
     <button class="impact-close" id="reviewDiffClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Review Proposed Changes</h2>
     <div id="reviewDiffContent"></div>
@@ -1938,25 +1938,65 @@ async function openReviewDiff() {
     This rule is awaiting approval. Review changes below then approve or reject.
   </div>`;
 
-  if (latest && latest.diff) {
-    html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Most recent change</div>`;
-    html += `<div class="diff-panel" style="margin-bottom:12px;">
-      <div><span class="diff-remove">${latest.diff.field}: ${latest.diff.old || '(none)'}</span> → <span class="diff-add">${latest.diff.new}</span></div>
-    </div>`;
-    html += `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:16px;">Changed on ${fmtDate(latest.changed_at)} · v${latest.version}</div>`;
-  } else if (latest) {
-    html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Version ${latest.version} — ${fmtDate(latest.changed_at)}</div>`;
-    html += `<div style="font-size:12px;color:var(--text);margin-bottom:16px;padding:10px;background:var(--slds-bg);border-radius:4px;">${latest.change_summary || 'No change summary available.'}</div>`;
-  } else {
-    html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">No version history available.</div>`;
+  // ── Build diffMap: oldest-first so "old" = true pre-edit state ──
+  const reversedVersions = [...versions].reverse();
+  const changedFields = {};
+  for (const v of reversedVersions) {
+    if (v.diff && v.diff.field) {
+      if (!changedFields[v.diff.field]) {
+        changedFields[v.diff.field] = { old: v.diff.old };
+      }
+      changedFields[v.diff.field].new = v.diff.new;
+    }
   }
+  const DIFF_FIELDS = [
+    { key: 'name',        label: 'Name' },
+    { key: 'description', label: 'Description' },
+    { key: 'citation',    label: 'Citation' },
+    { key: 'rule_type',   label: 'Rule Type' },
+    { key: 'priority',    label: 'Priority' },
+    { key: 'phase',       label: 'Phase' }
+  ];
+  const changeCount = DIFF_FIELDS.filter(f => !!changedFields[f.key]).length;
+  const fmtVal = (v) => (v === null || v === undefined || v === '')
+    ? '<span style="color:var(--text-secondary);font-style:italic;">(none)</span>'
+    : v;
 
-  html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Current rule snapshot</div>
-  <div style="font-size:12px;color:var(--text);padding:12px;background:var(--slds-bg);border-radius:4px;">
-    <strong>Name:</strong> ${currentRule.name}<br>
-    <strong>Citation:</strong> ${currentRule.citation || 'None'}<br>
-    <strong>Priority:</strong> ${currentRule.priority} &nbsp; <strong>Type:</strong> ${currentRule.rule_type}
-  </div>`;
+  if (versions.length === 0) {
+    html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;padding:10px;background:var(--slds-bg);border-radius:4px;">
+      No version history available for this rule.</div>`;
+  } else if (changeCount === 0) {
+    html += `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;padding:10px;background:var(--slds-bg);border-radius:4px;">
+      Version history exists but no structured field changes were recorded. Review the History tab for details.</div>`;
+  } else {
+    const newestV = versions[0];
+    html += `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">
+      <span class="diff-change-count">${changeCount} field${changeCount !== 1 ? 's' : ''} changed</span>
+      &nbsp;· Last changed ${fmtDate(newestV.changed_at)} · v${newestV.version}
+    </div>`;
+
+    const buildRows = (side) => DIFF_FIELDS.map(f => {
+      const isChanged = !!changedFields[f.key];
+      const currentVal = currentRule[f.key];
+      const displayVal = (side === 'before' && isChanged) ? changedFields[f.key].old : currentVal;
+      const changedClass = isChanged ? ' diff-field-changed' : '';
+      return `<div class="diff-field-row${changedClass}">
+        <div class="diff-field-label">${f.label}</div>
+        <div class="diff-field-value">${fmtVal(displayVal)}</div>
+      </div>`;
+    }).join('');
+
+    html += `<div class="diff-columns" role="region" aria-label="Side by side rule comparison">
+      <div class="diff-col diff-col-before" role="group" aria-label="Before">
+        <div class="diff-col-header">Before</div>
+        ${buildRows('before')}
+      </div>
+      <div class="diff-col diff-col-after" role="group" aria-label="After — Proposed">
+        <div class="diff-col-header">After &mdash; Proposed</div>
+        ${buildRows('after')}
+      </div>
+    </div>`;
+  }
 
   document.getElementById('reviewDiffContent').innerHTML = html;
   document.getElementById('approveRuleBtn').onclick = () => transitionStatus('active');
