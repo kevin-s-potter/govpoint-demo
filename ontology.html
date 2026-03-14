@@ -1167,7 +1167,7 @@ async function renderDetailPanel() {
     const banner = document.createElement('div');
     banner.id = 'lifecycleBanner';
     banner.style.cssText = 'padding:10px 24px;background:#F9FAFB;border-bottom:1px solid var(--slds-border);font-size:12px;color:#747474;display:flex;align-items:center;gap:8px;';
-    banner.innerHTML = `■ This rule has been archived${currentRule.superseded_by ? ` — superseded by <a href="javascript:void(0)" onclick="selectRule('${currentRule.superseded_by}')" style="color:var(--slds-blue);font-weight:600;">${currentRule.superseded_by}</a>` : ''}.`;
+    banner.innerHTML = `■ This rule has been archived${currentRule.superseded_by ? ` — superseded by <a href="javascript:void(0)" onclick="selectRule('${currentRule.superseded_by}')" style="color:var(--slds-blue);font-weight:600;">${currentRule.superseded_by}</a>. <button onclick="openRollbackModal()" style="margin-left:12px;padding:3px 10px;font-size:11px;font-weight:700;border:1px solid var(--slds-warning);color:var(--slds-warning);background:transparent;border-radius:2px;cursor:pointer;">↩ Rollback to This Version</button>` : ''}.`;
     document.getElementById('detailTabs').insertAdjacentElement('beforebegin', banner);
   }
 
