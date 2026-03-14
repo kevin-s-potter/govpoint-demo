@@ -662,6 +662,7 @@ class LexiPointAPI {
         effective_date: null,
         sunset_date: null,
         classification: source.classification || 'standard',
+        source_text: source.source_text || null,
         created_by: source.created_by,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
