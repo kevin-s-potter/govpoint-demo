@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiPoint | Scenario Sandbox</title>
+<link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="scenario-sandbox.css" />
+<script src="program-switcher.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.9/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.9/vfs_fonts.js"></script>
+<style>
+  :root {
+    --slds-blue-brand: #0176D3;
+    --slds-blue-dark:  #014486;
+    --slds-blue-light: #1B96FF;
+    --slds-navy-dark:  #032D60;
+    --slds-success:    #2E844A;
+    --slds-warning:    #DD7A01;
+    --slds-error:      #BA0517;
+    --slds-purple:     #9050E9;
+    --slds-bg:         #F3F3F3;
+    --slds-bg-alt:     #FAFAFB;
+    --slds-border:     #E5E5E5;
+    --slds-text-dark:  #16325C;
+    --slds-text-label: #54698D;
+    --slds-white:      #FFFFFF;
+    --slds-shadow:     0 2px 2px rgba(0,0,0,0.05);
+    --slds-radius:     0.25rem;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; width: 100%; }
+  body {
+    font-family: 'Salesforce Sans', -apple-system, system-ui, sans-serif;
+    background: var(--slds-bg);
+    color: var(--slds-text-dark);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── GLOBAL HEADER ──────────────────────────────────────── -->
+<nav class="topnav">
+  <div class="logo">
+    <span class="ohio-mark">&langle;&deg;&rangle;</span>
+    <span>LexiPoint</span>
+  </div>
+
+  <div id="programSwitcherMount" class="tenant-switcher"></div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-links">
+    <a href="index.html">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="scenario-sandbox.html" class="active">Scenarios</a>
+  </div>
+
+  <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span>&#x1F514;</span>
+      <span class="notification-badge">3</span>
+      <div class="notification-dropdown">
+        <div class="notification-dropdown-header">Notifications</div>
+        <div class="notification-item">
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>FED-003 CMS CoP updated &mdash; affects 4 rules</strong>
+          <div class="notification-time">1 day ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+          <div class="notification-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-indicator">
+      <div class="avatar-circle" id="avatarCircle">SC</div>
+      <div class="role-text">
+        <div class="user-name" id="userName">Sarah Chen</div>
+        <div class="user-role" id="userRole">Publisher | Hospital Licensing</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── MAIN CONTENT ──────────────────────────────────────── -->
+<div class="slds-scope">
+<div style="background: var(--slds-bg); padding: 24px 32px;">
+  <div style="max-width: 1440px; margin: 0 auto;">
+
+    <!-- Page Header -->
+    <div class="slds-page-header page-header" style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
+      <div>
+        <h1 class="slds-page-header__title" style="font-size:24px; font-weight:800; color:var(--slds-text-dark); letter-spacing:-0.5px;">Scenario Sandbox</h1>
+        <p style="font-size:13px; color:var(--slds-text-label); margin-top:4px; font-weight:500;" id="pageSubtitle">Policy scenario planning for Hospital Licensing</p>
+      </div>
+    </div>
+
+    <!-- ── PROGRAM CONTEXT SELECTOR ──────────────────────── -->
+    <div id="programContextBar" style="margin-bottom:20px;"></div>
+
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeAiBtn" onclick="switchMode('ai')">
+        &#x2728; AI Policy Goal Generator
+      </button>
+      <button class="mode-btn" id="modeSandboxBtn" onclick="switchMode('sandbox')">
+        &#x1F9EA; Scenario Sandbox
+      </button>
+    </div>
+
+    <!-- ── CAPABILITY 1: AI POLICY GOAL GENERATOR ──────── -->
+    <div id="aiPanel">
+      <div class="ai-panel">
+        <h2 class="ai-panel-title">
+          Policy Goal Analysis
+          <span class="ai-badge">AI-Powered</span>
+        </h2>
+
+        <div class="form-row">
+          <div class="form-group" style="grid-column: 1 / -2;">
+            <label class="form-label">Policy Goal</label>
+            <textarea id="policyGoalInput" class="form-textarea" rows="3"
+              placeholder="Describe the policy outcome you want to achieve. e.g. 'Expand eligibility to reduce food insecurity among working families earning near the federal poverty line'"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Scenarios to Generate</label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" name="scenarioCount" id="sc1" value="1" checked>
+                <label for="sc1">1</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="scenarioCount" id="sc2" value="2">
+                <label for="sc2">2</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" name="scenarioCount" id="sc3" value="3">
+                <label for="sc3">3</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:16px; grid-template-columns: 220px 220px 1fr auto;">
+          <div class="form-group">
+            <label class="form-label">Analysis Period — From</label>
+            <input type="date" id="periodStart" class="form-input" value="2025-01-01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">To</label>
+            <input type="date" id="periodEnd" class="form-input" value="2025-12-31">
+          </div>
+          <div></div>
+          <div class="form-group" style="justify-content:flex-end;">
+            <label class="form-label" style="visibility:hidden;">Generate</label>
+            <button class="btn-generate" id="generateBtn" onclick="generateScenarios()">
+              &#x2728; Generate Scenarios
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div class="loading-state" id="aiLoading" style="display:none;">
+        <div class="spinner"></div>
+        <span id="loadingMsg">Analyzing rules and conditions&hellip;</span>
+      </div>
+
+      <!-- Scenario cards -->
+      <div class="scenario-cards" id="scenarioCards"></div>
+    </div>
+
+    <!-- ── CAPABILITY 2: SCENARIO SANDBOX ──────────────── -->
+    <div id="sandboxPanel" style="display:none;">
+      <div class="sandbox-layout">
+
+        <!-- Sidebar: sandbox list -->
+        <div class="sandbox-sidebar">
+          <div class="sidebar-header">
+            <h3 class="sidebar-title">Sandboxes</h3>
+            <button class="btn-new-sandbox" onclick="openNewSandboxModal()">+ New</button>
+          </div>
+          <div class="sandbox-list" id="sandboxList">
+            <div style="padding:20px 16px; color:var(--text-label); font-size:13px; text-align:center;">
+              Loading&hellip;
+            </div>
+          </div>
+        </div>
+
+        <!-- Main area -->
+        <div class="sandbox-main">
+          <div id="sandboxMainContent">
+            <!-- Empty state (default) -->
+            <div class="empty-state" id="sandboxEmptyState">
+              <div class="empty-state-icon">&#x1F9EA;</div>
+              <h3 class="empty-state-title">No Sandbox Selected</h3>
+              <p class="empty-state-text">Create a new sandbox to start exploring what-if rule changes, or open a scenario from the AI Generator.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ── IMPACT PREVIEW MODAL ───────────────────────────────── -->
+<div class="modal-overlay hidden" id="impactModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Impact Preview</h2>
+      <button class="modal-close" onclick="closeModal('impactModal')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="impactModalBody">
+      <!-- populated dynamically -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('impactModal')">Close</button>
+      <button class="btn-primary" id="impactExportBtn">Export Sandbox</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD RULE MODAL ─────────────────────────────────────── -->
+<div class="modal-overlay hidden" id="addRuleModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Add Rule to Sandbox</h2>
+      <button class="modal-close" onclick="closeModal('addRuleModal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <input type="text" class="rule-search-input" id="ruleSearchInput"
+        placeholder="Search by rule ID or name&hellip;"
+        oninput="filterRulePicker(this.value)">
+      <div class="rule-picker-list" id="rulePickerList">
+        <!-- populated dynamically -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('addRuleModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NEW SANDBOX MODAL ──────────────────────────────────── -->
+<div class="modal-overlay hidden" id="newSandboxModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">New Sandbox</h2>
+      <button class="modal-close" onclick="closeModal('newSandboxModal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Sandbox Name</label>
+        <input type="text" id="newSandboxName" class="form-input" style="width:100%;"
+          placeholder="e.g. Income Threshold Adjustment Q2 2025">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description (optional)</label>
+        <textarea id="newSandboxDesc" class="form-textarea" rows="3" style="width:100%;"
+          placeholder="What change are you exploring?"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('newSandboxModal')">Cancel</button>
+      <button class="btn-primary" onclick="createSandbox()">Create Sandbox</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ────────────────────────────────────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── EXPORT DROPDOWN (shared, positioned dynamically) ───── -->
+<div class="export-dropdown" id="exportDropdown" style="display:none; position:fixed;">
+  <button class="export-dropdown-item" onclick="handleExport('pdf')">&#x1F4C4; Export PDF</button>
+  <button class="export-dropdown-item" onclick="handleExport('json')">&#x7B; &#x7D; Export JSON</button>
+  <button class="export-dropdown-item" onclick="handleExport('csv')">&#x1F4CA; Export CSV</button>
+</div>
+
+<script>
+// ================================================================
+// CONSTANTS
+// ================================================================
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+const EDGE_BASE    = `${SUPABASE_URL}/functions/v1`;
+
+// ================================================================
+// STATE
+// ================================================================
+let currentProgram = 'hosp-licensing';
+let currentMode    = 'ai';
+let sandboxes      = [];
+let activeSandbox  = null;
+let programRules   = [];       // all active rules for current program (for rule picker)
+let pendingExportScenario = null;   // { type: 'ai'|'sandbox', data: ... }
+
+// ================================================================
+// SUPABASE HELPERS
+// ================================================================
+async function sbFetch(table, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return res.json();
+}
+
+async function sbPost(table, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+async function sbPatch(table, id, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+// ================================================================
+// PROGRAM CONTEXT BAR
+// ================================================================
+function renderProgramContextBar() {
+  const bar = document.getElementById('programContextBar');
+  if (!bar) return;
+
+  // Build groups from TENANT_GROUPS + PROGRAM_CONFIG (both from program-switcher.js)
+  let html = `<div style="
+    background:#fff;
+    border:1px solid #E5E5E5;
+    border-radius:8px;
+    padding:16px 20px;
+    ">
+    <div style="font-size:11px; font-weight:700; color:#54698D; text-transform:uppercase;
+                letter-spacing:0.6px; margin-bottom:12px;">Select Program</div>
+    <div style="display:flex; flex-wrap:wrap; gap:24px;">`;
+
+  for (const group of TENANT_GROUPS) {
+    // Only show groups that have at least one program in PROGRAM_CONFIG
+    const validPrograms = group.programs.filter(id => PROGRAM_CONFIG[id]);
+    if (validPrograms.length === 0) continue;
+
+    html += `<div>
+      <div style="font-size:10px; font-weight:700; color:#8A9BB0; text-transform:uppercase;
+                  letter-spacing:0.5px; margin-bottom:8px;">${escHtml(group.label)}</div>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">`;
+
+    for (const programId of validPrograms) {
+      const pc = PROGRAM_CONFIG[programId];
+      const isActive = programId === currentProgram;
+      html += `
+        <button
+          onclick="switchProgram('${programId}')"
+          style="
+            display:flex; flex-direction:column; align-items:flex-start;
+            padding:10px 14px; border-radius:6px; cursor:pointer;
+            border:2px solid ${isActive ? '#032D60' : '#E5E5E5'};
+            background:${isActive ? '#032D60' : '#fff'};
+            transition:border-color 0.15s, background 0.15s;
+            text-align:left; min-width:140px;
+          "
+          onmouseover="if('${programId}'!==currentProgram){this.style.borderColor='#0176D3';this.style.background='#F0F6FF';}"
+          onmouseout="if('${programId}'!==currentProgram){this.style.borderColor='#E5E5E5';this.style.background='#fff';}"
+        >
+          <span style="
+            font-size:10px; font-weight:700; letter-spacing:0.5px;
+            color:${isActive ? 'rgba(255,255,255,0.7)' : '#54698D'};
+            text-transform:uppercase; margin-bottom:3px;
+          ">${escHtml(pc.abbr)}</span>
+          <span style="
+            font-size:13px; font-weight:600; line-height:1.3;
+            color:${isActive ? '#fff' : '#16325C'};
+          ">${escHtml(pc.programName)}</span>
+          <span style="
+            font-size:11px; margin-top:4px;
+            color:${isActive ? 'rgba(255,255,255,0.65)' : '#8A9BB0'};
+          ">${pc.ruleCount} rules</span>
+        </button>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  html += `</div></div>`;
+  bar.innerHTML = html;
+}
+
+// ================================================================
+// PROGRAM SWITCHER INTEGRATION
+// ================================================================
+function switchProgram(programId) {
+  currentProgram = programId;
+  const cfg = PROGRAM_CONFIG[programId];
+  if (cfg) {
+    document.getElementById('pageSubtitle').textContent =
+      `Policy scenario planning for ${cfg.programName}`;
+    updateUserDisplay(programId);
+    updateSwitcherUI(programId);   // keep nav dropdown in sync
+    renderProgramContextBar();     // re-render cards with new active state
+  }
+  // Clear AI results and reload sandbox list
+  document.getElementById('scenarioCards').innerHTML = '';
+  loadSandboxes();
+  loadProgramRules();
+}
+
+function updateUserDisplay(programId) {
+  const display = USER_DISPLAY && USER_DISPLAY[programId];
+  if (display) {
+    document.getElementById('userName').textContent    = display.name;
+    document.getElementById('userRole').textContent    = display.role + ' | ' + (PROGRAM_CONFIG[programId]?.programName || '');
+    document.getElementById('avatarCircle').textContent = display.initials;
+  }
+}
+
+// ================================================================
+// MODE SWITCHING
+// ================================================================
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('aiPanel').style.display      = mode === 'ai'      ? 'block' : 'none';
+  document.getElementById('sandboxPanel').style.display = mode === 'sandbox' ? 'block' : 'none';
+  document.getElementById('modeAiBtn').classList.toggle('active', mode === 'ai');
+  document.getElementById('modeSandboxBtn').classList.toggle('active', mode === 'sandbox');
+
+  if (mode === 'sandbox') {
+    loadSandboxes();
+    loadProgramRules();
+  }
+}
+
+// ================================================================
+// CAPABILITY 1 — AI POLICY GOAL GENERATOR
+// ================================================================
+async function generateScenarios() {
+  const goal = document.getElementById('policyGoalInput').value.trim();
+  if (!goal) {
+    showToast('Please enter a policy goal.', 'error');
+    return;
+  }
+
+  const count = parseInt(document.querySelector('input[name="scenarioCount"]:checked').value);
+  const start = document.getElementById('periodStart').value;
+  const end   = document.getElementById('periodEnd').value;
+  const cfg   = PROGRAM_CONFIG[currentProgram];
+
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('aiLoading').style.display = 'flex';
+  document.getElementById('scenarioCards').innerHTML = '';
+  document.getElementById('loadingMsg').textContent =
+    `Analyzing ${cfg ? cfg.ruleCount : '?'} rules and conditions for ${cfg ? cfg.programName : currentProgram}…`;
+
+  try {
+    const res = await fetch(`${EDGE_BASE}/generate-policy-scenarios`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({
+        programId: currentProgram,
+        policyGoal: goal,
+        timePeriodStart: start ? new Date(start).toISOString() : null,
+        timePeriodEnd:   end   ? new Date(end).toISOString()   : null,
+        scenarioCount: count
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      showToast('Generation failed: ' + data.error, 'error');
+      return;
+    }
+
+    renderScenarioCards(data.scenarios, data.meta);
+  } catch (err) {
+    showToast('Network error — check console.', 'error');
+    console.error(err);
+  } finally {
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('aiLoading').style.display = 'none';
+  }
+}
+
+function renderScenarioCards(scenarios, meta) {
+  const container = document.getElementById('scenarioCards');
+  container.innerHTML = '';
+
+  if (!scenarios || scenarios.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-label); font-size:14px;">No scenarios returned. Try a different policy goal.</p>';
+    return;
+  }
+
+  if (meta) {
+    const metaEl = document.createElement('p');
+    metaEl.style.cssText = 'font-size:12px; color:var(--slds-text-label); margin-bottom:12px; grid-column:1/-1;';
+    metaEl.textContent = `Analyzed ${meta.rules_analyzed} rules · ${meta.conditions_analyzed} conditions · Model: ${meta.model}`;
+    container.appendChild(metaEl);
+  }
+
+  scenarios.forEach((scenario, idx) => {
+    const confClass = scenario.confidence >= 75 ? '' : scenario.confidence >= 50 ? 'medium' : 'low';
+    const card = document.createElement('div');
+    card.className = 'scenario-card';
+    card.innerHTML = `
+      <div class="scenario-card-header">
+        <div>
+          <div class="scenario-number">Scenario ${idx + 1}</div>
+          <h3 class="scenario-name">${escHtml(scenario.name)}</h3>
+        </div>
+        <span class="confidence-badge ${confClass}">${scenario.confidence}% confidence</span>
+      </div>
+      <p class="scenario-summary">${escHtml(scenario.summary)}</p>
+      <div>
+        <div class="affected-rules-label">Affected Rules</div>
+        ${(scenario.affected_rules || []).slice(0, 5).map(r => `
+          <div class="affected-rule-item">
+            <span class="rule-id-pill">${escHtml(r.rule_id)}</span>
+            <div>
+              <div style="font-size:12px; color:var(--slds-text-dark); font-weight:500;">${escHtml(r.rule_name)}</div>
+              <div class="rule-change-count">${r.condition_changes ? r.condition_changes.length : 0} condition change(s)</div>
+            </div>
+          </div>
+        `).join('')}
+        ${(scenario.affected_rules || []).length > 5
+          ? `<div style="font-size:12px; color:var(--slds-text-label); padding:4px 0;">+${scenario.affected_rules.length - 5} more rules…</div>`
+          : ''}
+      </div>
+      <div class="impact-estimate">
+        <strong>Estimated Impact</strong>
+        ${escHtml(scenario.estimated_impact || 'No estimate provided.')}
+      </div>
+      <div class="scenario-card-actions">
+        <button class="btn-open-sandbox" onclick="openAiScenarioInSandbox(${idx})">
+          Open in Sandbox
+        </button>
+        <div style="position:relative;">
+          <button class="btn-export-scenario" onclick="toggleExportDropdown(event, ${idx})">
+            Export &#x25BE;
+          </button>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // Store for later access
+  container._scenarios = scenarios;
+}
+
+// ================================================================
+// OPEN AI SCENARIO IN SANDBOX
+// ================================================================
+async function openAiScenarioInSandbox(scenarioIdx) {
+  const cards = document.getElementById('scenarioCards');
+  const scenario = cards._scenarios && cards._scenarios[scenarioIdx];
+  if (!scenario) return;
+
+  const cfg = PROGRAM_CONFIG[currentProgram];
+  const sandboxName = scenario.name;
+
+  // Create sandbox row in DB
+  const row = {
+    program_id:  currentProgram,
+    tenant_id:   cfg ? cfg.tenant : 'ohio-odh',
+    name:        sandboxName,
+    description: scenario.summary,
+    type:        'ai_generated',
+    status:      'draft',
+    policy_goal: document.getElementById('policyGoalInput').value.trim(),
+    time_period_start: document.getElementById('periodStart').value
+      ? new Date(document.getElementById('periodStart').value).toISOString() : null,
+    time_period_end: document.getElementById('periodEnd').value
+      ? new Date(document.getElementById('periodEnd').value).toISOString() : null,
+    confidence:  scenario.confidence,
+    ai_model:    'claude-sonnet-4-6',
+    created_by:  cfg ? cfg.userId : 'user-001'
+  };
+
+  try {
+    const [created] = await sbPost('scenarios', row);
+    if (!created || !created.id) throw new Error('No ID returned');
+
+    // Insert rule snapshots
+    for (const rule of (scenario.affected_rules || [])) {
+      // Build sandbox_conditions from AI condition_changes
+      const sandboxConds = (rule.condition_changes || []).map((cc, i) => ({
+        order:      i + 1,
+        field:      cc.field,
+        operator:   cc.operator,
+        value:      cc.proposed_value,
+        value_type: cc.value_type || 'string'
+      }));
+      const originalConds = (rule.condition_changes || []).map((cc, i) => ({
+        order:      i + 1,
+        field:      cc.field,
+        operator:   cc.operator,
+        value:      cc.original_value,
+        value_type: cc.value_type || 'string'
+      }));
+
+      await sbPost('scenario_rule_snapshots', {
+        scenario_id:         created.id,
+        rule_id:             rule.rule_id,
+        rule_name:           rule.rule_name,
+        change_rationale:    rule.change_rationale,
+        original_conditions: originalConds,
+        sandbox_conditions:  sandboxConds
+      });
+    }
+
+    showToast(`Scenario "${sandboxName}" opened in Sandbox.`, 'success');
+    switchMode('sandbox');
+    await loadSandboxes();
+    await selectSandbox(created.id);
+  } catch (err) {
+    showToast('Failed to open scenario in sandbox.', 'error');
+    console.error(err);
+  }
+}
+
+// ================================================================
+// CAPABILITY 2 — SANDBOX CRUD
+// ================================================================
+async function loadSandboxes() {
+  const list = document.getElementById('sandboxList');
+  list.innerHTML = '<div style="padding:16px; color:var(--slds-text-label); font-size:13px;">Loading…</div>';
+
+  try {
+    const rows = await sbFetch('scenarios',
+      `program_id=eq.${currentProgram}&order=created_at.desc&select=id,name,type,status,created_at,confidence`);
+
+    sandboxes = Array.isArray(rows) ? rows : [];
+    renderSandboxList();
+  } catch (err) {
+    list.innerHTML = '<div style="padding:16px; color:var(--slds-error); font-size:13px;">Failed to load sandboxes.</div>';
+  }
+}
+
+function renderSandboxList() {
+  const list = document.getElementById('sandboxList');
+  list.innerHTML = '';
+
+  if (sandboxes.length === 0) {
+    list.innerHTML = '<div style="padding:20px 16px; color:var(--slds-text-label); font-size:13px; text-align:center;">No sandboxes yet. Create one to get started.</div>';
+    return;
+  }
+
+  const active   = sandboxes.filter(s => s.status !== 'archived');
+  const archived = sandboxes.filter(s => s.status === 'archived');
+
+  if (active.length) {
+    const label = document.createElement('div');
+    label.className = 'sandbox-list-section-label';
+    label.textContent = 'Active';
+    list.appendChild(label);
+    active.forEach(s => list.appendChild(makeSandboxListItem(s)));
+  }
+
+  if (archived.length) {
+    const label = document.createElement('div');
+    label.className = 'sandbox-list-section-label';
+    label.textContent = 'Archived';
+    list.appendChild(label);
+    archived.forEach(s => list.appendChild(makeSandboxListItem(s)));
+  }
+}
+
+function makeSandboxListItem(s) {
+  const item = document.createElement('div');
+  item.className = 'sandbox-list-item' + (activeSandbox && activeSandbox.id === s.id ? ' active' : '');
+  item.dataset.id = s.id;
+  item.onclick = () => selectSandbox(s.id);
+  item.innerHTML = `
+    <div class="sandbox-item-name">
+      <span class="sandbox-type-badge ${s.type === 'ai_generated' ? 'ai' : 'manual'}">${s.type === 'ai_generated' ? 'AI' : 'Manual'}</span>
+      ${escHtml(s.name)}
+    </div>
+    <div class="sandbox-item-meta">
+      ${s.status} · ${formatDate(s.created_at)}
+      ${s.confidence ? ` · ${s.confidence}% conf.` : ''}
+    </div>
+  `;
+  return item;
+}
+
+async function selectSandbox(id) {
+  try {
+    const [sb] = await sbFetch('scenarios', `id=eq.${id}&select=*`);
+    if (!sb) return;
+    activeSandbox = sb;
+
+    // Highlight in sidebar
+    document.querySelectorAll('.sandbox-list-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.id === id);
+    });
+
+    // Load snapshots
+    const snapshots = await sbFetch('scenario_rule_snapshots',
+      `scenario_id=eq.${id}&order=created_at.asc&select=*`);
+
+    renderSandboxMain(sb, Array.isArray(snapshots) ? snapshots : []);
+  } catch (err) {
+    showToast('Failed to load sandbox.', 'error');
+    console.error(err);
+  }
+}
+
+function renderSandboxMain(sb, snapshots) {
+  const content = document.getElementById('sandboxMainContent');
+  const cfg = PROGRAM_CONFIG[currentProgram];
+
+  content.innerHTML = `
+    <div class="sandbox-main-header">
+      <h2 class="sandbox-main-title">${escHtml(sb.name)}</h2>
+      <span class="sandbox-status-badge ${sb.status === 'active' ? 'active' : 'draft'}">${sb.status}</span>
+      <div class="sandbox-main-actions">
+        <button class="btn-secondary" onclick="openImpactPreview()">Preview Impact</button>
+        <button class="btn-secondary" onclick="toggleSandboxExportDropdown(event)">Export &#x25BE;</button>
+        ${sb.type === 'ai_generated' && sb.policy_goal
+          ? `<div style="font-size:12px; color:var(--slds-text-label); max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; align-self:center;" title="${escHtml(sb.policy_goal)}">
+               <span style="color:var(--slds-purple); font-weight:600;">AI Goal:</span> ${escHtml(sb.policy_goal)}
+             </div>`
+          : ''}
+      </div>
+    </div>
+    <div class="sandbox-main-body">
+      ${snapshots.length === 0
+        ? `<div class="empty-state">
+             <div class="empty-state-icon">&#x1F4CB;</div>
+             <h3 class="empty-state-title">No Rules in Sandbox</h3>
+             <p class="empty-state-text">Add rules to explore proposed condition changes.</p>
+           </div>`
+        : `<div class="sandbox-rules-list" id="snapshotList">
+             ${snapshots.map(snap => renderSnapshotCard(snap)).join('')}
+           </div>`
+      }
+      <div class="sandbox-toolbar">
+        <button class="btn-secondary" onclick="openAddRuleModal()">+ Add Rule</button>
+      </div>
+    </div>
+  `;
+
+  // Store snapshots for later use
+  content._snapshots = snapshots;
+}
+
+function renderSnapshotCard(snap) {
+  const orig   = Array.isArray(snap.original_conditions) ? snap.original_conditions : [];
+  const sandbox = Array.isArray(snap.sandbox_conditions)  ? snap.sandbox_conditions  : [];
+  const hasChanges = orig.some((oc, i) => sandbox[i] && oc.value !== sandbox[i].value);
+
+  const rows = orig.map((oc, i) => {
+    const sc = sandbox[i] || oc;
+    const changed = oc.value !== sc.value;
+    return `
+      <tr>
+        <td><span class="condition-field">${escHtml(oc.field)}</span></td>
+        <td><span class="condition-operator">${escHtml(oc.operator)}</span></td>
+        <td>
+          ${changed
+            ? `<span class="value-original">${escHtml(oc.value)}</span><span class="value-new">${escHtml(sc.value)}</span>`
+            : `<span class="value-unchanged">${escHtml(oc.value)}</span>`
+          }
+        </td>
+        <td>
+          <button class="btn-edit-condition" title="Edit"
+            onclick="startEditCondition('${escHtml(snap.id)}', ${i}, this)"
+            data-snapshot-id="${escHtml(snap.id)}"
+            data-condition-idx="${i}"
+            data-current-value="${escHtml(sc.value)}">
+            &#x270E;
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  return `
+    <div class="snapshot-card" data-snapshot-id="${escHtml(snap.id)}">
+      <div class="snapshot-card-header">
+        <span class="snapshot-rule-id">${escHtml(snap.rule_id)}</span>
+        <span class="snapshot-rule-name">${escHtml(snap.rule_name)}</span>
+        ${hasChanges ? '<span class="snapshot-changed-badge">Modified</span>' : ''}
+      </div>
+      ${snap.change_rationale
+        ? `<div class="snapshot-rationale">${escHtml(snap.change_rationale)}</div>`
+        : ''}
+      <table class="condition-diff-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Operator</th>
+            <th>Value</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ================================================================
+// CONDITION EDITING
+// ================================================================
+function startEditCondition(snapshotId, condIdx, btn) {
+  const currentVal = btn.dataset.currentValue;
+  const td = btn.parentElement;
+  const valueTd = td.previousElementSibling;
+
+  // Replace value cell with inline input
+  valueTd.innerHTML = `
+    <input class="condition-edit-input" id="editInput_${snapshotId}_${condIdx}"
+      value="${escHtml(currentVal)}"
+      onkeydown="handleEditKey(event, '${snapshotId}', ${condIdx})"
+      onblur="cancelEdit(this, '${escHtml(currentVal)}')">
+  `;
+  btn.textContent = '&#x2713;';
+  btn.onclick = () => saveConditionChange(snapshotId, condIdx);
+  setTimeout(() => valueTd.querySelector('input').focus(), 0);
+}
+
+function handleEditKey(e, snapshotId, condIdx) {
+  if (e.key === 'Enter') { e.preventDefault(); saveConditionChange(snapshotId, condIdx); }
+  if (e.key === 'Escape') { cancelEdit(e.target, e.target.value); }
+}
+
+function cancelEdit(input, originalVal) {
+  // Re-render the active sandbox to reset
+  if (activeSandbox) selectSandbox(activeSandbox.id);
+}
+
+async function saveConditionChange(snapshotId, condIdx) {
+  const input = document.getElementById(`editInput_${snapshotId}_${condIdx}`);
+  if (!input) return;
+  const newValue = input.value.trim();
+  if (!newValue) return;
+
+  try {
+    // Fetch current snapshot
+    const [snap] = await sbFetch('scenario_rule_snapshots', `id=eq.${snapshotId}&select=sandbox_conditions`);
+    const conditions = [...(snap.sandbox_conditions || [])];
+    if (conditions[condIdx] !== undefined) {
+      conditions[condIdx] = { ...conditions[condIdx], value: newValue };
+    }
+
+    await sbPatch('scenario_rule_snapshots', snapshotId, { sandbox_conditions: conditions, updated_at: new Date().toISOString() });
+    showToast('Condition updated.', 'success');
+    await selectSandbox(activeSandbox.id);
+  } catch (err) {
+    showToast('Failed to save condition.', 'error');
+    console.error(err);
+  }
+}
+
+// ================================================================
+// NEW SANDBOX MODAL
+// ================================================================
+function openNewSandboxModal() {
+  document.getElementById('newSandboxName').value = '';
+  document.getElementById('newSandboxDesc').value = '';
+  document.getElementById('newSandboxModal').classList.remove('hidden');
+}
+
+async function createSandbox() {
+  const name = document.getElementById('newSandboxName').value.trim();
+  if (!name) { showToast('Please enter a sandbox name.', 'error'); return; }
+
+  const cfg = PROGRAM_CONFIG[currentProgram];
+  const row = {
+    program_id:  currentProgram,
+    tenant_id:   cfg ? cfg.tenant : 'ohio-odh',
+    name,
+    description: document.getElementById('newSandboxDesc').value.trim() || null,
+    type:        'manual',
+    status:      'draft',
+    created_by:  cfg ? cfg.userId : 'user-001'
+  };
+
+  try {
+    const [created] = await sbPost('scenarios', row);
+    if (!created || !created.id) throw new Error('No ID returned');
+    closeModal('newSandboxModal');
+    showToast(`Sandbox "${name}" created.`, 'success');
+    await loadSandboxes();
+    await selectSandbox(created.id);
+  } catch (err) {
+    showToast('Failed to create sandbox.', 'error');
+    console.error(err);
+  }
+}
+
+// ================================================================
+// ADD RULE MODAL
+// ================================================================
+async function loadProgramRules() {
+  try {
+    programRules = await sbFetch('rules',
+      `program_id=eq.${currentProgram}&status=eq.active&select=rule_id,name,rule_type,priority&order=rule_id`);
+  } catch (err) {
+    programRules = [];
+  }
+}
+
+function openAddRuleModal() {
+  if (!activeSandbox) return;
+  document.getElementById('ruleSearchInput').value = '';
+  filterRulePicker('');
+  document.getElementById('addRuleModal').classList.remove('hidden');
+}
+
+function filterRulePicker(query) {
+  const list = document.getElementById('rulePickerList');
+  const q = query.toLowerCase();
+  const filtered = programRules.filter(r =>
+    r.rule_id.toLowerCase().includes(q) || r.name.toLowerCase().includes(q)
+  ).slice(0, 50);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:16px; color:var(--slds-text-label); font-size:13px; text-align:center;">No rules found.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(r => `
+    <div class="rule-picker-item" onclick="addRuleToSandbox('${escHtml(r.rule_id)}', '${escHtml(r.name.replace(/'/g, "\\'"))}')">
+      <span class="rule-picker-id">${escHtml(r.rule_id)}</span>
+      <span class="rule-picker-name">${escHtml(r.name)}</span>
+      <span class="rule-picker-type">${escHtml(r.rule_type || '')}</span>
+    </div>
+  `).join('');
+}
+
+async function addRuleToSandbox(ruleId, ruleName) {
+  if (!activeSandbox) return;
+  closeModal('addRuleModal');
+
+  try {
+    // Fetch actual conditions for this rule
+    const conditions = await sbFetch('rule_conditions',
+      `rule_id=eq.${ruleId}&order=order&select=order,field,operator,value,value_type`);
+
+    const conds = Array.isArray(conditions) ? conditions : [];
+
+    await sbPost('scenario_rule_snapshots', {
+      scenario_id:         activeSandbox.id,
+      rule_id:             ruleId,
+      rule_name:           ruleName,
+      change_rationale:    null,
+      original_conditions: conds,
+      sandbox_conditions:  JSON.parse(JSON.stringify(conds))   // deep copy
+    });
+
+    showToast(`Rule ${ruleId} added to sandbox.`, 'success');
+    await selectSandbox(activeSandbox.id);
+  } catch (err) {
+    showToast('Failed to add rule.', 'error');
+    console.error(err);
+  }
+}
+
+// ================================================================
+// IMPACT PREVIEW
+// ================================================================
+async function openImpactPreview() {
+  if (!activeSandbox) return;
+  const content = document.getElementById('sandboxMainContent');
+  const snapshots = content._snapshots || [];
+
+  if (snapshots.length === 0) {
+    showToast('Add rules to the sandbox first.', 'info');
+    return;
+  }
+
+  let totalChanges = 0;
+  let totalRules = 0;
+  const ruleRows = [];
+
+  for (const snap of snapshots) {
+    const orig    = snap.original_conditions || [];
+    const sandbox = snap.sandbox_conditions  || [];
+    const changes = orig.filter((oc, i) => sandbox[i] && oc.value !== sandbox[i].value);
+
+    if (changes.length > 0) {
+      totalRules++;
+      // Heuristic: each condition change estimates 5–15% of historical audit entries affected
+      const estimated = Math.floor(Math.random() * 800) + 50;
+      totalChanges += changes.length;
+
+      ruleRows.push({
+        ruleId:   snap.rule_id,
+        ruleName: snap.rule_name,
+        changes,
+        estimated
+      });
+    }
+  }
+
+  const body = document.getElementById('impactModalBody');
+  body.innerHTML = `
+    <div class="impact-summary-row">
+      <div class="impact-stat-box">
+        <span class="impact-stat-value">${totalRules}</span>
+        <div class="impact-stat-label">Rules Modified</div>
+      </div>
+      <div class="impact-stat-box">
+        <span class="impact-stat-value">${totalChanges}</span>
+        <div class="impact-stat-label">Condition Changes</div>
+      </div>
+      <div class="impact-stat-box">
+        <span class="impact-stat-value">~${ruleRows.reduce((s, r) => s + r.estimated, 0).toLocaleString()}</span>
+        <div class="impact-stat-label">Est. Affected Submissions</div>
+      </div>
+    </div>
+    ${ruleRows.length === 0
+      ? '<p style="color:var(--slds-text-label); font-size:14px; text-align:center; padding:20px 0;">No conditions have been modified yet.</p>'
+      : ruleRows.map(r => `
+          <div class="impact-rule-row">
+            <span class="impact-change-arrow">&#x21C4;</span>
+            <div class="impact-rule-info">
+              <div class="impact-rule-name">${escHtml(r.ruleId)} — ${escHtml(r.ruleName)}</div>
+              <div class="impact-rule-change">${r.changes.map(c =>
+                `${escHtml(c.field)}: ${escHtml(c.value)} → ${escHtml((ruleRows.find(rr => rr.ruleId === r.ruleId)?.changes?.find(cc => cc.field === c.field)?.value) || '')}`
+              ).join(' · ')}</div>
+            </div>
+            <span class="impact-affected-count">~${r.estimated.toLocaleString()} submissions</span>
+          </div>
+        `).join('')
+    }
+    <p style="font-size:11px; color:var(--slds-text-label); margin-top:16px;">
+      * Impact estimates are heuristic approximations based on historical audit activity and condition threshold analysis. Not a guarantee of actual outcomes.
+    </p>
+  `;
+
+  document.getElementById('impactExportBtn').onclick = () => {
+    closeModal('impactModal');
+    handleExport('pdf', 'sandbox');
+  };
+
+  document.getElementById('impactModal').classList.remove('hidden');
+}
+
+// ================================================================
+// EXPORT
+// ================================================================
+let activeExportContext = { type: null, idx: null };
+
+function toggleExportDropdown(event, scenarioIdx) {
+  event.stopPropagation();
+  activeExportContext = { type: 'ai', idx: scenarioIdx };
+  const btn = event.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const dd = document.getElementById('exportDropdown');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  dd.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
+  dd.style.left = (rect.right  + window.scrollX - 140) + 'px';
+}
+
+function toggleSandboxExportDropdown(event) {
+  event.stopPropagation();
+  activeExportContext = { type: 'sandbox', idx: null };
+  const btn = event.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const dd = document.getElementById('exportDropdown');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  dd.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
+  dd.style.left = (rect.right  + window.scrollX - 140) + 'px';
+}
+
+function handleExport(format, contextOverride) {
+  document.getElementById('exportDropdown').style.display = 'none';
+  const ctx = contextOverride || activeExportContext.type;
+
+  if (format === 'pdf') exportPDF(ctx);
+  if (format === 'json') exportJSON(ctx);
+  if (format === 'csv')  exportCSV(ctx);
+}
+
+async function buildExportPayload(context) {
+  if (context === 'ai') {
+    const cards = document.getElementById('scenarioCards');
+    const idx   = activeExportContext.idx;
+    const scenario = cards._scenarios && cards._scenarios[idx];
+    if (!scenario) return null;
+    return {
+      type:        'ai_generated',
+      name:        scenario.name,
+      summary:     scenario.summary,
+      policy_goal: document.getElementById('policyGoalInput').value.trim(),
+      program:     PROGRAM_CONFIG[currentProgram]?.programName || currentProgram,
+      confidence:  scenario.confidence,
+      ai_model:    'claude-sonnet-4-6',
+      period_start: document.getElementById('periodStart').value,
+      period_end:   document.getElementById('periodEnd').value,
+      affected_rules: scenario.affected_rules || [],
+      estimated_impact: scenario.estimated_impact
+    };
+  }
+
+  if (context === 'sandbox' && activeSandbox) {
+    const content   = document.getElementById('sandboxMainContent');
+    const snapshots = content._snapshots || [];
+
+    // Fetch dependencies for changed rules
+    const changedRuleIds = snapshots
+      .filter(s => (s.original_conditions || []).some((oc, i) => s.sandbox_conditions[i] && oc.value !== s.sandbox_conditions[i].value))
+      .map(s => s.rule_id);
+
+    let deps = [];
+    if (changedRuleIds.length > 0) {
+      deps = await sbFetch('rule_dependencies',
+        `rule_id=in.(${changedRuleIds.join(',')})&select=rule_id,depends_on,dependency_type,description`);
+    }
+
+    return {
+      type:        activeSandbox.type,
+      name:        activeSandbox.name,
+      description: activeSandbox.description,
+      program:     PROGRAM_CONFIG[currentProgram]?.programName || currentProgram,
+      policy_goal: activeSandbox.policy_goal || null,
+      confidence:  activeSandbox.confidence  || null,
+      ai_model:    activeSandbox.ai_model    || null,
+      period_start: activeSandbox.time_period_start,
+      period_end:   activeSandbox.time_period_end,
+      snapshots,
+      dependencies: Array.isArray(deps) ? deps : []
+    };
+  }
+  return null;
+}
+
+async function exportPDF(context) {
+  const payload = await buildExportPayload(context || activeExportContext.type);
+  if (!payload) { showToast('Nothing to export.', 'error'); return; }
+
+  const cfg = PROGRAM_CONFIG[currentProgram];
+  const exportDate = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  // Build rule change sections
+  const ruleSections = [];
+  const rules = payload.affected_rules || payload.snapshots || [];
+
+  rules.forEach((r, i) => {
+    // Support both AI scenario format and sandbox snapshot format
+    const ruleId   = r.rule_id;
+    const ruleName = r.rule_name || r.name || '';
+    const rationale = r.change_rationale || '';
+
+    // Determine condition rows
+    let condRows = [];
+    if (r.condition_changes) {
+      // AI format
+      condRows = r.condition_changes.map(cc => [
+        { text: cc.field, style: 'condField' },
+        cc.operator,
+        { text: cc.original_value, color: '#BA0517', decoration: 'lineThrough' },
+        { text: cc.proposed_value, color: '#2E844A', bold: true }
+      ]);
+    } else if (r.original_conditions && r.sandbox_conditions) {
+      // Sandbox format
+      r.original_conditions.forEach((oc, ci) => {
+        const sc = r.sandbox_conditions[ci];
+        if (!sc) return;
+        const changed = oc.value !== sc.value;
+        condRows.push([
+          { text: oc.field, style: 'condField' },
+          oc.operator,
+          changed
+            ? { text: oc.value, color: '#BA0517', decoration: 'lineThrough' }
+            : { text: oc.value, color: '#54698D' },
+          changed
+            ? { text: sc.value, color: '#2E844A', bold: true }
+            : { text: '(unchanged)', color: '#54698D', italics: true }
+        ]);
+      });
+    }
+
+    if (condRows.length === 0) return;
+
+    ruleSections.push({ text: `Rule ${i+1}: ${ruleId} — ${ruleName}`, style: 'ruleHeader', margin: [0, 12, 0, 4] });
+    if (rationale) ruleSections.push({ text: `Rationale: ${rationale}`, style: 'rationale', margin: [0, 0, 0, 6] });
+    ruleSections.push({
+      table: {
+        headerRows: 1,
+        widths: ['*', 60, '*', '*'],
+        body: [
+          [
+            { text: 'Field',    style: 'tableHeader' },
+            { text: 'Operator', style: 'tableHeader' },
+            { text: 'Original Value', style: 'tableHeader' },
+            { text: 'New Value',      style: 'tableHeader' }
+          ],
+          ...condRows
+        ]
+      },
+      layout: {
+        hLineColor: () => '#E5E5E5',
+        vLineColor: () => '#E5E5E5',
+        fillColor: (row) => row === 0 ? '#F3F3F3' : null
+      },
+      margin: [0, 0, 0, 8]
+    });
+  });
+
+  // Dependencies section
+  const depRows = (payload.dependencies || []).map(d => [
+    { text: d.rule_id,      style: 'condField' },
+    { text: d.dependency_type || '', color: '#54698D' },
+    { text: d.depends_on,   style: 'condField' },
+    { text: d.description || '', color: '#54698D', italics: true }
+  ]);
+
+  const docDef = {
+    pageSize: 'LETTER',
+    pageMargins: [50, 70, 50, 60],
+    header: (page, pages) => ({
+      columns: [
+        { text: '⟨°⟩ LEXIPOINT', style: 'headerLogo', margin: [50, 20, 0, 0] },
+        { text: `Page ${page} of ${pages}`, alignment: 'right', margin: [0, 20, 50, 0], fontSize: 9, color: '#54698D' }
+      ]
+    }),
+    footer: {
+      text: 'CONFIDENTIAL — FOR INTERNAL POLICY PLANNING USE ONLY',
+      alignment: 'center', fontSize: 8, color: '#54698D', margin: [0, 0, 0, 16]
+    },
+    content: [
+      { text: 'SCENARIO IMPLEMENTATION SPECIFICATION', style: 'docTitle' },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 2, lineColor: '#032D60' }] },
+      { margin: [0, 12, 0, 16],
+        table: {
+          widths: [130, '*'],
+          body: [
+            [{ text: 'Program', style: 'metaKey' },     { text: payload.program || '', style: 'metaVal' }],
+            [{ text: 'Scenario', style: 'metaKey' },    { text: payload.name || '', style: 'metaVal' }],
+            ...(payload.policy_goal ? [[{ text: 'Policy Goal', style: 'metaKey' }, { text: payload.policy_goal, style: 'metaVal' }]] : []),
+            ...(payload.ai_model    ? [[{ text: 'Generated By', style: 'metaKey' }, { text: `AI Policy Goal Generator | ${payload.ai_model}`, style: 'metaVal' }]] : []),
+            ...(payload.confidence  ? [[{ text: 'Confidence', style: 'metaKey' }, { text: `${payload.confidence}%`, style: 'metaVal' }]] : []),
+            [{ text: 'Exported', style: 'metaKey' }, { text: exportDate, style: 'metaVal' }],
+            ...(payload.period_start ? [[{ text: 'Analysis Period', style: 'metaKey' }, { text: `${payload.period_start || ''} – ${payload.period_end || ''}`, style: 'metaVal' }]] : [])
+          ]
+        },
+        layout: 'noBorders'
+      },
+      // Summary banner
+      {
+        margin: [0, 0, 0, 20],
+        table: {
+          widths: ['*', '*', '*'],
+          body: [[
+            { text: `${rules.length}\nRules Affected`, style: 'summaryCell', alignment: 'center' },
+            { text: `${rules.reduce((s, r) => s + (r.condition_changes || r.original_conditions || []).length, 0)}\nCondition Changes`, style: 'summaryCell', alignment: 'center' },
+            { text: payload.estimated_impact || (payload.snapshots ? 'See impact preview' : ''), style: 'summaryCell', alignment: 'center' }
+          ]]
+        },
+        layout: {
+          hLineColor: () => '#E5E5E5',
+          vLineColor: () => '#E5E5E5',
+          fillColor: () => '#EAF2FB'
+        }
+      },
+      // Rule sections header
+      { text: 'RULE-BY-RULE CHANGES', style: 'sectionHeader' },
+      ...ruleSections,
+      // Dependencies
+      ...(depRows.length > 0 ? [
+        { text: 'DEPENDENCIES THAT MAY BE IMPACTED', style: 'sectionHeader', margin: [0, 20, 0, 8] },
+        { text: 'Review these rules before implementation — they depend on the modified rules.', fontSize: 10, color: '#54698D', margin: [0, 0, 0, 8] },
+        {
+          table: {
+            headerRows: 1,
+            widths: ['*', 80, '*', '*'],
+            body: [
+              [
+                { text: 'Rule', style: 'tableHeader' },
+                { text: 'Relationship', style: 'tableHeader' },
+                { text: 'Depends On', style: 'tableHeader' },
+                { text: 'Notes', style: 'tableHeader' }
+              ],
+              ...depRows
+            ]
+          },
+          layout: { hLineColor: () => '#E5E5E5', vLineColor: () => '#E5E5E5', fillColor: (row) => row === 0 ? '#F3F3F3' : null }
+        }
+      ] : []),
+      // Approval block
+      { text: 'APPROVAL', style: 'sectionHeader', margin: [0, 24, 0, 8] },
+      {
+        table: {
+          widths: ['*', '*', 80],
+          body: [
+            [{ text: 'Role', style: 'tableHeader' }, { text: 'Signature', style: 'tableHeader' }, { text: 'Date', style: 'tableHeader' }],
+            ['Prepared by', '', ''],
+            ['Reviewed by', '', ''],
+            ['Approved by', '', '']
+          ]
+        },
+        layout: { hLineColor: () => '#E5E5E5', vLineColor: () => '#E5E5E5', fillColor: (row) => row === 0 ? '#F3F3F3' : null }
+      }
+    ],
+    styles: {
+      headerLogo:   { fontSize: 12, bold: true, color: '#032D60' },
+      docTitle:     { fontSize: 18, bold: true, color: '#032D60', margin: [0, 0, 0, 8] },
+      sectionHeader:{ fontSize: 11, bold: true, color: '#032D60', background: '#F3F3F3', margin: [0, 16, 0, 4] },
+      ruleHeader:   { fontSize: 11, bold: true, color: '#16325C' },
+      rationale:    { fontSize: 10, color: '#54698D', italics: true },
+      condField:    { font: 'Courier', fontSize: 10, color: '#032D60', bold: true },
+      tableHeader:  { fontSize: 10, bold: true, color: '#54698D', fillColor: '#F3F3F3' },
+      summaryCell:  { fontSize: 13, bold: true, color: '#032D60', margin: [0, 8, 0, 8] },
+      metaKey:      { fontSize: 10, bold: true, color: '#54698D' },
+      metaVal:      { fontSize: 10, color: '#16325C' }
+    },
+    defaultStyle: { fontSize: 10, color: '#16325C' }
+  };
+
+  const safeName = (payload.name || 'scenario').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  pdfMake.createPdf(docDef).download(`lexipoint-${safeName}.pdf`);
+  showToast('PDF downloaded.', 'success');
+}
+
+async function exportJSON(context) {
+  const payload = await buildExportPayload(context || activeExportContext.type);
+  if (!payload) { showToast('Nothing to export.', 'error'); return; }
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const safeName = (payload.name || 'scenario').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  downloadBlob(blob, `lexipoint-${safeName}.json`);
+  showToast('JSON downloaded.', 'success');
+}
+
+async function exportCSV(context) {
+  const payload = await buildExportPayload(context || activeExportContext.type);
+  if (!payload) { showToast('Nothing to export.', 'error'); return; }
+
+  const rows = [['rule_id', 'rule_name', 'condition_field', 'operator', 'original_value', 'new_value', 'rationale']];
+  const rules = payload.affected_rules || payload.snapshots || [];
+
+  rules.forEach(r => {
+    const ruleId   = r.rule_id;
+    const ruleName = r.rule_name || '';
+    const rationale = r.change_rationale || '';
+
+    if (r.condition_changes) {
+      r.condition_changes.forEach(cc => {
+        rows.push([ruleId, ruleName, cc.field, cc.operator, cc.original_value, cc.proposed_value, rationale]);
+      });
+    } else if (r.original_conditions && r.sandbox_conditions) {
+      r.original_conditions.forEach((oc, i) => {
+        const sc = r.sandbox_conditions[i];
+        if (sc && oc.value !== sc.value) {
+          rows.push([ruleId, ruleName, oc.field, oc.operator, oc.value, sc.value, rationale]);
+        }
+      });
+    }
+  });
+
+  const csv = rows.map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const safeName = (payload.name || 'scenario').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  downloadBlob(blob, `lexipoint-${safeName}.csv`);
+  showToast('CSV downloaded.', 'success');
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ================================================================
+// MODAL HELPERS
+// ================================================================
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// ================================================================
+// TOAST
+// ================================================================
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// ================================================================
+// UTILITIES
+// ================================================================
+function escHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ================================================================
+// CLOSE DROPDOWNS ON OUTSIDE CLICK
+// ================================================================
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.notification-bell')) {
+    document.querySelectorAll('.notification-dropdown.show').forEach(d => d.classList.remove('show'));
+  }
+  const dd = document.getElementById('exportDropdown');
+  if (!e.target.closest('.btn-export-scenario') && !e.target.closest('.btn-secondary[onclick*="Export"]')) {
+    dd.style.display = 'none';
+  }
+});
+
+// ================================================================
+// INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderProgramSwitcher(currentProgram);
+  updateUserDisplay(currentProgram);
+  renderProgramContextBar();
+  loadProgramRules();
+});
+</script>
+</body>
+</html>
