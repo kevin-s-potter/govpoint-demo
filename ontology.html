@@ -306,6 +306,116 @@
   </div>
 </div>
 
+<!-- Schedule Review Modal -->
+<div class="impact-modal" id="scheduleReviewModal">
+  <div class="impact-content" style="max-width: 480px;">
+    <span class="impact-close" id="scheduleReviewClose">✕</span>
+    <h2 class="impact-title">Schedule Periodic Review</h2>
+    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">Set a future date when this rule should be reviewed for regulatory currency. A "Review Due" badge will appear in the sidebar when the date arrives.</p>
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Review By Date</label>
+      <input type="date" id="scheduleReviewDate" class="slds-input" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;" />
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
+      <button id="scheduleReviewCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
+      <button id="scheduleReviewConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Schedule Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clone Rule Modal -->
+<div class="impact-modal" id="cloneRuleModal">
+  <div class="impact-content" style="max-width: 500px;">
+    <span class="impact-close" id="cloneRuleClose">✕</span>
+    <h2 class="impact-title">Clone as New Version</h2>
+    <div id="cloneRuleBody" style="margin-bottom: 20px;"></div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
+      <button id="cloneRuleCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
+      <button id="cloneRuleConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Create Draft Version</button>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Version Modal -->
+<div class="impact-modal" id="approveVersionModal">
+  <div class="impact-content" style="max-width: 500px;">
+    <span class="impact-close" id="approveVersionClose">✕</span>
+    <h2 class="impact-title">Approve New Rule Version</h2>
+    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">Set the effective date. If today is selected, the new version activates immediately and the previous version is archived. If a future date is selected, the rule enters Pending status until activated.</p>
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Effective Date</label>
+      <input type="date" id="approveVersionDate" class="slds-input" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;" />
+      <div id="approveVersionHint" style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;"></div>
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
+      <button id="approveVersionCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
+      <button id="approveVersionConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-success); color: white; border-radius: 2px; cursor: pointer;">Approve &amp; Activate</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Rule Modal -->
+<div class="impact-modal" id="newRuleModal">
+  <div class="impact-content" style="max-width: 560px;">
+    <span class="impact-close" id="newRuleClose">✕</span>
+    <h2 class="impact-title">Create New Rule</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+      <div style="grid-column: 1 / -1;">
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Rule Name <span style="color: var(--slds-error);">*</span></label>
+        <input type="text" id="newRuleName" class="slds-input" placeholder="e.g., Minimum Bed Count Requirement" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;" />
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Citation</label>
+        <input type="text" id="newRuleCitation" class="slds-input" placeholder="e.g., ORC 3702.30" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;" />
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Jurisdiction</label>
+        <select id="newRuleJurisdiction" class="slds-select" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;">
+          <option value="Ohio">Ohio</option>
+          <option value="Federal">Federal</option>
+          <option value="Local">Local</option>
+        </select>
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Rule Type</label>
+        <select id="newRuleType" class="slds-select" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;">
+          <option value="GATE">GATE — Must pass to proceed</option>
+          <option value="FILTER">FILTER — Narrows eligibility</option>
+          <option value="CALC">CALC — Computes a value</option>
+          <option value="ROUTE">ROUTE — Determines pathway</option>
+          <option value="INFO">INFO — Documentation requirement</option>
+        </select>
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Priority</label>
+        <select id="newRulePriority" class="slds-select" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;">
+          <option value="P1">P1 — Critical</option>
+          <option value="P2">P2 — Required</option>
+          <option value="P3">P3 — Recommended</option>
+          <option value="P4">P4 — Informational</option>
+        </select>
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">Phase</label>
+        <select id="newRulePhase" class="slds-select" style="width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px;">
+          <option value="LICENSING">LICENSING</option>
+          <option value="COMPLIANCE">COMPLIANCE</option>
+          <option value="APPLICATION_PROCESSING">APPLICATION_PROCESSING</option>
+          <option value="REPORTING_VERIFICATION">REPORTING_VERIFICATION</option>
+          <option value="RECERTIFICATION">RECERTIFICATION</option>
+        </select>
+      </div>
+      <div style="grid-column: 1 / -1;">
+        <div id="newRuleIdPreview" style="font-size: 11px; color: var(--text-secondary); padding: 8px; background: var(--slds-bg); border-radius: 2px;"></div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
+      <button id="newRuleCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
+      <button id="newRuleConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Create Rule</button>
+    </div>
+  </div>
+</div>
+
 <!-- Impact Simulation Modal -->
 <div class="impact-modal" id="impactModal">
   <div class="impact-content">
@@ -486,6 +596,202 @@ class LexiPointAPI {
     });
     if (!res.ok) { console.error(`[LexiPoint API] addAuditEntry failed: ${res.status}`); }
     this.clearCache();
+  }
+
+  // ── RULE VERSION HISTORY ──────────────────────────────────
+  async addRuleVersion(ruleId, version, changedBy, changeSummary, diff = null) {
+    const url = `${SUPABASE_URL}/rest/v1/rule_versions`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        rule_id: ruleId,
+        version: version,
+        changed_by: changedBy,
+        changed_at: new Date().toISOString(),
+        change_summary: changeSummary,
+        diff: diff
+      })
+    });
+    if (!res.ok) { console.warn('[LexiPoint API] addRuleVersion failed:', await res.text()); }
+  }
+
+  // ── RULE LIFECYCLE METHODS ────────────────────────────────
+
+  async cloneRule(sourceRuleId) {
+    const source = await this.getRule(sourceRuleId);
+    if (!source) throw new Error('Source rule not found');
+
+    // Derive base ID (strip existing -vN suffix) and bump version
+    const baseId = sourceRuleId.replace(/-v\d+$/, '');
+    const majorVersion = parseInt((source.version || '1.0').split('.')[0], 10) || 1;
+    const newMajor = majorVersion + 1;
+    const newRuleId = `${baseId}-v${newMajor}`;
+    const newVersion = `${newMajor}.0`;
+
+    const sourceConditions = await this.getConditions(sourceRuleId);
+    const sourceDeps = await this._query('rule_dependencies', `select=*&rule_id=eq.${encodeURIComponent(sourceRuleId)}`);
+
+    // Insert cloned rule
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rules`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        rule_id: newRuleId,
+        program_id: source.program_id,
+        tenant_id: source.tenant_id,
+        name: source.name + ' (Amendment)',
+        description: source.description,
+        citation: source.citation,
+        jurisdiction: source.jurisdiction,
+        rule_type: source.rule_type,
+        phase: source.phase,
+        priority: source.priority,
+        status: 'draft',
+        version: newVersion,
+        parent_rule_id: sourceRuleId,
+        effective_date: null,
+        sunset_date: null,
+        classification: source.classification || 'standard',
+        created_by: source.created_by,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+    });
+    if (!res.ok) { const err = await res.text(); throw new Error(`Clone failed: ${err}`); }
+    const created = (await res.json())[0];
+
+    // Clone conditions
+    if (sourceConditions.length > 0) {
+      const newConditions = sourceConditions.map(c => ({
+        rule_id: newRuleId,
+        order: c.order,
+        field: c.field,
+        operator: c.operator,
+        value: c.value,
+        value_type: c.value_type
+      }));
+      await fetch(`${SUPABASE_URL}/rest/v1/rule_conditions`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(newConditions)
+      });
+    }
+
+    // Clone dependencies (only outbound — rule_id side)
+    if (sourceDeps.length > 0) {
+      const newDeps = sourceDeps.map(d => ({
+        rule_id: newRuleId,
+        depends_on: d.depends_on,
+        dependency_type: d.dependency_type,
+        description: d.description
+      }));
+      await fetch(`${SUPABASE_URL}/rest/v1/rule_dependencies`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDeps)
+      });
+    }
+
+    await this.addRuleVersion(newRuleId, newVersion, source.created_by || 'user-001',
+      `Cloned from ${sourceRuleId} for amendment`);
+    await this.addAuditEntry(source.tenant_id, source.created_by || 'user-001', 'publisher',
+      'clone_initiated', 'rule', sourceRuleId, `Cloned to ${newRuleId}`);
+    await this.addAuditEntry(source.tenant_id, source.created_by || 'user-001', 'publisher',
+      'clone_created', 'rule', newRuleId, `Cloned from ${sourceRuleId}`);
+    this.clearCache();
+    return created;
+  }
+
+  async scheduleReview(ruleId, reviewDate, currentUserId, tenantId) {
+    await this.updateRule(ruleId, { next_review_date: reviewDate });
+    await this.addAuditEntry(tenantId, currentUserId, 'publisher',
+      'review_scheduled', 'rule', ruleId, `Review scheduled for ${reviewDate}`);
+    this.clearCache();
+  }
+
+  async approveRule(ruleId, effectiveDate, currentUserId, tenantId) {
+    const rule = await this.getRule(ruleId);
+    if (!rule) throw new Error('Rule not found');
+    const today = new Date().toISOString().split('T')[0];
+    const newStatus = effectiveDate <= today ? 'active' : 'pending';
+
+    await this.updateRule(ruleId, {
+      status: newStatus,
+      effective_date: effectiveDate,
+      approved_by: currentUserId,
+      approved_at: new Date().toISOString()
+    });
+
+    if (newStatus === 'active' && rule.parent_rule_id) {
+      await this.updateRule(rule.parent_rule_id, {
+        status: 'archived',
+        superseded_by: ruleId,
+        sunset_date: today
+      });
+      await this.addAuditEntry(tenantId, currentUserId, 'publisher',
+        'archived', 'rule', rule.parent_rule_id, `Superseded by ${ruleId}`);
+    }
+
+    await this.addAuditEntry(tenantId, currentUserId, 'publisher',
+      'approved', 'rule', ruleId, `Approved. Effective ${effectiveDate}.`);
+    await this.addRuleVersion(ruleId, rule.version, currentUserId,
+      `Approved. Effective ${effectiveDate}.`);
+    this.clearCache();
+    return newStatus;
+  }
+
+  async activateRule(ruleId, currentUserId, tenantId) {
+    const rule = await this.getRule(ruleId);
+    if (!rule) throw new Error('Rule not found');
+
+    await this.updateRule(ruleId, { status: 'active' });
+
+    if (rule.parent_rule_id) {
+      const today = new Date().toISOString().split('T')[0];
+      await this.updateRule(rule.parent_rule_id, {
+        status: 'archived',
+        superseded_by: ruleId,
+        sunset_date: today
+      });
+      await this.addAuditEntry(tenantId, currentUserId, 'publisher',
+        'archived', 'rule', rule.parent_rule_id, `Superseded by ${ruleId}`);
+    }
+
+    await this.addAuditEntry(tenantId, currentUserId, 'publisher',
+      'activated', 'rule', ruleId, 'Rule activated from pending status.');
+    this.clearCache();
+  }
+
+  async createRule(data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rules`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        ...data,
+        status: 'draft',
+        version: '1.0',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+    });
+    if (!res.ok) { const err = await res.text(); throw new Error(`Create rule failed: ${err}`); }
+    this.clearCache();
+    return (await res.json())[0];
   }
 
   async saveConditions(ruleId, tenantId, conditions) {
@@ -674,13 +980,15 @@ function renderRulesList() {
   });
 
   container.innerHTML = filtered.map(rule => {
-    const pending = PENDING_APPS[rule.rule_id];
-    const pendingBadge = pending
-      ? `<span class="pending-apps-badge">${pending} active</span>`
+    const pendingApps = PENDING_APPS[rule.rule_id];
+    const pendingAppsBadge = pendingApps
+      ? `<span class="pending-apps-badge">${pendingApps} active</span>`
       : '';
     const citationChip = rule.citation
       ? `<span class="citation-chip-sm">${rule.citation}</span>`
       : '';
+
+    // Effective date badge (future date)
     let effectiveBadge = '';
     if (rule.effective_date) {
       const eff = new Date(rule.effective_date);
@@ -688,15 +996,45 @@ function renderRulesList() {
         effectiveBadge = `<span style="font-size:10px;color:var(--slds-warning);font-weight:600;">Eff. ${eff.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`;
       }
     }
+
+    // Review Due badge (next_review_date <= today)
+    let reviewDueBadge = '';
+    if (rule.next_review_date) {
+      const rev = new Date(rule.next_review_date + 'T00:00:00');
+      if (rev <= today) {
+        reviewDueBadge = `<span class="badge-review-due">Review Due</span>`;
+      }
+    }
+
+    // Status badge — pending and archived get their own styles
+    const statusLabel = rule.status === 'pending' ? 'PENDING'
+      : rule.status === 'archived' ? 'ARCHIVED'
+      : rule.status.toUpperCase();
+    const statusCls = rule.status === 'pending' ? 'status-pending'
+      : rule.status === 'archived' ? 'status-archived'
+      : rule.status;
+
+    // Version number
+    const versionLabel = rule.version ? `<span class="version-lineage">v${rule.version}</span>` : '';
+
+    // Parent-child lineage indicator
+    let lineageLabel = '';
+    if (rule.parent_rule_id) {
+      lineageLabel = `<span class="version-lineage" style="color:var(--slds-blue);">↳ revision of ${rule.parent_rule_id}</span>`;
+    }
+
     return `
       <div class="rule-card ${rule.rule_id === currentRule?.rule_id ? 'active' : ''}" data-id="${rule.rule_id}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
           <div class="rule-name">${rule.rule_id}</div>
-          ${pendingBadge}
+          ${pendingAppsBadge}
         </div>
+        ${lineageLabel ? `<div style="margin-bottom:3px;">${lineageLabel}</div>` : ''}
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">${rule.name}</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-          <span class="rule-status slds-badge ${rule.status}" style="font-size:11px;">${rule.status.toUpperCase()}</span>
+          <span class="rule-status slds-badge ${statusCls}" style="font-size:11px;">${statusLabel}</span>
+          ${versionLabel}
+          ${reviewDueBadge}
           ${citationChip}
           ${effectiveBadge}
         </div>
@@ -749,10 +1087,33 @@ async function renderDetailPanel() {
     actionBtns += `<button class="slds-button slds-button_brand" onclick="transitionStatus('review')">Submit for Review</button>`;
   } else if (s === 'review') {
     actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-purple);color:var(--slds-purple);" onclick="openReviewDiff()">Review Changes</button>`;
+    actionBtns += `<button class="slds-button slds-button_brand" onclick="openApproveVersionModal()">Approve Version</button>`;
   } else if (s === 'active') {
+    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:#0E7490;color:#0E7490;" onclick="openScheduleReviewModal()">Schedule Review</button>`;
+    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-blue);color:var(--slds-blue);" onclick="openCloneRuleModal()">Clone as New Version</button>`;
     actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-warning);color:var(--slds-warning);" onclick="transitionStatus('sunset')">Sunset Rule</button>`;
+  } else if (s === 'pending') {
+    actionBtns += `<button class="slds-button slds-button_brand" onclick="runActivateRule()">Activate Now</button>`;
   }
+  // archived / sunset: read-only — no action buttons added
   actionsEl.innerHTML = actionBtns;
+
+  // Pending activation info banner (shown below header)
+  const existingBanner = document.getElementById('lifecycleBanner');
+  if (existingBanner) existingBanner.remove();
+  if (s === 'pending' && currentRule.effective_date) {
+    const banner = document.createElement('div');
+    banner.id = 'lifecycleBanner';
+    banner.style.cssText = 'padding:10px 24px;background:#CFFAFE;border-bottom:1px solid #A5F3FC;font-size:12px;color:#0E7490;font-weight:600;display:flex;align-items:center;gap:8px;';
+    banner.innerHTML = `⏳ Pending activation on ${new Date(currentRule.effective_date + 'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'})} — click "Activate Now" to activate immediately.`;
+    document.getElementById('detailTabs').insertAdjacentElement('beforebegin', banner);
+  } else if (s === 'archived') {
+    const banner = document.createElement('div');
+    banner.id = 'lifecycleBanner';
+    banner.style.cssText = 'padding:10px 24px;background:#F9FAFB;border-bottom:1px solid var(--slds-border);font-size:12px;color:#747474;display:flex;align-items:center;gap:8px;';
+    banner.innerHTML = `■ This rule has been archived${currentRule.superseded_by ? ` — superseded by <a href="javascript:void(0)" onclick="selectRule('${currentRule.superseded_by}')" style="color:var(--slds-blue);font-weight:600;">${currentRule.superseded_by}</a>` : ''}.`;
+    document.getElementById('detailTabs').insertAdjacentElement('beforebegin', banner);
+  }
 
   // Fetch related data in parallel
   const [conditions, deps, versions, comments, auditLog] = await Promise.all([
@@ -803,7 +1164,8 @@ async function renderDetailPanel() {
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">STATUS</div>
         <select class="slds-select" style="${fieldStyle}">${selOpt(r.status, [
-          {value:'draft',label:'Draft'},{value:'review',label:'Review'},{value:'active',label:'Active'},{value:'sunset',label:'Sunset'}
+          {value:'draft',label:'Draft'},{value:'review',label:'In Review'},{value:'active',label:'Active'},
+          {value:'pending',label:'Pending Activation'},{value:'sunset',label:'Sunset'},{value:'archived',label:'Archived'}
         ])}</select>
       </div>
       <div>
@@ -855,7 +1217,34 @@ async function renderDetailPanel() {
   // ── VERSION HISTORY TAB — from rule_versions table ──────────
   const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}); } catch(e) { return d; } };
 
-  document.getElementById('historyContent').innerHTML = versions.length > 0 ? versions.map((v, i) => `
+  // Build lineage header
+  let lineageHtml = '';
+  if (r.parent_rule_id) {
+    lineageHtml += `
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#EFF6FF;border-radius:4px;margin-bottom:12px;font-size:12px;border-left:3px solid var(--slds-blue);">
+        <span style="font-weight:700;color:var(--slds-blue);">↳ Revision of</span>
+        <a href="javascript:void(0)" onclick="selectRule('${r.parent_rule_id}')" style="color:var(--slds-blue);font-weight:600;text-decoration:underline;">${r.parent_rule_id}</a>
+        <span style="color:var(--text-secondary);">— this is an amendment to an active rule</span>
+      </div>`;
+  }
+  if (r.superseded_by) {
+    lineageHtml += `
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#FEF3C7;border-radius:4px;margin-bottom:12px;font-size:12px;border-left:3px solid var(--slds-warning);">
+        <span style="font-weight:700;color:var(--slds-warning);">Superseded by</span>
+        <a href="javascript:void(0)" onclick="selectRule('${r.superseded_by}')" style="color:var(--slds-warning);font-weight:600;text-decoration:underline;">${r.superseded_by}</a>
+        <span style="color:var(--text-secondary);">— a newer version has replaced this rule</span>
+      </div>`;
+  }
+  if (r.approved_by && r.approved_at) {
+    lineageHtml += `
+      <div style="padding:10px 14px;background:#D1FAE5;border-radius:4px;margin-bottom:12px;font-size:12px;border-left:3px solid var(--slds-success);">
+        <span style="font-weight:700;color:var(--slds-success);">Approved</span>
+        <span style="color:var(--text-secondary);"> on ${fmtDate(r.approved_at)} by ${r.approved_by}</span>
+        ${r.effective_date ? ` · <span style="color:var(--text-secondary);">Effective ${fmtDate(r.effective_date)}</span>` : ''}
+      </div>`;
+  }
+
+  document.getElementById('historyContent').innerHTML = lineageHtml + (versions.length > 0 ? versions.map((v, i) => `
     <div class="version-item">
       <div class="version-header">
         <span class="version-num">v${v.version}</span>
@@ -872,9 +1261,9 @@ async function renderDetailPanel() {
         <span class="version-num">v${r.version}</span>
         <span class="version-date">Current</span>
       </div>
-      <div class="version-details">Initial version</div>
+      <div class="version-details">Initial version — no edits recorded yet</div>
     </div>
-  `;
+  `);
 
   // ── SOURCE VIEW TAB ─────────────────────────────────────────
   document.getElementById('sourceContent').innerHTML = `
@@ -1065,6 +1454,28 @@ function setupEventListeners() {
   _on('testRuleClose', 'click', () => document.getElementById('testRuleModal')?.classList.remove('active'));
   _on('reviewDiffClose', 'click', () => document.getElementById('reviewDiffModal')?.classList.remove('active'));
 
+  // ── Schedule Review Modal ────────────────────────────────
+  _on('scheduleReviewClose', 'click', () => document.getElementById('scheduleReviewModal')?.classList.remove('active'));
+  _on('scheduleReviewCancelBtn', 'click', () => document.getElementById('scheduleReviewModal')?.classList.remove('active'));
+  _on('scheduleReviewConfirmBtn', 'click', runScheduleReview);
+
+  // ── Clone Rule Modal ─────────────────────────────────────
+  _on('cloneRuleClose', 'click', () => document.getElementById('cloneRuleModal')?.classList.remove('active'));
+  _on('cloneRuleCancelBtn', 'click', () => document.getElementById('cloneRuleModal')?.classList.remove('active'));
+  _on('cloneRuleConfirmBtn', 'click', runCloneRule);
+
+  // ── Approve Version Modal ────────────────────────────────
+  _on('approveVersionClose', 'click', () => document.getElementById('approveVersionModal')?.classList.remove('active'));
+  _on('approveVersionCancelBtn', 'click', () => document.getElementById('approveVersionModal')?.classList.remove('active'));
+  _on('approveVersionConfirmBtn', 'click', runApproveRule);
+  _on('approveVersionDate', 'change', updateApproveVersionBtn, false);
+
+  // ── New Rule Modal ───────────────────────────────────────
+  _on('newRuleBtn', 'click', openNewRuleModal);
+  _on('newRuleClose', 'click', () => document.getElementById('newRuleModal')?.classList.remove('active'));
+  _on('newRuleCancelBtn', 'click', () => document.getElementById('newRuleModal')?.classList.remove('active'));
+  _on('newRuleConfirmBtn', 'click', runCreateRule);
+
   // ── j/k keyboard navigation ──────────────────────────────
   document.addEventListener('keydown', (e) => {
     const tag = (e.target || {}).tagName;
@@ -1254,6 +1665,17 @@ async function executeSave() {
       'rule', currentRule.rule_id, changes.join('; ')
     );
 
+    // 3. Write rule_versions entry (tracks what changed in this version)
+    if (changes.length > 0) {
+      const changedLabels = changes.map(c => c.split(':')[0]).join(', ');
+      await lexipoint.addRuleVersion(
+        currentRule.rule_id,
+        updated.version,
+        config.userId,
+        `Updated: ${changedLabels}`
+      );
+    }
+
     currentRule = updated;
     rules = await lexipoint.getRules(currentProgram);
     const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
@@ -1296,16 +1718,28 @@ async function executeSave() {
 
 // ── WORKFLOW RAIL RENDERER ────────────────────────────────────
 function renderWorkflowRail(status) {
+  // Archived rules show a terminal banner instead of the rail
+  if (status === 'archived') {
+    return `<div class="workflow-rail"><span class="workflow-stage status-archived" style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;background:#F3F4F6;color:#747474;border:1px solid #D1D5DB;">■ ARCHIVED — Superseded by newer version</span></div>`;
+  }
+
   const stages = [
-    { key: 'draft',  label: 'Draft' },
-    { key: 'review', label: 'In Review' },
-    { key: 'active', label: 'Active' },
-    { key: 'sunset', label: 'Sunset' }
+    { key: 'draft',   label: 'Draft' },
+    { key: 'review',  label: 'In Review' },
+    { key: 'pending', label: 'Pending' },
+    { key: 'active',  label: 'Active' },
+    { key: 'sunset',  label: 'Sunset' }
   ];
+  // For rules that went draft→review→active (no pending step), treat active as after review
+  // Map current status to the correct index
   const currentIdx = stages.findIndex(s => s.key === status);
   let html = '<div class="workflow-rail">';
   stages.forEach((stage, i) => {
-    if (i > 0) html += '<span class="workflow-rail-arrow">›</span>';
+    // Skip 'pending' in the visual rail for rules that are already active without going through pending
+    if (stage.key === 'pending' && status === 'active') return;
+    if (i > 0 && !(stage.key === 'pending' && status === 'active')) {
+      html += '<span class="workflow-rail-arrow">›</span>';
+    }
     let cls = 'workflow-stage';
     if (i < currentIdx) cls += ' stage-completed';
     else if (i === currentIdx) cls += ` stage-current-${stage.key}`;
@@ -1412,6 +1846,238 @@ async function openReviewDiff() {
   document.getElementById('approveRuleBtn').onclick = () => transitionStatus('active');
   document.getElementById('rejectRuleBtn').onclick = () => transitionStatus('draft');
   modal.classList.add('active');
+}
+
+// ── LIFECYCLE MODAL OPENERS ───────────────────────────────────
+function openScheduleReviewModal() {
+  if (!currentRule) return;
+  const modal = document.getElementById('scheduleReviewModal');
+  if (!modal) return;
+  const dateEl = document.getElementById('scheduleReviewDate');
+  if (dateEl) {
+    // Pre-fill with existing review date or default 1 year from now
+    if (currentRule.next_review_date) {
+      dateEl.value = currentRule.next_review_date;
+    } else {
+      const next = new Date();
+      next.setFullYear(next.getFullYear() + 1);
+      dateEl.value = next.toISOString().split('T')[0];
+    }
+  }
+  modal.classList.add('active');
+}
+
+async function runScheduleReview() {
+  if (!currentRule) return;
+  const dateEl = document.getElementById('scheduleReviewDate');
+  const reviewDate = dateEl?.value;
+  if (!reviewDate) { showToast('Please select a review date'); return; }
+
+  const config = PROGRAM_CONFIG[currentProgram];
+  const btn = document.getElementById('scheduleReviewConfirmBtn');
+  if (btn) { btn.textContent = 'Scheduling...'; btn.disabled = true; }
+
+  try {
+    await lexipoint.scheduleReview(currentRule.rule_id, reviewDate, config.userId, config.tenant);
+    document.getElementById('scheduleReviewModal').classList.remove('active');
+    lexipoint.clearCache();
+    currentRule = await lexipoint.getRule(currentRule.rule_id);
+    rules = await lexipoint.getRules(currentProgram);
+    renderRulesList();
+    showToast(`Review scheduled for ${new Date(reviewDate + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+  }
+  if (btn) { btn.textContent = 'Schedule Review'; btn.disabled = false; }
+}
+
+function openCloneRuleModal() {
+  if (!currentRule) return;
+  const modal = document.getElementById('cloneRuleModal');
+  if (!modal) return;
+
+  const baseId = currentRule.rule_id.replace(/-v\d+$/, '');
+  const major = parseInt((currentRule.version || '1.0').split('.')[0], 10) || 1;
+  const newId = `${baseId}-v${major + 1}`;
+
+  document.getElementById('cloneRuleBody').innerHTML = `
+    <div style="padding:12px;background:#EFF6FF;border-radius:4px;margin-bottom:12px;font-size:13px;border-left:3px solid var(--slds-blue);">
+      <div style="font-weight:700;color:var(--slds-navy);margin-bottom:6px;">${currentRule.name}</div>
+      <div style="color:var(--text-secondary);font-size:12px;">${currentRule.rule_id} · v${currentRule.version} · ${(currentRule.citation || '')}</div>
+    </div>
+    <p style="font-size:12px;color:var(--text);margin-bottom:8px;">This will create a new draft version <strong>${newId}</strong> with all conditions and dependencies copied from the active rule.</p>
+    <p style="font-size:12px;color:var(--text-secondary);">The active rule will remain live until the new version is approved and activated.</p>
+  `;
+  modal.classList.add('active');
+}
+
+async function runCloneRule() {
+  if (!currentRule) return;
+  const btn = document.getElementById('cloneRuleConfirmBtn');
+  if (btn) { btn.textContent = 'Cloning...'; btn.disabled = true; }
+
+  try {
+    const newRule = await lexipoint.cloneRule(currentRule.rule_id);
+    document.getElementById('cloneRuleModal').classList.remove('active');
+    rules = await lexipoint.getRules(currentProgram);
+    renderRulesList();
+    await selectRule(newRule.rule_id);
+    showToast(`Draft ${newRule.rule_id} created — ready for editing`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[Clone] Failed:', e);
+  }
+  if (btn) { btn.textContent = 'Create Draft Version'; btn.disabled = false; }
+}
+
+function openApproveVersionModal() {
+  if (!currentRule) return;
+  const modal = document.getElementById('approveVersionModal');
+  if (!modal) return;
+  const dateEl = document.getElementById('approveVersionDate');
+  if (dateEl) {
+    dateEl.value = new Date().toISOString().split('T')[0]; // default today
+  }
+  updateApproveVersionBtn();
+  modal.classList.add('active');
+}
+
+function updateApproveVersionBtn() {
+  const dateEl = document.getElementById('approveVersionDate');
+  const btn = document.getElementById('approveVersionConfirmBtn');
+  const hint = document.getElementById('approveVersionHint');
+  if (!dateEl || !btn) return;
+  const today = new Date().toISOString().split('T')[0];
+  const selected = dateEl.value;
+  if (!selected) return;
+  if (selected <= today) {
+    btn.textContent = 'Approve & Activate';
+    btn.style.background = 'var(--slds-success)';
+    if (hint) hint.innerHTML = currentRule?.parent_rule_id
+      ? `<span style="color:var(--slds-success);">Active rule ${currentRule.parent_rule_id} will be archived immediately.</span>`
+      : `<span style="color:var(--slds-success);">Rule will become active immediately.</span>`;
+  } else {
+    btn.textContent = 'Approve & Schedule';
+    btn.style.background = '#0E7490';
+    if (hint) hint.innerHTML = `<span style="color:#0E7490;">Rule will enter Pending status until activated on or after this date.</span>`;
+  }
+}
+
+async function runApproveRule() {
+  if (!currentRule) return;
+  const dateEl = document.getElementById('approveVersionDate');
+  const effectiveDate = dateEl?.value;
+  if (!effectiveDate) { showToast('Please select an effective date'); return; }
+
+  const config = PROGRAM_CONFIG[currentProgram];
+  const btn = document.getElementById('approveVersionConfirmBtn');
+  if (btn) { btn.disabled = true; }
+
+  try {
+    const newStatus = await lexipoint.approveRule(
+      currentRule.rule_id, effectiveDate, config.userId, config.tenant
+    );
+    document.getElementById('approveVersionModal').classList.remove('active');
+    lexipoint.clearCache();
+    currentRule = await lexipoint.getRule(currentRule.rule_id);
+    rules = await lexipoint.getRules(currentProgram);
+    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
+    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
+    renderRulesList();
+    renderWorkspaceTabs();
+    await renderDetailPanel();
+    showToast(newStatus === 'active'
+      ? `Rule activated — previous version archived`
+      : `Rule approved, pending activation on ${effectiveDate}`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[Approve] Failed:', e);
+  }
+  if (btn) { btn.textContent = 'Approve & Activate'; btn.disabled = false; }
+}
+
+async function runActivateRule() {
+  if (!currentRule) return;
+  const config = PROGRAM_CONFIG[currentProgram];
+  try {
+    await lexipoint.activateRule(currentRule.rule_id, config.userId, config.tenant);
+    lexipoint.clearCache();
+    currentRule = await lexipoint.getRule(currentRule.rule_id);
+    rules = await lexipoint.getRules(currentProgram);
+    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
+    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
+    renderRulesList();
+    renderWorkspaceTabs();
+    await renderDetailPanel();
+    showToast(`Rule ${currentRule.rule_id} is now Active`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[Activate] Failed:', e);
+  }
+}
+
+function openNewRuleModal() {
+  const modal = document.getElementById('newRuleModal');
+  if (!modal) return;
+  // Clear fields
+  ['newRuleName','newRuleCitation'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Show generated rule_id preview
+  const prefixMap = {
+    'hosp-licensing': 'OH', 'snap': 'SNAP-OH', 'nursing-home': 'NH',
+    'contractor-licensing': 'CL-MI', 'childcare-licensing': 'CC-OH'
+  };
+  const prefix = prefixMap[currentProgram] || 'RULE';
+  const existingNums = (rules || [])
+    .map(r => r.rule_id)
+    .filter(id => id.startsWith(prefix + '-'))
+    .map(id => { const m = id.replace(prefix + '-', '').match(/^(\d+)/); return m ? parseInt(m[1], 10) : 0; })
+    .filter(n => !isNaN(n) && n > 0);
+  const nextNum = (existingNums.length > 0 ? Math.max(...existingNums) : 0) + 1;
+  const newId = `${prefix}-${String(nextNum).padStart(3, '0')}`;
+  const preview = document.getElementById('newRuleIdPreview');
+  if (preview) preview.textContent = `Rule ID will be: ${newId}`;
+  modal._pendingRuleId = newId;
+  modal.classList.add('active');
+}
+
+async function runCreateRule() {
+  const modal = document.getElementById('newRuleModal');
+  const name = document.getElementById('newRuleName')?.value.trim();
+  if (!name) { showToast('Rule name is required'); return; }
+
+  const config = PROGRAM_CONFIG[currentProgram];
+  const btn = document.getElementById('newRuleConfirmBtn');
+  if (btn) { btn.textContent = 'Creating...'; btn.disabled = true; }
+
+  try {
+    const data = {
+      rule_id: modal._pendingRuleId,
+      program_id: currentProgram,
+      tenant_id: config.tenant,
+      name: name,
+      citation: document.getElementById('newRuleCitation')?.value.trim() || null,
+      jurisdiction: document.getElementById('newRuleJurisdiction')?.value || 'Ohio',
+      rule_type: document.getElementById('newRuleType')?.value || 'GATE',
+      priority: document.getElementById('newRulePriority')?.value || 'P2',
+      phase: document.getElementById('newRulePhase')?.value || 'LICENSING',
+      classification: 'standard',
+      created_by: config.userId
+    };
+    const newRule = await lexipoint.createRule(data);
+    await lexipoint.addAuditEntry(config.tenant, config.userId, 'publisher', 'create_draft', 'rule', newRule.rule_id, `New rule created: ${name}`);
+    modal.classList.remove('active');
+    rules = await lexipoint.getRules(currentProgram);
+    renderRulesList();
+    await selectRule(newRule.rule_id);
+    showToast(`Rule ${newRule.rule_id} created`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[CreateRule] Failed:', e);
+  }
+  if (btn) { btn.textContent = 'Create Rule'; btn.disabled = false; }
 }
 
 // ── RULE TYPE FILTER ─────────────────────────────────────────
@@ -1552,7 +2218,7 @@ function renderWorkspaceTabs() {
   container.style.display = 'flex';
   container.innerHTML = workspaceTabs.map(tab => {
     const status = (tab.rule.status || '').toLowerCase();
-    const statusColor = status === 'active' ? '#2E844A' : status === 'draft' ? '#DD7A01' : status === 'review' ? '#0176D3' : '#BA0517';
+    const statusColor = status === 'active' ? '#2E844A' : status === 'draft' ? '#DD7A01' : status === 'review' ? '#9050E9' : status === 'pending' ? '#0E7490' : status === 'archived' ? '#747474' : '#BA0517';
     return `
       <div class="workspace-tab ${tab.ruleId === activeTabId ? 'active' : ''}" data-rule-id="${tab.ruleId}" onclick="activateTab('${tab.ruleId}')">
         <span class="tab-status-dot" style="background: ${statusColor};"></span>

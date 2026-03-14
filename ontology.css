@@ -420,6 +420,57 @@
     color: var(--slds-success);
   }
 
+  /* ── RULE LIFECYCLE BADGE VARIANTS ── */
+  .rule-status.pending,
+  .status-pending {
+    background: #CFFAFE;
+    color: #0E7490;
+  }
+
+  .rule-status.archived,
+  .status-archived {
+    background: #F3F4F6;
+    color: #747474;
+  }
+
+  .rule-status.sunset {
+    background: #FFE4E6;
+    color: var(--slds-error);
+  }
+
+  /* Review Due badge — amber with subtle pulse */
+  .badge-review-due {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: #FEF3C7;
+    color: #B45309;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    animation: reviewPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes reviewPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Version / lineage labels in sidebar */
+  .version-lineage {
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: inline-block;
+  }
+
+  /* Workflow rail — pending stage color */
+  .stage-current-pending {
+    color: #0E7490;
+    font-weight: 700;
+  }
+
   /* Detail Panel */
   .detail-panel {
     flex: 1;
