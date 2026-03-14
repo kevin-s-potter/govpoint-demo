@@ -114,7 +114,7 @@ raw AS (
 ),
 -- ── Derive primary application fields ────────────────────────────────────────
 f AS (
-  SELECT r.*,
+  SELECT raw.*,
     CASE WHEN rA<450 THEN 'Sunridge' WHEN rA<750 THEN 'Maplewood'
          WHEN rA<900 THEN 'Crestview' ELSE 'Riverside' END AS county,
     CASE WHEN rC<15 THEN 1 WHEN rC<45 THEN 2 WHEN rC<75 THEN 3
