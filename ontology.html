@@ -1723,6 +1723,7 @@ async function saveRule() {
 
   preflightPendingAction = {
     fields,
+    changesRaw: changes,
     changes: changes.map(c => `${c.label}: "${c.from}" → "${c.to}"`)
   };
   document.getElementById('preflightModal').classList.add('active');
@@ -1754,14 +1755,19 @@ async function executeSave() {
       'rule', currentRule.rule_id, changes.join('; ')
     );
 
-    // 3. Write rule_versions entry (tracks what changed in this version)
+    // 3. Write rule_versions entry with structured diff for side-by-side review
     if (changes.length > 0) {
-      const changedLabels = changes.map(c => c.split(':')[0]).join(', ');
+      const rawChanges = pending.changesRaw || [];
+      const changedLabels = rawChanges.map(c => c.label).join(', ');
+      const diffPayload = rawChanges.length === 1
+        ? { field: rawChanges[0].key, old: rawChanges[0].from ?? null, new: rawChanges[0].to }
+        : rawChanges.map(c => ({ field: c.key, old: c.from ?? null, new: c.to }));
       await lexipoint.addRuleVersion(
         currentRule.rule_id,
         updated.version,
         config.userId,
-        `Updated: ${changedLabels}`
+        `Updated: ${changedLabels}`,
+        diffPayload
       );
     }
 
@@ -1939,14 +1945,18 @@ async function openReviewDiff() {
   </div>`;
 
   // ── Build diffMap: oldest-first so "old" = true pre-edit state ──
+  // diff may be {field,old,new} (single) or [{field,old,new},...] (multi-field save)
   const reversedVersions = [...versions].reverse();
   const changedFields = {};
   for (const v of reversedVersions) {
-    if (v.diff && v.diff.field) {
-      if (!changedFields[v.diff.field]) {
-        changedFields[v.diff.field] = { old: v.diff.old };
+    if (!v.diff) continue;
+    const entries = Array.isArray(v.diff) ? v.diff : [v.diff];
+    for (const d of entries) {
+      if (!d.field) continue;
+      if (!changedFields[d.field]) {
+        changedFields[d.field] = { old: d.old };
       }
-      changedFields[v.diff.field].new = v.diff.new;
+      changedFields[d.field].new = d.new;
     }
   }
   const DIFF_FIELDS = [
