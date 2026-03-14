@@ -1,4 +1,5 @@
   :root {
+    --text-dark: #16325C;
     --slds-blue: #0176D3;
     --slds-blue-dark: #014486;
     --slds-blue-light: #1B96FF;
@@ -16,7 +17,93 @@
     --text-secondary: #4A5568;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── Modal Button System ─────────────────────────────────────── */
+.modal-btn {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: filter 0.12s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+.modal-btn:hover { filter: brightness(0.9); }
+.modal-btn:focus-visible { outline: 3px solid #0176D3; outline-offset: 2px; }
+.modal-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+.modal-btn-neutral { background: #fff; color: #16325C; border: 1px solid #dddbda; }
+.modal-btn-brand   { background: #0176D3; color: #fff; }
+.modal-btn-success { background: #2E844A; color: #fff; }
+.modal-btn-warning { background: #DD7A01; color: #fff; }
+.modal-btn-danger  { background: #BA0517; color: #fff; }
+
+/* Rejection reason section */
+.rejection-reason-section {
+  margin-top: 14px;
+  padding: 14px;
+  background: #FFF5F5;
+  border: 1px solid #FCA5A5;
+  border-radius: 4px;
+}
+.rejection-reason-section label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #BA0517;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.rejection-reason-section textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #FCA5A5;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 72px;
+  color: #16325C;
+}
+.rejection-reason-section textarea:focus {
+  outline: none;
+  border-color: #BA0517;
+  box-shadow: 0 0 0 2px rgba(186,5,23,0.15);
+}
+
+/* ── Global focus indicator (ADA) ───────────────────────────── */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid #0176D3;
+  outline-offset: 2px;
+}
+
+/* ── Detail panel action button system ──────────────────────── */
+.btn-action {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: filter 0.12s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-action:focus-visible { outline: 3px solid #0176D3; outline-offset: 2px; }
+.btn-action:disabled      { opacity: 0.45; cursor: not-allowed; }
+.btn-action-secondary { background: #fff;    color: #16325C; border-color: #dddbda; }
+.btn-action-secondary:hover { background: #f3f3f3; }
+.btn-action-primary   { background: #0176D3; color: #fff;    border-color: #0176D3; }
+.btn-action-primary:hover   { filter: brightness(0.9); }
+.btn-action-success   { background: #2E844A; color: #fff;    border-color: #2E844A; }
+.btn-action-success:hover   { filter: brightness(0.9); }
+.btn-action-danger    { background: #BA0517; color: #fff;    border-color: #BA0517; }
+.btn-action-danger:hover    { filter: brightness(0.9); }
+.btn-action-warning   { background: #DD7A01; color: #fff;    border-color: #DD7A01; }
+.btn-action-warning:hover   { filter: brightness(0.9); }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Salesforce Sans', 'Inter', -apple-system, system-ui, sans-serif;
@@ -345,9 +432,11 @@
     font-weight: 600;
     border: 1px solid var(--slds-border);
     background: var(--slds-card);
+    color: #16325C;
     border-radius: 2px;
     cursor: pointer;
     transition: all 0.2s;
+    font-family: inherit;
   }
 
   .sidebar-actions button:hover {
@@ -513,9 +602,11 @@
     font-weight: 600;
     border: 1px solid var(--slds-border);
     background: var(--slds-card);
+    color: #16325C;
     border-radius: 2px;
     cursor: pointer;
     transition: all 0.2s;
+    font-family: inherit;
   }
 
   .detail-actions button:hover {
@@ -652,7 +743,8 @@
   .cb-btn-edit:hover { background: #014486; }
   .cb-btn-accept { background: var(--slds-success); color: #fff; }
   .cb-btn-reject { background: var(--slds-border); color: var(--text); }
-  .cb-btn-sm { padding: 4px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; }
+  .cb-btn-sm { padding: 4px 10px; font-size: 11px; font-weight: 600; border: 1px solid #dddbda; background: #fff; color: #16325C; border-radius: 4px; cursor: pointer; font-family: inherit; }
+  .cb-btn-sm:hover { background: #f3f3f3; }
 
   /* Logic tree preview */
   .cb-logic-preview { background: var(--slds-bg); border-radius: 4px; padding: 12px; margin-top: 12px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.6; color: var(--slds-navy); border: 1px solid var(--slds-border); white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow-y: auto; }
@@ -846,8 +938,15 @@
     float: right;
     cursor: pointer;
     font-size: 18px;
-    color: var(--text-secondary);
+    color: #16325C;
+    background: none;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    font-family: inherit;
   }
+  .impact-close:hover { background: #f3f3f3; color: #BA0517; }
 
   /* Document Upload Modal */
   .upload-modal {
@@ -1365,6 +1464,7 @@
   }
   .type-chip:hover { border-color: var(--slds-blue); color: var(--slds-blue); }
   .type-chip.active { background: var(--slds-blue); color: white; border-color: var(--slds-blue); }
+  .type-chip:focus-visible { outline: 3px solid #0176D3; outline-offset: 2px; }
 
   /* Tooltip */
   .tooltip {
