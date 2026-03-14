@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiPoint | Paws &amp; Progress Doggy Day Care Grant</title>
+<link rel="stylesheet" href="shared.css">
+<script src="program-switcher.js"></script>
+<style>
+#programSwitcherMount { flex: 1; min-width: 0; }
+
+/* ── Intake ── */
+.intake-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.intake-header {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.intake-header-left h2 { font-size: 17px; font-weight: 700; color: #032D60; margin-bottom: 2px; }
+.intake-header-left p { font-size: 12px; color: #54698D; }
+
+/* Form sections */
+.form-card {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.form-card-header {
+  background: #F8FAFC;
+  border-bottom: 1px solid #E5E5E5;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-card-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #032D60;
+  letter-spacing: 0.1px;
+}
+
+.form-section-icon {
+  width: 22px; height: 22px;
+  background: #0176D3;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: white; flex-shrink: 0;
+}
+
+.form-body { padding: 16px 20px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 11px; font-weight: 600; color: #54698D; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-group input,
+.form-group select {
+  padding: 7px 10px;
+  border: 1px solid #D8D8D8;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #16325C;
+  background: white;
+  transition: border-color 0.15s;
+}
+.form-group input:focus,
+.form-group select:focus { outline: none; border-color: #0176D3; box-shadow: 0 0 0 2px rgba(1,118,211,0.12); }
+
+.form-group.full { grid-column: 1 / -1; }
+
+/* ── Intake bottom ── */
+.intake-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* ── Evaluation Page ── */
+.eval-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.eval-header {
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.eval-header h2 { font-size: 16px; font-weight: 700; color: #032D60; margin-bottom: 4px; }
+.eval-header p { font-size: 12px; color: #54698D; }
+
+/* ── Audit Page ── */
+.audit-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.audit-step-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: #54698D;
+  min-width: 24px;
+}
+
+.audit-rule-id { font-size: 12px; font-weight: 600; color: #032D60; min-width: 100px; }
+.audit-rule-name { font-size: 12px; color: #54698D; flex: 1; }
+
+.audit-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.abadge-pass   { background: #D1FAE5; color: #065F46; }
+.abadge-flag   { background: #FEF3C7; color: #92400E; }
+.abadge-block  { background: #FEE2E2; color: #991B1B; }
+.abadge-skip   { background: #F3F3F3; color: #9CA3AF; }
+
+.audit-chevron { color: #9CA3AF; font-size: 11px; transition: transform 0.2s; }
+.audit-entry.open .audit-chevron { transform: rotate(180deg); }
+
+.audit-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+/* ── Benefit Calc Breakdown ── */
+.benefit-breakdown {
+  background: #F0F8FF;
+  border: 1px solid #BAD9F4;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 12px;
+}
+
+.benefit-breakdown-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #032D60;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+}
+
+.benefit-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #54698D;
+  padding: 3px 0;
+}
+
+.benefit-line.total {
+  border-top: 1px solid #BAD9F4;
+  margin-top: 4px;
+  padding-top: 6px;
+  font-weight: 700;
+  color: #032D60;
+}
+
+.benefit-line.annual {
+  font-size: 11px;
+  color: #54698D;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="logo">
+    <span class="ohio-mark">⟨°⟩</span>
+    <span>LexiPoint</span>
+  </div>
+
+  <div id="programSwitcherMount" class="tenant-switcher"></div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-links">
+    <a href="index.html" class="active">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+
+  <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span>&#x1F514;</span>
+      <span class="notification-badge">2</span>
+      <div class="notification-dropdown">
+        <div class="notification-dropdown-header">Notifications</div>
+        <div class="notification-item">
+          <strong>DDC-011 Tier 1 threshold updated — affects open applications</strong>
+          <div class="notification-time">3 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>DDC-009 Max Dogs rule: comment added by Jamie Rivera</strong>
+          <div class="notification-time">2 days ago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-indicator">
+      <div class="avatar-circle" id="avatarCircle">JR</div>
+      <div class="role-text">
+        <div class="user-name" id="userName">Jamie Rivera</div>
+        <div class="user-role" id="userRole">Grant Coordinator | Doggy Day Care Grants</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="lp-stepper">
+  <div class="lp-step active" id="step1" onclick="showPage('intake')">
+    <div class="lp-step-num">1</div>
+    <span>Application</span>
+  </div>
+  <div class="lp-step-line" id="line1"></div>
+  <div class="lp-step" id="step2" onclick="showPage('evaluation')">
+    <div class="lp-step-num">2</div>
+    <span>Evaluation</span>
+  </div>
+  <div class="lp-step-line" id="line2"></div>
+  <div class="lp-step" id="step3" onclick="showPage('results')">
+    <div class="lp-step-num">3</div>
+    <span>Decision</span>
+  </div>
+  <div class="lp-step-line" id="line3"></div>
+  <div class="lp-step" id="step4" onclick="showPage('audit')">
+    <div class="lp-step-num">4</div>
+    <span>Audit Trail</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 1: INTAKE
+═══════════════════════════════════════════════ -->
+<div id="page-intake" class="page visible">
+<div class="intake-wrap">
+
+  <div class="intake-header">
+    <div class="intake-header-left">
+      <h2>Paws &amp; Progress Doggy Day Care Grant Application</h2>
+      <p>City of Sunridge — Sunridge Municipal Code § 12 / Federal Pet Welfare Standards</p>
+    </div>
+  </div>
+
+  <div class="quick-demo-card">
+    <div class="quick-demo-header">
+      <span class="quick-demo-icon">✨</span>
+      <span class="quick-demo-title">Quick Demo: Choose a scenario to auto-populate the form</span>
+    </div>
+    <div class="scenario-bar">
+      <button class="scenario-btn" id="sBtn-A" onclick="loadScenario('A')">
+        <h4>Scenario A: Grant Approved</h4>
+        <p>Maria Santos — Sunridge, 1 Labrador, Tier 2 income. Shows live DDC-011 tier override impact.</p>
+      </button>
+      <button class="scenario-btn" id="sBtn-B" onclick="loadScenario('B')">
+        <h4>Scenario B: Approved with Conditions</h4>
+        <p>James Park — Maplewood, veteran, single parent, 2 dogs. Benefit cascade demo — annual cap flag.</p>
+      </button>
+      <button class="scenario-btn" id="sBtn-C" onclick="loadScenario('C')">
+        <h4>Scenario C: Application Blocked</h4>
+        <p>Tyler Walsh — Riverside (ineligible county), over income, restricted breed, suspended facility.</p>
+      </button>
+    </div>
+  </div>
+
+  <!-- Section 1: Application Info -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">1</div>
+      <h3>Application Information</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Applicant Name</label><input type="text" id="f-name" placeholder="e.g. Maria Santos"></div>
+        <div class="form-group">
+          <label>County of Residence</label>
+          <select id="f-county">
+            <option value="Sunridge">Sunridge</option>
+            <option value="Maplewood">Maplewood</option>
+            <option value="Crestview">Crestview</option>
+            <option value="Riverside">Riverside</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Application Complete</label>
+          <select id="f-complete">
+            <option value="true">Yes — All required fields provided</option>
+            <option value="false">No — Missing required information</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Household -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">2</div>
+      <h3>Household Information</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Household Size (persons)</label><input type="number" id="f-household-size" min="1" placeholder="e.g. 3"></div>
+        <div class="form-group"><label>Annual Household Income ($)</label><input type="number" id="f-income" placeholder="e.g. 31500"></div>
+        <div class="form-group">
+          <label>Household Type</label>
+          <select id="f-household-type">
+            <option value="standard">Standard Household</option>
+            <option value="single_parent">Single Parent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Veteran Status</label>
+          <select id="f-veteran">
+            <option value="false">No</option>
+            <option value="true">Yes — Verified U.S. veteran</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Dog Information -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">3</div>
+      <h3>Dog Information</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Number of Dogs</label>
+          <select id="f-dog-count">
+            <option value="1">1 dog</option>
+            <option value="2">2 dogs</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Primary Breed</label>
+          <select id="f-breed">
+            <option value="Labrador">Labrador</option>
+            <option value="Golden Retriever">Golden Retriever</option>
+            <option value="Poodle">Poodle</option>
+            <option value="Beagle">Beagle</option>
+            <option value="Bulldog">Bulldog</option>
+            <option value="Dachshund">Dachshund</option>
+            <option value="Shih Tzu">Shih Tzu</option>
+            <option value="Boxer">Boxer</option>
+            <option value="Siberian Husky">Siberian Husky</option>
+            <option value="Border Collie">Border Collie</option>
+            <option value="Mixed Breed">Mixed Breed</option>
+            <option value="German Shepherd">German Shepherd</option>
+            <option value="Other Restricted Breed">Other Restricted Breed</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Dog Age (years)</label><input type="number" id="f-dog-age" min="0" step="0.5" placeholder="e.g. 4"></div>
+        <div class="form-group"><label>Days Since Last Vaccination</label><input type="number" id="f-vaccination-days" min="0" placeholder="e.g. 30"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Facility -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">4</div>
+      <h3>Day Care Facility</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Facility Name</label><input type="text" id="f-facility-name" placeholder="e.g. Sunridge Paws Day Care"></div>
+        <div class="form-group">
+          <label>Facility License Status</label>
+          <select id="f-facility-license">
+            <option value="active">Active — Current municipal license on file</option>
+            <option value="suspended">Suspended — License currently suspended</option>
+            <option value="expired">Expired — License lapsed</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Open Enrollment Slots</label><input type="number" id="f-slots" min="0" placeholder="e.g. 5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Grant History & Documentation -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-section-icon">5</div>
+      <h3>Grant History &amp; Documentation</h3>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>First-Time Applicant</label>
+          <select id="f-first-time">
+            <option value="true">Yes — First application</option>
+            <option value="false">No — Prior grant received</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Months Since Last Grant (if prior)</label><input type="number" id="f-months-since-grant" min="0" placeholder="e.g. 14 (or 0 if first-time)"></div>
+        <div class="form-group"><label>Total Annual Benefit YTD ($)</label><input type="number" id="f-total-benefit" min="0" placeholder="e.g. 0"></div>
+        <div class="form-group"><label>Income Document Age (days)</label><input type="number" id="f-doc-age" min="0" placeholder="e.g. 45"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="intake-actions">
+    <button class="btn-secondary" onclick="clearForm()">Clear</button>
+    <button class="btn-primary" onclick="startEvaluation()">
+      Start Evaluation ▶
+    </button>
+  </div>
+
+</div>
+</div><!-- /page-intake -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 2: EVALUATION
+═══════════════════════════════════════════════ -->
+<div id="page-evaluation" class="page">
+<div class="eval-wrap">
+
+  <div class="eval-header">
+    <h2 id="evalApplicantName">Evaluating Application...</h2>
+    <p>LexiPoint is applying Sunridge Municipal Code § 12 and Federal Pet Welfare Standards to this application</p>
+    <div class="eval-progress-bar"><div class="eval-progress-fill" id="evalProgressFill"></div></div>
+  </div>
+
+  <div id="phasesContainer"></div>
+
+  <div class="intake-actions" id="evalContinueBtn" style="display:none;">
+    <button class="btn-primary" onclick="showPage('results')">View Decision Report →</button>
+  </div>
+
+</div>
+</div><!-- /page-evaluation -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 3: RESULTS
+═══════════════════════════════════════════════ -->
+<div id="page-results" class="page">
+<div class="results-wrap">
+
+  <div id="decisionBanner" class="decision-banner decision-approved">
+    <div class="decision-icon" id="decisionIcon">✅</div>
+    <div class="decision-text">
+      <h2 id="decisionTitle">GRANT APPROVED</h2>
+      <p id="decisionSubtitle">All requirements satisfied. Grant may be issued.</p>
+    </div>
+  </div>
+
+  <div id="liveBanner" class="live-banner" style="display:none;">
+    <div class="live-banner-icon">⚡</div>
+    <div class="live-banner-text">
+      <div class="live-banner-title">Live Ontology Override Active</div>
+      <div id="liveBannerDetail"></div>
+    </div>
+  </div>
+
+  <div id="benefitSummaryCard" class="result-card" style="margin-bottom:16px;display:none;">
+    <div class="result-card-header">Benefit Calculation</div>
+    <div class="result-card-body" id="benefitSummaryBody"></div>
+  </div>
+
+  <div class="result-card" style="margin-bottom: 16px;">
+    <div class="result-card-header">Evaluation Summary</div>
+    <div class="result-card-body">
+      <div class="result-stats" id="resultStats"></div>
+    </div>
+  </div>
+
+  <div class="results-grid">
+    <div class="ai-summary-card" id="aiSummaryCard">
+      <div class="ai-summary-header">
+        <span>🤖</span>
+        <span class="ai-summary-label">AI Decision Narrative</span>
+        <span class="ai-summary-status" id="aiSummaryStatus">Generating...</span>
+      </div>
+      <div class="ai-summary-body" id="aiSummaryText">
+        <span class="ai-summary-loading">Analyzing decision factors...</span>
+      </div>
+    </div>
+    <div class="result-card">
+      <div class="result-card-header">Rules Triggered</div>
+      <div class="result-card-body">
+        <ul class="triggered-rules" id="triggeredRules"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal-cta">
+    <div class="reveal-cta-text">
+      <h3>See the Ontology that powers this decision</h3>
+      <p>Every rule is transparent, versioned, and tied to a specific statute. Click to explore the DDC grant rules.</p>
+    </div>
+    <button class="btn-reveal" onclick="goToOntology()">Explore Ontology →</button>
+  </div>
+
+  <div class="results-actions">
+    <button class="btn-secondary" onclick="showPage('intake')">← Back to Application</button>
+    <button class="btn-primary" onclick="buildAndShowAudit()">View Audit Trail →</button>
+  </div>
+
+</div>
+</div><!-- /page-results -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 4: AUDIT TRAIL
+═══════════════════════════════════════════════ -->
+<div id="page-audit" class="page">
+<div class="audit-wrap">
+
+  <div class="chain-verified">
+    <span class="chain-icon">🔐</span>
+    HASH CHAIN VERIFIED — Record integrity confirmed. This decision is immutable and exhibit-ready.
+  </div>
+
+  <div class="audit-meta-grid" id="auditMeta"></div>
+
+  <div id="auditSequence"></div>
+
+  <div class="results-actions">
+    <button class="btn-secondary" onclick="showPage('results')">← Back to Decision</button>
+    <button class="btn-primary" onclick="window.location.href='ontology.html?program=doggy-daycare&rule=DDC-011'">Explore Ontology →</button>
+  </div>
+
+</div>
+</div><!-- /page-audit -->
+
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+
+const SUPA_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json'
+};
+
+const CURRENT_PROGRAM = 'doggy-daycare';
+const CURRENT_TENANT  = 'city-of-sunridge';
+
+// Default tier thresholds for DDC-011 (Base Grant Amount Calculation)
+// These can be overridden via the Ontology Manager
+const DEFAULT_TIER1_THRESHOLD = 30000; // income <= this → $200/month
+const DEFAULT_TIER2_THRESHOLD = 42000; // income <= this → $150/month
+const DEFAULT_TIER3_THRESHOLD = 52000; // income <= this → $100/month
+
+// Grant tier amounts
+const TIER_AMOUNTS = { 1: 200, 2: 150, 3: 100 };
+
+// Approved breeds (DDC-002)
+const APPROVED_BREEDS = new Set([
+  'Labrador', 'Golden Retriever', 'Poodle', 'Beagle', 'Bulldog',
+  'Dachshund', 'Shih Tzu', 'Boxer', 'Siberian Husky', 'Border Collie', 'Mixed Breed'
+]);
+
+// Eligible counties (DDC-007)
+const ELIGIBLE_COUNTIES = new Set(['Sunridge', 'Maplewood', 'Crestview']);
+
+// ══════════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════════
+let currentScenario  = null;
+let evalResults      = {};
+let liveOverrides    = {}; // { tier1: { value, defaultValue }, ... }
+let benefitCalc      = {}; // computed benefit breakdown
+let applicantName    = '';
+
+// ══════════════════════════════════════════════════════════════════════
+//  SCENARIOS
+// ══════════════════════════════════════════════════════════════════════
+const SCENARIOS = {
+  A: {
+    // APPROVED — Tier 2 income, single dog, clean record
+    // Key demo: DDC-011 tier threshold override changes $150 → $200
+    name: 'Maria Santos',
+    county: 'Sunridge',
+    complete: 'true',
+    household_size: 3,
+    income: 31500,        // Above $30K → Tier 2 ($150/month). If DDC-011 Tier 1 raised to $35K → Tier 1 ($200/month)
+    household_type: 'standard',
+    veteran: 'false',
+    dog_count: '1',
+    breed: 'Labrador',
+    dog_age: 4,
+    vaccination_days: 30,
+    facility_name: 'Sunridge Paws Day Care',
+    facility_license: 'active',
+    slots: 5,
+    first_time: 'true',
+    months_since_grant: 0,
+    total_benefit: 0,
+    doc_age: 45
+  },
+  B: {
+    // APPROVED WITH CONDITIONS — annual benefit exceeds cap (DDC-013)
+    // Shows full cascade: base + multi-dog + emergency supplement + veteran bonus
+    name: 'James Park',
+    county: 'Maplewood',
+    complete: 'true',
+    household_size: 2,
+    income: 26500,        // Tier 1 → $200/month base
+    household_type: 'single_parent',
+    veteran: 'true',
+    dog_count: '2',
+    breed: 'Golden Retriever',
+    dog_age: 3,
+    vaccination_days: 60,
+    facility_name: 'Maplewood Pet Resort',
+    facility_license: 'active',
+    slots: 3,
+    first_time: 'false',
+    months_since_grant: 14,  // ≥ 6 → passes DDC-008 cooling period
+    total_benefit: 1800,
+    doc_age: 75
+  },
+  C: {
+    // BLOCKED — multiple hard blocks across rules
+    name: 'Tyler Walsh',
+    county: 'Riverside',     // not in eligible list → blocks DDC-007
+    complete: 'true',
+    household_size: 1,
+    income: 68000,           // over $52K threshold → blocks DDC-004
+    household_type: 'standard',
+    veteran: 'false',
+    dog_count: '1',
+    breed: 'German Shepherd', // restricted breed → blocks DDC-002
+    dog_age: 6,
+    vaccination_days: 420,   // > 365 days → blocks DDC-005
+    facility_name: 'Riverside Kennels',
+    facility_license: 'suspended',  // → blocks DDC-003
+    slots: 0,
+    first_time: 'true',
+    months_since_grant: 0,
+    total_benefit: 0,
+    doc_age: 110              // > 90 days → flags DDC-015
+  }
+};
+
+function loadScenario(key) {
+  currentScenario = key;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('sBtn-' + key).classList.add('selected');
+
+  const s = SCENARIOS[key];
+  setField('f-name',              s.name);
+  setSelect('f-county',           s.county);
+  setSelect('f-complete',         s.complete);
+  setField('f-household-size',    s.household_size);
+  setField('f-income',            s.income);
+  setSelect('f-household-type',   s.household_type);
+  setSelect('f-veteran',          s.veteran);
+  setSelect('f-dog-count',        s.dog_count);
+  setSelect('f-breed',            s.breed);
+  setField('f-dog-age',           s.dog_age);
+  setField('f-vaccination-days',  s.vaccination_days);
+  setField('f-facility-name',     s.facility_name);
+  setSelect('f-facility-license', s.facility_license);
+  setField('f-slots',             s.slots);
+  setSelect('f-first-time',       s.first_time);
+  setField('f-months-since-grant',s.months_since_grant);
+  setField('f-total-benefit',     s.total_benefit);
+  setField('f-doc-age',           s.doc_age);
+}
+
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function setSelect(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  for (const opt of el.options) {
+    if (opt.value === String(val)) { el.value = String(val); return; }
+  }
+}
+
+function clearForm() {
+  currentScenario = null;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.intake-wrap input, .intake-wrap select').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  LIVE SUPABASE RULE FETCH — DDC-011 Tier Thresholds
+// ══════════════════════════════════════════════════════════════════════
+async function fetchTierRules() {
+  liveOverrides = {};
+  try {
+    // Check localStorage for in-session ontology editor overrides first
+    const lsKey = 'lp_live_conds_DDC-011';
+    const cached = localStorage.getItem(lsKey);
+
+    let conds;
+    if (cached) {
+      conds = JSON.parse(cached);
+    } else {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/rule_conditions?rule_id=eq.DDC-011&select=*&order=order`,
+        { headers: SUPA_HEADERS }
+      );
+      if (!res.ok) return;
+      conds = await res.json();
+    }
+
+    if (!conds || conds.length < 3) return;
+
+    // Conditions are ordered: tier1 threshold, tier2 threshold, tier3 threshold
+    const tier1 = parseInt(conds[0].value, 10);
+    const tier2 = parseInt(conds[1].value, 10);
+    const tier3 = parseInt(conds[2].value, 10);
+
+    liveOverrides = { tier1, tier2, tier3 };
+
+    // Only flag as "live override" if Tier 1 differs from default (this is the demo moment)
+    if (tier1 !== DEFAULT_TIER1_THRESHOLD) {
+      liveOverrides._hasOverride = true;
+      liveOverrides._overrideDesc = `DDC-011 Tier 1 Income Threshold: $${DEFAULT_TIER1_THRESHOLD.toLocaleString()} → $${tier1.toLocaleString()}`;
+    }
+  } catch (e) {
+    console.warn('[LexiPoint] Could not fetch live DDC-011 tier thresholds:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  EVALUATION LOGIC
+// ══════════════════════════════════════════════════════════════════════
+const PHASES = [
+  {
+    id: 'phase-1',
+    title: 'Phase 1 — Application Completeness',
+    rules: [
+      { id: 'DDC-006', name: 'Application Completeness', citation: 'Sunridge Municipal Code § 12.3.1' }
+    ]
+  },
+  {
+    id: 'phase-2',
+    title: 'Phase 2 — Geographic Eligibility',
+    rules: [
+      { id: 'DDC-007', name: 'Geographic Eligibility', citation: 'Sunridge Municipal Code § 12.2.1' }
+    ]
+  },
+  {
+    id: 'phase-3',
+    title: 'Phase 3 — Household Income Determination',
+    rules: [
+      { id: 'DDC-010', name: 'Household Size Income Adjustment', citation: 'Sunridge Municipal Code § 12.6.2' },
+      { id: 'DDC-004', name: 'Owner Income Eligibility', citation: 'Sunridge Municipal Code § 12.6.1' }
+    ]
+  },
+  {
+    id: 'phase-4',
+    title: 'Phase 4 — Dog Eligibility',
+    rules: [
+      { id: 'DDC-001', name: 'Dog Age Eligibility', citation: 'Sunridge Municipal Code § 12.4.1' },
+      { id: 'DDC-002', name: 'Breed Safety Classification', citation: 'Federal Pet Day Care Safety Act § 3.2(b)' },
+      { id: 'DDC-005', name: 'Vaccination Currency', citation: 'Federal Pet Health Standards Act § 7.1' },
+      { id: 'DDC-009', name: 'Max Dogs Per Household', citation: 'Sunridge Municipal Code § 12.8.1' }
+    ]
+  },
+  {
+    id: 'phase-5',
+    title: 'Phase 5 — Facility &amp; Program Eligibility',
+    rules: [
+      { id: 'DDC-003', name: 'Facility License Verification', citation: 'Sunridge Municipal Code § 12.5.1' },
+      { id: 'DDC-008', name: 'Prior Grant Cooling Period', citation: 'Sunridge Municipal Code § 12.7.2' },
+      { id: 'DDC-014', name: 'Facility Capacity Check', citation: 'Sunridge Municipal Code § 12.5.3' },
+      { id: 'DDC-015', name: 'Income Documentation Expiry', citation: 'Federal Grant Documentation Standards § 4.1.2' }
+    ]
+  },
+  {
+    id: 'phase-6',
+    title: 'Phase 6 — Benefit Calculation',
+    rules: [
+      { id: 'DDC-011', name: 'Base Grant Amount Calculation', citation: 'Sunridge Municipal Code § 12.10.1' },
+      { id: 'DDC-012', name: 'Multi-Dog Supplement', citation: 'Sunridge Municipal Code § 12.8.2' },
+      { id: 'DDC-016', name: 'Emergency Supplement', citation: 'Sunridge Municipal Code § 12.11.1' },
+      { id: 'DDC-017', name: 'Veteran Preference Bonus', citation: 'Federal Veteran Pet Welfare Act § 2.4' }
+    ]
+  },
+  {
+    id: 'phase-7',
+    title: 'Phase 7 — Cap Check &amp; Processing Route',
+    rules: [
+      { id: 'DDC-013', name: 'Annual Benefit Cap', citation: 'Sunridge Municipal Code § 12.9.1' },
+      { id: 'DDC-018', name: 'Priority Processing Route', citation: 'Sunridge Municipal Code § 12.12.1' },
+      { id: 'DDC-019', name: 'Manual Review Route', citation: 'Sunridge Municipal Code § 12.12.2' },
+      { id: 'DDC-020', name: 'Renewal Fast Track', citation: 'Sunridge Municipal Code § 12.12.3' }
+    ]
+  }
+];
+
+function getFormData() {
+  return {
+    name:              document.getElementById('f-name').value || 'Unknown Applicant',
+    county:            document.getElementById('f-county').value,
+    complete:          document.getElementById('f-complete').value === 'true',
+    household_size:    parseInt(document.getElementById('f-household-size').value) || 1,
+    income:            parseFloat(document.getElementById('f-income').value) || 0,
+    household_type:    document.getElementById('f-household-type').value,
+    veteran:           document.getElementById('f-veteran').value === 'true',
+    dog_count:         parseInt(document.getElementById('f-dog-count').value) || 1,
+    breed:             document.getElementById('f-breed').value,
+    dog_age_years:     parseFloat(document.getElementById('f-dog-age').value) || 0,
+    vaccination_days:  parseInt(document.getElementById('f-vaccination-days').value) || 0,
+    facility_license:  document.getElementById('f-facility-license').value,
+    slots:             parseInt(document.getElementById('f-slots').value) || 0,
+    first_time:        document.getElementById('f-first-time').value === 'true',
+    months_since_grant:parseInt(document.getElementById('f-months-since-grant').value) || 0,
+    total_benefit:     parseFloat(document.getElementById('f-total-benefit').value) || 0,
+    doc_age:           parseInt(document.getElementById('f-doc-age').value) || 0
+  };
+}
+
+const R = (status, result, extras = {}) => ({ status, result, ...extras });
+
+function evaluateRules(data) {
+  const results = {};
+  benefitCalc = {};
+
+  // Get live tier thresholds (or defaults)
+  const tier1Threshold = (liveOverrides.tier1 !== undefined) ? liveOverrides.tier1 : DEFAULT_TIER1_THRESHOLD;
+  const tier2Threshold = (liveOverrides.tier2 !== undefined) ? liveOverrides.tier2 : DEFAULT_TIER2_THRESHOLD;
+  const tier3Threshold = (liveOverrides.tier3 !== undefined) ? liveOverrides.tier3 : DEFAULT_TIER3_THRESHOLD;
+
+  let geoBlocked       = false;
+  let incomeBlocked    = false;
+  let dogBlocked       = false;
+  let facilityBlocked  = false;
+
+  // ── Phase 1: Application Completeness ──────────────────────────────
+  if (!data.complete) {
+    results['DDC-006'] = R('block', 'BLOCKED: Application is incomplete — all required fields must be provided before evaluation', {
+      condition: 'application_complete == true',
+      facts: { application_complete: false },
+      reasoning: 'Sunridge Municipal Code § 12.3.1 requires all application fields to be completed before the grant evaluation process can begin. Incomplete applications are returned to the applicant.'
+    });
+    // Short-circuit all remaining phases
+    for (const phase of PHASES.slice(1)) {
+      for (const r of phase.rules) {
+        results[r.id] = R('skip', 'SKIPPED: Application completeness gate not satisfied', { condition: '', facts: {}, reasoning: '' });
+      }
+    }
+    return results;
+  }
+
+  results['DDC-006'] = R('pass', 'Application is complete — all required fields provided', {
+    condition: 'application_complete == true',
+    facts: { application_complete: true, applicant_name: data.name },
+    reasoning: 'All required fields under Sunridge Municipal Code § 12.3.1 have been provided. Application is eligible for evaluation.'
+  });
+
+  // ── Phase 2: Geographic Eligibility ────────────────────────────────
+  const countyEligible = ELIGIBLE_COUNTIES.has(data.county);
+
+  if (!countyEligible) {
+    results['DDC-007'] = R('block', `BLOCKED: County "${data.county}" is not in the Paws & Progress grant service area (eligible: Sunridge, Maplewood, Crestview)`, {
+      condition: 'county IN (Sunridge, Maplewood, Crestview)',
+      facts: { county: data.county, eligible_counties: 'Sunridge, Maplewood, Crestview' },
+      reasoning: 'Sunridge Municipal Code § 12.2.1 limits the Paws & Progress grant program to residents of Sunridge, Maplewood, or Crestview counties. Applicants from other counties are ineligible.'
+    });
+    geoBlocked = true;
+  } else {
+    results['DDC-007'] = R('pass', `Geographic eligibility confirmed — ${data.county} is a participating county`, {
+      condition: 'county IN (Sunridge, Maplewood, Crestview)',
+      facts: { county: data.county },
+      reasoning: `Sunridge Municipal Code § 12.2.1 geographic eligibility requirement met. ${data.county} county is an approved service area for the Paws & Progress program.`
+    });
+  }
+
+  // ── Phase 3: Household Income Determination ─────────────────────────
+  // DDC-010: Household size income adjustment (§ 12.6.2)
+  // Larger households get an income adjustment factor to account for cost of living
+  let adjustmentFactor = 1.0;
+  let adjustmentLabel  = 'No adjustment (household size 1–2)';
+  if (data.household_size >= 5) {
+    adjustmentFactor = 0.80;
+    adjustmentLabel  = '20% reduction for household of 5+ persons';
+  } else if (data.household_size >= 3) {
+    adjustmentFactor = 0.90;
+    adjustmentLabel  = '10% reduction for household of 3–4 persons';
+  }
+  const adjustedIncome = Math.round(data.income * adjustmentFactor);
+
+  results['DDC-010'] = R('pass', `Adjusted income: $${adjustedIncome.toLocaleString()} (raw: $${data.income.toLocaleString()}, ${adjustmentLabel})`, {
+    condition: 'household_annual_income * size_adjustment_factor',
+    facts: { raw_income: data.income, household_size: data.household_size, adjustment_factor: adjustmentFactor, adjusted_income: adjustedIncome },
+    reasoning: `Sunridge Municipal Code § 12.6.2 applies a household size adjustment to normalize income for cost-of-living. Households of 3–4 receive a 10% reduction; households of 5+ receive a 20% reduction. Adjusted income of $${adjustedIncome.toLocaleString()} is used for eligibility determination.`
+  });
+
+  // DDC-004: Income eligibility gate
+  if (adjustedIncome > 52000) {
+    results['DDC-004'] = R('block', `BLOCKED: Adjusted household income $${adjustedIncome.toLocaleString()} exceeds the $52,000 eligibility limit`, {
+      condition: 'household_annual_income_adjusted <= 52000',
+      facts: { adjusted_income: adjustedIncome, income_limit: 52000 },
+      reasoning: 'Sunridge Municipal Code § 12.6.1 caps eligibility at an adjusted household income of $52,000 per year. This application does not qualify for the Paws & Progress grant program.'
+    });
+    incomeBlocked = true;
+  } else {
+    results['DDC-004'] = R('pass', `Adjusted income $${adjustedIncome.toLocaleString()} is within the $52,000 eligibility limit`, {
+      condition: 'household_annual_income_adjusted <= 52000',
+      facts: { adjusted_income: adjustedIncome, income_limit: 52000 },
+      reasoning: `Sunridge Municipal Code § 12.6.1 income eligibility requirement satisfied. Adjusted income of $${adjustedIncome.toLocaleString()} is at or below the $52,000 annual limit.`
+    });
+  }
+
+  // ── Phase 4: Dog Eligibility ────────────────────────────────────────
+  // DDC-001: Dog Age (8 weeks to 10 years)
+  const dogAgeWeeks = data.dog_age_years * 52;
+  if (dogAgeWeeks < 8 || data.dog_age_years > 10) {
+    results['DDC-001'] = R('block', `BLOCKED: Dog age ${data.dog_age_years} years is outside the eligible range (8 weeks – 10 years)`, {
+      condition: 'dog_age_weeks >= 8 AND dog_age_years <= 10',
+      facts: { dog_age_years: data.dog_age_years, dog_age_weeks: Math.round(dogAgeWeeks), min_weeks: 8, max_years: 10 },
+      reasoning: 'Sunridge Municipal Code § 12.4.1 requires dogs to be at least 8 weeks of age and no older than 10 years to participate in the Paws & Progress program.'
+    });
+    dogBlocked = true;
+  } else {
+    results['DDC-001'] = R('pass', `Dog age ${data.dog_age_years} years is within the eligible range (8 weeks – 10 years)`, {
+      condition: 'dog_age_weeks >= 8 AND dog_age_years <= 10',
+      facts: { dog_age_years: data.dog_age_years },
+      reasoning: 'Sunridge Municipal Code § 12.4.1 dog age eligibility requirement satisfied.'
+    });
+  }
+
+  // DDC-002: Breed safety classification
+  const breedApproved = APPROVED_BREEDS.has(data.breed);
+  if (!breedApproved) {
+    results['DDC-002'] = R('block', `BLOCKED: ${data.breed} is not on the Federal Pet Day Care Safety Act approved breed list`, {
+      condition: 'breed IN (Labrador, Golden Retriever, Poodle, Beagle, Bulldog, Dachshund, Shih Tzu, Boxer, Siberian Husky, Border Collie, Mixed Breed)',
+      facts: { breed: data.breed, classification: 'restricted' },
+      reasoning: 'Federal Pet Day Care Safety Act § 3.2(b) requires all participating dogs to be of an approved breed classification. Restricted breeds may pose safety concerns in a group day care setting and are not eligible for the Paws & Progress grant.'
+    });
+    dogBlocked = true;
+  } else {
+    results['DDC-002'] = R('pass', `${data.breed} is an approved breed under Federal Pet Day Care Safety Act § 3.2(b)`, {
+      condition: 'breed IN (approved_breeds_list)',
+      facts: { breed: data.breed, classification: 'approved' },
+      reasoning: 'Federal Pet Day Care Safety Act § 3.2(b) breed safety classification satisfied. The applicant\'s breed is on the approved list for participation in licensed doggy day care programs.'
+    });
+  }
+
+  // DDC-005: Vaccination currency (within 365 days)
+  if (data.vaccination_days > 365) {
+    results['DDC-005'] = R('block', `BLOCKED: Vaccinations are ${data.vaccination_days} days old — must be within the past 365 days`, {
+      condition: 'days_since_vaccination <= 365',
+      facts: { days_since_vaccination: data.vaccination_days, max_allowed: 365 },
+      reasoning: 'Federal Pet Health Standards Act § 7.1 requires all participating dogs to have current vaccinations within the past 12 months (365 days). Outdated vaccination records are a public health disqualifier.'
+    });
+    dogBlocked = true;
+  } else {
+    results['DDC-005'] = R('pass', `Vaccinations current — ${data.vaccination_days} days ago (within the 365-day requirement)`, {
+      condition: 'days_since_vaccination <= 365',
+      facts: { days_since_vaccination: data.vaccination_days, max_allowed: 365 },
+      reasoning: 'Federal Pet Health Standards Act § 7.1 vaccination currency requirement satisfied.'
+    });
+  }
+
+  // DDC-009: Max dogs per household (≤ 2)
+  if (data.dog_count > 2) {
+    results['DDC-009'] = R('block', `BLOCKED: ${data.dog_count} dogs submitted — the program limit is 2 dogs per household`, {
+      condition: 'dog_count <= 2',
+      facts: { dog_count: data.dog_count, max_allowed: 2 },
+      reasoning: 'Sunridge Municipal Code § 12.8.1 limits the Paws & Progress grant to a maximum of 2 dogs per household to ensure equitable program access.'
+    });
+    dogBlocked = true;
+  } else {
+    results['DDC-009'] = R('pass', `${data.dog_count === 1 ? '1 dog' : '2 dogs'} — within the 2-dog-per-household limit`, {
+      condition: 'dog_count <= 2',
+      facts: { dog_count: data.dog_count, max_allowed: 2 },
+      reasoning: 'Sunridge Municipal Code § 12.8.1 maximum household dog count satisfied.'
+    });
+  }
+
+  // ── Phase 5: Facility & Program Eligibility ────────────────────────
+  // DDC-003: Facility license verification
+  if (data.facility_license !== 'active') {
+    results['DDC-003'] = R('block', `BLOCKED: Selected facility has a ${data.facility_license} license — only facilities with an active municipal license are eligible`, {
+      condition: 'facility_license_status == active',
+      facts: { facility_license_status: data.facility_license },
+      reasoning: 'Sunridge Municipal Code § 12.5.1 requires grant-subsidized doggy day care to be conducted at a facility holding a current, active municipal license. Suspended or expired licenses are not eligible.'
+    });
+    facilityBlocked = true;
+  } else {
+    results['DDC-003'] = R('pass', 'Facility holds an active municipal license — license verification complete', {
+      condition: 'facility_license_status == active',
+      facts: { facility_license_status: 'active' },
+      reasoning: 'Sunridge Municipal Code § 12.5.1 facility license requirement satisfied.'
+    });
+  }
+
+  // DDC-008: Prior grant cooling period (6-month wait between grants)
+  if (!data.first_time && data.months_since_grant < 6) {
+    results['DDC-008'] = R('block', `BLOCKED: Only ${data.months_since_grant} months since last grant — 6-month cooling period required`, {
+      condition: 'first_time_applicant == true OR months_since_last_grant >= 6',
+      facts: { first_time: false, months_since_last_grant: data.months_since_grant, required_wait: 6 },
+      reasoning: 'Sunridge Municipal Code § 12.7.2 imposes a 6-month cooling period between successive grant awards to ensure equitable distribution across eligible households.'
+    });
+    facilityBlocked = true;
+  } else if (!data.first_time && data.months_since_grant >= 6) {
+    results['DDC-008'] = R('pass', `Prior grant cooling period satisfied — ${data.months_since_grant} months since last grant (≥ 6 required)`, {
+      condition: 'months_since_last_grant >= 6',
+      facts: { months_since_last_grant: data.months_since_grant, required_wait: 6 },
+      reasoning: 'Sunridge Municipal Code § 12.7.2 cooling period satisfied. Sufficient time has elapsed since the applicant\'s previous grant award.'
+    });
+  } else {
+    results['DDC-008'] = R('pass', 'First-time applicant — cooling period not applicable', {
+      condition: 'first_time_applicant == true (cooling period not applicable)',
+      facts: { first_time_applicant: true },
+      reasoning: 'Sunridge Municipal Code § 12.7.2 cooling period applies only to prior grant recipients. This is a first-time application.'
+    });
+  }
+
+  // DDC-014: Facility capacity check (must have open slots)
+  if (data.slots < 1) {
+    results['DDC-014'] = R('flag', 'ACTION REQUIRED: Selected facility has no open enrollment slots — applicant must select a facility with available capacity', {
+      condition: 'facility_slots_remaining >= 1',
+      facts: { facility_slots_remaining: data.slots },
+      reasoning: 'Sunridge Municipal Code § 12.5.3 requires the selected facility to have at least one open enrollment slot at the time of application. The applicant must identify an alternate facility with available capacity.'
+    });
+  } else {
+    results['DDC-014'] = R('pass', `Facility has ${data.slots} open slot${data.slots !== 1 ? 's' : ''} — capacity requirement satisfied`, {
+      condition: 'facility_slots_remaining >= 1',
+      facts: { facility_slots_remaining: data.slots },
+      reasoning: 'Sunridge Municipal Code § 12.5.3 facility capacity requirement satisfied.'
+    });
+  }
+
+  // DDC-015: Income documentation expiry (must be within 90 days)
+  if (data.doc_age > 90) {
+    results['DDC-015'] = R('flag', `ACTION REQUIRED: Income documentation is ${data.doc_age} days old — must be refreshed (90-day maximum)`, {
+      condition: 'income_doc_age_days <= 90',
+      facts: { income_doc_age_days: data.doc_age, max_allowed: 90 },
+      reasoning: 'Federal Grant Documentation Standards § 4.1.2 requires income verification documents to be dated within 90 days of the application date. The applicant must provide updated income documentation.'
+    });
+  } else {
+    results['DDC-015'] = R('pass', `Income documentation is ${data.doc_age} days old — within the 90-day documentation window`, {
+      condition: 'income_doc_age_days <= 90',
+      facts: { income_doc_age_days: data.doc_age, max_allowed: 90 },
+      reasoning: 'Federal Grant Documentation Standards § 4.1.2 income documentation currency requirement satisfied.'
+    });
+  }
+
+  // ── Phase 6: Benefit Calculation ───────────────────────────────────
+  const hasAnyBlock = geoBlocked || incomeBlocked || dogBlocked || facilityBlocked;
+
+  if (hasAnyBlock) {
+    // Skip all benefit calculation if a hard block exists
+    results['DDC-011'] = R('skip', 'SKIPPED: Benefit calculation deferred — one or more eligibility blocks must be resolved first', { condition: '', facts: {}, reasoning: '' });
+    results['DDC-012'] = R('skip', 'SKIPPED: Multi-dog supplement deferred pending eligibility resolution', { condition: '', facts: {}, reasoning: '' });
+    results['DDC-016'] = R('skip', 'SKIPPED: Emergency supplement deferred pending eligibility resolution', { condition: '', facts: {}, reasoning: '' });
+    results['DDC-017'] = R('skip', 'SKIPPED: Veteran bonus deferred pending eligibility resolution', { condition: '', facts: {}, reasoning: '' });
+  } else {
+    // DDC-011: Base grant amount (tier determination using live thresholds)
+    let tier, baseMonthly;
+    if (adjustedIncome <= tier1Threshold) {
+      tier = 1; baseMonthly = TIER_AMOUNTS[1];
+    } else if (adjustedIncome <= tier2Threshold) {
+      tier = 2; baseMonthly = TIER_AMOUNTS[2];
+    } else {
+      tier = 3; baseMonthly = TIER_AMOUNTS[3];
+    }
+
+    const liveThresholdNote = liveOverrides._hasOverride
+      ? ` (live DDC-011 Tier 1 threshold: $${liveOverrides.tier1.toLocaleString()})`
+      : '';
+
+    results['DDC-011'] = R('pass',
+      `Tier ${tier} — adjusted income $${adjustedIncome.toLocaleString()} → base grant $${baseMonthly}/month${liveThresholdNote}`, {
+      condition: `adjusted_income <= ${tier1Threshold} → Tier 1 ($${TIER_AMOUNTS[1]}/mo) | <= ${tier2Threshold} → Tier 2 ($${TIER_AMOUNTS[2]}/mo) | <= ${tier3Threshold} → Tier 3 ($${TIER_AMOUNTS[3]}/mo)`,
+      facts: { adjusted_income: adjustedIncome, tier: tier, base_monthly: baseMonthly, tier1_threshold: tier1Threshold, tier2_threshold: tier2Threshold, tier3_threshold: tier3Threshold },
+      reasoning: `Sunridge Municipal Code § 12.10.1 establishes three income-based grant tiers. At adjusted income $${adjustedIncome.toLocaleString()}, Tier ${tier} applies — base monthly grant is $${baseMonthly}.${liveThresholdNote ? ' Live ontology threshold override is active.' : ''}`
+    });
+    benefitCalc.base = baseMonthly;
+    benefitCalc.tier = tier;
+
+    // DDC-012: Multi-dog supplement ($50/month for second dog)
+    if (data.dog_count === 2) {
+      results['DDC-012'] = R('pass', 'Multi-dog supplement applied — +$50/month for second dog', {
+        condition: 'dog_count == 2',
+        facts: { dog_count: 2, supplement: 50 },
+        reasoning: 'Sunridge Municipal Code § 12.8.2 provides a $50/month supplement when the applicant\'s household has 2 enrolled dogs, to offset the additional care cost.'
+      });
+      benefitCalc.multiDog = 50;
+    } else {
+      results['DDC-012'] = R('skip', 'Multi-dog supplement not applicable — single-dog household', {
+        condition: 'dog_count == 2 (condition not met)',
+        facts: { dog_count: data.dog_count },
+        reasoning: 'Sunridge Municipal Code § 12.8.2 multi-dog supplement applies only when 2 dogs are enrolled. This household has 1 dog.'
+      });
+      benefitCalc.multiDog = 0;
+    }
+
+    // DDC-016: Emergency supplement for single-parent households (+$30/month)
+    if (data.household_type === 'single_parent') {
+      results['DDC-016'] = R('pass', 'Single-parent emergency supplement applied — +$30/month', {
+        condition: 'household_type == single_parent',
+        facts: { household_type: 'single_parent', supplement: 30 },
+        reasoning: 'Sunridge Municipal Code § 12.11.1 provides an emergency supplement of $30/month to single-parent households in recognition of elevated child care cost burdens.'
+      });
+      benefitCalc.emergency = 30;
+    } else {
+      results['DDC-016'] = R('skip', 'Emergency supplement not applicable — standard household type', {
+        condition: 'household_type == single_parent (condition not met)',
+        facts: { household_type: data.household_type },
+        reasoning: 'Sunridge Municipal Code § 12.11.1 emergency supplement applies only to single-parent households. This applicant is classified as a standard household.'
+      });
+      benefitCalc.emergency = 0;
+    }
+
+    // DDC-017: Veteran preference bonus (+$25/month)
+    if (data.veteran) {
+      results['DDC-017'] = R('pass', 'Veteran preference bonus applied — +$25/month', {
+        condition: 'applicant_veteran_status == true',
+        facts: { veteran: true, bonus: 25 },
+        reasoning: 'Federal Veteran Pet Welfare Act § 2.4 provides a $25/month preference bonus to U.S. veterans participating in the Paws & Progress program.'
+      });
+      benefitCalc.veteran = 25;
+    } else {
+      results['DDC-017'] = R('skip', 'Veteran bonus not applicable — applicant is not a verified veteran', {
+        condition: 'applicant_veteran_status == true (condition not met)',
+        facts: { veteran: false },
+        reasoning: 'Federal Veteran Pet Welfare Act § 2.4 veteran bonus applies only to verified U.S. veterans. This applicant did not indicate veteran status.'
+      });
+      benefitCalc.veteran = 0;
+    }
+  }
+
+  // ── Phase 7: Cap Check & Routing ────────────────────────────────────
+  if (hasAnyBlock) {
+    results['DDC-013'] = R('skip', 'SKIPPED: Cap check deferred — eligibility blocks present', { condition: '', facts: {}, reasoning: '' });
+    results['DDC-018'] = R('skip', 'SKIPPED: Routing deferred — eligibility blocks present', { condition: '', facts: {}, reasoning: '' });
+    results['DDC-019'] = R('skip', 'SKIPPED: Routing deferred — eligibility blocks present', { condition: '', facts: {}, reasoning: '' });
+    results['DDC-020'] = R('skip', 'SKIPPED: Routing deferred — eligibility blocks present', { condition: '', facts: {}, reasoning: '' });
+  } else {
+    const totalMonthly = (benefitCalc.base || 0) + (benefitCalc.multiDog || 0) + (benefitCalc.emergency || 0) + (benefitCalc.veteran || 0);
+    const totalAnnual  = totalMonthly * 12;
+    benefitCalc.totalMonthly = totalMonthly;
+    benefitCalc.totalAnnual  = totalAnnual;
+
+    // DDC-013: Annual benefit cap ($2,400/year)
+    const annualBenefitCap = 2400;
+    if (totalAnnual > annualBenefitCap) {
+      results['DDC-013'] = R('flag',
+        `ACTION REQUIRED: Calculated annual benefit $${totalAnnual.toLocaleString()} exceeds the $${annualBenefitCap.toLocaleString()} annual cap — benefit will be prorated to the cap`, {
+        condition: 'total_annual_benefit <= 2400',
+        facts: { calculated_annual: totalAnnual, annual_cap: annualBenefitCap, monthly_equivalent: Math.round(annualBenefitCap / 12) },
+        reasoning: `Sunridge Municipal Code § 12.9.1 imposes an annual benefit cap of $${annualBenefitCap.toLocaleString()} per household. The calculated benefit of $${totalAnnual.toLocaleString()} exceeds this limit. The grant will be issued at the prorated cap amount of $${Math.round(annualBenefitCap / 12)}/month.`
+      });
+      benefitCalc.cappedAnnual  = annualBenefitCap;
+      benefitCalc.cappedMonthly = Math.round(annualBenefitCap / 12);
+      benefitCalc.capped        = true;
+    } else {
+      results['DDC-013'] = R('pass', `Annual benefit $${totalAnnual.toLocaleString()} is within the $${annualBenefitCap.toLocaleString()} annual cap`, {
+        condition: 'total_annual_benefit <= 2400',
+        facts: { total_annual_benefit: totalAnnual, annual_cap: annualBenefitCap },
+        reasoning: `Sunridge Municipal Code § 12.9.1 annual benefit cap satisfied. Total annual benefit of $${totalAnnual.toLocaleString()} is within the allowed limit.`
+      });
+      benefitCalc.capped = false;
+    }
+
+    // DDC-018: Priority processing — veteran or single-parent gets priority queue
+    const isPriority = data.veteran || data.household_type === 'single_parent';
+    if (isPriority) {
+      results['DDC-018'] = R('pass', 'Routed to PRIORITY QUEUE — veteran or single-parent household qualifies for expedited processing', {
+        condition: 'veteran == true OR household_type == single_parent',
+        facts: { veteran: data.veteran, household_type: data.household_type, route: 'priority_queue' },
+        reasoning: 'Sunridge Municipal Code § 12.12.1 routes applications from veterans and single-parent households to the priority processing queue, with a target 3-business-day turnaround.'
+      });
+    } else {
+      results['DDC-018'] = R('skip', 'Priority queue criteria not met — standard processing applies', {
+        condition: 'veteran == true OR household_type == single_parent (not met)',
+        facts: { veteran: data.veteran, household_type: data.household_type },
+        reasoning: 'Applicant does not meet the priority processing criteria under Sunridge Municipal Code § 12.12.1.'
+      });
+    }
+
+    // DDC-019: Manual review — flag conditions trigger manual review
+    const flagCount = Object.values(results).filter(r => r.status === 'flag').length;
+    if (flagCount > 0) {
+      results['DDC-019'] = R('flag', `MANUAL REVIEW REQUIRED — ${flagCount} flagged item${flagCount > 1 ? 's' : ''} require human review before grant issuance`, {
+        condition: 'flag_count > 0',
+        facts: { flagged_items: flagCount, requires_manual_review: true },
+        reasoning: 'Sunridge Municipal Code § 12.12.2 routes applications with outstanding action items to manual review. A grant coordinator must resolve each flagged condition before the grant becomes effective.'
+      });
+    } else {
+      results['DDC-019'] = R('skip', 'No flagged items — manual review not required', {
+        condition: 'flag_count > 0 (not met)',
+        facts: { flagged_items: 0 },
+        reasoning: 'All evaluated conditions passed. No manual review required under Sunridge Municipal Code § 12.12.2.'
+      });
+    }
+
+    // DDC-020: Renewal fast-track — prior applicant who passed cooling period
+    const isRenewal = !data.first_time && data.months_since_grant >= 6;
+    if (isRenewal) {
+      results['DDC-020'] = R('pass', 'RENEWAL FAST-TRACK eligible — prior applicant with no outstanding issues qualifies for expedited renewal processing', {
+        condition: 'first_time_applicant == false AND months_since_last_grant >= 6',
+        facts: { first_time: false, months_since_last_grant: data.months_since_grant, route: 'renewal_fast_track' },
+        reasoning: 'Sunridge Municipal Code § 12.12.3 provides a fast-track renewal path for returning applicants who have previously received the grant, are in good standing, and have satisfied the 6-month cooling period.'
+      });
+    } else {
+      results['DDC-020'] = R('skip', 'Renewal fast-track not applicable — first-time applicant or cooling period not yet met', {
+        condition: 'first_time_applicant == false AND months_since_last_grant >= 6 (not met)',
+        facts: { first_time: data.first_time },
+        reasoning: 'Sunridge Municipal Code § 12.12.3 renewal fast-track applies only to returning applicants who have satisfied the cooling period.'
+      });
+    }
+  }
+
+  return results;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  EVALUATION ANIMATION
+// ══════════════════════════════════════════════════════════════════════
+async function startEvaluation() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) {
+    alert('Please enter an applicant name or load a scenario to begin.');
+    return;
+  }
+
+  applicantName = name;
+  document.getElementById('evalApplicantName').textContent = `Evaluating: ${name}`;
+
+  showPage('evaluation');
+
+  // Fetch live DDC-011 tier thresholds, then evaluate
+  await fetchTierRules();
+  const data = getFormData();
+  evalResults = evaluateRules(data);
+
+  buildPhaseCards();
+  animatePhases(0);
+}
+
+function buildPhaseCards() {
+  const container = document.getElementById('phasesContainer');
+  container.innerHTML = '';
+
+  PHASES.forEach((phase, idx) => {
+    const card = document.createElement('div');
+    card.className = 'phase-card phase-pending';
+    card.id = `phase-card-${idx}`;
+
+    card.innerHTML = `
+      <div class="phase-header" onclick="togglePhase(this)">
+        <div class="phase-status-icon">—</div>
+        <div class="phase-title">${phase.title}</div>
+        <span class="phase-badge badge-pending">Pending</span>
+        <span class="phase-chevron">▾</span>
+      </div>
+      <div class="phase-rules">
+        ${phase.rules.map(r => `
+          <div class="rule-row" id="rule-row-${r.id}">
+            <div class="rule-status-dot dot-pending"></div>
+            <div class="rule-info">
+              <span class="rule-id">${r.id}</span>
+              <span class="rule-name"> — ${r.name}</span>
+            </div>
+            <span class="rule-citation">${r.citation}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  document.getElementById('evalContinueBtn').style.display = 'none';
+}
+
+function togglePhase(headerEl) {
+  const card = headerEl.closest('.phase-card');
+  card.classList.toggle('open');
+}
+
+function animatePhases(idx) {
+  if (idx >= PHASES.length) {
+    document.getElementById('evalProgressFill').style.width = '100%';
+    document.getElementById('evalContinueBtn').style.display = 'flex';
+    buildResults();
+    return;
+  }
+
+  const phase    = PHASES[idx];
+  const card     = document.getElementById(`phase-card-${idx}`);
+  const badge    = card.querySelector('.phase-badge');
+  const icon     = card.querySelector('.phase-status-icon');
+  const progress = Math.round(((idx + 1) / PHASES.length) * 95);
+
+  document.getElementById('evalProgressFill').style.width = progress + '%';
+
+  card.className = 'phase-card phase-running open';
+  badge.className = 'phase-badge badge-evaluating';
+  badge.textContent = 'Evaluating...';
+  icon.textContent = '⟳';
+
+  setTimeout(() => {
+    let hasBlock = false;
+    let hasFlag  = false;
+    let allSkip  = true;
+
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id] || { status: 'skip', result: 'Not evaluated' };
+      const row = document.getElementById(`rule-row-${r.id}`);
+      const dot = row.querySelector('.rule-status-dot');
+
+      dot.className = `rule-status-dot dot-${res.status}`;
+
+      let resultText = '';
+      if (res.status !== 'skip') {
+        allSkip = false;
+        resultText = `<div class="rule-result">${res.result}</div>`;
+      }
+
+      row.querySelector('.rule-info').innerHTML = `
+        <span class="rule-id">${r.id}</span>
+        <span class="rule-name"> — ${r.name}</span>
+        ${resultText}
+      `;
+
+      if (res.status === 'block') hasBlock = true;
+      if (res.status === 'flag')  hasFlag  = true;
+    });
+
+    if (hasBlock) {
+      card.className = 'phase-card phase-blocked open';
+      badge.className = 'phase-badge badge-blocked';
+      badge.textContent = 'Blocked';
+      icon.textContent = '✕';
+    } else if (hasFlag) {
+      card.className = 'phase-card phase-flagged open';
+      badge.className = 'phase-badge badge-flagged';
+      badge.textContent = 'Action Needed';
+      icon.textContent = '!';
+    } else if (allSkip) {
+      card.className = 'phase-card phase-bypassed';
+      badge.className = 'phase-badge badge-bypassed';
+      badge.textContent = 'Bypassed';
+      icon.textContent = '—';
+    } else {
+      card.className = 'phase-card phase-passed';
+      badge.className = 'phase-badge badge-passed';
+      badge.textContent = 'Passed';
+      icon.textContent = '✓';
+    }
+
+    setTimeout(() => animatePhases(idx + 1), 500);
+  }, 800 + Math.random() * 400);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════════════════════════════════
+function buildResults() {
+  const statuses = Object.values(evalResults).map(r => r.status);
+  const passed   = statuses.filter(s => s === 'pass').length;
+  const flagged  = statuses.filter(s => s === 'flag').length;
+  const blocked  = statuses.filter(s => s === 'block').length;
+  const skipped  = statuses.filter(s => s === 'skip').length;
+
+  const banner = document.getElementById('decisionBanner');
+  const icon   = document.getElementById('decisionIcon');
+  const title  = document.getElementById('decisionTitle');
+  const sub    = document.getElementById('decisionSubtitle');
+
+  if (blocked > 0) {
+    banner.className = 'decision-banner decision-denied';
+    icon.textContent  = '🚫';
+    title.textContent = 'APPLICATION BLOCKED';
+    sub.textContent   = `${blocked} blocking issue${blocked > 1 ? 's' : ''} must be resolved before a grant can be issued.`;
+  } else if (flagged > 0) {
+    banner.className = 'decision-banner decision-conditions';
+    icon.textContent  = '⚠️';
+    title.textContent = 'APPROVED WITH CONDITIONS';
+    sub.textContent   = `${flagged} item${flagged > 1 ? 's' : ''} require${flagged === 1 ? 's' : ''} resolution before the grant becomes effective.`;
+  } else {
+    banner.className = 'decision-banner decision-approved';
+    icon.textContent  = '✅';
+    title.textContent = 'GRANT APPROVED';
+    sub.textContent   = 'All requirements satisfied. Grant may be issued.';
+  }
+
+  // Benefit breakdown card (show only when no hard blocks)
+  const benefitCard = document.getElementById('benefitSummaryCard');
+  if (blocked === 0 && benefitCalc.base !== undefined) {
+    benefitCard.style.display = 'block';
+    const finalMonthly = benefitCalc.capped ? benefitCalc.cappedMonthly : benefitCalc.totalMonthly;
+    const finalAnnual  = benefitCalc.capped ? benefitCalc.cappedAnnual  : benefitCalc.totalAnnual;
+
+    let breakdownHtml = `<div class="benefit-breakdown">
+      <div class="benefit-breakdown-title">Monthly Benefit Breakdown</div>
+      <div class="benefit-line"><span>Tier ${benefitCalc.tier} Base Grant</span><span>$${benefitCalc.base}/month</span></div>`;
+
+    if (benefitCalc.multiDog > 0) {
+      breakdownHtml += `<div class="benefit-line"><span>Multi-Dog Supplement (DDC-012)</span><span>+$${benefitCalc.multiDog}/month</span></div>`;
+    }
+    if (benefitCalc.emergency > 0) {
+      breakdownHtml += `<div class="benefit-line"><span>Single-Parent Emergency Supplement (DDC-016)</span><span>+$${benefitCalc.emergency}/month</span></div>`;
+    }
+    if (benefitCalc.veteran > 0) {
+      breakdownHtml += `<div class="benefit-line"><span>Veteran Preference Bonus (DDC-017)</span><span>+$${benefitCalc.veteran}/month</span></div>`;
+    }
+    breakdownHtml += `<div class="benefit-line total"><span>Total Monthly Benefit</span><span>$${benefitCalc.totalMonthly}/month</span></div>`;
+
+    if (benefitCalc.capped) {
+      breakdownHtml += `<div class="benefit-line" style="color:#BA0517;font-size:11px;"><span>⚠ Annual Cap Applied (DDC-013)</span><span>→ $${benefitCalc.cappedMonthly}/month prorated</span></div>`;
+    }
+
+    breakdownHtml += `<div class="benefit-line annual"><span>Final Annual Grant Award</span><span>$${finalAnnual.toLocaleString()}/year</span></div>`;
+    breakdownHtml += `</div>`;
+
+    document.getElementById('benefitSummaryBody').innerHTML = breakdownHtml;
+  } else {
+    benefitCard.style.display = 'none';
+  }
+
+  // Stats
+  document.getElementById('resultStats').innerHTML = `
+    <div class="result-stat"><div class="result-stat-value" style="color:#2E844A">${passed}</div><div class="result-stat-label">Passed</div></div>
+    <div class="result-stat"><div class="result-stat-value" style="color:#DD7A01">${flagged}</div><div class="result-stat-label">Flagged</div></div>
+    <div class="result-stat"><div class="result-stat-value" style="color:#BA0517">${blocked}</div><div class="result-stat-label">Blocked</div></div>
+    <div class="result-stat"><div class="result-stat-value" style="color:#9CA3AF">${skipped}</div><div class="result-stat-label">Skipped</div></div>
+  `;
+
+  // Triggered rules list
+  const list = document.getElementById('triggeredRules');
+  list.innerHTML = '';
+  PHASES.forEach(phase => {
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id];
+      if (!res || res.status === 'skip') return;
+      const iconMap = { pass: '✅', flag: '⚠️', block: '🚫' };
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="trig-icon">${iconMap[res.status] || '•'}</span>
+        <div class="trig-info">
+          <div class="trig-rule">${r.id} — ${r.name}</div>
+          <div class="trig-result">${res.result}</div>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+  });
+
+  // Live override banner
+  const liveBanner = document.getElementById('liveBanner');
+  if (liveOverrides._hasOverride) {
+    liveBanner.style.display = 'flex';
+    document.getElementById('liveBannerDetail').innerHTML =
+      `<span><strong>DDC-011 Tier 1 Threshold</strong> — live value: <strong>$${liveOverrides.tier1.toLocaleString()}</strong> (default: $${DEFAULT_TIER1_THRESHOLD.toLocaleString()}). This changes Scenario A's income tier assignment.</span>`;
+  } else {
+    liveBanner.style.display = 'none';
+  }
+
+  // AI decision summary
+  generateAISummary(blocked, flagged, passed, skipped);
+}
+
+async function generateAISummary(blocked, flagged, passed, skipped) {
+  const card     = document.getElementById('aiSummaryCard');
+  const statusEl = document.getElementById('aiSummaryStatus');
+  const textEl   = document.getElementById('aiSummaryText');
+
+  card.style.display = 'block';
+  statusEl.textContent = 'Generating...';
+  statusEl.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#7C3AED;background:#EDE9FE;padding:2px 8px;border-radius:4px;';
+  textEl.innerHTML = '<span class="ai-summary-loading">Analyzing decision factors...</span>';
+
+  const decision = blocked > 0 ? 'BLOCKED' : flagged > 0 ? 'APPROVED WITH CONDITIONS' : 'APPROVED';
+  const flags = [];
+  PHASES.forEach(phase => {
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id];
+      if (res && (res.status === 'flag' || res.status === 'block')) {
+        flags.push(`${r.id}: ${res.result}`);
+      }
+    });
+  });
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/generate-decision-summary`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ facilityName: applicantName, decision, flags, passCount: passed, flagCount: flagged, blockCount: blocked })
+    });
+
+    if (!resp.ok) throw new Error('Service error');
+    const { summary } = await resp.json();
+
+    textEl.textContent = summary;
+    statusEl.textContent = 'Complete';
+    statusEl.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#065F46;background:#D1FAE5;padding:2px 8px;border-radius:4px;';
+  } catch {
+    textEl.textContent = 'Summary unavailable — evaluation data recorded in audit trail.';
+    statusEl.textContent = 'Unavailable';
+    statusEl.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:#9CA3AF;background:#F3F3F3;padding:2px 8px;border-radius:4px;';
+  }
+}
+
+function goToOntology() {
+  window.location.href = 'ontology.html?program=doggy-daycare&rule=DDC-011';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  AUDIT TRAIL
+// ══════════════════════════════════════════════════════════════════════
+function buildAndShowAudit() {
+  const decisionId = 'DDC-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+  const ontologyVer = 'SUNRIDGE-DDC-v1.0';
+  const ts       = new Date().toISOString();
+  const duration = (Math.floor(Math.random() * 60) + 120) + 'ms';
+
+  const hashBytes = crypto.getRandomValues(new Uint8Array(32));
+  const hash = Array.from(hashBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  const prevHash = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const statuses   = Object.values(evalResults);
+  const totalRules = statuses.length;
+  const evaluated  = statuses.filter(r => r.status !== 'skip').length;
+  const skipped    = statuses.filter(r => r.status === 'skip').length;
+
+  const decision = statuses.some(r => r.status === 'block') ? 'BLOCKED'
+    : statuses.some(r => r.status === 'flag') ? 'APPROVED WITH CONDITIONS'
+    : 'APPROVED';
+
+  const liveRulesList = liveOverrides._hasOverride
+    ? `DDC-011 Tier 1 Threshold: $${DEFAULT_TIER1_THRESHOLD.toLocaleString()} → $${liveOverrides.tier1.toLocaleString()}`
+    : 'None (using default thresholds)';
+
+  document.getElementById('auditMeta').innerHTML = `
+    <div class="audit-meta-cell"><div class="audit-meta-label">Decision ID</div><div class="audit-meta-value">${decisionId}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Ontology Version</div><div class="audit-meta-value">${ontologyVer}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Timestamp</div><div class="audit-meta-value">${ts}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Applicant</div><div class="audit-meta-value">${applicantName}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Evaluator</div><div class="audit-meta-value">LexiPoint Decision Engine v1.0</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Decision Mode</div><div class="audit-meta-value">DETERMINISTIC</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Rules Total / Evaluated / Skipped</div><div class="audit-meta-value">${totalRules} / ${evaluated} / ${skipped}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Duration</div><div class="audit-meta-value">${duration}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Decision</div><div class="audit-meta-value" style="font-weight:700;color:#032D60">${decision}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Live Rules Applied</div><div class="audit-meta-value">${liveRulesList}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Record Hash (SHA-256)</div><div class="audit-meta-value audit-hash">${hash}</div></div>
+    <div class="audit-meta-cell"><div class="audit-meta-label">Previous Record Hash</div><div class="audit-meta-value audit-hash">${prevHash}</div></div>
+  `;
+
+  const seq = document.getElementById('auditSequence');
+  seq.innerHTML = '';
+  let stepNum = 1;
+
+  PHASES.forEach(phase => {
+    phase.rules.forEach(r => {
+      const res = evalResults[r.id];
+      if (!res) return;
+
+      const badgeMap = { pass: 'abadge-pass', flag: 'abadge-flag', block: 'abadge-block', skip: 'abadge-skip' };
+      const labelMap = { pass: 'Pass', flag: 'Flag', block: 'Block', skip: 'Skip' };
+
+      const entry = document.createElement('div');
+      entry.className = 'audit-entry';
+      entry.innerHTML = `
+        <div class="audit-entry-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="audit-step-num">#${stepNum}</span>
+          <span class="audit-rule-id">${r.id}</span>
+          <span class="audit-rule-name">${r.name}</span>
+          <span class="audit-status-badge ${badgeMap[res.status] || 'abadge-skip'}">${labelMap[res.status] || res.status}</span>
+          <span class="audit-chevron">▾</span>
+        </div>
+        <div class="audit-entry-body">
+          <div class="audit-section">
+            <div class="audit-section-title">Citation</div>
+            <div class="audit-section-value">${r.citation}</div>
+          </div>
+          ${res.condition ? `
+          <div class="audit-section">
+            <div class="audit-section-title">Condition Logic</div>
+            <div class="audit-code">${res.condition}</div>
+          </div>` : ''}
+          ${res.facts && Object.keys(res.facts).length > 0 ? `
+          <div class="audit-section">
+            <div class="audit-section-title">Facts Applied</div>
+            <div class="audit-facts">
+              ${Object.entries(res.facts).map(([k, v]) => `<span class="audit-fact"><span class="fact-key">${k}</span>: <span class="fact-val">${v}</span></span>`).join('')}
+            </div>
+          </div>` : ''}
+          ${res.reasoning ? `
+          <div class="audit-section">
+            <div class="audit-section-title">Reasoning</div>
+            <div class="audit-section-value">${res.reasoning}</div>
+          </div>` : ''}
+          <div class="audit-section">
+            <div class="audit-section-title">Outcome</div>
+            <div class="audit-section-value">${res.result}</div>
+          </div>
+        </div>
+      `;
+
+      seq.appendChild(entry);
+      stepNum++;
+    });
+  });
+
+  showPage('audit');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PAGE NAVIGATION
+// ══════════════════════════════════════════════════════════════════════
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.getElementById('page-' + page).classList.add('visible');
+
+  const stepMap = { intake: 1, evaluation: 2, results: 3, audit: 4 };
+  const activeIdx = stepMap[page] || 1;
+
+  ['step1','step2','step3','step4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('active', 'done');
+    const num = i + 1;
+    if (num < activeIdx) el.classList.add('done');
+    else if (num === activeIdx) el.classList.add('active');
+  });
+
+  ['line1','line2','line3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('done', i < activeIdx - 1);
+  });
+
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════════
+(function init() {
+  if (typeof renderProgramSwitcher === 'function') {
+    renderProgramSwitcher('doggy-daycare');
+  }
+
+  // Load Scenario A by default
+  loadScenario('A');
+})();
+</script>
+
+<footer class="lp-footer">
+  <div class="lp-footer-brand">⌘ LexiPoint</div>
+  <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+  <nav class="lp-footer-nav">
+    <a href="index.html">New Request</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="ontology.html">Ontology Manager</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="dashboard.html">Analytics Dashboard</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="audit-log.html">Audit Log</a>
+  </nav>
+  <div class="lp-footer-disclaimer">
+    <strong>Prototype Demonstration</strong>
+    A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+    Not affiliated with or endorsed by any government agency.
+    For demonstration purposes only — regulatory citations should not be used as legal guidance.
+  </div>
+  <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
+</footer>
+</body>
+</html>
