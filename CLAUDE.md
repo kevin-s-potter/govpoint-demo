@@ -246,3 +246,55 @@ This applies to every agent working in this repo, no exceptions.
    - Add program ID to the correct group in `TENANT_GROUPS` (or add a new group)
    - Add entry to `USER_DISPLAY` if the new tenant has new users
 3. Test that the program switcher loads data correctly on all 4 pages
+
+## Connecting a New Program to Impact Analysis
+
+The Scenario Sandbox (scenario-sandbox.html) uses a `PROGRAM_IMPACT_CONFIG` object to compute real decision-flip counts. Adding a new program requires only these steps — no schema changes.
+
+### 1. Seed the data
+
+Add a new block to `database/22_applications_seed.sql` (or a new migration file) using `generate_series(1,500)` + `abs(hashtext(i::text||'seed_PROGRAMID_FIELD'))%range`.
+
+Follow the existing 5-program pattern:
+- What `key_facts` fields does the program's evaluation engine need?
+- What are the key GATE conditions that drive approved vs. blocked decisions?
+- Target ~60% approved, ~30% blocked, ~10% approved_with_conditions
+- Use `data_source='seeded'`
+
+### 2. Add to `PROGRAM_IMPACT_CONFIG`
+
+Add one entry to the config object in `scenario-sandbox.html` (search for `PROGRAM_IMPACT_CONFIG`). Map each `rule_conditions.field` value (exactly as stored in the DB) to the corresponding `key_facts` key and value type:
+
+```javascript
+'my-new-program': {
+  dataTable: 'applications',
+  fetchFilter: 'program_id=eq.my-new-program&order=created_at.asc&limit=500',
+  rowValueFn: (row, key) => (row.key_facts || {})[key],
+  fieldMap: {
+    'some_field': { key: 'some_field', type: 'integer' },   // integer, decimal, boolean, or string
+    'fpl_token':  { key: 'gross_income', type: 'decimal', evaluable: false }  // skip non-numeric tokens
+  }
+}
+```
+
+For DDC-style programs with flat columns (not JSONB), use:
+```javascript
+dataTable: 'grant_applications',
+rowValueFn: (row, key) => row[key],
+```
+
+### 3. Test the mapping
+
+Open the sandbox for the new program, add a rule with a numeric threshold condition, edit the threshold, click Impact Preview. Confirm a non-zero flip count appears. If zero, check that the `fieldMap` keys exactly match the `field` column values in `rule_conditions` for that program.
+
+### 4. Badge upgrade path
+
+When real client data is available, insert rows into `applications` (or the flat table) with `data_source='live'`. The SEEDED badge on Impact Preview automatically upgrades to LIVE — no code change needed.
+
+### 5. Capability 3 (Needs Review Triage)
+
+To wire the Needs Review tab for a new program:
+- Add `review_flags TEXT[]` column and `pending` decision bucket to the application table
+- Add the flag codes and their policy context to `FLAG_CONTEXT` in `supabase/functions/analyze-needs-review/index.ts`
+- Add human-readable `FLAG_LABELS` entries in `scenario-sandbox.html`
+- Change the `currentProgram !== 'doggy-daycare'` guard in `loadNeedsReview()` to allow the new program
