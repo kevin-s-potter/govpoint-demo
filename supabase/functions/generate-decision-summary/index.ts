@@ -12,7 +12,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { facilityName, decision, flags, passCount, flagCount, blockCount } = await req.json();
+    const { facilityName, decision, flags, passCount, flagCount, blockCount, context } = await req.json();
 
     const client = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
@@ -20,14 +20,20 @@ Deno.serve(async (req: Request) => {
       ? `Issues identified: ${flags.join('; ')}.`
       : 'No issues were identified.';
 
+    const programContext = context
+      ? context
+      : 'Ohio child care facility license application. Write as a regulatory compliance officer.';
+
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 200,
       messages: [{
         role: 'user',
-        content: `You are a regulatory compliance officer writing a formal decision summary for an Ohio child care facility license application. Write a 2-3 sentence plain-English summary in third person, suitable for the facility's official record. Be specific about what drove the decision. Do not use bullet points or headers.
+        content: `You are writing a formal decision summary. Context: ${programContext}
 
-Facility: ${facilityName}
+Write a 2-3 sentence plain-English summary in third person, suitable for the applicant's official record. Be specific about what drove the decision. Do not use bullet points or headers.
+
+Applicant/Facility: ${facilityName}
 Decision: ${decision}
 Rules passed: ${passCount}, flagged: ${flagCount}, blocked: ${blockCount}
 ${issueText}
