@@ -1525,7 +1525,7 @@ async function generateAISummary(blocked, flagged, passed, skipped) {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/generate-decision-summary`, {
       method: 'POST',
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ facilityName: applicantName, decision, flags, passCount: passed, flagCount: flagged, blockCount: blocked })
+      body: JSON.stringify({ facilityName: applicantName, decision, flags, passCount: passed, flagCount: flagged, blockCount: blocked, context: 'Paws & Progress Doggy Day Care Grant program (City of Sunridge Municipal Code § 12). Write as a grant administrator, not a licensing officer. The applicant is a household, not a facility.' })
     });
 
     if (!resp.ok) throw new Error('Service error');
