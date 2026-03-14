@@ -627,11 +627,18 @@ class LexiPointAPI {
     if (!source) throw new Error('Source rule not found');
 
     // Derive base ID (strip existing -vN suffix) and bump version
+    // Strip any -vN suffix to get the canonical family base ID
     const baseId = sourceRuleId.replace(/-v\d+$/, '');
-    const majorVersion = parseInt((source.version || '1.0').split('.')[0], 10) || 1;
-    const newMajor = majorVersion + 1;
-    const newRuleId = `${baseId}-v${newMajor}`;
-    const newVersion = `${newMajor}.0`;
+
+    // Find the highest -vN already in use for this family (safe against cloning a clone)
+    const allRules = await this._query('rules', 'select=rule_id&order=rule_id');
+    const maxN = allRules
+      .filter(r => r.rule_id === baseId || r.rule_id.match(new RegExp(`^${baseId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-v\\d+$`)))
+      .reduce((max, r) => {
+        const m = r.rule_id.match(/-v(\d+)$/);
+        return m ? Math.max(max, parseInt(m[1], 10)) : max;
+      }, 1);
+    const newRuleId = `${baseId}-v${maxN + 1}`;
 
     const sourceConditions = await this.getConditions(sourceRuleId);
     const sourceDeps = await this._query('rule_dependencies', `select=*&rule_id=eq.${encodeURIComponent(sourceRuleId)}`);
@@ -657,7 +664,7 @@ class LexiPointAPI {
         phase: source.phase,
         priority: source.priority,
         status: 'draft',
-        version: newVersion,
+        version: '1.0',
         parent_rule_id: sourceRuleId,
         effective_date: null,
         sunset_date: null,
@@ -703,7 +710,7 @@ class LexiPointAPI {
       });
     }
 
-    await this.addRuleVersion(newRuleId, newVersion, source.created_by || 'user-001',
+    await this.addRuleVersion(newRuleId, '1.0', source.created_by || 'user-001',
       `Cloned from ${sourceRuleId} for amendment`);
     await this.addAuditEntry(source.tenant_id, source.created_by || 'user-001', 'publisher',
       'clone_initiated', 'rule', sourceRuleId, `Cloned to ${newRuleId}`);
