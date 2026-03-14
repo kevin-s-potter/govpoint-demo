@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LexiPoint | Select a Use Case</title>
+  <link rel="stylesheet" href="shared.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -314,32 +315,6 @@
       border-radius: 4px;
     }
 
-    .footer {
-      padding: 24px;
-      text-align: center;
-      border-top: 1px solid #E5E5E5;
-      background: white;
-      flex-shrink: 0;
-    }
-
-    .footer-links {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      margin-bottom: 8px;
-    }
-
-    .footer-links a {
-      color: #0176D3;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .footer-links a:hover { text-decoration: underline; }
-    .footer-divider { color: #C9C9C9; }
-    .footer-copy { font-size: 11px; color: #54698D; }
 
     @media (max-width: 680px) {
       .hero h1 { font-size: 28px; }
@@ -443,15 +418,25 @@
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="footer-links">
+  <footer class="lp-footer">
+    <div class="lp-footer-brand">⌘ LexiPoint</div>
+    <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+    <nav class="lp-footer-nav">
+      <a href="index.html">New Request</a>
+      <span class="lp-footer-nav-divider">·</span>
       <a href="ontology.html">Ontology Manager</a>
-      <span class="footer-divider">|</span>
+      <span class="lp-footer-nav-divider">·</span>
       <a href="dashboard.html">Analytics Dashboard</a>
-      <span class="footer-divider">|</span>
+      <span class="lp-footer-nav-divider">·</span>
       <a href="audit-log.html">Audit Log</a>
+    </nav>
+    <div class="lp-footer-disclaimer">
+      <strong>Prototype Demonstration</strong>
+      A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+      Not affiliated with or endorsed by any government agency.
+      For demonstration purposes only — regulatory citations should not be used as legal guidance.
     </div>
-    <p class="footer-copy">LexiPoint — Policy Intelligence Infrastructure for Government &nbsp;·&nbsp; Aimpoint Technology</p>
+    <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
   </footer>
 
 </body>

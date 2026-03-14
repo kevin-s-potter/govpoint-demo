@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Audit Log</title>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
+<link rel="stylesheet" href="shared.css" />
 <script src="program-switcher.js"></script>
 <style>
   :root {
@@ -542,24 +543,6 @@
     cursor: not-allowed;
   }
 
-  /* ── FOOTER ── */
-  .footer {
-    text-align: center;
-    padding: 24px;
-    font-size: 12px;
-    color: var(--slds-text-secondary);
-    margin-top: 32px;
-  }
-
-  .footer a {
-    color: var(--slds-brand);
-    text-decoration: none;
-  }
-
-  .footer a:hover {
-    text-decoration: underline;
-  }
-
   /* ── RESPONSIVE ── */
   @media (max-width: 1024px) {
     .container {
@@ -743,9 +726,26 @@
 </div>
 </div>
 
-<div class="footer">
-  <a href="ontology.html">← Back to Ontology Manager</a> &middot; Live data from Supabase
-</div>
+<footer class="lp-footer">
+  <div class="lp-footer-brand">⌘ LexiPoint</div>
+  <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+  <nav class="lp-footer-nav">
+    <a href="index.html">New Request</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="ontology.html">Ontology Manager</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="dashboard.html">Analytics Dashboard</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="audit-log.html">Audit Log</a>
+  </nav>
+  <div class="lp-footer-disclaimer">
+    <strong>Prototype Demonstration</strong>
+    A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+    Not affiliated with or endorsed by any government agency.
+    For demonstration purposes only — regulatory citations should not be used as legal guidance.
+  </div>
+  <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
+</footer>
 
 <script>
   // ── PROGRAM CONFIG ────────────────────────────────────────────

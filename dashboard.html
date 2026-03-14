@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Analytics Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
+<link rel="stylesheet" href="shared.css" />
 <script src="program-switcher.js"></script>
 <style>
   :root {
@@ -1308,12 +1309,7 @@
     rules.forEach(r => {
       // Status (normalize case for display)
       const rawStatus = (r.status || 'unknown').toLowerCase();
-      let displayStatus;
-      if (rawStatus === 'active') displayStatus = 'Active';
-      else if (rawStatus === 'draft') displayStatus = 'Draft';
-      else if (rawStatus === 'in review' || rawStatus === 'review') displayStatus = 'In Review';
-      else if (rawStatus === 'sunset') displayStatus = 'Sunset';
-      else displayStatus = r.status || 'Unknown';
+      const displayStatus = rawStatus === 'review' ? 'in review' : rawStatus;
       statusCounts[displayStatus] = (statusCounts[displayStatus] || 0) + 1;
 
       // Jurisdiction
@@ -1336,10 +1332,10 @@
     document.getElementById('statusTotal').textContent = `${total} total`;
 
     const colors = {
-      'Active':    '#2E844A',
-      'Draft':     '#DD7A01',
-      'In Review': '#9050E9',
-      'Sunset':    '#BA0517'
+      'active':    '#2E844A',
+      'draft':     '#DD7A01',
+      'in review': '#9050E9',
+      'sunset':    '#BA0517'
     };
     const defaultColor = '#6B7280';
 
@@ -1611,5 +1607,25 @@
   });
 </script>
 
+<footer class="lp-footer">
+  <div class="lp-footer-brand">⌘ LexiPoint</div>
+  <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+  <nav class="lp-footer-nav">
+    <a href="index.html">New Request</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="ontology.html">Ontology Manager</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="dashboard.html">Analytics Dashboard</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="audit-log.html">Audit Log</a>
+  </nav>
+  <div class="lp-footer-disclaimer">
+    <strong>Prototype Demonstration</strong>
+    A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+    Not affiliated with or endorsed by any government agency.
+    For demonstration purposes only — regulatory citations should not be used as legal guidance.
+  </div>
+  <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
+</footer>
 </body>
 </html>

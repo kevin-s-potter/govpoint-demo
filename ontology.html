@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="program-switcher.js"></script>
 <link rel="stylesheet" href="ontology.css" />
+<link rel="stylesheet" href="shared.css" />
 </head>
 <body class="slds-scope">
 
@@ -224,7 +225,7 @@
       </div>
       <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; font-weight: 600;" role="legend" aria-label="Graph legend">
         <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#2E844A;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Active</span>
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#B25E00;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Draft</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#DD7A01;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Draft</span>
         <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#0176D3;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> In Review</span>
         <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#BA0517;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Sunset</span>
         <span style="display:flex;align-items:center;gap:5px;color:#6B7280;">— Dependency &nbsp; <span style="border-top:2px dashed #BA0517;width:20px;display:inline-block;"></span> Conflict</span>
@@ -1587,5 +1588,26 @@ let cbState = {
 </script>
 <script src="ontology-condition-builder.js"></script>
 <script src="ontology-graphs.js"></script>
+
+<footer class="lp-footer">
+  <div class="lp-footer-brand">⌘ LexiPoint</div>
+  <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+  <nav class="lp-footer-nav">
+    <a href="index.html">New Request</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="ontology.html">Ontology Manager</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="dashboard.html">Analytics Dashboard</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="audit-log.html">Audit Log</a>
+  </nav>
+  <div class="lp-footer-disclaimer">
+    <strong>Prototype Demonstration</strong>
+    A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+    Not affiliated with or endorsed by any government agency.
+    For demonstration purposes only — regulatory citations should not be used as legal guidance.
+  </div>
+  <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
+</footer>
 </body>
 </html>
