@@ -43,7 +43,7 @@ WITH raw AS (
   FROM generate_series(1, 500) i
 ),
 f AS (
-  SELECT r.*,
+  SELECT raw.*,
     CASE WHEN rA<30 THEN 10 + rB           -- 30%: 10-49 beds (some blocked)
          WHEN rA<80 THEN 50 + rB           -- 50%: 50-89 beds (safe range)
          ELSE            90 + (rB%60)      -- 20%: 90-149 beds
@@ -127,7 +127,7 @@ WITH raw AS (
   FROM generate_series(1, 500) i
 ),
 f AS (
-  SELECT r.*,
+  SELECT raw.*,
     CASE WHEN rA<20 THEN 1 WHEN rA<50 THEN 2 WHEN rA<75 THEN 3
          WHEN rA<90 THEN 4 ELSE 5 END AS hh_size,
     (rD >= 5)  AS citizenship_met,   -- 95% pass
@@ -219,7 +219,7 @@ WITH raw AS (
   FROM generate_series(1, 500) i
 ),
 f AS (
-  SELECT r.*,
+  SELECT raw.*,
     CASE WHEN rA<25 THEN 15 + rA           -- 25%: 15-39 (some blocked)
          ELSE            40 + rA           -- 75%: 40-139
     END AS beds,
@@ -281,7 +281,7 @@ WITH raw AS (
   FROM generate_series(1, 500) i
 ),
 f AS (
-  SELECT r.*,
+  SELECT raw.*,
     (ARRAY['residential_builder','commercial_builder','electrical',
            'plumbing','hvac'])[1+(rA%5)] AS lic_type,
     (rB >= 15) AS exam_ok,          -- 85% pass exam
@@ -349,7 +349,7 @@ WITH raw AS (
   FROM generate_series(1, 500) i
 ),
 f AS (
-  SELECT r.*,
+  SELECT raw.*,
     (ARRAY['center','type_a','type_b'])[1+(rA%3)] AS fac_type,
     CASE WHEN rB<30 THEN 10+(rB%20)     -- 30%: 10-29 children
          WHEN rB<70 THEN 30+(rB%40)     -- 40%: 30-69

@@ -64,9 +64,12 @@ CREATE INDEX IF NOT EXISTS idx_applications_facts
 -- This constraint enables POST with "Prefer: resolution=merge-duplicates"
 -- (Supabase REST upsert pattern).
 -- =============================================================================
-ALTER TABLE scenario_impact_results
-  ADD CONSTRAINT IF NOT EXISTS uq_impact_scenario_rule
-  UNIQUE (scenario_id, rule_id);
+DO $$
+BEGIN
+  ALTER TABLE scenario_impact_results
+    ADD CONSTRAINT uq_impact_scenario_rule UNIQUE (scenario_id, rule_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 
 -- =============================================================================
