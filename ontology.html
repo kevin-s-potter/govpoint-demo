@@ -12,11 +12,6 @@
 </head>
 <body class="slds-scope">
 
-<div class="state-banner">
-  <span>Ohio Revised Code Ontology System</span>
-  <span style="margin-left: auto;"><a href="#">Documentation</a> · <a href="#">Support</a></span>
-</div>
-
 <nav class="topnav">
   <div class="logo">
     <span class="ohio-mark">⟨°⟩</span>
@@ -35,7 +30,7 @@
 
   <div class="nav-controls">
     <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
-      <span>🔔</span>
+      <span>&#x1F514;</span>
       <span class="notification-badge">3</span>
       <div class="notification-dropdown">
         <div class="notification-item">
@@ -1556,7 +1551,7 @@ function renderWorkspaceTabs() {
   }
   container.style.display = 'flex';
   container.innerHTML = workspaceTabs.map(tab => {
-    const status = tab.rule.status;
+    const status = (tab.rule.status || '').toLowerCase();
     const statusColor = status === 'active' ? '#2E844A' : status === 'draft' ? '#DD7A01' : status === 'review' ? '#0176D3' : '#BA0517';
     return `
       <div class="workspace-tab ${tab.ruleId === activeTabId ? 'active' : ''}" data-rule-id="${tab.ruleId}" onclick="activateTab('${tab.ruleId}')">

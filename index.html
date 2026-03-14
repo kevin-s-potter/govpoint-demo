@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LexiPoint | Select a Use Case</title>
   <link rel="stylesheet" href="shared.css">
+  <script src="program-switcher.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,75 +16,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-    }
-
-    .header {
-      background: #032D60;
-      padding: 0 24px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      flex-shrink: 0;
-    }
-
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: #0176D3;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 14px;
-      color: white;
-      letter-spacing: -0.5px;
-      flex-shrink: 0;
-    }
-
-    .logo-text {
-      font-size: 18px;
-      font-weight: 700;
-      color: white;
-      letter-spacing: -0.3px;
-    }
-
-    .logo-tagline {
-      font-size: 11px;
-      color: rgba(255,255,255,0.55);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      margin-top: 1px;
-    }
-
-    .header-nav {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .header-nav a {
-      color: rgba(255,255,255,0.75);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 4px;
-      transition: all 0.15s;
-    }
-
-    .header-nav a:hover {
-      color: white;
-      background: rgba(255,255,255,0.1);
     }
 
     .main {
@@ -325,20 +257,52 @@
 </head>
 <body>
 
-  <header class="header">
-    <a href="index.html" class="header-logo">
-      <div class="logo-icon">LP</div>
-      <div>
-        <div class="logo-text">LexiPoint</div>
-        <div class="logo-tagline">Policy Intelligence</div>
-      </div>
-    </a>
-    <nav class="header-nav">
+  <nav class="topnav">
+    <div class="logo">
+      <span class="ohio-mark">⟨°⟩</span>
+      <span>LexiPoint</span>
+    </div>
+
+    <div id="programSwitcherMount" class="tenant-switcher"></div>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-links">
+      <a href="index.html" class="active">New Request</a>
       <a href="ontology.html">Ontology</a>
       <a href="dashboard.html">Dashboard</a>
-      <a href="audit-log.html">Audit Log</a>
-    </nav>
-  </header>
+    </div>
+
+    <div class="nav-controls">
+      <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+        <span>&#x1F514;</span>
+        <span class="notification-badge">3</span>
+        <div class="notification-dropdown">
+          <div class="notification-dropdown-header">Notifications</div>
+          <div class="notification-item">
+            <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
+            <div class="notification-time">2 hours ago</div>
+          </div>
+          <div class="notification-item">
+            <strong>FED-003 CMS CoP updated &mdash; affects 4 rules</strong>
+            <div class="notification-time">1 day ago</div>
+          </div>
+          <div class="notification-item">
+            <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+            <div class="notification-time">1 week ago</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="role-indicator">
+        <div class="avatar-circle" id="avatarCircle">SC</div>
+        <div class="role-text">
+          <div class="user-name" id="userName">Sarah Chen</div>
+          <div class="user-role" id="userRole">Publisher | Hospital Licensing</div>
+        </div>
+      </div>
+    </div>
+  </nav>
 
   <main class="main">
 
