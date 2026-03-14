@@ -121,6 +121,10 @@
         <h2 class="ai-panel-title">
           Policy Goal Analysis
           <span class="ai-badge">AI-Powered</span>
+          <span style="margin-left:auto; font-size:12px; font-weight:500; color:var(--slds-text-label);">
+            Analyzing: <strong id="activeProgramLabel" style="color:var(--navy-dark);">Hospital Licensing</strong>
+            &mdash; <span id="activeProgramRuleCount" style="color:var(--brand-blue);">26 rules</span>
+          </span>
         </h2>
 
         <div class="form-row">
@@ -357,6 +361,8 @@ function switchProgram(programId) {
   if (cfg) {
     document.getElementById('pageSubtitle').textContent =
       `Policy scenario planning for ${cfg.programName}`;
+    document.getElementById('activeProgramLabel').textContent = cfg.programName;
+    document.getElementById('activeProgramRuleCount').textContent = `${cfg.ruleCount} rules`;
     updateUserDisplay(programId);
   }
   // Clear AI results and reload sandbox list
@@ -1385,6 +1391,11 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
   renderProgramSwitcher('programSwitcherMount', currentProgram, switchProgram);
   updateUserDisplay(currentProgram);
+  const initCfg = PROGRAM_CONFIG[currentProgram];
+  if (initCfg) {
+    document.getElementById('activeProgramLabel').textContent = initCfg.programName;
+    document.getElementById('activeProgramRuleCount').textContent = `${initCfg.ruleCount} rules`;
+  }
   loadProgramRules();
 });
 </script>
