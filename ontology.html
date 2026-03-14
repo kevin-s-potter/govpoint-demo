@@ -91,6 +91,13 @@
       <button class="type-chip" data-type="INFO" onclick="setTypeFilter('INFO')">Info</button>
     </div>
 
+    <!-- Show Archived Toggle -->
+    <div style="padding: 4px 12px 8px;">
+      <button id="showArchivedToggle" onclick="toggleShowArchived()" style="font-size:11px;color:var(--text-secondary);background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;">
+        <span id="showArchivedIcon">☐</span> Show archived (<span id="archivedCount">0</span>)
+      </button>
+    </div>
+
     <!-- Action Buttons -->
     <div class="sidebar-actions">
       <button class="primary slds-button slds-button_brand" id="importBtn">⬆ Import</button>
@@ -351,6 +358,19 @@
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
       <button id="approveVersionCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
       <button id="approveVersionConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-success); color: white; border-radius: 2px; cursor: pointer;">Approve &amp; Activate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rollback Modal -->
+<div class="impact-modal" id="rollbackModal">
+  <div class="impact-content" style="max-width: 500px;">
+    <span class="impact-close" id="rollbackClose">✕</span>
+    <h2 class="impact-title">Rollback to This Version</h2>
+    <div id="rollbackBody" style="margin-bottom: 20px;"></div>
+    <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
+      <button id="rollbackCancelBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); border-radius: 2px; cursor: pointer;">Cancel</button>
+      <button id="rollbackConfirmBtn" style="padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-warning); color: white; border-radius: 2px; cursor: pointer;">Confirm Rollback</button>
     </div>
   </div>
 </div>
@@ -781,6 +801,29 @@ class LexiPointAPI {
     this.clearCache();
   }
 
+  async rollbackRule(archivedRuleId, currentUserId, tenantId) {
+    const rule = await this.getRule(archivedRuleId);
+    if (!rule) throw new Error('Rule not found');
+    if (rule.status !== 'archived') throw new Error('Only archived rules can be rolled back');
+    const successorId = rule.superseded_by;
+    if (!successorId) throw new Error('No successor rule found to roll back from');
+
+    // Restore archived rule to active
+    await this.updateRule(archivedRuleId, { status: 'active', superseded_by: null });
+
+    // Re-archive the successor
+    const today = new Date().toISOString().split('T')[0];
+    await this.updateRule(successorId, { status: 'archived', sunset_date: today });
+
+    await this.addAuditEntry(tenantId, currentUserId, 'publisher',
+      'rollback', 'rule', archivedRuleId, `Rolled back from ${successorId}. Rule restored to active.`);
+    await this.addAuditEntry(tenantId, currentUserId, 'publisher',
+      'archived', 'rule', successorId, `Re-archived — rollback restored ${archivedRuleId} as active version.`);
+    await this.addRuleVersion(archivedRuleId, rule.version, currentUserId,
+      `Rollback: restored from archived, ${successorId} re-archived.`);
+    this.clearCache();
+  }
+
   async createRule(data) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/rules`, {
       method: 'POST',
@@ -882,6 +925,9 @@ function switchProgram(programId) {
   document.querySelector('.avatar-circle').textContent = user.initials;
   document.querySelector('.user-role').textContent = `${user.role} | ${config.programName}`;
 
+  // Reset per-program UI state
+  showArchived = false;
+
   // Clear cache and reload
   lexipoint.clearCache();
   init();
@@ -891,6 +937,7 @@ function switchProgram(programId) {
 let currentRule = null;   // full rule object from Supabase
 let rules = [];           // all rules for current program
 let activeTypeFilter = 'ALL';
+let showArchived = false;
 let preflightPendingAction = null;
 
 // ── PENDING APPLICATIONS (demo data keyed by rule_id) ────────
@@ -989,6 +1036,12 @@ function renderRulesList() {
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
   const today = new Date();
 
+  const archivedCount = rules.filter(r => r.status === 'archived').length;
+  const countEl = document.getElementById('archivedCount');
+  if (countEl) countEl.textContent = archivedCount;
+  const iconEl = document.getElementById('showArchivedIcon');
+  if (iconEl) iconEl.textContent = showArchived ? '☑' : '☐';
+
   const filtered = rules.filter(r => {
     const matchesSearch =
       r.name.toLowerCase().includes(searchTerm) ||
@@ -996,7 +1049,8 @@ function renderRulesList() {
       (r.description || '').toLowerCase().includes(searchTerm) ||
       (r.citation || '').toLowerCase().includes(searchTerm);
     const matchesType = activeTypeFilter === 'ALL' || r.rule_type === activeTypeFilter;
-    return matchesSearch && matchesType;
+    const matchesArchived = showArchived || r.status !== 'archived';
+    return matchesSearch && matchesType && matchesArchived;
   });
 
   container.innerHTML = filtered.map(rule => {
@@ -1132,7 +1186,7 @@ async function renderDetailPanel() {
     const banner = document.createElement('div');
     banner.id = 'lifecycleBanner';
     banner.style.cssText = 'padding:10px 24px;background:#F9FAFB;border-bottom:1px solid var(--slds-border);font-size:12px;color:#747474;display:flex;align-items:center;gap:8px;';
-    banner.innerHTML = `■ This rule has been archived${currentRule.superseded_by ? ` — superseded by <a href="javascript:void(0)" onclick="selectRule('${currentRule.superseded_by}')" style="color:var(--slds-blue);font-weight:600;">${currentRule.superseded_by}</a>` : ''}.`;
+    banner.innerHTML = `■ This rule has been archived${currentRule.superseded_by ? ` — superseded by <a href="javascript:void(0)" onclick="selectRule('${currentRule.superseded_by}')" style="color:var(--slds-blue);font-weight:600;">${currentRule.superseded_by}</a>. <button onclick="openRollbackModal()" style="margin-left:12px;padding:3px 10px;font-size:11px;font-weight:700;border:1px solid var(--slds-warning);color:var(--slds-warning);background:transparent;border-radius:2px;cursor:pointer;">↩ Rollback to This Version</button>` : ''}.`;
     document.getElementById('detailTabs').insertAdjacentElement('beforebegin', banner);
   }
 
@@ -1490,6 +1544,11 @@ function setupEventListeners() {
   _on('approveVersionCancelBtn', 'click', () => document.getElementById('approveVersionModal')?.classList.remove('active'));
   _on('approveVersionConfirmBtn', 'click', runApproveRule);
   _on('approveVersionDate', 'change', updateApproveVersionBtn, false);
+
+  // ── Rollback Modal ───────────────────────────────────────
+  _on('rollbackClose', 'click', () => document.getElementById('rollbackModal')?.classList.remove('active'));
+  _on('rollbackCancelBtn', 'click', () => document.getElementById('rollbackModal')?.classList.remove('active'));
+  _on('rollbackConfirmBtn', 'click', runRollback);
 
   // ── New Rule Modal ───────────────────────────────────────
   _on('newRuleBtn', 'click', openNewRuleModal);
@@ -2057,6 +2116,42 @@ async function runActivateRule() {
   }
 }
 
+function openRollbackModal() {
+  if (!currentRule || !currentRule.superseded_by) return;
+  const successorId = currentRule.superseded_by;
+  document.getElementById('rollbackBody').innerHTML = `
+    <p style="font-size:13px;color:var(--text-dark);margin-bottom:12px;">
+      This will restore <strong>${currentRule.rule_id}</strong> as the active version.
+    </p>
+    <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:4px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#92400E;">
+      <strong>${successorId}</strong> (currently active) will be re-archived.
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);">
+      This action is reversible — you can re-activate the newer version at any time from its archived record.
+    </p>`;
+  document.getElementById('rollbackModal').classList.add('active');
+}
+
+async function runRollback() {
+  document.getElementById('rollbackModal').classList.remove('active');
+  const config = PROGRAM_CONFIG[currentProgram];
+  try {
+    await lexipoint.rollbackRule(currentRule.rule_id, config.userId, config.tenant);
+    lexipoint.clearCache();
+    currentRule = await lexipoint.getRule(currentRule.rule_id);
+    rules = await lexipoint.getRules(currentProgram);
+    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
+    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
+    renderRulesList();
+    renderWorkspaceTabs();
+    await renderDetailPanel();
+    showToast(`Rollback complete — ${currentRule.rule_id} restored to active.`);
+  } catch (e) {
+    showToast(`Rollback failed: ${e.message}`);
+    console.error('[Rollback] Failed:', e);
+  }
+}
+
 function openNewRuleModal() {
   const modal = document.getElementById('newRuleModal');
   if (!modal) return;
@@ -2127,6 +2222,11 @@ function setTypeFilter(type) {
   document.querySelectorAll('.type-chip').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.type === type);
   });
+  renderRulesList();
+}
+
+function toggleShowArchived() {
+  showArchived = !showArchived;
   renderRulesList();
 }
 
