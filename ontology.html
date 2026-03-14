@@ -90,6 +90,13 @@
       <button class="type-chip" data-type="INFO" onclick="setTypeFilter('INFO')">Info</button>
     </div>
 
+    <!-- Show Archived Toggle -->
+    <div style="padding: 4px 12px 8px;">
+      <button id="showArchivedToggle" onclick="toggleShowArchived()" style="font-size:11px;color:var(--text-secondary);background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;">
+        <span id="showArchivedIcon">☐</span> Show archived (<span id="archivedCount">0</span>)
+      </button>
+    </div>
+
     <!-- Action Buttons -->
     <div class="sidebar-actions">
       <button class="primary slds-button slds-button_brand" id="importBtn">⬆ Import</button>
@@ -917,6 +924,9 @@ function switchProgram(programId) {
   document.querySelector('.avatar-circle').textContent = user.initials;
   document.querySelector('.user-role').textContent = `${user.role} | ${config.programName}`;
 
+  // Reset per-program UI state
+  showArchived = false;
+
   // Clear cache and reload
   lexipoint.clearCache();
   init();
@@ -926,6 +936,7 @@ function switchProgram(programId) {
 let currentRule = null;   // full rule object from Supabase
 let rules = [];           // all rules for current program
 let activeTypeFilter = 'ALL';
+let showArchived = false;
 let preflightPendingAction = null;
 
 // ── PENDING APPLICATIONS (demo data keyed by rule_id) ────────
@@ -1024,6 +1035,12 @@ function renderRulesList() {
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
   const today = new Date();
 
+  const archivedCount = rules.filter(r => r.status === 'archived').length;
+  const countEl = document.getElementById('archivedCount');
+  if (countEl) countEl.textContent = archivedCount;
+  const iconEl = document.getElementById('showArchivedIcon');
+  if (iconEl) iconEl.textContent = showArchived ? '☑' : '☐';
+
   const filtered = rules.filter(r => {
     const matchesSearch =
       r.name.toLowerCase().includes(searchTerm) ||
@@ -1031,7 +1048,8 @@ function renderRulesList() {
       (r.description || '').toLowerCase().includes(searchTerm) ||
       (r.citation || '').toLowerCase().includes(searchTerm);
     const matchesType = activeTypeFilter === 'ALL' || r.rule_type === activeTypeFilter;
-    return matchesSearch && matchesType;
+    const matchesArchived = showArchived || r.status !== 'archived';
+    return matchesSearch && matchesType && matchesArchived;
   });
 
   container.innerHTML = filtered.map(rule => {
@@ -2203,6 +2221,11 @@ function setTypeFilter(type) {
   document.querySelectorAll('.type-chip').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.type === type);
   });
+  renderRulesList();
+}
+
+function toggleShowArchived() {
+  showArchived = !showArchived;
   renderRulesList();
 }
 
