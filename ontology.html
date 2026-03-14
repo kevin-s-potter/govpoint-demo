@@ -83,25 +83,25 @@
 
     <!-- Rule Type Filter Chips -->
     <div class="type-filter-chips" id="typeFilterChips">
-      <button class="type-chip active" data-type="ALL" onclick="setTypeFilter('ALL')">All</button>
-      <button class="type-chip" data-type="GATE" onclick="setTypeFilter('GATE')">Gate</button>
-      <button class="type-chip" data-type="FILTER" onclick="setTypeFilter('FILTER')">Filter</button>
-      <button class="type-chip" data-type="CALC" onclick="setTypeFilter('CALC')">Calc</button>
-      <button class="type-chip" data-type="ROUTE" onclick="setTypeFilter('ROUTE')">Route</button>
-      <button class="type-chip" data-type="INFO" onclick="setTypeFilter('INFO')">Info</button>
+      <button class="type-chip active" type="button" data-type="ALL" onclick="setTypeFilter('ALL')">All</button>
+      <button class="type-chip" type="button" data-type="GATE" onclick="setTypeFilter('GATE')">Gate</button>
+      <button class="type-chip" type="button" data-type="FILTER" onclick="setTypeFilter('FILTER')">Filter</button>
+      <button class="type-chip" type="button" data-type="CALC" onclick="setTypeFilter('CALC')">Calc</button>
+      <button class="type-chip" type="button" data-type="ROUTE" onclick="setTypeFilter('ROUTE')">Route</button>
+      <button class="type-chip" type="button" data-type="INFO" onclick="setTypeFilter('INFO')">Info</button>
     </div>
 
     <!-- Show Archived Toggle -->
     <div style="padding: 4px 12px 8px;">
-      <button id="showArchivedToggle" onclick="toggleShowArchived()" style="font-size:11px;color:var(--text-secondary);background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;">
+      <button id="showArchivedToggle" type="button" onclick="toggleShowArchived()" style="font-size:11px;color:var(--text-secondary);background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;">
         <span id="showArchivedIcon">☐</span> Show archived (<span id="archivedCount">0</span>)
       </button>
     </div>
 
     <!-- Action Buttons -->
     <div class="sidebar-actions">
-      <button class="primary slds-button slds-button_brand" id="importBtn">⬆ Import</button>
-      <button class="slds-button slds-button_neutral" id="newRuleBtn">+ New</button>
+      <button class="primary slds-button slds-button_brand" id="importBtn" type="button">⬆ Import</button>
+      <button class="slds-button slds-button_neutral" id="newRuleBtn" type="button" style="color:#16325C;">+ New</button>
     </div>
 
     <!-- Rules List -->
@@ -124,8 +124,8 @@
         </div>
       </div>
       <div class="detail-actions" id="detailActions">
-        <button class="slds-button slds-button_neutral" onclick="triggerSimulate()">Simulate Impact</button>
-        <button class="slds-button slds-button_neutral" style="border-color: var(--slds-blue); color: var(--slds-blue);" onclick="openTestModal()">▶ Test Rule</button>
+        <button class="btn-action btn-action-secondary" type="button" onclick="triggerSimulate()">Simulate Impact</button>
+        <button class="btn-action btn-action-secondary" type="button" onclick="openTestModal()">▶ Test Rule</button>
       </div>
     </div>
 
@@ -274,7 +274,7 @@
 <!-- Pre-flight Save Modal -->
 <div class="impact-modal" id="preflightModal">
   <div class="impact-content">
-    <span class="impact-close" id="preflightClose">✕</span>
+    <button class="impact-close" id="preflightClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Confirm Changes</h2>
     <div class="impact-section">
       <div class="impact-section-title">Changes to be saved</div>
@@ -294,7 +294,7 @@
 <!-- Test Rule Modal -->
 <div class="impact-modal" id="testRuleModal">
   <div class="impact-content" style="max-width: 560px;">
-    <span class="impact-close" id="testRuleClose">✕</span>
+    <button class="impact-close" id="testRuleClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Test This Rule</h2>
     <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Enter sample values to verify same facts → same outcome.</p>
     <div id="testRuleModalContent"></div>
@@ -304,7 +304,7 @@
 <!-- Review Diff Modal -->
 <div class="impact-modal" id="reviewDiffModal">
   <div class="impact-content" style="max-width: 600px;">
-    <span class="impact-close" id="reviewDiffClose">✕</span>
+    <button class="impact-close" id="reviewDiffClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Review Proposed Changes</h2>
     <div id="reviewDiffContent"></div>
 
@@ -326,7 +326,7 @@
 <!-- Schedule Review Modal -->
 <div class="impact-modal" id="scheduleReviewModal">
   <div class="impact-content" style="max-width: 480px;">
-    <span class="impact-close" id="scheduleReviewClose">✕</span>
+    <button class="impact-close" id="scheduleReviewClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Schedule Periodic Review</h2>
     <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">Set a future date when this rule should be reviewed for regulatory currency. A "Review Due" badge will appear in the sidebar when the date arrives.</p>
     <div style="margin-bottom: 20px;">
@@ -343,7 +343,7 @@
 <!-- Clone Rule Modal -->
 <div class="impact-modal" id="cloneRuleModal">
   <div class="impact-content" style="max-width: 500px;">
-    <span class="impact-close" id="cloneRuleClose">✕</span>
+    <button class="impact-close" id="cloneRuleClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Clone as New Version</h2>
     <div id="cloneRuleBody" style="margin-bottom: 20px;"></div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
@@ -356,7 +356,7 @@
 <!-- Approve Version Modal -->
 <div class="impact-modal" id="approveVersionModal">
   <div class="impact-content" style="max-width: 500px;">
-    <span class="impact-close" id="approveVersionClose">✕</span>
+    <button class="impact-close" id="approveVersionClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Approve New Rule Version</h2>
     <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">Set the effective date. If today is selected, the new version activates immediately and the previous version is archived. If a future date is selected, the rule enters Pending status until activated.</p>
     <div style="margin-bottom: 20px;">
@@ -374,7 +374,7 @@
 <!-- Rollback Modal -->
 <div class="impact-modal" id="rollbackModal">
   <div class="impact-content" style="max-width: 500px;">
-    <span class="impact-close" id="rollbackClose">✕</span>
+    <button class="impact-close" id="rollbackClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Rollback to This Version</h2>
     <div id="rollbackBody" style="margin-bottom: 20px;"></div>
     <div style="display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--slds-border);">
@@ -387,7 +387,7 @@
 <!-- New Rule Modal -->
 <div class="impact-modal" id="newRuleModal">
   <div class="impact-content" style="max-width: 560px;">
-    <span class="impact-close" id="newRuleClose">✕</span>
+    <button class="impact-close" id="newRuleClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title">Create New Rule</h2>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
       <div style="grid-column: 1 / -1;">
@@ -449,7 +449,7 @@
 <!-- Impact Simulation Modal -->
 <div class="impact-modal" id="impactModal">
   <div class="impact-content">
-    <span class="impact-close" id="impactClose">✕</span>
+    <button class="impact-close" id="impactClose" type="button" aria-label="Close">✕</button>
     <h2 class="impact-title" id="impactTitle"></h2>
     <div class="impact-section">
       <div class="impact-section-title">Rules with Direct Impact</div>
@@ -1164,20 +1164,20 @@ async function renderDetailPanel() {
   const actionsEl = document.getElementById('detailActions');
   const s = currentRule.status;
   let actionBtns = `
-    <button class="slds-button slds-button_neutral" onclick="triggerSimulate()">Simulate Impact</button>
-    <button class="slds-button slds-button_neutral" style="border-color:var(--slds-blue);color:var(--slds-blue);" onclick="openTestModal()">▶ Test Rule</button>`;
+    <button class="btn-action btn-action-secondary" type="button" onclick="triggerSimulate()">Simulate Impact</button>
+    <button class="btn-action btn-action-secondary" type="button" onclick="openTestModal()">▶ Test Rule</button>`;
   if (s === 'draft') {
-    actionBtns += `<button class="slds-button slds-button_brand" onclick="transitionStatus('review')">Submit for Review</button>`;
-    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-error);color:var(--slds-error);" onclick="runDeleteDraft()">Delete Draft</button>`;
+    actionBtns += `<button class="btn-action btn-action-primary" type="button" onclick="transitionStatus('review')">Submit for Review</button>`;
+    actionBtns += `<button class="btn-action btn-action-danger" type="button" onclick="runDeleteDraft()">Delete Draft</button>`;
   } else if (s === 'review') {
-    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-purple);color:var(--slds-purple);" onclick="openReviewDiff()">Review Changes</button>`;
-    actionBtns += `<button class="slds-button slds-button_brand" onclick="openApproveVersionModal()">Approve Version</button>`;
+    actionBtns += `<button class="btn-action btn-action-secondary" type="button" onclick="openReviewDiff()">Review Changes</button>`;
+    actionBtns += `<button class="btn-action btn-action-success" type="button" onclick="openApproveVersionModal()">Approve Version</button>`;
   } else if (s === 'active') {
-    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:#0E7490;color:#0E7490;" onclick="openScheduleReviewModal()">Schedule Review</button>`;
-    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-blue);color:var(--slds-blue);" onclick="openCloneRuleModal()">Clone as New Version</button>`;
-    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-warning);color:var(--slds-warning);" onclick="transitionStatus('sunset')">Sunset Rule</button>`;
+    actionBtns += `<button class="btn-action btn-action-secondary" type="button" onclick="openScheduleReviewModal()">Schedule Review</button>`;
+    actionBtns += `<button class="btn-action btn-action-secondary" type="button" onclick="openCloneRuleModal()">Clone as New Version</button>`;
+    actionBtns += `<button class="btn-action btn-action-warning" type="button" onclick="transitionStatus('sunset')">Sunset Rule</button>`;
   } else if (s === 'pending') {
-    actionBtns += `<button class="slds-button slds-button_brand" onclick="runActivateRule()">Activate Now</button>`;
+    actionBtns += `<button class="btn-action btn-action-success" type="button" onclick="runActivateRule()">Activate Now</button>`;
   }
   // archived / sunset: read-only — no action buttons added
   actionsEl.innerHTML = actionBtns;
@@ -1195,7 +1195,7 @@ async function renderDetailPanel() {
     const banner = document.createElement('div');
     banner.id = 'lifecycleBanner';
     banner.style.cssText = 'padding:10px 24px;background:#F9FAFB;border-bottom:1px solid var(--slds-border);font-size:12px;color:#747474;display:flex;align-items:center;gap:8px;';
-    banner.innerHTML = `■ This rule has been archived${currentRule.superseded_by ? ` — superseded by <a href="javascript:void(0)" onclick="selectRule('${currentRule.superseded_by}')" style="color:var(--slds-blue);font-weight:600;">${currentRule.superseded_by}</a>. <button onclick="openRollbackModal()" style="margin-left:12px;padding:3px 10px;font-size:11px;font-weight:700;border:1px solid var(--slds-warning);color:var(--slds-warning);background:transparent;border-radius:2px;cursor:pointer;">↩ Rollback to This Version</button>` : ''}.`;
+    banner.innerHTML = `■ This rule has been archived${currentRule.superseded_by ? ` — superseded by <a href="javascript:void(0)" onclick="selectRule('${currentRule.superseded_by}')" style="color:var(--slds-blue);font-weight:600;">${currentRule.superseded_by}</a>. <button onclick="openRollbackModal()" type="button" class="btn-action btn-action-warning" style="margin-left:12px;font-size:11px;padding:4px 10px;">↩ Rollback to This Version</button>` : ''}.`;
     document.getElementById('detailTabs').insertAdjacentElement('beforebegin', banner);
   }
 
@@ -1287,8 +1287,8 @@ async function renderDetailPanel() {
       </div>
     </div>
     <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--slds-border);">
-      <button class="slds-button slds-button_neutral" onclick="discardChanges()" type="button" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--slds-border); background: var(--slds-card); color: #16325C; border-radius: 2px; cursor: pointer;">Discard</button>
-      <button class="slds-button slds-button_brand" id="saveRuleBtn" onclick="saveRule()" style="padding: 8px 20px; font-size: 12px; font-weight: 600; border: none; background: var(--slds-blue); color: white; border-radius: 2px; cursor: pointer;">Save Changes</button>
+      <button class="btn-action btn-action-secondary" onclick="discardChanges()" type="button">Discard</button>
+      <button class="btn-action btn-action-primary" id="saveRuleBtn" onclick="saveRule()" type="button">Save Changes</button>
     </div>
   `;
 
