@@ -802,6 +802,17 @@ class LexiPointAPI {
     return (await res.json())[0];
   }
 
+  async deleteRule(ruleId) {
+    const enc = encodeURIComponent(ruleId);
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
+    // Delete child records first (in case FK cascades aren't set)
+    await fetch(`${SUPABASE_URL}/rest/v1/rule_conditions?rule_id=eq.${enc}`, { method: 'DELETE', headers });
+    await fetch(`${SUPABASE_URL}/rest/v1/rule_dependencies?rule_id=eq.${enc}`, { method: 'DELETE', headers });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rules?rule_id=eq.${enc}`, { method: 'DELETE', headers });
+    if (!res.ok) { const err = await res.text(); throw new Error(`Delete failed: ${err}`); }
+    this.clearCache();
+  }
+
   async saveConditions(ruleId, tenantId, conditions) {
     // Delete all existing conditions for this rule, then insert the new set.
     const delUrl = `${SUPABASE_URL}/rest/v1/rule_conditions?rule_id=eq.${encodeURIComponent(ruleId)}`;
@@ -1093,6 +1104,7 @@ async function renderDetailPanel() {
     <button class="slds-button slds-button_neutral" style="border-color:var(--slds-blue);color:var(--slds-blue);" onclick="openTestModal()">▶ Test Rule</button>`;
   if (s === 'draft') {
     actionBtns += `<button class="slds-button slds-button_brand" onclick="transitionStatus('review')">Submit for Review</button>`;
+    actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-error);color:var(--slds-error);" onclick="runDeleteDraft()">Delete Draft</button>`;
   } else if (s === 'review') {
     actionBtns += `<button class="slds-button slds-button_neutral" style="border-color:var(--slds-purple);color:var(--slds-purple);" onclick="openReviewDiff()">Review Changes</button>`;
     actionBtns += `<button class="slds-button slds-button_brand" onclick="openApproveVersionModal()">Approve Version</button>`;
@@ -2002,6 +2014,26 @@ async function runApproveRule() {
     console.error('[Approve] Failed:', e);
   }
   if (btn) { btn.textContent = 'Approve & Activate'; btn.disabled = false; }
+}
+
+async function runDeleteDraft() {
+  if (!currentRule || currentRule.status !== 'draft') return;
+  if (!confirm(`Delete draft ${currentRule.rule_id}? This cannot be undone.`)) return;
+
+  const ruleId = currentRule.rule_id;
+  const config = PROGRAM_CONFIG[currentProgram];
+  try {
+    await lexipoint.addAuditEntry(config.tenant, config.userId, 'publisher',
+      'delete_draft', 'rule', ruleId, `Draft deleted`);
+    await lexipoint.deleteRule(ruleId);
+    closeTab(ruleId);
+    rules = await lexipoint.getRules(currentProgram);
+    renderRulesList();
+    showToast(`Draft ${ruleId} deleted`);
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[Delete] Failed:', e);
+  }
 }
 
 async function runActivateRule() {
