@@ -13,7 +13,7 @@
   --lp-green:   #2E844A;
   --lp-amber:   #DD7A01;
   --lp-red:     #BA0517;
-  --lp-purple:  #7C3AED;
+  --lp-purple:  #9050E9;
   --lp-bg:      #F3F3F3;
   --lp-white:   #FFFFFF;
   --lp-border:  #E5E5E5;
@@ -434,7 +434,7 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.eval-phase.processing { border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124,58,237,0.08); }
+.eval-phase.processing { border-color: #9050E9; box-shadow: 0 0 0 2px rgba(144,80,233,0.08); }
 .eval-phase.passed     { border-color: var(--lp-green); }
 .eval-phase.flagged    { border-color: var(--lp-amber); }
 .eval-phase.blocked    { border-color: var(--lp-red); }
@@ -460,7 +460,7 @@ body {
 }
 
 .eval-phase.waiting    .phase-icon { background: #F3F3F3; color: var(--lp-label); }
-.eval-phase.processing .phase-icon { background: #EDE9FE; color: #7C3AED; }
+.eval-phase.processing .phase-icon { background: #EDE9FE; color: #9050E9; }
 .eval-phase.passed     .phase-icon { background: #D1FAE5; color: #059669; }
 .eval-phase.flagged    .phase-icon { background: #FEF3C7; color: #D97706; }
 .eval-phase.blocked    .phase-icon { background: #FEE2E2; color: #DC2626; }
@@ -486,7 +486,7 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.phase-card.phase-running  { border-color: #7C3AED; box-shadow: 0 0 0 2px rgba(124,58,237,0.08); }
+.phase-card.phase-running  { border-color: #9050E9; box-shadow: 0 0 0 2px rgba(144,80,233,0.08); }
 .phase-card.phase-passed   { border-color: var(--lp-green); }
 .phase-card.phase-flagged  { border-color: var(--lp-amber); }
 .phase-card.phase-blocked  { border-color: var(--lp-red); }
@@ -510,7 +510,7 @@ body {
 }
 
 .phase-pending   .phase-status-icon { background: #F3F3F3; color: var(--lp-label); }
-.phase-running   .phase-status-icon { background: #EDE9FE; color: #7C3AED; }
+.phase-running   .phase-status-icon { background: #EDE9FE; color: #9050E9; }
 .phase-passed    .phase-status-icon { background: #D1FAE5; color: #059669; }
 .phase-flagged   .phase-status-icon { background: #FEF3C7; color: #D97706; }
 .phase-blocked   .phase-status-icon { background: #FEE2E2; color: #DC2626; }
@@ -525,7 +525,7 @@ body {
 }
 
 .badge-pending   { background: #F3F3F3; color: #9CA3AF; }
-.badge-evaluating { background: #EDE9FE; color: #7C3AED; }
+.badge-evaluating { background: #EDE9FE; color: #9050E9; }
 .badge-passed    { background: #D1FAE5; color: #065F46; }
 .badge-flagged   { background: #FEF3C7; color: #92400E; }
 .badge-blocked   { background: #FEE2E2; color: #991B1B; }
@@ -700,7 +700,7 @@ body {
 .ai-summary-status {
   font-size: 10px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.4px;
-  color: #7C3AED; background: #EDE9FE;
+  color: #9050E9; background: #EDE9FE;
   padding: 2px 8px; border-radius: 4px;
 }
 

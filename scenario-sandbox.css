@@ -1042,3 +1042,50 @@ body {
 }
 
 .print-export-content { display: none; }
+
+/* ── Data Source Badges ──────────────────────────────────── */
+.data-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.data-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.data-badge--live {
+  background: #E8F5E9;
+  color: #2E844A;
+  border: 1px solid #A8D5B2;
+}
+
+.data-badge--seeded {
+  background: #E8F3FD;
+  color: #0176D3;
+  border: 1px solid #B0CFED;
+}
+
+.data-badge--ai {
+  background: #F4EDFD;
+  color: #9050E9;
+  border: 1px solid #C9A8F5;
+}
+
+.data-badge--estimated {
+  background: #F3F3F3;
+  color: #54698D;
+  border: 1px solid #C9D2DC;
+}
