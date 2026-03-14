@@ -990,7 +990,7 @@ function startEditCondition(snapshotId, condIdx, btn) {
       onkeydown="handleEditKey(event, '${snapshotId}', ${condIdx})"
       onblur="cancelEdit(this, '${escHtml(currentVal)}')">
   `;
-  btn.textContent = '&#x2713;';
+  btn.innerHTML = '&#x2713;';
   btn.onclick = () => saveConditionChange(snapshotId, condIdx);
   setTimeout(() => valueTd.querySelector('input').focus(), 0);
 }
