@@ -12,14 +12,16 @@ const PROGRAM_CONFIG = {
   'snap':                 { tenant: 'ohio-odjfs',    abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',        programName: 'SNAP Benefits',                 userId: 'user-301', ruleCount: 183 },
   'nursing-home':         { tenant: 'ky-chfs',       abbr: 'CHFS',  name: 'Kentucky CHFS',                              programName: 'Nursing Home Licensing',         userId: 'user-101', ruleCount: 8   },
   'contractor-licensing': { tenant: 'michigan-lara', abbr: 'LARA',  name: 'Michigan LARA Bureau of Construction Codes', programName: 'Contractor Licensing',          userId: 'user-201', ruleCount: 100 },
-  'childcare-licensing':  { tenant: 'ohio-odjfs',    abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',       programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113 }
+  'childcare-licensing':  { tenant: 'ohio-odjfs',    abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',       programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113 },
+  'doggy-daycare':        { tenant: 'city-of-sunridge', abbr: 'DDC', name: 'City of Sunridge',                          programName: 'Doggy Day Care Grants',         userId: 'user-401', ruleCount: 20  }
 };
 
 const USER_DISPLAY = {
   'user-001': { name: 'Sarah Chen',        initials: 'SC', role: 'Publisher' },
   'user-101': { name: 'Maria Torres',      initials: 'MT', role: 'Publisher' },
   'user-201': { name: 'James Wilson',      initials: 'JW', role: 'Publisher' },
-  'user-301': { name: 'Michelle Thompson', initials: 'MT', role: 'Publisher' }
+  'user-301': { name: 'Michelle Thompson', initials: 'MT', role: 'Publisher' },
+  'user-401': { name: 'Jamie Rivera',      initials: 'JR', role: 'Grant Coordinator' }
 };
 
 // Controls dropdown section order and grouping.
@@ -29,6 +31,7 @@ const TENANT_GROUPS = [
   { label: 'Ohio ODJFS',                programs: ['snap', 'childcare-licensing'] },
   { label: 'Kentucky CHFS',             programs: ['nursing-home'] },
   { label: 'Michigan LARA',             programs: ['contractor-licensing'] },
+  { label: 'City of Sunridge',          programs: ['doggy-daycare'] },
 ];
 
 // Detail line shown under each program name in the dropdown
@@ -38,6 +41,7 @@ const PROGRAM_DETAIL_LABELS = {
   'nursing-home':         'NH-902 · 8 rules',
   'contractor-licensing': 'MCL-339 · 100 rules',
   'childcare-licensing':  'ORC-5104 · 113 rules',
+  'doggy-daycare':        'DDC · 20 rules',
 };
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
