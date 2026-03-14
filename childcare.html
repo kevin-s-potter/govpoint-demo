@@ -314,29 +314,48 @@
 </head>
 <body>
 
-<nav class="lp-nav">
-  <a href="index.html" class="lp-logo">
-    <span class="lp-logo-mark">⌘</span>
-    <span class="lp-logo-name">LexiPoint</span>
-  </a>
+<nav class="topnav">
+  <div class="logo">
+    <span class="ohio-mark">⟨°⟩</span>
+    <span>LexiPoint</span>
+  </div>
 
-  <div id="programSwitcherMount"></div>
+  <div id="programSwitcherMount" class="tenant-switcher"></div>
 
-  <div class="lp-nav-spacer"></div>
+  <div class="nav-spacer"></div>
 
-  <div class="lp-nav-links">
+  <div class="nav-links">
     <a href="index.html" class="active">New Request</a>
     <a href="ontology.html">Ontology</a>
     <a href="dashboard.html">Dashboard</a>
   </div>
 
-  <div class="lp-nav-controls">
-    <button class="lp-notif" title="Notifications">🔔</button>
-    <div class="lp-user">
-      <div class="lp-avatar" id="userAvatar">MT</div>
-      <div class="lp-user-text">
-        <span class="lp-user-name" id="userName">Michelle Thompson</span>
-        <span class="lp-user-role">Licensing Specialist</span>
+  <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span>&#x1F514;</span>
+      <span class="notification-badge">3</span>
+      <div class="notification-dropdown">
+        <div class="notification-dropdown-header">Notifications</div>
+        <div class="notification-item">
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>FED-003 CMS CoP updated &mdash; affects 4 rules</strong>
+          <div class="notification-time">1 day ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+          <div class="notification-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-indicator">
+      <div class="avatar-circle" id="avatarCircle">SC</div>
+      <div class="role-text">
+        <div class="user-name" id="userName">Sarah Chen</div>
+        <div class="user-role" id="userRole">Publisher | Child Care Licensing</div>
       </div>
     </div>
   </div>
@@ -1893,5 +1912,26 @@ function renderStatusBadge(status) {
   loadScenario('A');
 })();
 </script>
+
+<footer class="lp-footer">
+  <div class="lp-footer-brand">⌘ LexiPoint</div>
+  <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+  <nav class="lp-footer-nav">
+    <a href="index.html">New Request</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="ontology.html">Ontology Manager</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="dashboard.html">Analytics Dashboard</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="audit-log.html">Audit Log</a>
+  </nav>
+  <div class="lp-footer-disclaimer">
+    <strong>Prototype Demonstration</strong>
+    A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+    Not affiliated with or endorsed by any government agency.
+    For demonstration purposes only — regulatory citations should not be used as legal guidance.
+  </div>
+  <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
+</footer>
 </body>
 </html>
