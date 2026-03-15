@@ -886,10 +886,13 @@
     <!-- ACTIVITY TABLE -->
     <article class="slds-card chart-card">
       <div class="chart-header">
-        <div class="chart-title">Recent Activity</div>
-        <div style="display:flex;align-items:center;gap:16px;">
+        <div>
+          <div class="chart-title">Recent Activity</div>
+          <div id="auditStatStrip" style="font-size:12px;color:var(--slds-text-label);margin-top:2px;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
           <div class="chart-total" id="activityTotal"></div>
-          <a href="audit-log.html" style="font-size:12px;font-weight:600;color:var(--slds-blue-brand);text-decoration:none;">View Full Audit Log &rarr;</a>
+          <a href="audit-log.html" class="slds-button slds-button_neutral" style="font-size:12px;">View Full Audit Log &rarr;</a>
         </div>
       </div>
       <div class="table-wrapper">
@@ -1406,13 +1409,20 @@
   function renderActivityTable(entries, usersMap) {
     const tbody = document.getElementById('activityTableBody');
     document.getElementById('activityTotal').textContent = `${entries.length} recent entries`;
+    const now = new Date();
+    const h24ago = new Date(now - 24 * 60 * 60 * 1000);
+    const d7ago  = new Date(now - 7  * 24 * 60 * 60 * 1000);
+    const count24h = cachedAuditEntries.filter(e => new Date(e.timestamp) >= h24ago).length;
+    const count7d  = cachedAuditEntries.filter(e => new Date(e.timestamp) >= d7ago).length;
+    const strip = document.getElementById('auditStatStrip');
+    if (strip) strip.textContent = `Last 24h: ${count24h} events  ·  Last 7 days: ${count7d} events`;
 
     if (entries.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--slds-text-label);">No recent activity found.</td></tr>';
       return;
     }
 
-    tbody.innerHTML = entries.map(e => {
+    tbody.innerHTML = entries.slice(0, 10).map(e => {
       const ts = new Date(e.timestamp);
       const timeStr = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         + ' ' + ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
