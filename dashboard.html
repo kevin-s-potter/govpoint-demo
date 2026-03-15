@@ -728,9 +728,33 @@
   #programHealth .ph-change-item:last-child { border-bottom: none; }
   #programHealth .ph-change-date { color: var(--slds-text-label); font-size: 11px; white-space: nowrap; flex-shrink: 0; min-width: 60px; }
 
-  @media (max-width: 1200px) { #phPanel { grid-template-columns: 1fr 1fr !important; } }
   @media (max-width: 768px)  { #phPanel { grid-template-columns: 1fr !important; }
                                #phPanel [style*="span 2"] { grid-column: 1 !important; } }
+
+  /* -- DASHBOARD PROGRAM SELECT -- */
+  #programSwitcherMount { display: none; }
+
+  .dash-program-select {
+    height: 30px;
+    padding: 0 28px 0 10px;
+    border: 1px solid var(--slds-border);
+    border-radius: var(--slds-radius);
+    background: var(--slds-white);
+    color: var(--slds-text-dark);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2354698D'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    min-width: 220px;
+    transition: border-color 0.15s;
+  }
+
+  .dash-program-select:hover { border-color: var(--slds-blue-brand); }
+  .dash-program-select:focus { outline: none; border-color: var(--slds-blue-brand); box-shadow: 0 0 0 2px rgba(1,118,211,0.15); }
 </style>
 </head>
 <body>
@@ -849,6 +873,10 @@
           <button class="refresh-btn" onclick="refreshDashboard()">&#x21BB; Refresh</button>
         </div>
         <div class="dash-filter">
+          <span class="dash-filter-label">Program</span>
+          <select id="dashProgramSelect" class="dash-program-select" onchange="switchProgram(this.value)"></select>
+        </div>
+        <div class="dash-filter">
           <span class="dash-filter-label">Scope</span>
           <div class="dash-filter-pills">
             <button class="slds-button dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
@@ -917,7 +945,7 @@
         <h2 style="font-size:18px;font-weight:800;color:var(--slds-text-dark);letter-spacing:-0.3px;">Program Health</h2>
         <p style="font-size:13px;color:var(--slds-text-label);margin-top:4px;">Rule coverage, application outcomes, and recent changes for the current program</p>
       </div>
-      <div id="phPanel" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;"></div>
+      <div id="phPanel" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start;"></div>
     </section>
 
     <!-- CHARTS GRID -->
@@ -1047,12 +1075,26 @@
   // ============================================================
   //  PROGRAM SWITCHER
   // ============================================================
+  function renderProgramSelect() {
+    const sel = document.getElementById('dashProgramSelect');
+    if (!sel) return;
+    sel.innerHTML = TENANT_GROUPS.map(group => {
+      const options = group.programs.map(id => {
+        const cfg = PROGRAM_CONFIG[id];
+        return `<option value="${id}"${id === currentProgram ? ' selected' : ''}>${cfg.programName}</option>`;
+      }).join('');
+      return `<optgroup label="${group.label}">${options}</optgroup>`;
+    }).join('');
+  }
+
   function switchProgram(programId) {
     currentProgram = programId;
     const config = PROGRAM_CONFIG[programId];
     const user = USER_DISPLAY[config.userId];
 
-    updateSwitcherUI(programId);
+    // Sync the dashboard program select
+    const sel = document.getElementById('dashProgramSelect');
+    if (sel) sel.value = programId;
 
     // Update user indicator
     document.getElementById('userName').textContent = user.name;
@@ -1637,12 +1679,13 @@
   function renderPhStats(stats) {
     const panel = document.getElementById('phPanel');
     if (!panel) return;
+    // Row 1: Status | Outcomes  Row 2: Top Triggered | Recent Changes  Row 3: Unused Rules (full width)
     panel.innerHTML =
       renderPhStatusCard(stats.breakdown, stats.total) +
       renderPhDecisionCard(stats) +
       renderPhTopCard(stats.topRules) +
-      renderPhUnusedCard(stats.unusedRules) +
-      renderPhChangesCard(stats.changes);
+      renderPhChangesCard(stats.changes) +
+      renderPhUnusedCard(stats.unusedRules);
   }
 
   function renderPhStatusCard(breakdown, total) {
@@ -1754,6 +1797,7 @@
   // ============================================================
   document.addEventListener('DOMContentLoaded', () => {
     renderProgramSwitcher(currentProgram);
+    renderProgramSelect();
     loadDashboardData();
   });
 </script>
