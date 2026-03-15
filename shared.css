@@ -52,6 +52,35 @@
   --green-light:#F0FDF4;
 }
 
+/* ── Skip navigation (WCAG 2.4.1) ──────────────────────────────────── */
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-nav:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  background: var(--lp-blue);
+  color: white;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  display: block;
+}
+
+/* ── Focus visible (WCAG 2.4.7) ────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #0070D2;
+  outline-offset: 2px;
+}
+
 /* ── Reset ──────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
@@ -524,12 +553,12 @@ body {
   padding: 2px 8px; border-radius: 4px;
 }
 
-.badge-pending   { background: #F3F3F3; color: #9CA3AF; }
+.badge-pending   { background: #F3F3F3; color: #6B7280; }
 .badge-evaluating { background: #EDE9FE; color: #9050E9; }
 .badge-passed    { background: #D1FAE5; color: #065F46; }
 .badge-flagged   { background: #FEF3C7; color: #92400E; }
 .badge-blocked   { background: #FEE2E2; color: #991B1B; }
-.badge-bypassed  { background: #F3F3F3; color: #9CA3AF; }
+.badge-bypassed  { background: #F3F3F3; color: #6B7280; }
 
 .phase-chevron { color: #9CA3AF; font-size: 12px; transition: transform 0.2s; flex-shrink: 0; }
 .phase-card.open .phase-chevron { transform: rotate(180deg); }

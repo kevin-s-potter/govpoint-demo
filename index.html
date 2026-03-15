@@ -4,6 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LexiPoint | Select a Use Case</title>
+  <!-- Auth guard: must appear before program-switcher.js and any page JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  (async function() {
+    const _sb = supabase.createClient(
+      'https://fshdlcveidwwufdigekh.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY'
+    );
+    const { data: { session } } = await _sb.auth.getSession();
+    if (!session) {
+      document.documentElement.style.visibility = 'hidden';
+      window.location.replace('login.html');
+    } else {
+      window.__lpSession = session;
+      window.__lpSupabase = _sb;
+    }
+  })();
+  </script>
   <link rel="stylesheet" href="shared.css">
   <script src="program-switcher.js"></script>
   <style>
@@ -256,6 +274,7 @@
   </style>
 </head>
 <body>
+<a href="#main-content" class="skip-nav">Skip to main content</a>
 
   <nav class="topnav">
     <div class="logo">
@@ -273,11 +292,12 @@
       <a href="review-queue.html">Review Queue</a>
       <a href="dashboard.html">Dashboard</a>
       <a href="scenario-sandbox.html">Scenarios</a>
+      <a href="admin.html">Admin</a>
     </div>
 
     <div class="nav-controls">
-      <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
-        <span>&#x1F514;</span>
+      <div class="notification-bell" id="notificationBell" role="button" aria-label="Notifications" aria-expanded="false" aria-haspopup="menu" tabindex="0" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+        <span aria-hidden="true">&#x1F514;</span>
         <span class="notification-badge">3</span>
         <div class="notification-dropdown">
           <div class="notification-dropdown-header">Notifications</div>
@@ -306,7 +326,7 @@
     </div>
   </nav>
 
-  <main class="main">
+  <main class="main" id="main-content">
 
     <div class="hero">
       <div class="hero-badge"><span class="hero-badge-dot"></span>Interactive Demo</div>
@@ -318,7 +338,7 @@
 
       <div class="use-case-card" onclick="window.location.href='hospital.html'">
         <div class="use-case-card-accent"></div>
-        <span class="card-icon">🏥</span>
+        <span class="card-icon" aria-hidden="true">🏥</span>
         <div class="card-agency">Ohio Department of Health</div>
         <h3 class="card-title">Hospital Capacity CR</h3>
         <p class="card-description">Evaluate a hospital bed capacity change request against Ohio ORC, federal CMS rules, and CON program requirements.</p>
@@ -351,7 +371,7 @@
       <div class="use-case-card" onclick="window.location.href='childcare.html'">
         <div class="use-case-card-accent"></div>
         <span class="card-new-badge">New</span>
-        <span class="card-icon">👶</span>
+        <span class="card-icon" aria-hidden="true">👶</span>
         <div class="card-agency">Ohio Dept of Job &amp; Family Services</div>
         <h3 class="card-title">Child Care Facility Licensing</h3>
         <p class="card-description">Process a child care center license application — background checks, director qualifications, staff ratios, SUTQ compliance, and document intelligence.</p>
@@ -383,7 +403,7 @@
 
       <div class="use-case-card" onclick="window.location.href='doggy-daycare.html'">
         <div class="use-case-card-accent"></div>
-        <span class="card-icon">🐾</span>
+        <span class="card-icon" aria-hidden="true">🐾</span>
         <div class="card-agency">City of Sunridge</div>
         <h3 class="card-title">Paws &amp; Progress Doggy Day Care Grant</h3>
         <p class="card-description">Evaluate a household grant application — income tiers, breed eligibility, vaccination status, veteran &amp; single-parent supplements, and the full benefit cascade.</p>
@@ -417,7 +437,7 @@
   </main>
 
   <footer class="lp-footer">
-    <div class="lp-footer-brand">⌘ LexiPoint</div>
+    <div class="lp-footer-brand"><span aria-hidden="true">⌘</span> LexiPoint</div>
     <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
     <nav class="lp-footer-nav">
       <a href="index.html">New Request</a>
@@ -427,7 +447,14 @@
       <a href="dashboard.html">Analytics Dashboard</a>
       <span class="lp-footer-nav-divider">·</span>
       <a href="audit-log.html">Audit Log</a>
+      <span class="lp-footer-nav-divider">·</span>
+      <a href="scenario-sandbox.html">Scenario Sandbox</a>
+      <span class="lp-footer-nav-divider">·</span>
+      <a href="review-queue.html">Review Queue</a>
+      <span class="lp-footer-nav-divider">·</span>
+      <a href="admin.html" id="footerAdminLink" style="display:none">Admin</a>
     </nav>
+    <script>if (sessionStorage.getItem('lp_role') === 'admin') { var el = document.getElementById('footerAdminLink'); if(el) el.style.display = ''; }</script>
     <div class="lp-footer-disclaimer">
       <strong>Prototype Demonstration</strong>
       A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.

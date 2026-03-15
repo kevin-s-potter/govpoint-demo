@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Hospital Capacity Change</title>
+<!-- Auth guard: must appear before program-switcher.js and any page JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(async function() {
+  const _sb = supabase.createClient(
+    'https://fshdlcveidwwufdigekh.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY'
+  );
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.replace('login.html');
+  } else {
+    window.__lpSession = session;
+    window.__lpSupabase = _sb;
+  }
+})();
+</script>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <link rel="stylesheet" href="shared.css">
 <script src="program-switcher.js"></script>
@@ -90,6 +108,7 @@
 </style>
 </head>
 <body>
+<a href="#main-content" class="skip-nav">Skip to main content</a>
 <div class="slds-scope">
 
 <nav class="topnav">
@@ -108,11 +127,12 @@
     <a href="review-queue.html">Review Queue</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="scenario-sandbox.html">Scenarios</a>
+    <a href="admin.html">Admin</a>
   </div>
 
   <div class="nav-controls">
-    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
-      <span>&#x1F514;</span>
+    <div class="notification-bell" id="notificationBell" role="button" aria-label="Notifications" aria-expanded="false" aria-haspopup="menu" tabindex="0" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span aria-hidden="true">&#x1F514;</span>
       <span class="notification-badge">3</span>
       <div class="notification-dropdown">
         <div class="notification-dropdown-header">Notifications</div>
@@ -141,7 +161,8 @@
   </div>
 </nav>
 
-<!-- ── STEPPER ── -->
+<!-- ── STEPPER + MAIN CONTENT ── -->
+<div id="main-content">
 <div class="lp-stepper" id="stepper">
   <div class="lp-step active" data-step="1" onclick="showPage('intake')"><div class="lp-step-num">1</div><span>Intake</span></div>
   <div class="lp-step-line"></div>
@@ -153,7 +174,7 @@
 </div>
 
 <!-- ══════════════════════════════════════════ PAGE 1: INTAKE ══════════════════════════════════════════ -->
-<div class="container page visible" id="page-intake">
+<div id="page-intake" class="container page visible">
 <div class="page-wrap">
   <div class="page-header">
     <h1>Hospital Capacity Change Request</h1>
@@ -1840,9 +1861,10 @@ document.getElementById('f_loc_type').addEventListener('change', function() {
   }
 });
 </script>
+</div><!-- end #main-content -->
 
 <footer class="lp-footer">
-  <div class="lp-footer-brand">⌘ LexiPoint</div>
+  <div class="lp-footer-brand"><span aria-hidden="true">⌘</span> LexiPoint</div>
   <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
   <nav class="lp-footer-nav">
     <a href="index.html">New Request</a>
@@ -1852,7 +1874,14 @@ document.getElementById('f_loc_type').addEventListener('change', function() {
     <a href="dashboard.html">Analytics Dashboard</a>
     <span class="lp-footer-nav-divider">·</span>
     <a href="audit-log.html">Audit Log</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="scenario-sandbox.html">Scenario Sandbox</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="review-queue.html">Review Queue</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="admin.html" id="footerAdminLink" style="display:none">Admin</a>
   </nav>
+  <script>if (sessionStorage.getItem('lp_role') === 'admin') { var el = document.getElementById('footerAdminLink'); if(el) el.style.display = ''; }</script>
   <div class="lp-footer-disclaimer">
     <strong>Prototype Demonstration</strong>
     A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.

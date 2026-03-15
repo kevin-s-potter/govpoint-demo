@@ -221,7 +221,8 @@
     const { error } = await _sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/login.html'
+        redirectTo: window.location.origin + '/login.html',
+        queryParams: { hd: 'aimpointtechnology.com' }
       }
     });
 
@@ -247,13 +248,10 @@
 
       if (rows && rows.length > 0 && rows[0].active === true) {
         const user = rows[0];
-        sessionStorage.setItem('lp_persona', JSON.stringify({
-          email: session.user.email,
-          persona_name: user.persona_name,
-          role: user.role
-        }));
+        sessionStorage.setItem('lp_persona', user.persona_name);
+        sessionStorage.setItem('lp_role', user.role);
         logLoginEvent(session.user.email, 'login', user.persona_name);
-        window.location.href = 'dashboard.html';
+        window.location.replace('dashboard.html');
       } else {
         // Not approved or inactive — sign out and show blocked state
         logLoginEvent(session.user.email, 'blocked', null);
