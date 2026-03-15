@@ -1728,6 +1728,10 @@ function cbConditionsChanged() {
 // ── WRITE-BACK: Save Rule — collect changes, show pre-flight ──
 async function saveRule() {
   if (!currentRule) return;
+  if (currentRule.status !== 'draft') {
+    showToast('Only draft rules can be edited — Clone as New Version to propose changes.');
+    return;
+  }
 
   // Collect form values from the Overview tab
   const overview = document.getElementById('overviewContent');
@@ -1746,7 +1750,7 @@ async function saveRule() {
       case 'DESCRIPTION': fields.description = val; break;
       case 'CITATION': fields.citation = val; break;
       case 'JURISDICTION': fields.jurisdiction = val; break;
-      case 'STATUS': fields.status = val; break;
+      // STATUS intentionally excluded — only changes via workflow buttons
       case 'RULE TYPE': fields.rule_type = val.split(' —')[0]; break;
       case 'PRIORITY': fields.priority = val.split(' —')[0]; break;
       case 'PHASE': fields.phase = val; break;
