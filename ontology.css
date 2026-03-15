@@ -1879,3 +1879,38 @@ button:focus-visible,
       gap: 12px;
     }
   }
+
+/* Staged edit mode banner */
+.edit-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  background: #FFF7EC;
+  border-bottom: 1px solid #F5CFA0;
+  border-top: 1px solid #F5CFA0;
+  font-size: 12px;
+  color: #7A4500;
+}
+.edit-mode-banner-icon { font-size: 14px; flex-shrink: 0; }
+.edit-mode-banner-spacer { flex: 1; }
+.edit-mode-banner-discard {
+  font-size: 11px; padding: 4px 10px;
+  border: 1px solid #DD7A01; background: none;
+  color: #DD7A01; border-radius: 2px; cursor: pointer; font-weight: 600;
+}
+.edit-mode-banner-discard:hover { background: rgba(221,122,1,0.07); }
+.edit-mode-banner-submit {
+  font-size: 11px; padding: 4px 12px;
+  border: none; background: #DD7A01;
+  color: #fff; border-radius: 2px; cursor: pointer; font-weight: 700;
+}
+.edit-mode-banner-submit:hover { background: #B86600; }
+
+/* Condition builder read-only notice */
+.cb-readonly-notice {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: #F9FAFB;
+  border: 1px solid var(--slds-border); border-radius: 4px;
+  margin-bottom: 12px; font-size: 12px; color: var(--text-secondary);
+}

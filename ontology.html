@@ -868,6 +868,15 @@ class LexiPointAPI {
   }
 
   async saveConditions(ruleId, tenantId, conditions) {
+    if (currentRule && currentRule.status === 'draft') {
+      changeBuffer.conditionsChanged = true;
+      updateEditModeBanner();
+      return conditions; // don't write to DB
+    }
+    return this._saveConditionsDirect(ruleId, tenantId, conditions);
+  }
+
+  async _saveConditionsDirect(ruleId, tenantId, conditions) {
     // Delete all existing conditions for this rule, then insert the new set.
     const delUrl = `${SUPABASE_URL}/rest/v1/rule_conditions?rule_id=eq.${encodeURIComponent(ruleId)}`;
     const delRes = await fetch(delUrl, {
@@ -949,6 +958,37 @@ let rules = [];           // all rules for current program
 let activeTypeFilter = 'ALL';
 let showArchived = false;
 let preflightPendingAction = null;
+
+let changeBuffer = {
+  fields: {},           // { fieldKey: { old: any, new: any } }
+  conditionsChanged: false,
+  _conditionsSnapshot: null, // cbState.rawConditions at session load
+  hasChanges()  { return Object.keys(this.fields).length > 0 || this.conditionsChanged; },
+  count()       { return Object.keys(this.fields).length + (this.conditionsChanged ? 1 : 0); },
+  clear()       { this.fields = {}; this.conditionsChanged = false; this._conditionsSnapshot = null; }
+};
+
+function updateEditModeBanner() {
+  const old = document.getElementById('editModeBanner');
+  if (old) old.remove();
+  if (!currentRule || currentRule.status !== 'draft') return;
+  const count = changeBuffer.count();
+  if (count === 0) return;
+  const fieldLabels = Object.keys(changeBuffer.fields).map(k => k.replace(/_/g,' ')).join(', ');
+  const condLabel   = changeBuffer.conditionsChanged ? (fieldLabels ? ', conditions' : 'conditions') : '';
+  const summary     = fieldLabels + condLabel;
+  const banner = document.createElement('div');
+  banner.id = 'editModeBanner';
+  banner.className = 'edit-mode-banner';
+  banner.innerHTML = `
+    <span class="edit-mode-banner-icon">✏️</span>
+    <span><strong>${count} staged change${count !== 1 ? 's' : ''}:</strong> ${summary}</span>
+    <span class="edit-mode-banner-spacer"></span>
+    <button class="edit-mode-banner-discard" type="button" onclick="discardChanges()">Discard</button>
+    <button class="edit-mode-banner-submit" type="button" onclick="submitForReview()">Submit for Review</button>
+  `;
+  document.getElementById('detailTabs').insertAdjacentElement('beforebegin', banner);
+}
 
 // ── PENDING APPLICATIONS (demo data keyed by rule_id) ────────
 const PENDING_APPS = {
@@ -1155,6 +1195,10 @@ async function renderDetailPanel() {
   document.getElementById('detailContent').style.display = 'block';
   document.getElementById('noSelection').style.display = 'none';
 
+  // Clear stale staged-edit banner; re-render if buffer has changes
+  const oldBanner = document.getElementById('editModeBanner');
+  if (oldBanner) oldBanner.remove();
+
   document.getElementById('detailTitle').textContent = currentRule.name;
   document.getElementById('workflowRail').innerHTML = renderWorkflowRail(currentRule.status);
   document.getElementById('detailCitation').textContent = currentRule.citation || '';
@@ -1168,7 +1212,7 @@ async function renderDetailPanel() {
     <button class="btn-action btn-action-secondary" type="button" onclick="triggerSimulate()">Simulate Impact</button>
     <button class="btn-action btn-action-secondary" type="button" onclick="openTestModal()">▶ Test Rule</button>`;
   if (s === 'draft') {
-    actionBtns += `<button class="btn-action btn-action-primary" type="button" onclick="transitionStatus('review')">Submit for Review</button>`;
+    actionBtns += `<button class="btn-action btn-action-primary" type="button" onclick="submitForReview()">Submit for Review</button>`;
     actionBtns += `<button class="btn-action btn-action-danger" type="button" onclick="runDeleteDraft()">Delete Draft</button>`;
   } else if (s === 'review') {
     actionBtns += `<button class="btn-action btn-action-secondary" type="button" onclick="openReviewDiff()">Review Changes</button>`;
@@ -1211,14 +1255,28 @@ async function renderDetailPanel() {
 
   // ── OVERVIEW TAB — editable fields from DB ──────────────────
   const r = currentRule;
-  const fieldStyle = 'width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px; font-family: inherit; background: var(--slds-card); transition: border-color 0.2s, box-shadow 0.2s;';
-  const fieldFocus = 'onfocus="this.style.borderColor=\'var(--slds-blue)\';this.style.boxShadow=\'0 0 0 2px rgba(1, 118, 211, 0.1)\'" onblur="this.style.borderColor=\'var(--slds-border)\';this.style.boxShadow=\'none\'"';
+  const isDraft = r.status === 'draft';
+  const roAttr   = isDraft ? '' : 'disabled readonly';
+  const bgStyle  = isDraft ? 'var(--slds-card)' : 'var(--slds-bg)';
+  const fieldStyle = `width: 100%; padding: 8px 10px; border: 1px solid var(--slds-border); border-radius: 2px; font-size: 13px; font-family: inherit; background: ${bgStyle}; transition: border-color 0.2s, box-shadow 0.2s;`;
+  const fieldFocus = isDraft
+    ? 'onfocus="this.style.borderColor=\'var(--slds-blue)\';this.style.boxShadow=\'0 0 0 2px rgba(1, 118, 211, 0.1)\'" onblur="this.style.borderColor=\'var(--slds-border)\';this.style.boxShadow=\'none\'"'
+    : '';
 
   const selOpt = (val, options) => options.map(o => {
     const optVal = typeof o === 'object' ? o.value : o;
     const optLabel = typeof o === 'object' ? o.label : o;
     return `<option value="${optVal}" ${optVal === val ? 'selected' : ''}>${optLabel}</option>`;
   }).join('');
+
+  const overviewFooter = isDraft
+    ? `<div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--slds-border);">
+        <button class="btn-action btn-action-secondary" onclick="discardChanges()" type="button">Discard</button>
+        <button class="btn-action btn-action-primary" id="saveRuleBtn" onclick="saveRule()" type="button">Save Changes</button>
+      </div>`
+    : `<div style="margin-top: 20px; padding: 10px 14px; background: var(--slds-bg); border: 1px solid var(--slds-border); border-radius: 4px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+        🔒 This rule is <strong style="color:var(--text-dark);margin:0 4px;">${r.status}</strong> — Clone as New Version to propose changes.
+      </div>`;
 
   document.getElementById('overviewContent').innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -1232,30 +1290,30 @@ async function renderDetailPanel() {
       </div>
       <div style="grid-column: 1 / -1;">
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">NAME</div>
-        <input type="text" class="slds-input" value="${r.name}" style="${fieldStyle}" ${fieldFocus} />
+        <input type="text" class="slds-input" value="${r.name}" style="${fieldStyle}" ${fieldFocus} ${roAttr} />
       </div>
       <div style="grid-column: 1 / -1;">
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">DESCRIPTION</div>
-        <textarea rows="3" class="slds-input" style="${fieldStyle} resize: vertical;" ${fieldFocus}>${r.description || ''}</textarea>
+        <textarea rows="3" class="slds-input" style="${fieldStyle} resize: vertical;" ${fieldFocus} ${roAttr}>${r.description || ''}</textarea>
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">CITATION</div>
-        <input type="text" class="slds-input" value="${r.citation || ''}" style="${fieldStyle}" ${fieldFocus} />
+        <input type="text" class="slds-input" value="${r.citation || ''}" style="${fieldStyle}" ${fieldFocus} ${roAttr} />
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">JURISDICTION</div>
-        <select class="slds-select" style="${fieldStyle}">${selOpt(r.jurisdiction, ['Ohio', 'Federal', 'Local'])}</select>
+        <select class="slds-select" style="${fieldStyle}" ${roAttr}>${selOpt(r.jurisdiction, ['Ohio', 'Federal', 'Local'])}</select>
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">STATUS</div>
-        <select class="slds-select" style="${fieldStyle}">${selOpt(r.status, [
+        <select class="slds-select" style="${fieldStyle}" ${roAttr}>${selOpt(r.status, [
           {value:'draft',label:'Draft'},{value:'review',label:'In Review'},{value:'active',label:'Active'},
           {value:'pending',label:'Pending Activation'},{value:'sunset',label:'Sunset'},{value:'archived',label:'Archived'}
         ])}</select>
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">RULE TYPE</div>
-        <select class="slds-select" style="${fieldStyle}">${selOpt(r.rule_type, [
+        <select class="slds-select" style="${fieldStyle}" ${roAttr}>${selOpt(r.rule_type, [
           {value:'GATE',label:'GATE — Must pass to proceed'},{value:'FILTER',label:'FILTER — Narrows eligibility'},
           {value:'CALC',label:'CALC — Computes a value'},{value:'ROUTE',label:'ROUTE — Determines pathway'},
           {value:'INFO',label:'INFO — Documentation requirement'}
@@ -1263,38 +1321,43 @@ async function renderDetailPanel() {
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">PRIORITY</div>
-        <select class="slds-select" style="${fieldStyle}">${selOpt(r.priority, [
+        <select class="slds-select" style="${fieldStyle}" ${roAttr}>${selOpt(r.priority, [
           {value:'P1',label:'P1 — Critical'},{value:'P2',label:'P2 — Required'},
           {value:'P3',label:'P3 — Recommended'},{value:'P4',label:'P4 — Informational'}
         ])}</select>
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">PHASE</div>
-        <select class="slds-select" style="${fieldStyle}">${selOpt(r.phase, ['LICENSING','COMPLIANCE','APPLICATION_PROCESSING','REPORTING_VERIFICATION','RECERTIFICATION'])}</select>
+        <select class="slds-select" style="${fieldStyle}" ${roAttr}>${selOpt(r.phase, ['LICENSING','COMPLIANCE','APPLICATION_PROCESSING','REPORTING_VERIFICATION','RECERTIFICATION'])}</select>
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">CLASSIFICATION</div>
-        <select class="slds-select" style="${fieldStyle}">${selOpt(r.classification, [
+        <select class="slds-select" style="${fieldStyle}" ${roAttr}>${selOpt(r.classification, [
           {value:'standard',label:'Standard'},{value:'restricted',label:'Restricted'},{value:'confidential',label:'Confidential'}
         ])}</select>
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">EFFECTIVE DATE</div>
-        <input type="date" class="slds-input" value="${r.effective_date || ''}" style="${fieldStyle}" ${fieldFocus} />
+        <input type="date" class="slds-input" value="${r.effective_date || ''}" style="${fieldStyle}" ${fieldFocus} ${roAttr} />
       </div>
       <div>
         <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase;">SUNSET DATE</div>
-        <input type="date" class="slds-input" value="${r.sunset_date || ''}" style="${fieldStyle}" ${fieldFocus} />
+        <input type="date" class="slds-input" value="${r.sunset_date || ''}" style="${fieldStyle}" ${fieldFocus} ${roAttr} />
       </div>
     </div>
-    <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--slds-border);">
-      <button class="btn-action btn-action-secondary" onclick="discardChanges()" type="button">Discard</button>
-      <button class="btn-action btn-action-primary" id="saveRuleBtn" onclick="saveRule()" type="button">Save Changes</button>
-    </div>
+    ${overviewFooter}
   `;
 
   // ── CONDITIONS TAB — Enhanced Logic Builder ─────────────────
-  cbInitialize(conditions, currentRule);
+  cbInitialize(conditions, currentRule, { readOnly: !isDraft });
+
+  // Snapshot conditions for diff comparison on submit (draft only)
+  if (isDraft && changeBuffer._conditionsSnapshot === null) {
+    changeBuffer._conditionsSnapshot = conditions.map(c => ({...c}));
+  }
+
+  // Re-render banner if buffer has pending changes
+  if (isDraft && changeBuffer.hasChanges()) updateEditModeBanner();
 
   // ── DEPENDENCIES TAB — with focused D3 graph (Feature 3) ───────
   await renderFocusedDependencyGraph(currentRule.rule_id);
@@ -1727,6 +1790,8 @@ async function saveRule() {
     changesRaw: changes,
     changes: changes.map(c => `${c.label}: "${c.from}" → "${c.to}"`)
   };
+  document.getElementById('preflightConfirmBtn').textContent =
+    currentRule.status === 'draft' ? 'Stage Changes' : 'Save Changes';
   document.getElementById('preflightModal').classList.add('active');
 }
 
@@ -1734,82 +1799,24 @@ async function saveRule() {
 async function executeSave() {
   const pending = preflightPendingAction;
   if (!pending || !currentRule) return;
-  const { fields, changes } = pending;
+  const { fields } = pending;
   preflightPendingAction = null;
   document.getElementById('preflightModal').classList.remove('active');
 
-  const btn = document.getElementById('saveRuleBtn');
-  if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
-
-  try {
-    const config = PROGRAM_CONFIG[currentProgram];
-
-    // 1. Save Overview field changes (skip if only conditions changed)
-    let updated = currentRule;
-    if (changes.length > 0) {
-      updated = await lexipoint.updateRule(currentRule.rule_id, fields);
-    }
-
-    // 2. Write audit entry
-    await lexipoint.addAuditEntry(
-      config.tenant, config.userId, 'publisher', 'edit_rule',
-      'rule', currentRule.rule_id, changes.join('; ')
-    );
-
-    // 3. Write rule_versions entry with structured diff for side-by-side review
-    if (changes.length > 0) {
-      const rawChanges = pending.changesRaw || [];
-      const changedLabels = rawChanges.map(c => c.label).join(', ');
-      const diffPayload = rawChanges.length === 1
-        ? { field: rawChanges[0].key, old: rawChanges[0].from ?? null, new: rawChanges[0].to }
-        : rawChanges.map(c => ({ field: c.key, old: c.from ?? null, new: c.to }));
-      await lexipoint.addRuleVersion(
-        currentRule.rule_id,
-        updated.version,
-        config.userId,
-        `Updated: ${changedLabels}`,
-        diffPayload
-      );
-    }
-
-    currentRule = updated;
-    rules = await lexipoint.getRules(currentProgram);
-    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
-    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
-    renderRulesList();
-    renderWorkspaceTabs();
-
-    document.getElementById('detailTitle').textContent = updated.name;
-    document.getElementById('workflowRail').innerHTML = renderWorkflowRail(updated.status);
-    document.getElementById('detailCitation').textContent = updated.citation || '';
-    document.getElementById('detailVersion').textContent = `v${updated.version}`;
-
-    showToast(`Saved ${changes.length} change${changes.length !== 1 ? 's' : ''} to ${updated.rule_id}`);
-
-    // ── Live Evaluation Bridge ──────────────────────────────────────
-    // Mirror saved conditions to localStorage so index.html picks them up immediately.
-    if (cbState && cbState.groups) {
-      try {
-        const liveConds = cbState.groups.flatMap(g =>
-          g.conditions.map(c => ({
-            field:      c.field,
-            operator:   c.operator,
-            value:      String(c.value),
-            value_type: c.valueType || 'string'
-          }))
-        );
-        localStorage.setItem(`lp_live_conds_${currentRule.rule_id}`, JSON.stringify(liveConds));
-        console.log(`[LexiPoint] Live conditions saved for ${currentRule.rule_id}:`, liveConds);
-      } catch (e) {
-        console.warn('[LexiPoint] Could not save live conditions to localStorage:', e);
-      }
-    }
-  } catch (e) {
-    showToast(`Error: ${e.message}`);
-    console.error('[Save] Failed:', e);
+  if (currentRule.status !== 'draft') {
+    showToast('Only draft rules can be edited — Clone as New Version to propose changes.');
+    return;
   }
 
-  if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+  for (const [k, v] of Object.entries(fields)) {
+    if (currentRule[k] !== v) {
+      changeBuffer.fields[k] = { old: currentRule[k], new: v };
+    }
+  }
+
+  updateEditModeBanner();
+  const n = Object.keys(changeBuffer.fields).length;
+  showToast(`${n} field change${n !== 1 ? 's' : ''} staged — Submit for Review to commit`);
 }
 
 // ── WORKFLOW RAIL RENDERER ────────────────────────────────────
@@ -1872,6 +1879,146 @@ async function runRejectWithReason(reason) {
     showToast(`Error: ${e.message}`);
     console.error('[Reject] Failed:', e);
   }
+}
+
+// ── SUBMIT FOR REVIEW — show unified diff pre-flight then commit ──
+async function submitForReview() {
+  if (!currentRule) return;
+  if (currentRule.status !== 'draft') {
+    showToast('Only draft rules can be submitted for review.');
+    return;
+  }
+
+  // Build unified diff
+  const fieldEntries = Object.entries(changeBuffer.fields).map(([k, v]) => ({
+    field: k, old: v.old ?? null, new: v.new
+  }));
+
+  let conditionsDiff = null;
+  if (changeBuffer.conditionsChanged) {
+    const snapshot = changeBuffer._conditionsSnapshot || [];
+    const current = cbGetCurrentConditions();
+    const snapshotKeys = snapshot.map(c => `${c.field}|${c.operator}|${c.value}`);
+    const currentKeys  = current.map(c => `${c.field}|${c.operator}|${c.value}`);
+    const added    = current.filter(c => !snapshotKeys.includes(`${c.field}|${c.operator}|${c.value}`));
+    const removed  = snapshot.filter(c => !currentKeys.includes(`${c.field}|${c.operator}|${c.value}`));
+    conditionsDiff = {
+      before: snapshot,
+      after:  current,
+      added,
+      removed,
+      summary: `${added.length} added, ${removed.length} removed`
+    };
+  }
+
+  const unifiedDiff = { fields: fieldEntries, conditions: conditionsDiff };
+
+  // Populate pre-flight modal
+  let changesHtml = '';
+  if (fieldEntries.length > 0) {
+    changesHtml += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px;">Field Changes</div>`;
+    changesHtml += fieldEntries.map(e => {
+      const label = e.field.replace(/_/g,' ').toUpperCase();
+      return `<div class="impact-item"><strong>${label}:</strong> <span style="color:var(--slds-error);text-decoration:line-through;">${e.old ?? '(none)'}</span> → <span style="color:var(--slds-success);">${e.new}</span></div>`;
+    }).join('');
+  }
+  if (conditionsDiff) {
+    changesHtml += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-top:10px;margin-bottom:6px;">Condition Changes — ${conditionsDiff.summary}</div>`;
+    conditionsDiff.added.forEach(c => {
+      changesHtml += `<div class="impact-item"><span style="color:var(--slds-success);">+ ${c.field} ${c.operator} ${c.value}</span></div>`;
+    });
+    conditionsDiff.removed.forEach(c => {
+      changesHtml += `<div class="impact-item"><span style="color:var(--slds-error);text-decoration:line-through;">− ${c.field} ${c.operator} ${c.value}</span></div>`;
+    });
+    if (conditionsDiff.added.length === 0 && conditionsDiff.removed.length === 0) {
+      changesHtml += `<div class="impact-item" style="color:var(--text-secondary);">Conditions reordered or modified.</div>`;
+    }
+  }
+  if (!changesHtml) {
+    changesHtml = `<div class="impact-item" style="color:var(--text-secondary);">No staged changes — submitting current draft state.</div>`;
+  }
+
+  document.getElementById('preflightChanges').innerHTML = changesHtml;
+
+  const deps = await lexipoint.getDependencies(currentRule.rule_id);
+  const depsEl = document.getElementById('preflightDeps');
+  if (deps.dependedOnBy.length > 0) {
+    depsEl.innerHTML = deps.dependedOnBy.map(d =>
+      `<div class="impact-item">→ <strong>${d.sourceRule?.rule_id || d.rule_id}</strong> ${d.sourceRule?.name || ''}</div>`
+    ).join('');
+  } else {
+    depsEl.innerHTML = '<div class="impact-item" style="color:var(--text-secondary);">No other rules depend on this one.</div>';
+  }
+
+  const confirmBtn = document.getElementById('preflightConfirmBtn');
+  confirmBtn.textContent = 'Submit for Review';
+  confirmBtn.onclick = () => executeSubmitForReview(unifiedDiff);
+  document.getElementById('preflightModal').classList.add('active');
+}
+
+async function executeSubmitForReview(unifiedDiff) {
+  if (!currentRule) return;
+  document.getElementById('preflightModal').classList.remove('active');
+  const config = PROGRAM_CONFIG[currentProgram];
+
+  try {
+    // 1. Write field changes
+    const fieldPayload = {};
+    (unifiedDiff.fields || []).forEach(e => { fieldPayload[e.field] = e.new; });
+    let updated = currentRule;
+    if (Object.keys(fieldPayload).length > 0) {
+      updated = await lexipoint.updateRule(currentRule.rule_id, fieldPayload);
+    }
+
+    // 2. Write conditions (bypasses staging guard)
+    if (unifiedDiff.conditions) {
+      await lexipoint._saveConditionsDirect(
+        currentRule.rule_id, config.tenant, unifiedDiff.conditions.after
+      );
+    }
+
+    // 3. Flip status to review
+    updated = await lexipoint.updateRule(currentRule.rule_id, { status: 'review' });
+
+    // 4. Store full unified diff as rule_versions entry
+    const changedLabels = [
+      ...(unifiedDiff.fields || []).map(e => e.field.replace(/_/g,' ')),
+      ...(unifiedDiff.conditions ? ['conditions'] : [])
+    ].join(', ') || 'no changes';
+    await lexipoint.addRuleVersion(
+      currentRule.rule_id,
+      updated.version,
+      config.userId,
+      `Submitted for review — changed: ${changedLabels}`,
+      unifiedDiff
+    );
+
+    // 5. Audit log
+    await lexipoint.addAuditEntry(
+      config.tenant, config.userId, 'publisher', 'submit_for_review',
+      'rule', currentRule.rule_id,
+      `Submitted for review — changed: ${changedLabels}`
+    );
+
+    // 6. Reset buffer and re-render
+    changeBuffer.clear();
+    lexipoint.clearCache();
+    currentRule = await lexipoint.getRule(currentRule.rule_id);
+    rules = await lexipoint.getRules(currentProgram);
+    const tabIdx = workspaceTabs.findIndex(t => t.ruleId === currentRule.rule_id);
+    if (tabIdx >= 0) workspaceTabs[tabIdx].rule = currentRule;
+    renderRulesList();
+    renderWorkspaceTabs();
+    await renderDetailPanel();
+    showToast(`${currentRule.rule_id} submitted for review`);
+
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+    console.error('[SubmitForReview] Failed:', e);
+  }
+
+  // Restore confirm button to default binding
+  document.getElementById('preflightConfirmBtn').onclick = null;
 }
 
 async function transitionStatus(newStatus) {
@@ -1960,24 +2107,65 @@ async function openReviewDiff() {
   </div>`;
 
   if (latest && latest.diff) {
-    const entries = Array.isArray(latest.diff) ? latest.diff : [latest.diff];
+    const diff = latest.diff;
     html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Changes in this version — v${latest.version}</div>`;
-    html += `<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;">
-      <thead><tr>
-        <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);width:30%;">Field</th>
-        <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);">Before</th>
-        <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);">After</th>
-      </tr></thead><tbody>`;
-    for (const d of entries) {
-      if (!d.field) continue;
-      const fieldLabel = d.field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      html += `<tr>
-        <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);font-weight:600;">${fieldLabel}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);"><span class="diff-remove">${d.old || '(none)'}</span></td>
-        <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);"><span class="diff-add">${d.new}</span></td>
-      </tr>`;
+
+    if (diff.fields || diff.conditions) {
+      // New unified diff shape from executeSubmitForReview
+      const fieldEntries = diff.fields || [];
+      if (fieldEntries.length > 0) {
+        html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px;">Field Changes</div>`;
+        html += `<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;">
+          <thead><tr>
+            <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);width:30%;">Field</th>
+            <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);">Before</th>
+            <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);">After</th>
+          </tr></thead><tbody>`;
+        for (const d of fieldEntries) {
+          const fieldLabel = d.field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          html += `<tr>
+            <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);font-weight:600;">${fieldLabel}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);"><span class="diff-remove">${d.old ?? '(none)'}</span></td>
+            <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);"><span class="diff-add">${d.new}</span></td>
+          </tr>`;
+        }
+        html += `</tbody></table>`;
+      }
+      if (diff.conditions) {
+        const cond = diff.conditions;
+        html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px;margin-top:${fieldEntries.length > 0 ? '10px' : '0'};">Condition Changes — ${cond.summary || ''}</div>`;
+        (cond.added || []).forEach(c => {
+          html += `<div style="padding:5px 10px;background:#D1FAE5;border-radius:3px;font-size:12px;font-family:monospace;margin-bottom:4px;color:#065F46;">+ ${c.field} ${c.operator} ${c.value}</div>`;
+        });
+        (cond.removed || []).forEach(c => {
+          html += `<div style="padding:5px 10px;background:#FEE2E2;border-radius:3px;font-size:12px;font-family:monospace;margin-bottom:4px;color:#991B1B;text-decoration:line-through;">− ${c.field} ${c.operator} ${c.value}</div>`;
+        });
+        if ((cond.added || []).length === 0 && (cond.removed || []).length === 0) {
+          html += `<div style="font-size:12px;color:var(--text-secondary);padding:6px 0;">Conditions reordered or modified.</div>`;
+        }
+        html += `<div style="height:12px;"></div>`;
+      }
+    } else {
+      // Legacy single-field or multi-field diff shape
+      const entries = Array.isArray(diff) ? diff : [diff];
+      html += `<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;">
+        <thead><tr>
+          <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);width:30%;">Field</th>
+          <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);">Before</th>
+          <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text-secondary);border-bottom:1px solid var(--slds-border);">After</th>
+        </tr></thead><tbody>`;
+      for (const d of entries) {
+        if (!d.field) continue;
+        const fieldLabel = d.field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        html += `<tr>
+          <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);font-weight:600;">${fieldLabel}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);"><span class="diff-remove">${d.old || '(none)'}</span></td>
+          <td style="padding:6px 8px;border-bottom:1px solid var(--slds-bg);"><span class="diff-add">${d.new}</span></td>
+        </tr>`;
+      }
+      html += `</tbody></table>`;
     }
-    html += `</tbody></table>`;
+
     html += `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:16px;">Changed on ${fmtDate(latest.changed_at)} by ${latest.changed_by || 'system'}</div>`;
   } else if (latest) {
     html += `<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Version ${latest.version} — ${fmtDate(latest.changed_at)}</div>`;
@@ -2344,7 +2532,7 @@ function toggleShowArchived() {
 // ── WRITE-BACK: Discard Changes ───────────────────────────────
 async function discardChanges() {
   if (!currentRule) return;
-  // Re-fetch the rule from DB and re-render
+  changeBuffer.clear();
   lexipoint.clearCache();
   currentRule = await lexipoint.getRule(currentRule.rule_id);
   await renderDetailPanel();

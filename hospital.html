@@ -482,9 +482,9 @@ function switchProgram(programId) {
   updateSwitcherUI(programId);
 
   // Update user indicator
-  document.querySelector('.lp-user-name').textContent = user.name;
-  document.querySelector('.lp-avatar').textContent = user.initials;
-  document.querySelector('.lp-user-role').textContent = `${user.role} | ${config.programName}`;
+  document.querySelector('.user-name').textContent = user.name;
+  document.querySelector('.avatar-circle').textContent = user.initials;
+  document.querySelector('.user-role').textContent = `${user.role} | ${config.programName}`;
 }
 
 // ══════════════════════════════════════════ SUPABASE INITIALIZATION ══════════════════════════════════════════

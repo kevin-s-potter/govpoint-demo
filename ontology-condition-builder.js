@@ -61,13 +61,14 @@ const CB_OPERATORS = {
 };
 
 // ── Initialize Condition Builder ────────────────────────────
-function cbInitialize(conditions, rule) {
+function cbInitialize(conditions, rule, options = {}) {
   cbState.rule = rule;
   cbState.rawConditions = conditions;
   cbState.nextId = 1;
   cbState.aiSuggestions = [];
   cbState.testCases = [];
   cbState.lastTestResult = null;
+  cbState.readOnly = options.readOnly === true;
 
   // Normalize DB operator/value_type values to UI-canonical values on load
   const opNorm  = { '==': '=', 'CONTAINS': 'contains' };
@@ -109,6 +110,24 @@ function cbRender() {
   const editor = document.getElementById('conditionEditor');
   const totalConditions = cbState.groups.reduce((sum, g) => sum + g.conditions.length, 0);
   document.getElementById('cbConditionCount').textContent = `${totalConditions} condition${totalConditions !== 1 ? 's' : ''} in ${cbState.groups.length} group${cbState.groups.length !== 1 ? 's' : ''}`;
+
+  if (cbState.readOnly) {
+    let html = `<div class="cb-readonly-notice">🔒 Conditions are read-only — <strong>${cbState.rule?.status}</strong>. Clone as New Version to propose changes.</div>`;
+    const allConditions = (cbState.groups || []).flatMap(g => g.conditions);
+    if (allConditions.length === 0) {
+      html += `<div style="color:var(--text-secondary);font-size:12px;padding:16px;text-align:center;">No conditions defined for this rule.</div>`;
+    } else {
+      html += `<div style="display:flex;flex-direction:column;gap:6px;">`;
+      allConditions.forEach(c => {
+        html += `<div style="padding:8px 12px;background:var(--slds-bg);border-radius:4px;font-size:12px;font-family:monospace;color:var(--text-dark);">${c.field} ${c.operator} ${c.value}</div>`;
+      });
+      html += `</div>`;
+    }
+    editor.innerHTML = html;
+    document.querySelectorAll('.cb-toolbar button').forEach(b => b.style.display = 'none');
+    return;
+  }
+  document.querySelectorAll('.cb-toolbar button').forEach(b => b.style.display = '');
 
   let html = '';
   cbState.groups.forEach((group, gi) => {
@@ -265,6 +284,7 @@ function cbAddConditionToGroup(groupId) {
 }
 
 async function cbRemoveCondition(groupId, condId) {
+  if (cbState.readOnly) { showToast('This rule is read-only'); return; }
   const group = cbState.groups.find(g => g.id === groupId);
   if (!group) return;
   group.conditions = group.conditions.filter(c => c.id !== condId);
@@ -280,6 +300,11 @@ async function cbRemoveCondition(groupId, condId) {
 // ── Shared helper: persist current cbState conditions to Supabase ──
 async function cbPersistConditions(auditSummary) {
   if (!currentRule) return;
+  if (currentRule && currentRule.status === 'draft') {
+    const config = PROGRAM_CONFIG[currentProgram];
+    await lexipoint.saveConditions(currentRule.rule_id, config.tenant, cbGetCurrentConditions());
+    return; // skip audit write and rawConditions update during staging
+  }
   const config = PROGRAM_CONFIG[currentProgram];
   const conditions = cbGetCurrentConditions();
   await lexipoint.saveConditions(currentRule.rule_id, config.tenant, conditions);
@@ -302,6 +327,7 @@ async function cbPersistConditions(auditSummary) {
 
 // ── Row-level Save: persist a single condition edit immediately ──
 async function cbSaveCondition(groupId, condId) {
+  if (cbState.readOnly) { showToast('This rule is read-only'); return; }
   const group = cbState.groups.find(g => g.id === groupId);
   if (!group) return;
   const cond = group.conditions.find(c => c.id === condId);
