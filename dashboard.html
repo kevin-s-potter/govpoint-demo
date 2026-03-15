@@ -95,11 +95,31 @@
     font-weight: 500;
   }
 
-  /* -- DASHBOARD FILTER -- */
-  .dash-filter {
+  /* -- DASHBOARD FILTER BAR -- */
+  .dash-filter-bar {
+    background: var(--slds-white);
+    border: 1px solid var(--slds-border);
+    border-radius: var(--slds-radius);
+    box-shadow: var(--slds-shadow);
     display: flex;
     align-items: center;
-    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .dash-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+  }
+
+  .dash-filter-divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--slds-border);
+    margin: 8px 0;
+    flex-shrink: 0;
   }
 
   .dash-filter-label {
@@ -108,6 +128,7 @@
     color: var(--slds-text-label);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap;
   }
 
   .dash-filter-pills {
@@ -711,6 +732,50 @@
     .dash-filter { width: 100%; }
     .nav-links { gap: 16px; margin: 0 16px; }
   }
+
+  /* -- PROGRAM HEALTH -- */
+  #programHealth .ph-hero { font-size: 36px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+  #programHealth .ph-hero.approved { color: var(--slds-success); }
+  #programHealth .ph-hero.blocked  { color: var(--slds-error); }
+
+  #programHealth .ph-ranked-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--slds-border); }
+  #programHealth .ph-ranked-item:last-child { border-bottom: none; }
+  #programHealth .ph-rank-num    { width: 20px; font-size: 12px; font-weight: 700; color: var(--slds-text-label); text-align: right; flex-shrink: 0; }
+  #programHealth .ph-rule-link   { font-size: 12px; font-weight: 700; color: var(--slds-blue-brand); text-decoration: none; flex-shrink: 0; min-width: 70px; }
+  #programHealth .ph-rule-name   { font-size: 12px; color: var(--slds-text-dark); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #programHealth .ph-count-badge { font-size: 11px; font-weight: 700; background: var(--slds-bg-alt); color: var(--slds-text-label); border: 1px solid var(--slds-border); border-radius: var(--slds-radius); padding: 2px 6px; flex-shrink: 0; }
+
+  #programHealth .ph-change-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--slds-border); font-size: 12px; }
+  #programHealth .ph-change-item:last-child { border-bottom: none; }
+  #programHealth .ph-change-date { color: var(--slds-text-label); font-size: 11px; white-space: nowrap; flex-shrink: 0; min-width: 60px; }
+
+  @media (max-width: 768px)  { #phPanel { grid-template-columns: 1fr !important; }
+                               #phPanel [style*="span 2"] { grid-column: 1 !important; } }
+
+  /* -- DASHBOARD PROGRAM SELECT -- */
+  #programSwitcherMount { display: none; }
+
+  .dash-program-select {
+    height: 30px;
+    padding: 0 28px 0 10px;
+    border: 1px solid var(--slds-border);
+    border-radius: var(--slds-radius);
+    background: var(--slds-white);
+    color: var(--slds-text-dark);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2354698D'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    min-width: 220px;
+    transition: border-color 0.15s;
+  }
+
+  .dash-program-select:hover { border-color: var(--slds-blue-brand); }
+  .dash-program-select:focus { outline: none; border-color: var(--slds-blue-brand); box-shadow: 0 0 0 2px rgba(1,118,211,0.15); }
 </style>
 </head>
 <body>
@@ -818,32 +883,40 @@
   <div class="container">
 
     <!-- PAGE HEADER -->
-    <div class="slds-page-header page-header">
+    <div class="slds-page-header page-header" style="margin-bottom:16px;">
       <div>
         <h1 class="slds-page-header__title page-title">Dashboard</h1>
         <p class="page-subtitle" id="pageSubtitle">Analytics and metrics for Hospital Licensing</p>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-        <div class="refresh-bar">
-          <span id="lastRefreshed"></span>
-          <button class="refresh-btn" onclick="refreshDashboard()">&#x21BB; Refresh</button>
+      <div class="refresh-bar">
+        <span id="lastRefreshed"></span>
+        <button class="refresh-btn" onclick="refreshDashboard()">&#x21BB; Refresh</button>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="dash-filter-bar">
+      <div class="dash-filter-group">
+        <span class="dash-filter-label">Scope</span>
+        <div class="dash-filter-pills">
+          <button class="slds-button dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
+          <button class="slds-button dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">This Tenant</button>
+          <button class="slds-button dash-pill" data-filter="all" onclick="setDashFilter('all')">All Tenants</button>
         </div>
-        <div class="dash-filter">
-          <span class="dash-filter-label">Scope</span>
-          <div class="dash-filter-pills">
-            <button class="slds-button dash-pill active" data-filter="current" onclick="setDashFilter('current')">Current Program</button>
-            <button class="slds-button dash-pill" data-filter="tenant" onclick="setDashFilter('tenant')">This Tenant</button>
-            <button class="slds-button dash-pill" data-filter="all" onclick="setDashFilter('all')">All Tenants</button>
-          </div>
-        </div>
-        <div class="dash-filter">
-          <span class="dash-filter-label">Date Range</span>
-          <div class="dash-filter-pills">
-            <button class="slds-button dash-pill" data-days="7" onclick="setDateFilter(7)">7 Days</button>
-            <button class="slds-button dash-pill" data-days="30" onclick="setDateFilter(30)">30 Days</button>
-            <button class="slds-button dash-pill" data-days="90" onclick="setDateFilter(90)">90 Days</button>
-            <button class="slds-button dash-pill active" data-days="0" onclick="setDateFilter(0)">All Time</button>
-          </div>
+      </div>
+      <div class="dash-filter-divider"></div>
+      <div class="dash-filter-group">
+        <span class="dash-filter-label">Program</span>
+        <select id="dashProgramSelect" class="dash-program-select" onchange="switchProgram(this.value)"></select>
+      </div>
+      <div class="dash-filter-divider"></div>
+      <div class="dash-filter-group">
+        <span class="dash-filter-label">Date Range</span>
+        <div class="dash-filter-pills">
+          <button class="slds-button dash-pill" data-days="7" onclick="setDateFilter(7)">7 Days</button>
+          <button class="slds-button dash-pill" data-days="30" onclick="setDateFilter(30)">30 Days</button>
+          <button class="slds-button dash-pill" data-days="90" onclick="setDateFilter(90)">90 Days</button>
+          <button class="slds-button dash-pill active" data-days="0" onclick="setDateFilter(0)">All Time</button>
         </div>
       </div>
     </div>
@@ -890,6 +963,15 @@
         <div class="metric-label">Compliant</div>
       </div>
     </div>
+
+    <!-- PROGRAM HEALTH -->
+    <section id="programHealth" style="margin-bottom:24px;">
+      <div style="margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:800;color:var(--slds-text-dark);letter-spacing:-0.3px;">Program Health</h2>
+        <p style="font-size:13px;color:var(--slds-text-label);margin-top:4px;">Rule coverage, application outcomes, and recent changes for the current program</p>
+      </div>
+      <div id="phPanel" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start;"></div>
+    </section>
 
     <!-- CHARTS GRID -->
     <div class="charts-grid">
@@ -993,6 +1075,7 @@
   let cachedUsersMap = {};
   let cachedRules = [];
   let isRefreshing = false;
+  let phCache = {};
 
   // ============================================================
   //  SUPABASE CLIENT
@@ -1017,12 +1100,26 @@
   // ============================================================
   //  PROGRAM SWITCHER
   // ============================================================
+  function renderProgramSelect() {
+    const sel = document.getElementById('dashProgramSelect');
+    if (!sel) return;
+    sel.innerHTML = TENANT_GROUPS.map(group => {
+      const options = group.programs.map(id => {
+        const cfg = PROGRAM_CONFIG[id];
+        return `<option value="${id}"${id === currentProgram ? ' selected' : ''}>${cfg.programName}</option>`;
+      }).join('');
+      return `<optgroup label="${group.label}">${options}</optgroup>`;
+    }).join('');
+  }
+
   function switchProgram(programId) {
     currentProgram = programId;
     const config = PROGRAM_CONFIG[programId];
     const user = USER_DISPLAY[config.userId];
 
-    updateSwitcherUI(programId);
+    // Sync the dashboard program select
+    const sel = document.getElementById('dashProgramSelect');
+    if (sel) sel.value = programId;
 
     // Update user indicator
     document.getElementById('userName').textContent = user.name;
@@ -1046,7 +1143,7 @@
   // ============================================================
   function setDashFilter(mode) {
     dashFilter = mode;
-    document.querySelectorAll('.dash-pill').forEach(btn => {
+    document.querySelectorAll('.dash-pill[data-filter]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.filter === mode);
     });
     loadDashboardData();
@@ -1096,6 +1193,7 @@
   //  LOAD DASHBOARD DATA
   // ============================================================
   async function loadDashboardData() {
+    phCache = {};
     const config = PROGRAM_CONFIG[currentProgram];
 
     let rulesParams = 'select=*';
@@ -1150,6 +1248,7 @@
     renderActivityTrend(filtered);
     renderActivityTable(filtered, usersMap);
     renderPendingReviews(rules);
+    initProgramHealth();
   }
 
   // ============================================================
@@ -1506,10 +1605,258 @@
   }
 
   // ============================================================
+  //  PROGRAM HEALTH
+  // ============================================================
+
+  function initProgramHealth() {
+    document.getElementById('phPanel').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--slds-text-label);font-size:13px;">Loading program health data…</div>';
+    loadPhData(currentProgram);
+  }
+
+  async function loadPhData(programId) {
+    try {
+      const cfg = PROGRAM_CONFIG[programId];
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+
+      const [rules, auditEntries, versions, decisions] = await Promise.all([
+        supaQuery('rules',
+          `select=rule_id,name,status&program_id=eq.${programId}&tenant_id=eq.${cfg.tenant}`),
+        supaQuery('audit_log',
+          `select=target_id,action,timestamp&program_id=eq.${programId}&target_type=eq.rule&order=timestamp.desc&limit=500`),
+        supaQuery('rule_versions',
+          `select=rule_id,version,changed_at,change_summary&program_id=eq.${programId}&order=changed_at.desc&limit=100`),
+        supaQuery(cfg.evaluationTable,
+          `select=decision&program_id=eq.${programId}`)
+      ]);
+
+      // Status breakdown
+      const breakdown = { active: 0, draft: 0, review: 0, sunset: 0 };
+      rules.forEach(r => {
+        const s = (r.status || '').toLowerCase();
+        if (s === 'active') breakdown.active++;
+        else if (s === 'draft') breakdown.draft++;
+        else if (s === 'review' || s === 'in review') breakdown.review++;
+        else if (s === 'sunset') breakdown.sunset++;
+      });
+      const total = rules.length;
+
+      // Approval / denial rates
+      let approved = 0, denied = 0, pending = 0;
+      decisions.forEach(d => {
+        const v = (d.decision || '').toLowerCase();
+        if (v === 'approved' || v === 'approved_with_conditions') approved++;
+        else if (v === 'blocked') denied++;
+        else if (v === 'pending') pending++;
+      });
+      const decided = approved + denied;
+      const approvalRate = decided > 0 ? Math.round((approved / decided) * 100) : null;
+      const denialRate  = decided > 0 ? Math.round((denied  / decided) * 100) : null;
+
+      // Top triggered rules (by audit_log hits)
+      const hitCounts = {};
+      auditEntries.forEach(e => { hitCounts[e.target_id] = (hitCounts[e.target_id] || 0) + 1; });
+      const ruleNameMap = {};
+      rules.forEach(r => { ruleNameMap[r.rule_id] = r.name; });
+      const topRules = Object.entries(hitCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([id, count]) => ({ id, count, name: ruleNameMap[id] || id }));
+
+      // Unused rules
+      const usedIds = new Set(Object.keys(hitCounts));
+      const unusedRules = rules.filter(r => !usedIds.has(r.rule_id));
+
+      // Recent changes — prefer rule_versions, fall back to audit_log actions
+      let changes = versions
+        .filter(v => v.changed_at >= sevenDaysAgo)
+        .map(v => ({
+          date: v.changed_at,
+          ruleId: v.rule_id,
+          summary: v.change_summary || `Version ${v.version}`
+        }));
+      if (changes.length === 0) {
+        const fallbackActions = new Set(['approve','edit_rule','submit_for_review','create_draft','publish']);
+        changes = auditEntries
+          .filter(e => e.timestamp >= sevenDaysAgo && fallbackActions.has(e.action))
+          .slice(0, 10)
+          .map(e => ({
+            date: e.timestamp,
+            ruleId: e.target_id,
+            summary: (e.action || '').replace(/_/g, ' ')
+          }));
+      }
+
+      const stats = { breakdown, total, approvalRate, denialRate, decided, approved, denied,
+                      topRules, unusedRules, changes };
+      phCache[programId] = stats;
+      renderPhStats(stats);
+    } catch (err) {
+      console.error('loadPhData error:', err);
+      document.getElementById('phPanel').innerHTML =
+        `<div style="grid-column:1/-1;padding:24px;background:var(--slds-white);border:1px solid var(--slds-border);border-radius:var(--slds-radius);color:var(--slds-error);font-size:13px;">
+          <strong>Error loading program health data.</strong> Check the console for details.
+        </div>`;
+    }
+  }
+
+  function renderPhStats(stats) {
+    const panel = document.getElementById('phPanel');
+    if (!panel) return;
+    // Row 1: Status | Outcomes  Row 2: Top Triggered | Recent Changes  Row 3: Unused Rules (full width)
+    panel.innerHTML =
+      renderPhStatusCard(stats.breakdown, stats.total) +
+      renderPhDecisionCard(stats) +
+      renderPhTopCard(stats.topRules) +
+      renderPhChangesCard(stats.changes) +
+      renderPhUnusedCard(stats.unusedRules);
+  }
+
+  function renderPhStatusCard(breakdown, total) {
+    const colors = { active: '#2E844A', draft: '#DD7A01', review: '#9050E9', sunset: '#BA0517' };
+    const labels = { active: 'Active', draft: 'Draft', review: 'In Review', sunset: 'Sunset' };
+    const barParts = Object.entries(breakdown).map(([key, count]) => {
+      if (count === 0) return '';
+      const pct = total > 0 ? (count / total) * 100 : 0;
+      return `<div title="${labels[key]}: ${count}" style="width:${pct}%;background:${colors[key]};height:100%;"></div>`;
+    }).join('');
+    const legend = Object.entries(breakdown).map(([key, count]) => {
+      const pct = total > 0 ? Math.round(count / total * 100) : 0;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+        <div style="width:10px;height:10px;border-radius:2px;background:${colors[key]};flex-shrink:0;"></div>
+        <div style="flex:1;font-size:12px;color:var(--slds-text-dark);">${labels[key]}</div>
+        <div style="width:80px;height:6px;background:var(--slds-bg-alt);border-radius:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${colors[key]};border-radius:3px;"></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--slds-text-dark);min-width:24px;text-align:right;">${count}</div>
+        <div style="font-size:11px;color:var(--slds-text-label);min-width:30px;text-align:right;">${pct}%</div>
+      </div>`;
+    }).join('');
+    return `<article class="slds-card chart-card" style="border-top:3px solid #2E844A;">
+      <div class="chart-header"><div class="chart-title">Rules by Status</div><div class="chart-total">${total} total</div></div>
+      <div style="height:16px;border-radius:var(--slds-radius);overflow:hidden;display:flex;margin-bottom:16px;background:var(--slds-bg-alt);gap:2px;">${barParts}</div>
+      <div style="display:flex;flex-direction:column;gap:0;">${legend}</div>
+    </article>`;
+  }
+
+  function renderPhDecisionCard(stats) {
+    if (stats.decided === 0) {
+      return `<article class="slds-card chart-card" style="border-top:3px solid #0176D3;">
+        <div class="chart-header"><div class="chart-title">Application Outcomes</div></div>
+        <div style="text-align:center;padding:32px;color:var(--slds-text-label);font-size:13px;">No application data — run migrations 21–22 to seed demo data</div>
+      </article>`;
+    }
+    const approvalPct = stats.approvalRate ?? 0;
+    const denialPct  = stats.denialRate ?? 0;
+    return `<article class="slds-card chart-card" style="border-top:3px solid #0176D3;">
+      <div class="chart-header"><div class="chart-title">Application Outcomes</div><div class="chart-total">${stats.decided} decided</div></div>
+      <div style="display:flex;gap:16px;margin-bottom:20px;">
+        <div style="flex:1;background:#F0FAF3;border-radius:6px;padding:12px 14px;">
+          <div class="ph-hero approved" style="font-size:32px;">${approvalPct}%</div>
+          <div style="font-size:11px;color:var(--slds-text-label);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">Approved</div>
+        </div>
+        <div style="flex:1;background:#FFF5F5;border-radius:6px;padding:12px 14px;">
+          <div class="ph-hero blocked" style="font-size:32px;">${denialPct}%</div>
+          <div style="font-size:11px;color:var(--slds-text-label);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">Denied</div>
+        </div>
+      </div>
+      <div style="height:8px;border-radius:4px;overflow:hidden;display:flex;margin-bottom:12px;background:var(--slds-bg-alt);">
+        <div style="width:${approvalPct}%;background:#2E844A;height:100%;border-radius:4px 0 0 4px;"></div>
+        <div style="width:${denialPct}%;background:#BA0517;height:100%;border-radius:0 4px 4px 0;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--slds-text-label);">Approved</span><span style="font-weight:700;color:#2E844A;">${stats.approved}</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--slds-text-label);">Blocked</span><span style="font-weight:700;color:#BA0517;">${stats.denied}</span></div>
+      </div>
+    </article>`;
+  }
+
+  function renderPhTopCard(topRules) {
+    const maxCount = topRules.length > 0 ? topRules[0].count : 1;
+    const body = topRules.length === 0
+      ? '<div style="text-align:center;padding:24px;color:var(--slds-text-label);font-size:13px;">No rule activity recorded yet</div>'
+      : topRules.map((r, i) => {
+          const barPct = Math.round((r.count / maxCount) * 100);
+          return `<div class="ph-ranked-item" style="flex-wrap:wrap;">
+            <span class="ph-rank-num">${i + 1}</span>
+            <a class="ph-rule-link" href="ontology.html#${r.id}">${r.id}</a>
+            <span class="ph-rule-name">${r.name}</span>
+            <span class="ph-count-badge">${r.count}</span>
+            <div style="width:100%;margin-left:36px;margin-top:4px;height:4px;background:var(--slds-bg-alt);border-radius:2px;overflow:hidden;">
+              <div style="width:${barPct}%;height:100%;background:var(--slds-purple);border-radius:2px;"></div>
+            </div>
+          </div>`;
+        }).join('');
+    return `<article class="slds-card chart-card" style="border-top:3px solid #9050E9;">
+      <div class="chart-header"><div class="chart-title">Top Triggered Rules</div></div>
+      ${body}
+    </article>`;
+  }
+
+  function renderPhUnusedCard(unusedRules) {
+    const display = unusedRules.slice(0, 10);
+    const overflow = unusedRules.length - display.length;
+    const body = unusedRules.length === 0
+      ? '<div style="text-align:center;padding:24px 0;color:var(--slds-text-label);font-size:13px;">All rules exercised — no gaps detected</div>'
+      : `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:var(--slds-bg-alt);">
+              <th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--slds-text-label);width:90px;">Rule ID</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--slds-text-label);">Name</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--slds-text-label);width:90px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${display.map(r => `<tr style="border-bottom:1px solid var(--slds-border);">
+              <td style="padding:8px 12px;"><a href="ontology.html#${r.rule_id}" style="color:var(--slds-blue-brand);font-weight:700;text-decoration:none;">${r.rule_id}</a></td>
+              <td style="padding:8px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${r.name}</td>
+              <td style="padding:8px 12px;"><span class="status-badge status-${(r.status||'').toLowerCase()}">${r.status||''}</span></td>
+            </tr>`).join('')}
+            ${overflow > 0 ? `<tr><td colspan="3" style="padding:8px 12px;color:var(--slds-text-label);font-size:12px;">+ ${overflow} more</td></tr>` : ''}
+          </tbody>
+        </table>`;
+    return `<article class="slds-card chart-card" style="grid-column:span 2;border-top:3px solid #BA0517;">
+      <div class="chart-header"><div class="chart-title">Unused Rules</div><div class="chart-total">${unusedRules.length} rules never triggered</div></div>
+      ${body}
+    </article>`;
+  }
+
+  function renderPhChangesCard(changes) {
+    const actionColors = {
+      approve: { bg:'#DFF1E6', color:'#1B5E20', label:'Approved' },
+      publish: { bg:'#E8F0FE', color:'#032D60', label:'Published' },
+      submit_for_review: { bg:'#F0E8FF', color:'#5C18A4', label:'In Review' },
+      edit_rule: { bg:'#E8F4FD', color:'#0176D3', label:'Edited' },
+      create_draft: { bg:'#F3F3F3', color:'#54698D', label:'Drafted' }
+    };
+    const body = changes.length === 0
+      ? '<div style="text-align:center;padding:24px;color:var(--slds-text-label);font-size:13px;">No changes in last 7 days</div>'
+      : changes.map(c => {
+          const d = new Date(c.date);
+          const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const actionKey = Object.keys(actionColors).find(k => c.summary.toLowerCase().includes(k.replace(/_/g,' '))) || null;
+          const badge = actionKey
+            ? `<span style="font-size:10px;font-weight:700;background:${actionColors[actionKey].bg};color:${actionColors[actionKey].color};border-radius:3px;padding:2px 6px;flex-shrink:0;">${actionColors[actionKey].label}</span>`
+            : '';
+          return `<div class="ph-change-item">
+            <span class="ph-change-date">${dateStr}</span>
+            <a href="ontology.html#${c.ruleId}" class="ph-rule-link">${c.ruleId}</a>
+            ${badge}
+            <span class="ph-rule-name" style="flex:1;">${c.summary}</span>
+          </div>`;
+        }).join('');
+    return `<article class="slds-card chart-card" style="border-top:3px solid #DD7A01;">
+      <div class="chart-header"><div class="chart-title">Recent Changes</div><div class="chart-total">Last 7 days</div></div>
+      ${body}
+    </article>`;
+  }
+
+  // ============================================================
   //  INIT
   // ============================================================
   document.addEventListener('DOMContentLoaded', () => {
     renderProgramSwitcher(currentProgram);
+    renderProgramSelect();
     loadDashboardData();
   });
 </script>
