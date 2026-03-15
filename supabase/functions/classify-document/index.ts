@@ -6,6 +6,8 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+
 const CLASSIFICATION_LABELS: Record<string, string> = {
   director_credentials:   'Director / Administrator Education Credentials',
   background_check_bci:  'BCI (Bureau of Criminal Investigation) Background Check Results',
@@ -118,6 +120,24 @@ Respond in valid JSON only — no markdown fences, no extra text:
         },
       ],
     });
+
+    // Log API usage — fire-and-forget, non-blocking
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    fetch(`${SUPABASE_URL}/rest/v1/api_usage_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        function_name: 'classify-document',
+        model: message.model,
+        input_tokens: message.usage.input_tokens,
+        output_tokens: message.usage.output_tokens,
+        program_id: null
+      })
+    }).catch(err => console.warn('api_usage_log insert failed:', err));
 
     const rawText = (message.content[0] as { type: string; text: string }).text.trim();
 

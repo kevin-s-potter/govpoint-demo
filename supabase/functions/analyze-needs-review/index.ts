@@ -6,6 +6,8 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+
 // Policy context for each known review flag code.
 // When wiring a new program: add its flag codes here.
 const FLAG_CONTEXT: Record<string, string> = {
@@ -111,6 +113,24 @@ Respond with this exact JSON structure — one entry per group in the same order
       messages: [{ role: 'user', content: userPrompt }],
       system: systemPrompt,
     });
+
+    // Log API usage — fire-and-forget, non-blocking
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    fetch(`${SUPABASE_URL}/rest/v1/api_usage_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        function_name: 'analyze-needs-review',
+        model: message.model,
+        input_tokens: message.usage.input_tokens,
+        output_tokens: message.usage.output_tokens,
+        program_id: programId ?? null
+      })
+    }).catch(err => console.warn('api_usage_log insert failed:', err));
 
     let rawText = (message.content[0] as { type: string; text: string }).text.trim();
     rawText = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '');
