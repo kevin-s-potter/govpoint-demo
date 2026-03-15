@@ -121,10 +121,10 @@
     </div>
 
     <div class="role-indicator" id="userIndicator">
-      <div class="avatar-circle">SC</div>
+      <div class="avatar-circle">–</div>
       <div class="role-text">
-        <div class="user-name">Sarah Chen</div>
-        <div class="user-role">Coordinator | Hospital Licensing</div>
+        <div class="user-name">Loading…</div>
+        <div class="user-role"></div>
       </div>
     </div>
   </div>
@@ -209,21 +209,34 @@ const FLAG_LABELS = {
 };
 
 // ── Program switcher integration ──────────────────────────────
+function updateUserIndicator(programId) {
+  const cfg = PROGRAM_CONFIG[programId];
+  const user = cfg && USER_DISPLAY ? USER_DISPLAY[cfg.userId] : null;
+  if (!user) return;
+  const el = document.getElementById('userIndicator');
+  if (!el) return;
+  el.querySelector('.avatar-circle').textContent = user.initials;
+  el.querySelector('.user-name').textContent = user.name;
+  el.querySelector('.user-role').textContent = `${user.role} | ${cfg.programName}`;
+}
+
 function switchProgram(programId) {
   currentProgram = programId;
   if (typeof updateSwitcherUI === 'function') updateSwitcherUI(programId);
   const cfg = (typeof PROGRAM_CONFIG !== 'undefined') ? PROGRAM_CONFIG[programId] : null;
   document.getElementById('programBarName').textContent = cfg ? cfg.programName : programId;
+  updateUserIndicator(programId);
   loadQueue();
 }
 
 // ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof renderProgramSwitcher === 'function') {
-    renderProgramSwitcher('programSwitcherMount', currentProgram);
+    renderProgramSwitcher(currentProgram);  // takes 1 arg — mount ID is hardcoded inside
   }
   const cfg = (typeof PROGRAM_CONFIG !== 'undefined') ? PROGRAM_CONFIG[currentProgram] : null;
   document.getElementById('programBarName').textContent = cfg ? cfg.programName : currentProgram;
+  updateUserIndicator(currentProgram);
   loadQueue();
 });
 
