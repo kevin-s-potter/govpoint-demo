@@ -1422,7 +1422,7 @@
       return;
     }
 
-    tbody.innerHTML = entries.map(e => {
+    tbody.innerHTML = entries.slice(0, 10).map(e => {
       const ts = new Date(e.timestamp);
       const timeStr = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         + ' ' + ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });

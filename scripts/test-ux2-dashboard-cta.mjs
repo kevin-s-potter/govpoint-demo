@@ -56,6 +56,11 @@ html.includes('auditStatStrip') && html.includes('cachedAuditEntries') && html.i
   ? ok('Stat strip JS (count24h / count7d) present in renderActivityTable')
   : fail('Stat strip JS not found', 'check renderActivityTable() for count24h/count7d logic');
 
+// 10-row cap present
+html.includes('entries.slice(0, 10).map')
+  ? ok('Table capped at 10 rows (entries.slice(0, 10))')
+  : fail('10-row cap missing', 'renderActivityTable should use entries.slice(0, 10).map()');
+
 // ── 2. Static HTML checks — program-switcher.js ────────────────────────────
 
 console.log('\n[2] Static — program-switcher.js ruleCount fixes');
