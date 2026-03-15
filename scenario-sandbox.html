@@ -453,6 +453,7 @@ let activeSandbox  = null;
 let programRules   = [];       // all active rules for current program (for rule picker)
 let pendingExportScenario = null;   // { type: 'ai'|'sandbox', data: ... }
 let _flipCache     = {};       // { ruleId: { passToFail: [...], failToPass: [...] } }
+let _summaryCache  = {};       // { cacheKey: summaryText } — keyed by sandboxId + rule:flip fingerprint
 
 // ================================================================
 // SUPABASE HELPERS
@@ -1355,6 +1356,10 @@ function renderImpactResults(ruleResults, totalFlips, appCount, dataSource, chan
         <div class="impact-stat-label">Decision Flips</div>
       </div>
     </div>
+    <div id="impactNarrativeSummary" style="background:#F3F3F3;border:1px solid #E5E5E5;border-radius:6px;padding:12px 16px;margin:12px 0 8px;font-size:13px;color:#16325C;line-height:1.5;display:flex;align-items:flex-start;gap:10px;min-height:44px;">
+      <span style="background:#54698D;color:#FFFFFF;font-size:10px;font-weight:600;letter-spacing:0.04em;padding:2px 6px;border-radius:3px;flex-shrink:0;margin-top:1px;">AI</span>
+      <span id="impactNarrativeText" style="color:var(--slds-text-label);font-style:italic;">Generating summary…</span>
+    </div>
     ${ruleResults.map((r, idx) => `
       <div class="impact-rule-row">
         <span class="impact-change-arrow">&#x21C4;</span>
@@ -1385,6 +1390,108 @@ function renderImpactResults(ruleResults, totalFlips, appCount, dataSource, chan
     closeModal('impactModal');
     handleExport('pdf', 'sandbox');
   };
+
+  // Fire async — doesn't block render
+  generateImpactSummary(ruleResults, totalFlips, appCount, dataSource);
+}
+
+// ================================================================
+// AI NARRATIVE SUMMARY
+// ================================================================
+async function generateImpactSummary(ruleResults, totalFlips, appCount, dataSource) {
+  // Hide if nothing flipped
+  if (totalFlips === 0) {
+    const el = document.getElementById('impactNarrativeSummary');
+    if (el) el.style.display = 'none';
+    return;
+  }
+
+  // Cache key: sandbox id + rule:flip fingerprint
+  const cacheKey = `${activeSandbox?.id}_${ruleResults.map(r => `${r.snap.rule_id}:${r.flips}`).join('|')}`;
+  if (_summaryCache[cacheKey]) {
+    const textEl = document.getElementById('impactNarrativeText');
+    if (textEl) {
+      textEl.style.fontStyle = '';
+      textEl.style.color = '#16325C';
+      textEl.textContent = _summaryCache[cacheKey];
+    }
+    return;
+  }
+
+  // Build ruleChanges payload — include citation from snap if available
+  const ruleChanges = ruleResults.map(r => {
+    const cached = _flipCache[r.snap.rule_id] || { passToFail: [], failToPass: [] };
+    return {
+      ruleName:        r.snap.rule_name || r.snap.rule_id,
+      citation:        r.snap.citation  || r.snap.rule_id,
+      changes:         r.changes.map(({ oc, sc }) => ({ field: oc.field, from: oc.value, to: sc.value })),
+      totalFlips:      r.flips,
+      failToPassCount: cached.failToPass.length,
+      passToFailCount: cached.passToFail.length
+    };
+  });
+
+  // Aggregate context values (county etc.) from flip records — only what's actually present
+  const contextCounts = {};
+  for (const r of ruleResults) {
+    const cached = _flipCache[r.snap.rule_id];
+    if (!cached) continue;
+    for (const flip of [...cached.passToFail, ...cached.failToPass]) {
+      for (const [label, val] of Object.entries(flip.context || {})) {
+        if (!val || typeof val !== 'string') continue;
+        contextCounts[label] = contextCounts[label] || {};
+        contextCounts[label][val] = (contextCounts[label][val] || 0) + 1;
+      }
+    }
+  }
+  const topContextValues = {};
+  for (const [label, counts] of Object.entries(contextCounts)) {
+    topContextValues[label] = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([v, n]) => `${v} (${n})`);
+  }
+
+  const cfg = PROGRAM_CONFIG[currentProgram] || {};
+  const payload = {
+    programName:      cfg.programName || currentProgram,
+    sandboxName:      activeSandbox?.name || 'Unnamed Sandbox',
+    ruleChanges,
+    totalFlips,
+    appCount,
+    dataSource,
+    topContextValues
+  };
+
+  try {
+    const res = await fetch(
+      'https://fshdlcveidwwufdigekh.supabase.co/functions/v1/summarize-impact',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'apikey':        SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.summary) throw new Error('No summary returned');
+
+    _summaryCache[cacheKey] = data.summary;
+    const textEl = document.getElementById('impactNarrativeText');
+    if (textEl) {
+      textEl.style.fontStyle = '';
+      textEl.style.color = '#16325C';
+      textEl.textContent = data.summary;
+    }
+  } catch (err) {
+    console.warn('Impact summary generation failed:', err);
+    const el = document.getElementById('impactNarrativeSummary');
+    if (el) el.style.display = 'none';  // Silent failure — non-critical
+  }
 }
 
 // ================================================================
@@ -1532,6 +1639,10 @@ function renderImpactFromCache(cached, changedSnaps) {
         <div class="impact-stat-label">Decision Flips</div>
       </div>
     </div>
+    <div id="impactNarrativeSummary" style="background:#F3F3F3;border:1px solid #E5E5E5;border-radius:6px;padding:12px 16px;margin:12px 0 8px;font-size:13px;color:#16325C;line-height:1.5;display:flex;align-items:flex-start;gap:10px;min-height:44px;">
+      <span style="background:#54698D;color:#FFFFFF;font-size:10px;font-weight:600;letter-spacing:0.04em;padding:2px 6px;border-radius:3px;flex-shrink:0;margin-top:1px;">AI</span>
+      <span id="impactNarrativeText" style="color:var(--slds-text-label);font-style:italic;">Generating summary…</span>
+    </div>
     ${cached.map(r => {
       const snap = snapMap[r.rule_id];
       return `
@@ -1553,6 +1664,14 @@ function renderImpactFromCache(cached, changedSnaps) {
     closeModal('impactModal');
     handleExport('pdf', 'sandbox');
   };
+
+  // Reconstruct minimal ruleResults shape for summary generation (_flipCache is empty in cache path)
+  const ruleResultsForSummary = cached.map(r => ({
+    snap:    { rule_id: r.rule_id, rule_name: snapMap[r.rule_id]?.rule_name || r.rule_id, citation: snapMap[r.rule_id]?.rule_id },
+    changes: [],
+    flips:   r.affected_count || 0
+  }));
+  generateImpactSummary(ruleResultsForSummary, totalFlips, appCount, dataSource);
 }
 
 function renderImpactEstimated(changedSnaps) {
