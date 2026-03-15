@@ -1044,8 +1044,7 @@
       query('rules', `select=rule_id,name&tenant_id=eq.${config.tenant}&program_id=eq.${currentProgram}`)
     ]);
 
-    // Prepend mock evaluation entry so the exhibit can be demonstrated before DB migration
-    allEntries = [MOCK_EVAL_ENTRY, ...entries];
+    allEntries = entries;
 
     // Build user lookup
     users.forEach(u => { usersMap[u.user_id] = u.display_name; });
@@ -1171,89 +1170,10 @@
     if (e.key === 'Enter') applyFilters();
   });
 
-  // ── MOCK DATA (used until DB migration is live) ──
-  const MOCK_EVAL_ENTRY = {
-    audit_id: 'aud-eval-DEMO',
-    tenant_id: 'ohio-odh',
-    timestamp: '2026-03-14T10:22:00-05:00',
-    user_id: null,
-    role: 'system',
-    action: 'application_evaluation',
-    target_type: 'application',
-    target_id: 'APP-2026-001847',
-    detail: JSON.stringify({
-      application_id: 'APP-2026-001847',
-      applicant_name: 'St. Francis Medical Center',
-      outcome: 'denied',
-      deciding_condition_id: 'cond-OH-001-01',
-      rules_evaluated: [
-        {
-          rule_id: 'OH-001',
-          rule_name: 'Bed Capacity Minimum',
-          citation: 'ORC § 3702.30(A)(1)',
-          rule_type: 'GATE',
-          fired: true,
-          conditions: [
-            {
-              condition_id: 'cond-OH-001-01',
-              field: 'bed_count',
-              operator: '>=',
-              threshold: '25',
-              actual_value: '18',
-              result: 'FAIL',
-              deciding: true
-            }
-          ]
-        },
-        {
-          rule_id: 'OH-016',
-          rule_name: 'Nursing Staffing Ratios',
-          citation: 'OAC 3701-59-16',
-          rule_type: 'GATE',
-          fired: false,
-          conditions: [
-            {
-              condition_id: 'cond-OH-016-01',
-              field: 'rn_ratio_per_patient',
-              operator: '>=',
-              threshold: '0.5',
-              actual_value: '0.62',
-              result: 'PASS',
-              deciding: false
-            }
-          ]
-        },
-        {
-          rule_id: 'OH-007',
-          rule_name: 'Patient Safety Reporting',
-          citation: 'ORC § 3727.60',
-          rule_type: 'GATE',
-          fired: false,
-          conditions: [
-            {
-              condition_id: 'cond-OH-007-01',
-              field: 'incident_response_hours',
-              operator: '<=',
-              threshold: '24',
-              actual_value: '18',
-              result: 'PASS',
-              deciding: false
-            }
-          ]
-        }
-      ]
-    }),
-    ip_address: null,
-    _isMock: true
-  };
-
   // ── DETAIL MODAL ──────────────────────────────────────────────────────────
 
   function openDetailModal(i) {
-    let entry = pageEntries[i];
-
-    // Inject mock for demo if this is the mock sentinel
-    if (entry && entry._isMock) entry = MOCK_EVAL_ENTRY;
+    const entry = pageEntries[i];
 
     const content = document.getElementById('detailModalContent');
     const overlay = document.getElementById('detailModalOverlay');
