@@ -1914,3 +1914,11 @@ button:focus-visible,
   border: 1px solid var(--slds-border); border-radius: 4px;
   margin-bottom: 12px; font-size: 12px; color: var(--text-secondary);
 }
+
+/* ── DEPENDENCY CARD NODES (D3 foreignObject) ─────────────────── */
+.dep-card-node {
+  transition: opacity 0.15s;
+}
+.dep-card-node:hover > div {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
