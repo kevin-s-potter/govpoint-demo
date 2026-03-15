@@ -248,7 +248,6 @@
 
       <!-- Dependencies Tab -->
       <div class="tab-pane" data-pane="dependencies">
-        <h3>Related Rules</h3>
         <div id="dependenciesContent"></div>
       </div>
 
@@ -290,14 +289,26 @@
         <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Rule Dependency Network</div>
         <div style="font-size: 13px; margin-bottom: 16px;">Showing <span id="graphRuleCount">0</span> rules with <span id="graphLinkCount">0</span> dependencies</div>
       </div>
-      <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; font-weight: 600;" role="legend" aria-label="Graph legend">
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#2E844A;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Active</span>
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#DD7A01;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Draft</span>
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#0176D3;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> In Review</span>
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:50%;background:#BA0517;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;"></span> Sunset</span>
-        <span style="display:flex;align-items:center;gap:5px;color:#6B7280;">— Dependency &nbsp; <span style="border-top:2px dashed #BA0517;width:20px;display:inline-block;"></span> Conflict</span>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;font-weight:600;" role="legend" aria-label="Graph legend">
+        <span style="display:flex;align-items:center;gap:5px;color:#0176D3;"><span style="border-top:2px solid #0176D3;width:20px;display:inline-block;"></span> requires</span>
+        <span style="display:flex;align-items:center;gap:5px;color:#DD7A01;"><span style="border-top:2px solid #DD7A01;width:20px;display:inline-block;"></span> impacts</span>
+        <span style="display:flex;align-items:center;gap:5px;color:#BA0517;"><span style="border-top:2px dashed #BA0517;width:20px;display:inline-block;"></span> overrides</span>
+        <span style="display:flex;align-items:center;gap:5px;color:#6B7280;"><span style="border-top:1px dotted #9CA3AF;width:20px;display:inline-block;"></span> related</span>
       </div>
-      <svg id="dependencyGraph" style="flex: 1; width: 100%; min-height: 400px; border-radius: 4px; background: #FAFAFB; border: 1px solid var(--slds-border);"></svg>
+      <label style="font-size:12px;color:#54698D;display:flex;align-items:center;gap:6px;margin-bottom:8px;cursor:pointer;align-self:flex-start;">
+        <input type="checkbox" id="showAllRulesToggle"> Show all rules (including standalone)
+      </label>
+      <!-- SVG wrapper — position:relative enables absolute-positioned overlay buttons -->
+      <div style="position:relative;flex:1;width:100%;">
+        <button type="button" id="resetZoomBtn"
+          style="position:absolute;top:8px;right:8px;z-index:10;
+                 padding:4px 10px;font-size:11px;font-weight:600;
+                 background:#fff;border:1px solid #E5E5E5;border-radius:2px;
+                 cursor:pointer;color:#032D60;">
+          &#10227; Reset
+        </button>
+        <svg id="dependencyGraph" style="width:100%;height:100%;min-height:400px;border-radius:4px;background:#FAFAFB;border:1px solid var(--slds-border);"></svg>
+      </div>
       <div id="d3Tooltip" class="d3-tooltip"></div>
     </div>
   </div>
@@ -1009,6 +1020,8 @@ function switchProgram(programId) {
 
   // Reset per-program UI state
   showArchived = false;
+  const tog = document.getElementById('showAllRulesToggle');
+  if (tog) tog.checked = false;
 
   // Clear cache and reload
   lexipoint.clearCache();
@@ -1296,7 +1309,7 @@ async function renderDetailPanel() {
   if (s === 'pending' && currentRule.effective_date) {
     const banner = document.createElement('div');
     banner.id = 'lifecycleBanner';
-    banner.style.cssText = 'padding:10px 24px;background:#CFFAFE;border-bottom:1px solid #A5F3FC;font-size:12px;color:#0E7490;font-weight:600;display:flex;align-items:center;gap:8px;';
+    banner.style.cssText = 'padding:10px 24px;background:#EFF6FF;border-bottom:1px solid #BFDBFE;font-size:12px;color:#0176D3;font-weight:600;display:flex;align-items:center;gap:8px;';
     banner.innerHTML = `⏳ Pending activation on ${new Date(currentRule.effective_date + 'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'})} — click "Activate Now" to activate immediately.`;
     document.getElementById('detailTabs').insertAdjacentElement('beforebegin', banner);
   } else if (s === 'archived') {
@@ -1574,6 +1587,7 @@ function _on(selectorOrId, event, handler, useQuery) {
 
 function setupEventListeners() {
   _on('searchInput', 'input', renderRulesList);
+  _on('showAllRulesToggle', 'change', renderDependencyGraph);
 
   _on('programSwitcher', 'click', function(e) {
     e.stopPropagation();
@@ -2404,8 +2418,8 @@ function updateApproveVersionBtn() {
       : `<span style="color:var(--slds-success);">Rule will become active immediately.</span>`;
   } else {
     btn.textContent = 'Approve & Schedule';
-    btn.style.background = '#0E7490';
-    if (hint) hint.innerHTML = `<span style="color:#0E7490;">Rule will enter Pending status until activated on or after this date.</span>`;
+    btn.style.background = '#0176D3';
+    if (hint) hint.innerHTML = `<span style="color:#0176D3;">Rule will enter Pending status until activated on or after this date.</span>`;
   }
 }
 
@@ -2711,7 +2725,7 @@ function closeTab(ruleId) {
       document.getElementById('detailContent').style.display = 'none';
       document.getElementById('noSelection').style.display = 'flex';
       document.getElementById('workspaceTabs').style.display = 'none';
-      renderDependencyGraph();
+      requestAnimationFrame(() => renderDependencyGraph());
     }
   }
 }
@@ -2725,7 +2739,7 @@ function renderWorkspaceTabs() {
   container.style.display = 'flex';
   container.innerHTML = workspaceTabs.map(tab => {
     const status = (tab.rule.status || '').toLowerCase();
-    const statusColor = status === 'active' ? '#2E844A' : status === 'draft' ? '#DD7A01' : status === 'review' ? '#9050E9' : status === 'pending' ? '#0E7490' : status === 'archived' ? '#747474' : '#BA0517';
+    const statusColor = status === 'active' ? '#2E844A' : status === 'draft' ? '#DD7A01' : status === 'review' ? '#9050E9' : status === 'pending' ? '#0176D3' : status === 'archived' ? '#747474' : '#BA0517';
     return `
       <div class="workspace-tab ${tab.ruleId === activeTabId ? 'active' : ''}" data-rule-id="${tab.ruleId}" onclick="activateTab('${tab.ruleId}')">
         <span class="tab-status-dot" style="background: ${statusColor};"></span>
