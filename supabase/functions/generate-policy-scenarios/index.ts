@@ -198,6 +198,24 @@ Respond with this exact JSON structure:
       system: systemPrompt,
     });
 
+    // Log API usage — fire-and-forget, non-blocking
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    fetch(`${SUPABASE_URL}/rest/v1/api_usage_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        function_name: 'generate-policy-scenarios',
+        model: message.model,
+        input_tokens: message.usage.input_tokens,
+        output_tokens: message.usage.output_tokens,
+        program_id: programId ?? null
+      })
+    }).catch(err => console.warn('api_usage_log insert failed:', err));
+
     let rawText = (message.content[0] as { type: string; text: string }).text.trim();
 
     // Strip JSON code fences if present

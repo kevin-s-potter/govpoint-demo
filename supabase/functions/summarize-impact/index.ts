@@ -6,6 +6,8 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+
 interface RuleChange {
   ruleName: string;
   citation?: string;
@@ -80,6 +82,24 @@ Be specific about the numbers. Do not start with "This change" or "This policy".
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
+
+    // Log API usage — fire-and-forget, non-blocking
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    fetch(`${SUPABASE_URL}/rest/v1/api_usage_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        function_name: 'summarize-impact',
+        model: message.model,
+        input_tokens: message.usage.input_tokens,
+        output_tokens: message.usage.output_tokens,
+        program_id: null
+      })
+    }).catch(err => console.warn('api_usage_log insert failed:', err));
 
     let summary = (message.content[0] as { type: string; text: string }).text.trim();
     // Strip any accidental markdown

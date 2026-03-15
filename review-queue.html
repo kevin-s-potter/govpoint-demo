@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Review Queue</title>
+<!-- Auth guard: must appear before program-switcher.js and any page JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(async function() {
+  const _sb = supabase.createClient(
+    'https://fshdlcveidwwufdigekh.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY'
+  );
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.replace('login.html');
+  } else {
+    window.__lpSession = session;
+    window.__lpSupabase = _sb;
+  }
+})();
+</script>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <script src="program-switcher.js"></script>
 <link rel="stylesheet" href="shared.css" />
@@ -81,6 +99,7 @@
 </style>
 </head>
 <body class="slds-scope">
+<a href="#main-content" class="skip-nav">Skip to main content</a>
 
 <nav class="topnav">
   <div class="logo">
@@ -98,11 +117,12 @@
     <a href="review-queue.html" class="active">Review Queue</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="scenario-sandbox.html">Scenarios</a>
+    <a href="admin.html">Admin</a>
   </div>
 
   <div class="nav-controls">
-    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
-      <span>&#x1F514;</span>
+    <div class="notification-bell" id="notificationBell" role="button" aria-label="Notifications" aria-expanded="false" aria-haspopup="menu" tabindex="0" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span aria-hidden="true">&#x1F514;</span>
       <span class="notification-badge">3</span>
       <div class="notification-dropdown">
         <div class="notification-item">
@@ -120,17 +140,60 @@
       </div>
     </div>
 
-    <div class="role-indicator" id="userIndicator">
-      <div class="avatar-circle">–</div>
+    <div class="persona-trigger role-indicator" id="personaTrigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
+      <div class="avatar-circle" id="avatarCircle">–</div>
       <div class="role-text">
-        <div class="user-name">Loading…</div>
-        <div class="user-role"></div>
+        <div class="user-name" id="userName">Loading…</div>
+        <div class="user-role" id="userRole"></div>
+      </div>
+      <span class="persona-chevron" aria-hidden="true">▾</span>
+      <div class="persona-dropdown" role="menu">
+        <div class="persona-dropdown-header">
+          <div class="persona-dropdown-avatar" id="ddAvatar">??</div>
+          <div>
+            <div class="persona-dropdown-name" id="ddName"></div>
+            <div class="persona-dropdown-role" id="ddRole"></div>
+          </div>
+        </div>
+        <div class="persona-dropdown-divider"></div>
+        <button class="persona-dropdown-signout" onclick="window.__lpSupabase ? window.__lpSupabase.auth.signOut().then(function(){ window.location.replace('login.html'); }) : window.location.replace('login.html');">Sign Out</button>
       </div>
     </div>
   </div>
 </nav>
+<script>
+(function() {
+  var trigger = document.getElementById('personaTrigger');
+  if (!trigger) return;
+  // populate from sessionStorage
+  var persona = sessionStorage.getItem('lp_persona') || '';
+  var role    = sessionStorage.getItem('lp_role')    || '';
+  var name    = persona.split(',')[0].trim() || persona;
+  var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
+  var ddAvatar = document.getElementById('ddAvatar');
+  var ddName   = document.getElementById('ddName');
+  var ddRole   = document.getElementById('ddRole');
+  if (ddAvatar) ddAvatar.textContent = initials || document.getElementById('avatarCircle') && document.getElementById('avatarCircle').textContent || '??';
+  if (ddName)   ddName.textContent   = name || (document.getElementById('userName') && document.getElementById('userName').textContent) || '';
+  if (ddRole)   ddRole.textContent   = role || (document.getElementById('userRole') && document.getElementById('userRole').textContent) || '';
+  // toggle
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var expanded = trigger.getAttribute('aria-expanded') === 'true';
+    trigger.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+  });
+  document.addEventListener('click', function() {
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+  // keyboard
+  trigger.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); }
+    if (e.key === 'Escape') trigger.setAttribute('aria-expanded', 'false');
+  });
+})();
+</script>
 
-<div class="page-body">
+<div class="page-body" id="main-content">
 
   <!-- Integration messaging banner -->
   <div class="rq-integration-banner">
@@ -213,11 +276,18 @@ function updateUserIndicator(programId) {
   const cfg = PROGRAM_CONFIG[programId];
   const user = cfg && USER_DISPLAY ? USER_DISPLAY[cfg.userId] : null;
   if (!user) return;
-  const el = document.getElementById('userIndicator');
+  const el = document.getElementById('personaTrigger');
   if (!el) return;
   el.querySelector('.avatar-circle').textContent = user.initials;
   el.querySelector('.user-name').textContent = user.name;
   el.querySelector('.user-role').textContent = `${user.role} | ${cfg.programName}`;
+  // keep dropdown panel in sync
+  const ddAvatar = document.getElementById('ddAvatar');
+  const ddName   = document.getElementById('ddName');
+  const ddRole   = document.getElementById('ddRole');
+  if (ddAvatar) ddAvatar.textContent = user.initials;
+  if (ddName)   ddName.textContent   = user.name;
+  if (ddRole)   ddRole.textContent   = `${user.role} | ${cfg.programName}`;
 }
 
 function switchProgram(programId) {
@@ -458,5 +528,33 @@ function saveOverride(idx) {
   document.getElementById(`overrideInput_${idx}`).style.display = 'none';
 }
 </script>
+
+<footer class="lp-footer">
+  <div class="lp-footer-brand"><span aria-hidden="true">&#x2318;</span> LexiPoint</div>
+  <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+  <nav class="lp-footer-nav">
+    <a href="index.html">New Request</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="ontology.html">Ontology Manager</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="dashboard.html">Analytics Dashboard</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="audit-log.html">Audit Log</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="scenario-sandbox.html">Scenario Sandbox</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="review-queue.html">Review Queue</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="admin.html" id="footerAdminLink" style="display:none">Admin</a>
+  </nav>
+  <script>if (sessionStorage.getItem('lp_role') === 'admin') { var el = document.getElementById('footerAdminLink'); if(el) el.style.display = ''; }</script>
+  <div class="lp-footer-disclaimer">
+    <strong>Prototype Demonstration</strong>
+    A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+    Not affiliated with or endorsed by any government agency.
+    For demonstration purposes only — regulatory citations should not be used as legal guidance.
+  </div>
+  <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
+</footer>
 </body>
 </html>

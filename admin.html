@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiPoint | Admin</title>
+<!-- Auth guard — admin role check: must run before any page content -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzI2ODM5OCwiZXhwIjoyMDg4ODQ0Mzk4fQ.OPaz8JhFkj4IKAebBGAXfSwyFSyIA7BVlwug19iGNZ0';
+
+(async function() {
+  const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.replace('login.html');
+    return;
+  }
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/approved_users?email=eq.${encodeURIComponent(session.user.email)}&select=role,active`,
+    { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${session.access_token}` } }
+  );
+  const rows = await res.json();
+  if (!rows || !rows[0] || rows[0].role !== 'admin' || !rows[0].active) {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.replace('dashboard.html');
+    return;
+  }
+  window.__lpSession = session;
+  window.__lpSupabase = _sb;
+  window.__lpUser = rows[0];
+})();
+</script>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  :root {
+    --lp-navy:   #032D60;
+    --lp-blue:   #0176D3;
+    --lp-green:  #2E844A;
+    --lp-amber:  #DD7A01;
+    --lp-red:    #BA0517;
+    --lp-bg:     #F3F3F3;
+    --lp-white:  #FFFFFF;
+    --lp-border: #E5E5E5;
+    --lp-text:   #16325C;
+    --lp-label:  #54698D;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Salesforce Sans', -apple-system, system-ui, sans-serif;
+    background: var(--lp-bg);
+    color: var(--lp-text);
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Page layout ── */
+  .admin-body {
+    flex: 1;
+    padding: 24px 32px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .page-header-block {
+    margin-bottom: 24px;
+  }
+
+  .page-header-block h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--lp-navy);
+    margin-bottom: 4px;
+  }
+
+  .page-header-block p {
+    font-size: 13px;
+    color: var(--lp-label);
+  }
+
+  /* ── Quick-links strip ── */
+  .quick-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .quick-link-btn {
+    padding: 8px 16px;
+    background: white;
+    color: var(--lp-blue);
+    border: 1px solid var(--lp-blue);
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s;
+    font-family: inherit;
+    display: inline-block;
+  }
+
+  .quick-link-btn:hover { background: #E8F4FD; }
+
+  /* ── Section cards ── */
+  .admin-card {
+    background: white;
+    border: 1px solid var(--lp-border);
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .admin-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--lp-border);
+    background: #FAFAFB;
+  }
+
+  .admin-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--lp-navy);
+  }
+
+  .admin-card-meta {
+    font-size: 11px;
+    color: var(--lp-label);
+  }
+
+  .admin-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .admin-card-body {
+    padding: 20px;
+  }
+
+  .btn-refresh {
+    padding: 6px 14px;
+    background: white;
+    border: 1px solid var(--lp-border);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--lp-label);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .btn-refresh:hover { background: var(--lp-bg); border-color: var(--lp-blue); color: var(--lp-blue); }
+
+  /* ── Data tables ── */
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .admin-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--lp-label);
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--lp-border);
+    background: #FAFAFB;
+  }
+
+  .admin-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #F3F3F3;
+    vertical-align: middle;
+  }
+
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: #FAFBFC; }
+
+  /* ── Role/event badges ── */
+  .role-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .role-admin  { background: #EDE9FE; color: #5B21B6; }
+  .role-viewer { background: #E8F4FD; color: #014486; }
+  .event-login   { background: #D1FAE5; color: #065F46; }
+  .event-blocked { background: #FEE2E2; color: #991B1B; }
+  .event-logout  { background: #F3F3F3; color: #54698D; }
+
+  /* ── Toggle switch ── */
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #ccc;
+    border-radius: 20px;
+    transition: 0.2s;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px;
+    left: 3px; bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+
+  input:checked + .toggle-slider { background: var(--lp-green); }
+  input:checked + .toggle-slider:before { transform: translateX(16px); }
+
+  /* ── Filter pills ── */
+  .filter-pills {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-pill {
+    padding: 4px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--lp-border);
+    background: white;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--lp-label);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .filter-pill.active {
+    background: var(--lp-blue);
+    border-color: var(--lp-blue);
+    color: white;
+  }
+
+  .filter-pill:hover:not(.active) { border-color: var(--lp-blue); color: var(--lp-blue); }
+
+  /* ── Stat cards ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stat-card {
+    background: #FAFAFB;
+    border: 1px solid var(--lp-border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .stat-card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--lp-navy);
+    margin-bottom: 4px;
+  }
+
+  .stat-card-label {
+    font-size: 11px;
+    color: var(--lp-label);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-weight: 600;
+  }
+
+  /* ── Health grid ── */
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .health-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── Status banner ── */
+  .status-banner {
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .status-ok  { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+  .status-warn { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+
+  /* ── Add user form ── */
+  .add-user-form {
+    border-top: 1px solid var(--lp-border);
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+
+  .add-user-form h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lp-navy);
+    margin-bottom: 12px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .form-field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--lp-label);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .form-field input,
+  .form-field select {
+    padding: 8px 10px;
+    border: 1px solid var(--lp-border);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--lp-text);
+    background: white;
+    font-family: inherit;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus {
+    outline: none;
+    border-color: var(--lp-blue);
+    box-shadow: 0 0 0 2px rgba(1,118,211,0.12);
+  }
+
+  .btn-add {
+    padding: 8px 18px;
+    background: var(--lp-blue);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-add:hover { background: #014486; }
+  .btn-add:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* ── Cost note ── */
+  .cost-note {
+    font-size: 11px;
+    color: var(--lp-label);
+    font-style: italic;
+    margin-top: 12px;
+  }
+
+  /* ── Migration info ── */
+  .migration-info {
+    font-size: 13px;
+    color: var(--lp-label);
+    margin-top: 8px;
+  }
+
+  .migration-info strong { color: var(--lp-text); }
+
+  /* ── Oversight slider ── */
+  .oversight-wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 8px 0;
+  }
+
+  .oversight-slider-row {
+    position: relative;
+    padding: 16px 0 40px;
+  }
+
+  .oversight-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(to right, #0176D3, #0176D3);
+    border-radius: 3px;
+    outline: none;
+  }
+
+  .oversight-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0176D3;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+
+  .oversight-slider::-webkit-slider-thumb:hover {
+    background: #014486;
+    box-shadow: 0 2px 8px rgba(1,68,134,0.3);
+  }
+
+  .oversight-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0176D3;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  }
+
+  .oversight-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .oversight-label {
+    font-size: 12px;
+    color: var(--lp-label);
+    text-align: center;
+    flex: 1;
+    line-height: 1.4;
+    transition: color 0.2s, font-weight 0.2s;
+  }
+
+  .oversight-label.active {
+    color: var(--lp-blue);
+    font-weight: 700;
+  }
+
+  .oversight-label:first-child { text-align: left; }
+  .oversight-label:last-child  { text-align: right; }
+
+  .oversight-note {
+    font-size: 11px;
+    color: var(--lp-label);
+    font-style: italic;
+    text-align: center;
+    margin-top: 16px;
+  }
+
+  /* ── Loading state ── */
+  .table-loading {
+    text-align: center;
+    padding: 32px;
+    color: var(--lp-label);
+    font-size: 13px;
+  }
+
+  /* ── Delete button ── */
+  .btn-danger-sm {
+    padding: 4px 10px;
+    background: white;
+    color: var(--lp-red);
+    border: 1px solid var(--lp-red);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .btn-danger-sm:hover { background: #FFF0F0; }
+
+  @media (max-width: 640px) {
+    .admin-body { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-nav">Skip to main content</a>
+
+<!-- GLOBAL HEADER -->
+<nav class="topnav">
+  <div class="logo">
+    <span class="ohio-mark">&langle;&deg;&rangle;</span>
+    <span>LexiPoint</span>
+  </div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-links">
+    <a href="index.html">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="review-queue.html">Review Queue</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="scenario-sandbox.html">Scenarios</a>
+    <a href="admin.html" class="active">Admin</a>
+  </div>
+
+  <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" role="button" aria-label="Notifications" aria-expanded="false" aria-haspopup="menu" tabindex="0" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span aria-hidden="true">&#x1F514;</span>
+      <span class="notification-badge">0</span>
+      <div class="notification-dropdown">
+        <div class="notification-dropdown-header">Notifications</div>
+        <div class="notification-item">No new notifications</div>
+      </div>
+    </div>
+
+    <div class="persona-trigger role-indicator" id="personaTrigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
+      <div class="avatar-circle" id="avatarCircle">KP</div>
+      <div class="role-text">
+        <div class="user-name" id="userName">Kevin Potter</div>
+        <div class="user-role" id="userRole">Admin</div>
+      </div>
+      <span class="persona-chevron" aria-hidden="true">▾</span>
+      <div class="persona-dropdown" role="menu">
+        <div class="persona-dropdown-header">
+          <div class="persona-dropdown-avatar" id="ddAvatar">??</div>
+          <div>
+            <div class="persona-dropdown-name" id="ddName"></div>
+            <div class="persona-dropdown-role" id="ddRole"></div>
+          </div>
+        </div>
+        <div class="persona-dropdown-divider"></div>
+        <button class="persona-dropdown-signout" onclick="window.__lpSupabase ? window.__lpSupabase.auth.signOut().then(function(){ window.location.replace('login.html'); }) : window.location.replace('login.html');">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+<script>
+(function() {
+  var trigger = document.getElementById('personaTrigger');
+  if (!trigger) return;
+  // populate from sessionStorage
+  var persona = sessionStorage.getItem('lp_persona') || '';
+  var role    = sessionStorage.getItem('lp_role')    || '';
+  var name    = persona.split(',')[0].trim() || persona;
+  var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
+  var ddAvatar = document.getElementById('ddAvatar');
+  var ddName   = document.getElementById('ddName');
+  var ddRole   = document.getElementById('ddRole');
+  if (ddAvatar) ddAvatar.textContent = initials || document.getElementById('avatarCircle') && document.getElementById('avatarCircle').textContent || '??';
+  if (ddName)   ddName.textContent   = name || (document.getElementById('userName') && document.getElementById('userName').textContent) || '';
+  if (ddRole)   ddRole.textContent   = role || (document.getElementById('userRole') && document.getElementById('userRole').textContent) || '';
+  // toggle
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var expanded = trigger.getAttribute('aria-expanded') === 'true';
+    trigger.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+  });
+  document.addEventListener('click', function() {
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+  // keyboard
+  trigger.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); }
+    if (e.key === 'Escape') trigger.setAttribute('aria-expanded', 'false');
+  });
+})();
+</script>
+
+<!-- ADMIN PAGE BODY -->
+<div class="admin-body" id="main-content">
+
+  <!-- Page Header -->
+  <div class="page-header-block">
+    <h1>Admin</h1>
+    <p>Real-time system data — visible to admin users only.</p>
+  </div>
+
+  <!-- Quick-links strip -->
+  <div class="quick-links">
+    <a href="audit-log.html" class="quick-link-btn">Audit Log</a>
+    <a href="ontology.html" class="quick-link-btn">Ontology Manager</a>
+    <a href="scenario-sandbox.html" class="quick-link-btn">Scenario Sandbox</a>
+    <a href="review-queue.html" class="quick-link-btn">Review Queue</a>
+  </div>
+
+  <!-- ── Section A: Users ───────────────────────────────────────── -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">A — Users</div>
+      <div class="admin-card-actions">
+        <span class="admin-card-meta" id="usersLastUpdated"></span>
+        <button class="btn-refresh" onclick="loadUsers()">&#x21BB; Refresh</button>
+      </div>
+    </div>
+    <div class="admin-card-body">
+      <div id="usersTableWrap">
+        <div class="table-loading">Loading users&hellip;</div>
+      </div>
+
+      <!-- Add user form -->
+      <div class="add-user-form">
+        <h4>Add User</h4>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="addEmail">Email</label>
+            <input type="email" id="addEmail" placeholder="user@example.com" />
+          </div>
+          <div class="form-field">
+            <label for="addPersona">Persona Name</label>
+            <input type="text" id="addPersona" placeholder="Jane Smith, Agency Title" />
+          </div>
+          <div class="form-field" style="flex:0;min-width:130px;">
+            <label for="addRole">Role</label>
+            <select id="addRole">
+              <option value="viewer">Viewer</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn-add" id="addUserBtn" onclick="addUser()">Add User</button>
+        </div>
+        <div id="addUserMsg" style="margin-top:8px;font-size:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section B: Login History ──────────────────────────────── -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">B — Login History</div>
+      <div class="admin-card-actions">
+        <span class="admin-card-meta" id="loginLastUpdated"></span>
+        <button class="btn-refresh" onclick="loadLoginHistory()">&#x21BB; Refresh</button>
+      </div>
+    </div>
+    <div class="admin-card-body">
+      <div class="filter-pills">
+        <button class="filter-pill active" id="loginFilterAll" onclick="applyLoginFilter('all')">All</button>
+        <button class="filter-pill" id="loginFilterBlocked" onclick="applyLoginFilter('blocked')">Blocked only</button>
+        <button class="filter-pill" id="loginFilterToday" onclick="applyLoginFilter('today')">Today</button>
+      </div>
+      <div id="loginTableWrap">
+        <div class="table-loading">Loading login history&hellip;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section C: Claude API Usage ───────────────────────────── -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">C — Claude API Usage</div>
+      <div class="admin-card-actions">
+        <span class="admin-card-meta" id="apiLastUpdated"></span>
+        <button class="btn-refresh" onclick="loadApiUsage()">&#x21BB; Refresh</button>
+      </div>
+    </div>
+    <div class="admin-card-body">
+      <div class="filter-pills">
+        <button class="filter-pill active" id="apiFilter7" onclick="applyApiFilter(7)">Last 7 days</button>
+        <button class="filter-pill" id="apiFilter30" onclick="applyApiFilter(30)">Last 30 days</button>
+        <button class="filter-pill" id="apiFilterAll" onclick="applyApiFilter(0)">All Time</button>
+      </div>
+      <div class="stat-row" id="apiStatRow">
+        <div class="stat-card"><div class="stat-card-value" id="statCalls">—</div><div class="stat-card-label">Total Calls</div></div>
+        <div class="stat-card"><div class="stat-card-value" id="statInputTokens">—</div><div class="stat-card-label">Input Tokens</div></div>
+        <div class="stat-card"><div class="stat-card-value" id="statOutputTokens">—</div><div class="stat-card-label">Output Tokens</div></div>
+        <div class="stat-card"><div class="stat-card-value" id="statCost">—</div><div class="stat-card-label">Est. Cost</div></div>
+      </div>
+      <div id="apiTableWrap">
+        <div class="table-loading">Loading API usage&hellip;</div>
+      </div>
+      <p class="cost-note">Cost estimates: Haiku at $0.80/$4.00 per M tokens &middot; Sonnet at $3.00/$15.00 per M tokens.</p>
+    </div>
+  </div>
+
+  <!-- ── Section D: System Health ──────────────────────────────── -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">D — System Health</div>
+      <div class="admin-card-actions">
+        <span class="admin-card-meta" id="healthLastUpdated"></span>
+        <button class="btn-refresh" onclick="loadSystemHealth()">&#x21BB; Refresh</button>
+      </div>
+    </div>
+    <div class="admin-card-body">
+      <div id="healthStatusBanner"></div>
+      <div class="health-grid" id="healthGrid">
+        <div class="table-loading" style="grid-column:1/-1">Loading row counts&hellip;</div>
+      </div>
+      <div class="migration-info">
+        Last migration applied: <strong>24_auth_tables.sql</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section E: Oversight Mode ─────────────────────────────── -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <div class="admin-card-title">E — Oversight Mode</div>
+    </div>
+    <div class="admin-card-body">
+      <div class="oversight-wrap">
+        <div class="oversight-slider-row">
+          <input type="range" min="0" max="2" step="1"
+                 class="oversight-slider"
+                 id="oversightSlider"
+                 aria-label="Oversight level: 0=Full Human Review, 1=Exception-Based, 2=Automated with Audit" />
+          <div class="oversight-labels">
+            <div class="oversight-label" id="oversightLabel0">Full Human Review</div>
+            <div class="oversight-label" id="oversightLabel1">Exception-Based</div>
+            <div class="oversight-label" id="oversightLabel2">Automated with Audit</div>
+          </div>
+        </div>
+        <p class="oversight-note">
+          Oversight position is configurable per agency. Setting is saved locally.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .admin-body -->
+
+<footer class="lp-footer">
+  <div class="lp-footer-brand"><span aria-hidden="true">&#x2318;</span> LexiPoint</div>
+  <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
+  <nav class="lp-footer-nav">
+    <a href="index.html">New Request</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="ontology.html">Ontology Manager</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="dashboard.html">Analytics Dashboard</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="audit-log.html">Audit Log</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="scenario-sandbox.html">Scenario Sandbox</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="review-queue.html">Review Queue</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="admin.html">Admin</a>
+  </nav>
+  <div class="lp-footer-disclaimer">
+    <strong>Prototype Demonstration</strong>
+    A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.
+    Not affiliated with or endorsed by any government agency.
+    For demonstration purposes only.
+  </div>
+  <div class="lp-footer-copy">&copy; 2026 Aimpoint Technology &middot; All rights reserved</div>
+</footer>
+
+<script>
+  // ── Constants ──────────────────────────────────────────────────────
+  // SUPABASE_URL and SUPABASE_SERVICE_KEY defined in the guard script above
+
+  // ── Service role fetch helper ──────────────────────────────────────
+  async function serviceQuery(path, params = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${path}${params ? '?' + params : ''}`;
+    const res = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return await res.json();
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+           + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function fmtNum(n) {
+    if (n === null || n === undefined) return '—';
+    return Number(n).toLocaleString();
+  }
+
+  function nowLabel() {
+    return 'Updated ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Section A — Users ──────────────────────────────────────────────
+  let _allUsers = [];
+
+  async function loadUsers() {
+    document.getElementById('usersTableWrap').innerHTML = '<div class="table-loading">Loading&hellip;</div>';
+    try {
+      _allUsers = await serviceQuery('approved_users', 'select=id,email,role,persona_name,active,created_at&order=created_at.asc');
+      renderUsersTable(_allUsers);
+      document.getElementById('usersLastUpdated').textContent = nowLabel();
+    } catch (e) {
+      document.getElementById('usersTableWrap').innerHTML = `<p style="color:var(--lp-red);padding:12px;">Failed to load users: ${escHtml(e.message)}</p>`;
+    }
+  }
+
+  function renderUsersTable(users) {
+    if (!users || users.length === 0) {
+      document.getElementById('usersTableWrap').innerHTML = '<p style="color:var(--lp-label);padding:12px;">No approved users found.</p>';
+      return;
+    }
+    const rows = users.map(u => `
+      <tr id="userRow_${u.id}">
+        <td>${escHtml(u.email)}</td>
+        <td>${escHtml(u.persona_name)}</td>
+        <td><span class="role-badge role-${escHtml(u.role)}">${escHtml(u.role)}</span></td>
+        <td>
+          <label class="toggle" aria-label="Active toggle for ${escHtml(u.email)}">
+            <input type="checkbox" ${u.active ? 'checked' : ''}
+                   onchange="toggleUserActive('${escHtml(u.id)}', this.checked)" />
+            <span class="toggle-slider"></span>
+          </label>
+        </td>
+        <td style="font-size:11px;color:var(--lp-label);">${fmtTime(u.created_at)}</td>
+        <td>
+          <button type="button" class="btn-danger-sm" onclick="deleteUser('${escHtml(u.id)}', '${escHtml(u.email)}')">Remove</button>
+        </td>
+      </tr>`).join('');
+
+    document.getElementById('usersTableWrap').innerHTML = `
+      <table class="admin-table">
+        <thead><tr>
+          <th scope="col">Email</th>
+          <th scope="col">Persona Name</th>
+          <th scope="col">Role</th>
+          <th scope="col">Active</th>
+          <th scope="col">Added</th>
+          <th scope="col">Actions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  async function toggleUserActive(id, newActive) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/approved_users?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ active: newActive, updated_at: new Date().toISOString() })
+      });
+    } catch (e) {
+      console.error('Toggle failed:', e);
+    }
+  }
+
+  async function deleteUser(id, email) {
+    if (!confirm(`Remove ${email} from approved users?`)) return;
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/approved_users?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+        }
+      });
+      loadUsers();
+    } catch (e) {
+      console.error('Delete failed:', e);
+    }
+  }
+
+  async function addUser() {
+    const email = document.getElementById('addEmail').value.trim();
+    const persona = document.getElementById('addPersona').value.trim();
+    const role = document.getElementById('addRole').value;
+    const msgEl = document.getElementById('addUserMsg');
+
+    if (!email || !persona) {
+      msgEl.style.color = 'var(--lp-red)';
+      msgEl.textContent = 'Email and persona name are required.';
+      return;
+    }
+
+    document.getElementById('addUserBtn').disabled = true;
+    msgEl.textContent = '';
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/approved_users`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ email, persona_name: persona, role, active: true })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Insert failed');
+      }
+
+      document.getElementById('addEmail').value = '';
+      document.getElementById('addPersona').value = '';
+      document.getElementById('addRole').value = 'viewer';
+      msgEl.style.color = 'var(--lp-green)';
+      msgEl.textContent = `User ${email} added successfully.`;
+      loadUsers();
+    } catch (e) {
+      msgEl.style.color = 'var(--lp-red)';
+      msgEl.textContent = `Error: ${e.message}`;
+    } finally {
+      document.getElementById('addUserBtn').disabled = false;
+    }
+  }
+
+  // ── Section B — Login History ──────────────────────────────────────
+  let _allLoginRows = [];
+  let _loginFilter = 'all';
+
+  async function loadLoginHistory() {
+    document.getElementById('loginTableWrap').innerHTML = '<div class="table-loading">Loading&hellip;</div>';
+    try {
+      _allLoginRows = await serviceQuery('login_audit_log', 'select=email,event_type,persona_name,created_at&order=created_at.desc&limit=100');
+      applyLoginFilter(_loginFilter);
+      document.getElementById('loginLastUpdated').textContent = nowLabel();
+    } catch (e) {
+      document.getElementById('loginTableWrap').innerHTML = `<p style="color:var(--lp-red);padding:12px;">Failed to load login history: ${escHtml(e.message)}</p>`;
+    }
+  }
+
+  function applyLoginFilter(filter) {
+    _loginFilter = filter;
+    ['all', 'blocked', 'today'].forEach(f => {
+      document.getElementById(`loginFilter${f.charAt(0).toUpperCase() + f.slice(1)}`).classList.toggle('active', f === filter);
+    });
+
+    let rows = _allLoginRows;
+    if (filter === 'blocked') {
+      rows = rows.filter(r => r.event_type === 'blocked');
+    } else if (filter === 'today') {
+      const today = new Date().toDateString();
+      rows = rows.filter(r => new Date(r.created_at).toDateString() === today);
+    }
+    renderLoginTable(rows);
+  }
+
+  function renderLoginTable(rows) {
+    if (!rows || rows.length === 0) {
+      document.getElementById('loginTableWrap').innerHTML = '<p style="color:var(--lp-label);padding:12px;">No events found.</p>';
+      return;
+    }
+    const trs = rows.map(r => `
+      <tr>
+        <td style="font-size:11px;color:var(--lp-label);white-space:nowrap;">${fmtTime(r.created_at)}</td>
+        <td>${escHtml(r.email)}</td>
+        <td><span class="role-badge event-${escHtml(r.event_type)}">${escHtml(r.event_type)}</span></td>
+        <td>${escHtml(r.persona_name || '—')}</td>
+      </tr>`).join('');
+
+    document.getElementById('loginTableWrap').innerHTML = `
+      <table class="admin-table">
+        <thead><tr>
+          <th scope="col">Timestamp</th>
+          <th scope="col">Email</th>
+          <th scope="col">Event</th>
+          <th scope="col">Persona</th>
+        </tr></thead>
+        <tbody>${trs}</tbody>
+      </table>`;
+  }
+
+  // ── Section C — API Usage ──────────────────────────────────────────
+  let _allApiRows = [];
+  let _apiDays = 7;
+
+  async function loadApiUsage() {
+    document.getElementById('apiTableWrap').innerHTML = '<div class="table-loading">Loading&hellip;</div>';
+    try {
+      _allApiRows = await serviceQuery('api_usage_log', 'select=function_name,model,input_tokens,output_tokens,estimated_cost,program_id,created_at&order=created_at.desc&limit=200');
+      applyApiFilter(_apiDays);
+      document.getElementById('apiLastUpdated').textContent = nowLabel();
+    } catch (e) {
+      document.getElementById('apiTableWrap').innerHTML = `<p style="color:var(--lp-red);padding:12px;">Failed to load API usage: ${escHtml(e.message)}</p>`;
+    }
+  }
+
+  function applyApiFilter(days) {
+    _apiDays = days;
+    ['7','30','All'].forEach(f => {
+      const el = document.getElementById(`apiFilter${f}`);
+      if (el) el.classList.remove('active');
+    });
+    const activeId = days === 7 ? 'apiFilter7' : days === 30 ? 'apiFilter30' : 'apiFilterAll';
+    document.getElementById(activeId).classList.add('active');
+
+    let rows = _allApiRows;
+    if (days > 0) {
+      const cutoff = new Date(Date.now() - days * 86400000).toISOString();
+      rows = rows.filter(r => r.created_at >= cutoff);
+    }
+    renderApiUsage(rows);
+  }
+
+  function renderApiUsage(rows) {
+    if (!rows || rows.length === 0) {
+      document.getElementById('statCalls').textContent = '0';
+      document.getElementById('statInputTokens').textContent = '0';
+      document.getElementById('statOutputTokens').textContent = '0';
+      document.getElementById('statCost').textContent = '$0.00';
+      document.getElementById('apiTableWrap').innerHTML = '<p style="color:var(--lp-label);padding:12px;">No API calls in this period.</p>';
+      return;
+    }
+
+    const totalCalls = rows.length;
+    const totalInput = rows.reduce((s,r) => s + (r.input_tokens || 0), 0);
+    const totalOutput = rows.reduce((s,r) => s + (r.output_tokens || 0), 0);
+    const totalCost = rows.reduce((s,r) => s + parseFloat(r.estimated_cost || 0), 0);
+
+    document.getElementById('statCalls').textContent = fmtNum(totalCalls);
+    document.getElementById('statInputTokens').textContent = fmtNum(totalInput);
+    document.getElementById('statOutputTokens').textContent = fmtNum(totalOutput);
+    document.getElementById('statCost').textContent = '$' + totalCost.toFixed(4);
+
+    // Per-function breakdown
+    const byFn = {};
+    rows.forEach(r => {
+      if (!byFn[r.function_name]) byFn[r.function_name] = { calls: 0, input: 0, output: 0, cost: 0 };
+      byFn[r.function_name].calls++;
+      byFn[r.function_name].input += r.input_tokens || 0;
+      byFn[r.function_name].output += r.output_tokens || 0;
+      byFn[r.function_name].cost += parseFloat(r.estimated_cost || 0);
+    });
+
+    const fnRows = Object.entries(byFn).sort((a,b) => b[1].calls - a[1].calls).map(([fn, s]) => `
+      <tr>
+        <td style="font-weight:600;">${escHtml(fn)}</td>
+        <td style="text-align:right;">${fmtNum(s.calls)}</td>
+        <td style="text-align:right;">${fmtNum(Math.round(s.input/s.calls))}</td>
+        <td style="text-align:right;">${fmtNum(Math.round(s.output/s.calls))}</td>
+        <td style="text-align:right;">$${(s.cost/s.calls).toFixed(6)}</td>
+        <td style="text-align:right;font-weight:600;">$${s.cost.toFixed(4)}</td>
+      </tr>`).join('');
+
+    document.getElementById('apiTableWrap').innerHTML = `
+      <table class="admin-table">
+        <thead><tr>
+          <th scope="col">Function</th>
+          <th scope="col" style="text-align:right;">Calls</th>
+          <th scope="col" style="text-align:right;">Avg Input Tokens</th>
+          <th scope="col" style="text-align:right;">Avg Output Tokens</th>
+          <th scope="col" style="text-align:right;">Avg Cost/Call</th>
+          <th scope="col" style="text-align:right;">Total Cost</th>
+        </tr></thead>
+        <tbody>${fnRows}</tbody>
+      </table>`;
+  }
+
+  // ── Section D — System Health ──────────────────────────────────────
+  const HEALTH_TABLES = [
+    'rules', 'rule_conditions', 'rule_dependencies',
+    'tenants', 'programs', 'audit_log',
+    'approved_users', 'api_usage_log'
+  ];
+
+  async function loadSystemHealth() {
+    document.getElementById('healthGrid').innerHTML = '<div class="table-loading" style="grid-column:1/-1">Loading&hellip;</div>';
+    document.getElementById('healthStatusBanner').innerHTML = '';
+    try {
+      const results = await Promise.all(
+        HEALTH_TABLES.map(t =>
+          serviceQuery(t, 'select=count').then(r => ({ table: t, count: r[0]?.count ?? '?' }))
+           .catch(() => ({ table: t, count: 'err' }))
+        )
+      );
+
+      const anyErr = results.some(r => r.count === 'err');
+      document.getElementById('healthStatusBanner').innerHTML = anyErr
+        ? '<div class="status-banner status-warn">&#x26A0; Degraded &mdash; some queries failed</div>'
+        : '<div class="status-banner status-ok">&#x2713; All systems operational</div>';
+
+      document.getElementById('healthGrid').innerHTML = results.map(r => `
+        <div class="stat-card">
+          <div class="stat-card-value">${r.count === 'err' ? '?' : fmtNum(r.count)}</div>
+          <div class="stat-card-label">${escHtml(r.table)}</div>
+        </div>`).join('');
+
+      document.getElementById('healthLastUpdated').textContent = nowLabel();
+    } catch (e) {
+      document.getElementById('healthGrid').innerHTML = `<p style="color:var(--lp-red);padding:12px;grid-column:1/-1;">Failed: ${escHtml(e.message)}</p>`;
+    }
+  }
+
+  // ── Section E — Oversight Mode ─────────────────────────────────────
+  const OVERSIGHT_LABELS = ['Full Human Review', 'Exception-Based', 'Automated with Audit'];
+
+  function updateOversightLabel(val) {
+    const v = parseInt(val);
+    for (let i = 0; i <= 2; i++) {
+      document.getElementById(`oversightLabel${i}`).classList.toggle('active', i === v);
+    }
+  }
+
+  function initOversightSlider() {
+    const slider = document.getElementById('oversightSlider');
+    const stored = localStorage.getItem('lp_oversight_level');
+    slider.value = stored !== null ? stored : '1';
+    updateOversightLabel(slider.value);
+
+    slider.addEventListener('input', () => {
+      localStorage.setItem('lp_oversight_level', slider.value);
+      updateOversightLabel(slider.value);
+    });
+  }
+
+  // ── Persona display ───────────────────────────────────────────────
+  function initPersona() {
+    const session = window.__lpSession;
+    if (!session) return;
+    const persona = sessionStorage.getItem('lp_persona') || session.user.email || 'Admin User';
+    const initials = persona.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase() || 'KP';
+    document.getElementById('avatarCircle').textContent = initials;
+    document.getElementById('userName').textContent = persona.split(',')[0].trim();
+    document.getElementById('userRole').textContent = 'Admin';
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    initPersona();
+    initOversightSlider();
+    loadUsers();
+    loadLoginHistory();
+    loadApiUsage();
+    loadSystemHealth();
+  });
+
+  // ── Close notification dropdown on outside click ──────────────────
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#notificationBell')) {
+      const dd = document.querySelector('.notification-dropdown');
+      if (dd) dd.classList.remove('show');
+    }
+  });
+</script>
+</body>
+</html>

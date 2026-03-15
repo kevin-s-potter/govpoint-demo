@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LexiPoint | Analytics Dashboard</title>
+<!-- Auth guard: must appear before program-switcher.js and any page JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(async function() {
+  const _sb = supabase.createClient(
+    'https://fshdlcveidwwufdigekh.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY'
+  );
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.replace('login.html');
+  } else {
+    window.__lpSession = session;
+    window.__lpSupabase = _sb;
+  }
+})();
+</script>
 <link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
 <link rel="stylesheet" href="shared.css" />
 <script src="program-switcher.js"></script>
@@ -696,6 +714,7 @@
 </style>
 </head>
 <body>
+<a href="#main-content" class="skip-nav">Skip to main content</a>
 
 <!-- GLOBAL HEADER -->
 <nav class="topnav">
@@ -714,11 +733,12 @@
     <a href="review-queue.html">Review Queue</a>
     <a href="dashboard.html" class="active">Dashboard</a>
     <a href="scenario-sandbox.html">Scenarios</a>
+    <a href="admin.html">Admin</a>
   </div>
 
   <div class="nav-controls">
-    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
-      <span>&#x1F514;</span>
+    <div class="notification-bell" id="notificationBell" role="button" aria-label="Notifications" aria-expanded="false" aria-haspopup="menu" tabindex="0" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span aria-hidden="true">&#x1F514;</span>
       <span class="notification-badge">3</span>
       <div class="notification-dropdown">
         <div class="notification-dropdown-header">Notifications</div>
@@ -737,21 +757,64 @@
       </div>
     </div>
 
-    <div class="role-indicator">
+    <div class="persona-trigger role-indicator" id="personaTrigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
       <div class="avatar-circle" id="avatarCircle">SC</div>
       <div class="role-text">
         <div class="user-name" id="userName">Sarah Chen</div>
         <div class="user-role" id="userRole">Publisher | Hospital Licensing</div>
       </div>
+      <span class="persona-chevron" aria-hidden="true">▾</span>
+      <div class="persona-dropdown" role="menu">
+        <div class="persona-dropdown-header">
+          <div class="persona-dropdown-avatar" id="ddAvatar">??</div>
+          <div>
+            <div class="persona-dropdown-name" id="ddName"></div>
+            <div class="persona-dropdown-role" id="ddRole"></div>
+          </div>
+        </div>
+        <div class="persona-dropdown-divider"></div>
+        <button class="persona-dropdown-signout" onclick="window.__lpSupabase ? window.__lpSupabase.auth.signOut().then(function(){ window.location.replace('login.html'); }) : window.location.replace('login.html');">Sign Out</button>
+      </div>
     </div>
   </div>
 </nav>
+<script>
+(function() {
+  var trigger = document.getElementById('personaTrigger');
+  if (!trigger) return;
+  // populate from sessionStorage
+  var persona = sessionStorage.getItem('lp_persona') || '';
+  var role    = sessionStorage.getItem('lp_role')    || '';
+  var name    = persona.split(',')[0].trim() || persona;
+  var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
+  var ddAvatar = document.getElementById('ddAvatar');
+  var ddName   = document.getElementById('ddName');
+  var ddRole   = document.getElementById('ddRole');
+  if (ddAvatar) ddAvatar.textContent = initials || document.getElementById('avatarCircle') && document.getElementById('avatarCircle').textContent || '??';
+  if (ddName)   ddName.textContent   = name || (document.getElementById('userName') && document.getElementById('userName').textContent) || '';
+  if (ddRole)   ddRole.textContent   = role || (document.getElementById('userRole') && document.getElementById('userRole').textContent) || '';
+  // toggle
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var expanded = trigger.getAttribute('aria-expanded') === 'true';
+    trigger.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+  });
+  document.addEventListener('click', function() {
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+  // keyboard
+  trigger.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); }
+    if (e.key === 'Escape') trigger.setAttribute('aria-expanded', 'false');
+  });
+})();
+</script>
 
 <!-- SLDS SCOPE WRAPPER -->
 <div class="slds-scope">
 
 <!-- MAIN CONTENT -->
-<div style="background: var(--slds-bg); padding: 24px 32px;">
+<div id="main-content" style="background: var(--slds-bg); padding: 24px 32px;">
   <div class="container">
 
     <!-- PAGE HEADER -->
@@ -899,11 +962,11 @@
         <table class="slds-table slds-table_cell-buffer slds-table_bordered data-table" id="activityTable">
           <thead>
             <tr class="slds-line-height_reset">
-              <th>Timestamp</th>
-              <th>Action</th>
-              <th>User</th>
-              <th>Target</th>
-              <th>Detail</th>
+              <th scope="col">Timestamp</th>
+              <th scope="col">Action</th>
+              <th scope="col">User</th>
+              <th scope="col">Target</th>
+              <th scope="col">Detail</th>
             </tr>
           </thead>
           <tbody id="activityTableBody">
@@ -1380,11 +1443,11 @@
       </div>
       <table class="data-table slds-table slds-table_cell-buffer slds-table_bordered" style="width:100%;">
         <thead><tr>
-          <th style="width:90px;">Rule</th>
-          <th>Name</th>
-          <th style="width:140px;">Citation</th>
-          <th style="width:110px;text-align:center;">Days Waiting</th>
-          <th style="width:80px;"></th>
+          <th scope="col" style="width:90px;">Rule</th>
+          <th scope="col">Name</th>
+          <th scope="col" style="width:140px;">Citation</th>
+          <th scope="col" style="width:110px;text-align:center;">Days Waiting</th>
+          <th scope="col" style="width:80px;"></th>
         </tr></thead>
         <tbody>
           ${reviewRules.map(r => {
@@ -1452,7 +1515,7 @@
 </script>
 
 <footer class="lp-footer">
-  <div class="lp-footer-brand">⌘ LexiPoint</div>
+  <div class="lp-footer-brand"><span aria-hidden="true">⌘</span> LexiPoint</div>
   <div class="lp-footer-tagline">Policy Intelligence Infrastructure for Government</div>
   <nav class="lp-footer-nav">
     <a href="index.html">New Request</a>
@@ -1462,7 +1525,14 @@
     <a href="dashboard.html">Analytics Dashboard</a>
     <span class="lp-footer-nav-divider">·</span>
     <a href="audit-log.html">Audit Log</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="scenario-sandbox.html">Scenario Sandbox</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="review-queue.html">Review Queue</a>
+    <span class="lp-footer-nav-divider">·</span>
+    <a href="admin.html" id="footerAdminLink" style="display:none">Admin</a>
   </nav>
+  <script>if (sessionStorage.getItem('lp_role') === 'admin') { var el = document.getElementById('footerAdminLink'); if(el) el.style.display = ''; }</script>
   <div class="lp-footer-disclaimer">
     <strong>Prototype Demonstration</strong>
     A product concept by <a href="https://aimpointtechnology.com">Aimpoint Technology</a>.

@@ -52,6 +52,35 @@
   --green-light:#F0FDF4;
 }
 
+/* ── Skip navigation (WCAG 2.4.1) ──────────────────────────────────── */
+.skip-nav {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-nav:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  background: var(--lp-blue);
+  color: white;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  display: block;
+}
+
+/* ── Focus visible (WCAG 2.4.7) ────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #0070D2;
+  outline-offset: 2px;
+}
+
 /* ── Reset ──────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
@@ -524,12 +553,12 @@ body {
   padding: 2px 8px; border-radius: 4px;
 }
 
-.badge-pending   { background: #F3F3F3; color: #9CA3AF; }
+.badge-pending   { background: #F3F3F3; color: #6B7280; }
 .badge-evaluating { background: #EDE9FE; color: #9050E9; }
 .badge-passed    { background: #D1FAE5; color: #065F46; }
 .badge-flagged   { background: #FEF3C7; color: #92400E; }
 .badge-blocked   { background: #FEE2E2; color: #991B1B; }
-.badge-bypassed  { background: #F3F3F3; color: #9CA3AF; }
+.badge-bypassed  { background: #F3F3F3; color: #6B7280; }
 
 .phase-chevron { color: #9CA3AF; font-size: 12px; transition: transform 0.2s; flex-shrink: 0; }
 .phase-card.open .phase-chevron { transform: rotate(180deg); }
@@ -988,6 +1017,93 @@ body {
 .role-text { font-size: 12px; line-height: 1.3; }
 .role-text .user-name { color: #fff; font-weight: 600; }
 .role-text .user-role { color: rgba(255,255,255,0.75); font-size: 11px; }
+
+/* ── Persona profile dropdown ─────────────────────────────────── */
+.persona-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.persona-trigger:focus-visible {
+  outline: 2px solid #1B96FF;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.persona-chevron {
+  color: rgba(255,255,255,0.65);
+  font-size: 11px;
+  margin-left: -4px;
+  transition: transform 0.15s;
+}
+.persona-trigger[aria-expanded="true"] .persona-chevron {
+  transform: rotate(180deg);
+}
+.persona-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 210px;
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  z-index: 9999;
+}
+.persona-trigger[aria-expanded="true"] .persona-dropdown {
+  display: block;
+}
+.persona-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+}
+.persona-dropdown-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1B96FF, #0176D3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.persona-dropdown-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #032D60;
+  line-height: 1.3;
+}
+.persona-dropdown-role {
+  font-size: 11px;
+  color: #54698D;
+  line-height: 1.3;
+}
+.persona-dropdown-divider {
+  height: 1px;
+  background: #E5E5E5;
+  margin: 0;
+}
+.persona-dropdown-signout {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  color: #BA0517;
+  cursor: pointer;
+  font-family: inherit;
+}
+.persona-dropdown-signout:hover { background: #FFF5F5; }
 
 /* ── Footer ──────────────────────────────────────────────────────── */
 .lp-footer {
