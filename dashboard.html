@@ -915,9 +915,8 @@
     <section id="programHealth" style="margin-bottom:24px;">
       <div style="margin-bottom:16px;">
         <h2 style="font-size:18px;font-weight:800;color:var(--slds-text-dark);letter-spacing:-0.3px;">Program Health</h2>
-        <p style="font-size:13px;color:var(--slds-text-label);margin-top:4px;">Per-program rule coverage, application outcomes, and recent changes</p>
+        <p style="font-size:13px;color:var(--slds-text-label);margin-top:4px;">Rule coverage, application outcomes, and recent changes for the current program</p>
       </div>
-      <div id="phTabs" class="dash-filter-pills" style="margin-bottom:16px;flex-wrap:wrap;gap:4px;"></div>
       <div id="phPanel" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;"></div>
     </section>
 
@@ -1023,7 +1022,6 @@
   let cachedUsersMap = {};
   let cachedRules = [];
   let isRefreshing = false;
-  let phSelectedProgram = null;
   let phCache = {};
 
   // ============================================================
@@ -1130,7 +1128,6 @@
   // ============================================================
   async function loadDashboardData() {
     phCache = {};
-    phSelectedProgram = currentProgram;
     const config = PROGRAM_CONFIG[currentProgram];
 
     let rulesParams = 'select=*';
@@ -1546,30 +1543,9 @@
   // ============================================================
 
   function initProgramHealth() {
-    phSelectedProgram = currentProgram;
-    renderPhTabs(phSelectedProgram);
-    switchHealthProgram(phSelectedProgram);
-  }
-
-  function renderPhTabs(activeId) {
-    const container = document.getElementById('phTabs');
-    if (!container) return;
-    container.innerHTML = Object.entries(PROGRAM_CONFIG).map(([id, cfg]) => {
-      const isActive = id === activeId;
-      return `<button class="slds-button dash-pill${isActive ? ' active' : ''}" onclick="switchHealthProgram('${id}')">${cfg.programName}</button>`;
-    }).join('');
-  }
-
-  function switchHealthProgram(programId) {
-    phSelectedProgram = programId;
-    renderPhTabs(programId);
-    if (phCache[programId]) {
-      renderPhStats(phCache[programId]);
-    } else {
-      document.getElementById('phPanel').innerHTML =
-        '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--slds-text-label);font-size:13px;">Loading program health data…</div>';
-      loadPhData(programId);
-    }
+    document.getElementById('phPanel').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--slds-text-label);font-size:13px;">Loading program health data…</div>';
+    loadPhData(currentProgram);
   }
 
   async function loadPhData(programId) {
@@ -1648,15 +1624,13 @@
       const stats = { breakdown, total, approvalRate, denialRate, decided, approved, denied,
                       topRules, unusedRules, changes };
       phCache[programId] = stats;
-      if (phSelectedProgram === programId) renderPhStats(stats);
+      renderPhStats(stats);
     } catch (err) {
       console.error('loadPhData error:', err);
-      if (phSelectedProgram === programId) {
-        document.getElementById('phPanel').innerHTML =
-          `<div style="grid-column:1/-1;padding:24px;background:var(--slds-white);border:1px solid var(--slds-border);border-radius:var(--slds-radius);color:var(--slds-error);font-size:13px;">
-            <strong>Error loading program health data.</strong> Check the console for details.
-          </div>`;
-      }
+      document.getElementById('phPanel').innerHTML =
+        `<div style="grid-column:1/-1;padding:24px;background:var(--slds-white);border:1px solid var(--slds-border);border-radius:var(--slds-radius);color:var(--slds-error);font-size:13px;">
+          <strong>Error loading program health data.</strong> Check the console for details.
+        </div>`;
     }
   }
 
