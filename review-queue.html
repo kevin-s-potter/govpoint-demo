@@ -176,7 +176,7 @@ const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
 const EDGE_BASE   = 'https://fshdlcveidwwufdigekh.supabase.co/functions/v1';
 
-let currentProgram = 'hosp-licensing';
+let currentProgram = 'doggy-daycare';
 
 // ── Utility ──────────────────────────────────────────────────
 function escHtml(s) {
@@ -251,7 +251,8 @@ async function loadQueue() {
             <li>Flagged applications are returned to your existing system, which routes them to the coordinator queue. LexiPoint can also surface AI-assisted recommendations alongside each flag.</li>
           </ol>
           <p style="margin:12px 0 0; padding-top:10px; border-top:1px solid var(--border);">
-            Impact Preview and the Scenario Planner are fully active for <strong>${escHtml(programName)}</strong> using seeded synthetic data.
+            To see a live demo of the configured queue, switch to <a href="#" onclick="switchProgram('doggy-daycare'); return false;" style="color:var(--brand-blue); text-decoration:none; font-weight:600;">Doggy Day Care Grants</a>.
+            Impact Preview and the Scenario Planner are fully active for <strong>${escHtml(programName)}</strong> using seeded synthetic data —
             <a href="scenario-sandbox.html" style="color:var(--brand-blue); text-decoration:none; font-weight:600;">Go to Scenario Planner →</a>
           </p>
         </div>
