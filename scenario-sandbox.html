@@ -342,7 +342,12 @@ const PROGRAM_IMPACT_CONFIG = {
       'accredited':     { key: 'accredited',      type: 'boolean' },
       'quality_score':  { key: 'quality_score',   type: 'integer' },
       'deficiencies':   { key: 'deficiencies',    type: 'integer' }
-    }
+    },
+    sampleFields: [
+      { label: 'Beds',          key: 'beds'          },
+      { label: 'Quality Score', key: 'quality_score' },
+      { label: 'Deficiencies',  key: 'deficiencies'  }
+    ]
   },
   'snap': {
     dataTable: 'applications',
@@ -360,7 +365,12 @@ const PROGRAM_IMPACT_CONFIG = {
       'categorically_eligible':                    { key: 'categorically_eligible', type: 'boolean' },
       'household_gross_monthly_income_130pct_fpl': { key: 'gross_income', type: 'decimal', evaluable: false },
       'household_net_monthly_income_100pct_fpl':   { key: 'net_income',   type: 'decimal', evaluable: false }
-    }
+    },
+    sampleFields: [
+      { label: 'HH Size',      key: 'household_size' },
+      { label: 'Gross Income', key: 'gross_income'   },
+      { label: 'Assets',       key: 'assets'         }
+    ]
   },
   'nursing-home': {
     dataTable: 'applications',
@@ -372,7 +382,12 @@ const PROGRAM_IMPACT_CONFIG = {
       'complaint_pending':   { key: 'complaint_pending',  type: 'boolean' },
       'cms_rating':          { key: 'cms_rating',         type: 'integer' },
       'inspection_days_ago': { key: 'inspection_days_ago',type: 'integer' }
-    }
+    },
+    sampleFields: [
+      { label: 'Beds',         key: 'beds'           },
+      { label: 'RN Hrs/Day',   key: 'rn_daily_hours' },
+      { label: 'CMS Rating',   key: 'cms_rating'     }
+    ]
   },
   'contractor-licensing': {
     dataTable: 'applications',
@@ -384,7 +399,12 @@ const PROGRAM_IMPACT_CONFIG = {
       'insurance_amount':  { key: 'insurance_amount',   type: 'decimal' },
       'bond_amount':       { key: 'bond_amount',        type: 'decimal' },
       'years_experience':  { key: 'years_experience',   type: 'integer' }
-    }
+    },
+    sampleFields: [
+      { label: 'Insurance',    key: 'insurance_amount' },
+      { label: 'Bond',         key: 'bond_amount'      },
+      { label: 'Yrs Exp',      key: 'years_experience' }
+    ]
   },
   'childcare-licensing': {
     dataTable: 'applications',
@@ -399,7 +419,12 @@ const PROGRAM_IMPACT_CONFIG = {
       'fbi_completed':      { key: 'fbi_completed',     type: 'boolean' },
       'indoor_sqft':        { key: 'indoor_sqft',       type: 'integer' },
       'children_per_staff': { key: 'children_per_staff',type: 'decimal' }
-    }
+    },
+    sampleFields: [
+      { label: 'Director Age',    key: 'director_age'      },
+      { label: 'Indoor Sq Ft',    key: 'indoor_sqft'       },
+      { label: 'Children/Staff',  key: 'children_per_staff'}
+    ]
   },
   'doggy-daycare': {
     dataTable: 'grant_applications',
@@ -418,7 +443,12 @@ const PROGRAM_IMPACT_CONFIG = {
       'facility_slots_remaining': { key: 'facility_slots_remaining', type: 'integer' },
       'months_since_last_grant':  { key: 'months_since_last_grant',  type: 'integer' },
       'income_doc_age_days':      { key: 'income_doc_age_days',      type: 'integer' }
-    }
+    },
+    sampleFields: [
+      { label: 'County',          key: 'county'                  },
+      { label: 'HH Income',       key: 'household_income'        },
+      { label: 'Facility Status', key: 'facility_license_status' }
+    ]
   }
 };
 
@@ -431,6 +461,7 @@ let sandboxes      = [];
 let activeSandbox  = null;
 let programRules   = [];       // all active rules for current program (for rule picker)
 let pendingExportScenario = null;   // { type: 'ai'|'sandbox', data: ... }
+let _flipCache     = {};       // { ruleId: { passToFail: [...], failToPass: [...] } }
 
 // ================================================================
 // SUPABASE HELPERS
@@ -991,6 +1022,7 @@ function startEditCondition(snapshotId, condIdx, btn) {
       onblur="cancelEdit(this, '${escHtml(currentVal)}')">
   `;
   btn.innerHTML = '&#x2713;';
+  btn.classList.add('is-saving');
   btn.onclick = () => saveConditionChange(snapshotId, condIdx);
   setTimeout(() => valueTd.querySelector('input').focus(), 0);
 }
@@ -1253,9 +1285,10 @@ async function openImpactPreview() {
     const appRows = Array.isArray(rows) ? rows : [];
     if (appRows.length === 0) { renderImpactEstimated(changedSnaps); return; }
 
-    // 5. Compute flips per changed snapshot
+    // 5. Compute flips per changed snapshot — collect flip details for drill-down
     const ruleResults = [];
     let totalFlips = 0;
+    _flipCache = {};
 
     for (const snap of changedSnaps) {
       const orig = snap.original_conditions || [];
@@ -1265,17 +1298,28 @@ async function openImpactPreview() {
         .filter(({ oc, sc }) => oc.value !== sc.value);
 
       let snapFlips = 0;
+      const passToFail = [];  // condition was passing, now fails
+      const failToPass = [];  // condition was failing, now passes
+
       for (const row of appRows) {
         for (const { oc, sc } of changes) {
           const origResult = evaluateCondition(row, oc, impactCfg);
           const sandResult = evaluateCondition(row, sc, impactCfg);
           if (origResult !== null && sandResult !== null && origResult !== sandResult) {
             snapFlips++;
+            const context = {};
+            for (const sf of (impactCfg.sampleFields || [])) {
+              context[sf.label] = impactCfg.rowValueFn(row, sf.key);
+            }
+            const rec = { id: row.id || row.app_id || snapFlips, field: oc.field, origVal: oc.value, sandVal: sc.value, context };
+            if (origResult) passToFail.push(rec);
+            else failToPass.push(rec);
             break; // count each row at most once per snapshot
           }
         }
       }
 
+      _flipCache[snap.rule_id] = { passToFail, failToPass };
       totalFlips += snapFlips;
       ruleResults.push({ snap, changes, flips: snapFlips });
 
@@ -1325,27 +1369,146 @@ function renderImpactResults(ruleResults, totalFlips, appCount, dataSource, chan
         <div class="impact-stat-label">Decision Flips</div>
       </div>
     </div>
-    ${ruleResults.map(r => `
+    ${ruleResults.map((r, idx) => `
       <div class="impact-rule-row">
         <span class="impact-change-arrow">&#x21C4;</span>
         <div class="impact-rule-info">
           <div class="impact-rule-name">${escHtml(r.snap.rule_id)} — ${escHtml(r.snap.rule_name)}</div>
           <div class="impact-rule-change">${r.changes.map(({ oc, sc }) =>
-            `${escHtml(oc.field)}: ${escHtml(oc.value)} → ${escHtml(sc.value)}`
-          ).join(' · ')}</div>
+            `${escHtml(oc.field)}: ${escHtml(oc.value)} &#x2192; ${escHtml(sc.value)}`
+          ).join(' &middot; ')}</div>
         </div>
-        <span class="impact-affected-count">${r.flips.toLocaleString()} flip${r.flips !== 1 ? 's' : ''}</span>
+        <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+          <span class="impact-affected-count">${r.flips.toLocaleString()} flip${r.flips !== 1 ? 's' : ''}</span>
+          ${r.flips > 0
+            ? `<button class="flip-toggle-btn" id="flipToggle_${idx}" onclick="toggleFlipDetail(${idx})">&#x25B6; Inspect</button>`
+            : ''}
+        </div>
       </div>
+      <div class="flip-detail-section" id="flipDetail_${idx}" style="display:none;"></div>
     `).join('')}
     <p style="font-size:11px; color:var(--slds-text-label); margin-top:16px;">
       Computed against ${appCount.toLocaleString()} ${escHtml(dataSource)} application records.
+      At larger data volumes, use Export CSV to inspect the full flip list.
     </p>
   `;
+
+  body._ruleResults = ruleResults;
 
   document.getElementById('impactExportBtn').onclick = () => {
     closeModal('impactModal');
     handleExport('pdf', 'sandbox');
   };
+}
+
+// ================================================================
+// FLIP DETAIL DRILL-DOWN
+// Scale note: sample is capped at 12 per direction. At higher data volumes
+// this function is unchanged — only the computation tier changes (client JS
+// → edge function SQL). The sample+export pattern works at any scale.
+// ================================================================
+function toggleFlipDetail(idx) {
+  const body = document.getElementById('impactModalBody');
+  const ruleResult = body._ruleResults && body._ruleResults[idx];
+  if (!ruleResult) return;
+
+  const detail = document.getElementById(`flipDetail_${idx}`);
+  const btn    = document.getElementById(`flipToggle_${idx}`);
+  if (!detail || !btn) return;
+
+  // Collapse if already open
+  if (detail.style.display !== 'none') {
+    detail.style.display = 'none';
+    btn.innerHTML = '&#x25B6; Inspect';
+    return;
+  }
+
+  // Build content on first open, re-use on subsequent opens
+  if (!detail._built) {
+    const cached = _flipCache[ruleResult.snap.rule_id];
+    if (!cached) return;
+
+    const { passToFail, failToPass } = cached;
+    const SAMPLE = 12;
+    const total  = passToFail.length + failToPass.length;
+    const sP = passToFail.slice(0, SAMPLE);
+    const sF = failToPass.slice(0, SAMPLE);
+    const ctxLabels = total > 0
+      ? Object.keys(((passToFail[0] || failToPass[0]) || {}).context || {})
+      : [];
+
+    function buildGroup(records, label, labelColor) {
+      if (records.length === 0) return '';
+      return `
+        <div class="flip-group">
+          <div class="flip-group-header" style="color:${labelColor};">${label} — ${records.length === SAMPLE ? SAMPLE + '+' : records.length} records</div>
+          <table class="flip-detail-table">
+            <thead><tr>
+              <th>ID</th><th>Field</th><th>Was</th><th>Becomes</th>
+              ${ctxLabels.map(l => `<th>${escHtml(l)}</th>`).join('')}
+            </tr></thead>
+            <tbody>
+              ${records.map(rec => `
+                <tr>
+                  <td style="font-family:monospace;font-size:10px;color:var(--slds-text-label);">${escHtml(String(rec.id)).slice(0, 8)}&hellip;</td>
+                  <td><span class="condition-field">${escHtml(rec.field)}</span></td>
+                  <td style="color:#BA0517;">${escHtml(rec.origVal)}</td>
+                  <td style="color:#2E844A; font-weight:600;">${escHtml(rec.sandVal)}</td>
+                  ${ctxLabels.map(l => `<td>${escHtml(String(rec.context[l] ?? ''))}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    detail.innerHTML = `
+      <div class="flip-detail-wrapper">
+        ${buildGroup(sP, '&#x2715; Condition now fails (was passing)', '#BA0517')}
+        ${buildGroup(sF, '&#x2713; Condition now passes (was failing)', '#2E844A')}
+        <div class="flip-detail-footer">
+          Showing ${Math.min(sP.length + sF.length, total)} of ${total} flipped records
+          &nbsp;&middot;&nbsp;
+          <a href="#" onclick="exportFlipCSV(${idx}); return false;">Export full list CSV</a>
+        </div>
+      </div>`;
+    detail._built = true;
+  }
+
+  detail.style.display = 'block';
+  btn.innerHTML = '&#x25BC; Inspect';
+}
+
+function exportFlipCSV(idx) {
+  const body = document.getElementById('impactModalBody');
+  const ruleResult = body._ruleResults && body._ruleResults[idx];
+  if (!ruleResult) return;
+
+  const cached = _flipCache[ruleResult.snap.rule_id];
+  if (!cached) return;
+
+  const allFlips = [...cached.passToFail, ...cached.failToPass];
+  if (allFlips.length === 0) { showToast('No flips to export.', 'info'); return; }
+
+  const ctxLabels = Object.keys(allFlips[0].context || {});
+  const headers = ['id', 'rule_id', 'field', 'original_value', 'sandbox_value', 'direction', ...ctxLabels];
+  const rows = allFlips.map(rec => [
+    rec.id,
+    ruleResult.snap.rule_id,
+    rec.field,
+    rec.origVal,
+    rec.sandVal,
+    cached.passToFail.includes(rec) ? 'pass_to_fail' : 'fail_to_pass',
+    ...ctxLabels.map(l => rec.context[l] ?? '')
+  ]);
+
+  const csv = [headers, ...rows]
+    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  const safeName = ruleResult.snap.rule_id.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  downloadBlob(new Blob([csv], { type: 'text/csv' }), `flips-${safeName}.csv`);
+  showToast('Flip details exported.', 'success');
 }
 
 function renderImpactFromCache(cached, changedSnaps) {
@@ -1810,10 +1973,18 @@ async function loadNeedsReview() {
       <div class="empty-state" style="padding:48px 32px;">
         <div style="margin-bottom:16px;">${renderDataBadge('estimated', 'Not Configured')}</div>
         <h3 class="empty-state-title">Needs Review Triage Not Yet Configured</h3>
-        <p class="empty-state-text" style="max-width:480px; margin:0 auto;">
-          ${escHtml(cfg ? cfg.programName : currentProgram)} does not have a connected application dataset.
-          Impact analysis uses seeded synthetic data. Connect a live data source to enable real-time triage.
+        <p class="empty-state-text" style="max-width:520px; margin:0 auto 16px;">
+          The <strong>${escHtml(cfg ? cfg.programName : currentProgram)}</strong> program does not yet have a connected application dataset with pending-review flags.
         </p>
+        <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:14px 18px; max-width:520px; margin:0 auto; text-align:left; font-size:13px; color:var(--text-label); line-height:1.6;">
+          <strong style="color:var(--text-dark); display:block; margin-bottom:6px;">To enable this tab:</strong>
+          <ol style="margin:0; padding-left:18px;">
+            <li>Connect a live application dataset for this program with a <code>pending</code> decision bucket and <code>review_flags</code> field.</li>
+            <li>Add the program's flag codes and policy context to the <code>analyze-needs-review</code> edge function.</li>
+            <li>Remove the program from the "not configured" guard in <code>loadNeedsReview()</code>.</li>
+          </ol>
+          <p style="margin:10px 0 0;">Impact Preview and Rule Condition Editor are fully active for this program using seeded synthetic data.</p>
+        </div>
       </div>
     `;
     return;
@@ -1859,13 +2030,28 @@ function renderNeedsReviewGroups(apps) {
 
   let html = `
     <div style="padding:0 0 24px;">
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-        <h3 style="font-size:16px; font-weight:700; color:var(--slds-text-dark); margin:0;">Needs Review Queue</h3>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin:0;">Needs Review Queue</h3>
         ${renderDataBadge('seeded', 'Seeded')}
-        <span style="font-size:13px; color:var(--slds-text-label);">
+        <span style="font-size:13px; color:var(--text-label);">
           ${apps.length} application${apps.length !== 1 ? 's' : ''} pending &middot; ${groupEntries.length} group${groupEntries.length !== 1 ? 's' : ''}
         </span>
       </div>
+
+      <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:20px; font-size:13px; color:var(--text-label); line-height:1.6;">
+        <strong style="color:var(--text-dark); display:block; margin-bottom:4px;">What is this?</strong>
+        These are applications that passed initial eligibility screening but were flagged for coordinator attention — usually because a document is expired, a cap was reached, or a discretionary policy may apply.
+        Applications are grouped by their primary review flag so coordinators can handle similar cases together.
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+          <strong style="color:var(--text-dark);">What can I do here?</strong>
+          <ul style="margin:6px 0 0 0; padding-left:18px;">
+            <li>Review each group to understand which policy is in play.</li>
+            <li>Click <strong>Analyze with AI ✨</strong> to get a recommended action with a specific policy citation and priority level.</li>
+            <li>Use <strong>Override</strong> on any recommendation to record your own coordinator rationale before finalizing.</li>
+          </ul>
+        </div>
+      </div>
+
       <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px;">
   `;
 
