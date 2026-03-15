@@ -249,15 +249,58 @@
       </div>
     </div>
 
-    <div class="role-indicator">
+    <div class="persona-trigger role-indicator" id="personaTrigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
       <div class="avatar-circle" id="avatarCircle">JR</div>
       <div class="role-text">
         <div class="user-name" id="userName">Jamie Rivera</div>
         <div class="user-role" id="userRole">Grant Coordinator | Doggy Day Care Grants</div>
       </div>
+      <span class="persona-chevron" aria-hidden="true">▾</span>
+      <div class="persona-dropdown" role="menu">
+        <div class="persona-dropdown-header">
+          <div class="persona-dropdown-avatar" id="ddAvatar">??</div>
+          <div>
+            <div class="persona-dropdown-name" id="ddName"></div>
+            <div class="persona-dropdown-role" id="ddRole"></div>
+          </div>
+        </div>
+        <div class="persona-dropdown-divider"></div>
+        <button class="persona-dropdown-signout" onclick="window.__lpSupabase ? window.__lpSupabase.auth.signOut().then(function(){ window.location.replace('login.html'); }) : window.location.replace('login.html');">Sign Out</button>
+      </div>
     </div>
   </div>
 </nav>
+<script>
+(function() {
+  var trigger = document.getElementById('personaTrigger');
+  if (!trigger) return;
+  // populate from sessionStorage
+  var persona = sessionStorage.getItem('lp_persona') || '';
+  var role    = sessionStorage.getItem('lp_role')    || '';
+  var name    = persona.split(',')[0].trim() || persona;
+  var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
+  var ddAvatar = document.getElementById('ddAvatar');
+  var ddName   = document.getElementById('ddName');
+  var ddRole   = document.getElementById('ddRole');
+  if (ddAvatar) ddAvatar.textContent = initials || document.getElementById('avatarCircle') && document.getElementById('avatarCircle').textContent || '??';
+  if (ddName)   ddName.textContent   = name || (document.getElementById('userName') && document.getElementById('userName').textContent) || '';
+  if (ddRole)   ddRole.textContent   = role || (document.getElementById('userRole') && document.getElementById('userRole').textContent) || '';
+  // toggle
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var expanded = trigger.getAttribute('aria-expanded') === 'true';
+    trigger.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+  });
+  document.addEventListener('click', function() {
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+  // keyboard
+  trigger.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); }
+    if (e.key === 'Escape') trigger.setAttribute('aria-expanded', 'false');
+  });
+})();
+</script>
 
 <div class="lp-stepper">
   <div class="lp-step active" id="step1" onclick="showPage('intake')">
