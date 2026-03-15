@@ -1973,10 +1973,18 @@ async function loadNeedsReview() {
       <div class="empty-state" style="padding:48px 32px;">
         <div style="margin-bottom:16px;">${renderDataBadge('estimated', 'Not Configured')}</div>
         <h3 class="empty-state-title">Needs Review Triage Not Yet Configured</h3>
-        <p class="empty-state-text" style="max-width:480px; margin:0 auto;">
-          ${escHtml(cfg ? cfg.programName : currentProgram)} does not have a connected application dataset.
-          Impact analysis uses seeded synthetic data. Connect a live data source to enable real-time triage.
+        <p class="empty-state-text" style="max-width:520px; margin:0 auto 16px;">
+          The <strong>${escHtml(cfg ? cfg.programName : currentProgram)}</strong> program does not yet have a connected application dataset with pending-review flags.
         </p>
+        <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:14px 18px; max-width:520px; margin:0 auto; text-align:left; font-size:13px; color:var(--text-label); line-height:1.6;">
+          <strong style="color:var(--text-dark); display:block; margin-bottom:6px;">To enable this tab:</strong>
+          <ol style="margin:0; padding-left:18px;">
+            <li>Connect a live application dataset for this program with a <code>pending</code> decision bucket and <code>review_flags</code> field.</li>
+            <li>Add the program's flag codes and policy context to the <code>analyze-needs-review</code> edge function.</li>
+            <li>Remove the program from the "not configured" guard in <code>loadNeedsReview()</code>.</li>
+          </ol>
+          <p style="margin:10px 0 0;">Impact Preview and Rule Condition Editor are fully active for this program using seeded synthetic data.</p>
+        </div>
       </div>
     `;
     return;
@@ -2022,13 +2030,28 @@ function renderNeedsReviewGroups(apps) {
 
   let html = `
     <div style="padding:0 0 24px;">
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-        <h3 style="font-size:16px; font-weight:700; color:var(--slds-text-dark); margin:0;">Needs Review Queue</h3>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin:0;">Needs Review Queue</h3>
         ${renderDataBadge('seeded', 'Seeded')}
-        <span style="font-size:13px; color:var(--slds-text-label);">
+        <span style="font-size:13px; color:var(--text-label);">
           ${apps.length} application${apps.length !== 1 ? 's' : ''} pending &middot; ${groupEntries.length} group${groupEntries.length !== 1 ? 's' : ''}
         </span>
       </div>
+
+      <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:20px; font-size:13px; color:var(--text-label); line-height:1.6;">
+        <strong style="color:var(--text-dark); display:block; margin-bottom:4px;">What is this?</strong>
+        These are applications that passed initial eligibility screening but were flagged for coordinator attention — usually because a document is expired, a cap was reached, or a discretionary policy may apply.
+        Applications are grouped by their primary review flag so coordinators can handle similar cases together.
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+          <strong style="color:var(--text-dark);">What can I do here?</strong>
+          <ul style="margin:6px 0 0 0; padding-left:18px;">
+            <li>Review each group to understand which policy is in play.</li>
+            <li>Click <strong>Analyze with AI ✨</strong> to get a recommended action with a specific policy citation and priority level.</li>
+            <li>Use <strong>Override</strong> on any recommendation to record your own coordinator rationale before finalizing.</li>
+          </ul>
+        </div>
+      </div>
+
       <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px;">
   `;
 
