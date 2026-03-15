@@ -8,12 +8,12 @@
 //   4. Run the corresponding SQL migration on Supabase
 
 const PROGRAM_CONFIG = {
-  'hosp-licensing':       { tenant: 'ohio-odh',      abbr: 'ODH',   name: 'Ohio Department of Health',                  programName: 'Hospital Licensing',            userId: 'user-001', ruleCount: 26  },
-  'snap':                 { tenant: 'ohio-odjfs',    abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',        programName: 'SNAP Benefits',                 userId: 'user-301', ruleCount: 183 },
-  'nursing-home':         { tenant: 'ky-chfs',       abbr: 'CHFS',  name: 'Kentucky CHFS',                              programName: 'Nursing Home Licensing',         userId: 'user-101', ruleCount: 8   },
-  'contractor-licensing': { tenant: 'michigan-lara', abbr: 'LARA',  name: 'Michigan LARA Bureau of Construction Codes', programName: 'Contractor Licensing',          userId: 'user-201', ruleCount: 100 },
-  'childcare-licensing':  { tenant: 'ohio-odjfs',    abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',       programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113 },
-  'doggy-daycare':        { tenant: 'city-of-sunridge', abbr: 'DDC', name: 'City of Sunridge',                          programName: 'Doggy Day Care Grants',         userId: 'user-401', ruleCount: 20  }
+  'hosp-licensing':       { tenant: 'ohio-odh',      abbr: 'ODH',   name: 'Ohio Department of Health',                  programName: 'Hospital Licensing',            userId: 'user-001', ruleCount: 26,  evaluationTable: 'applications'       },
+  'snap':                 { tenant: 'ohio-odjfs',    abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',        programName: 'SNAP Benefits',                 userId: 'user-301', ruleCount: 183, evaluationTable: 'applications'       },
+  'nursing-home':         { tenant: 'ky-chfs',       abbr: 'CHFS',  name: 'Kentucky CHFS',                              programName: 'Nursing Home Licensing',         userId: 'user-101', ruleCount: 8,   evaluationTable: 'applications'       },
+  'contractor-licensing': { tenant: 'michigan-lara', abbr: 'LARA',  name: 'Michigan LARA Bureau of Construction Codes', programName: 'Contractor Licensing',          userId: 'user-201', ruleCount: 100, evaluationTable: 'applications'       },
+  'childcare-licensing':  { tenant: 'ohio-odjfs',    abbr: 'ODJFS', name: 'Ohio Dept of Job and Family Services',       programName: 'Child Care Facility Licensing', userId: 'user-301', ruleCount: 113, evaluationTable: 'applications'       },
+  'doggy-daycare':        { tenant: 'city-of-sunridge', abbr: 'DDC', name: 'City of Sunridge',                          programName: 'Doggy Day Care Grants',         userId: 'user-401', ruleCount: 20,  evaluationTable: 'grant_applications' }
 };
 
 const USER_DISPLAY = {
