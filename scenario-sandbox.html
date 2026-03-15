@@ -57,6 +57,7 @@
   <div class="nav-links">
     <a href="index.html">New Request</a>
     <a href="ontology.html">Ontology</a>
+    <a href="review-queue.html">Review Queue</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="scenario-sandbox.html" class="active">Scenarios</a>
   </div>
@@ -128,9 +129,6 @@
       </button>
       <button class="mode-btn" id="modeSandboxBtn" onclick="switchMode('sandbox')">
         &#x1F9EA; Scenario Sandbox
-      </button>
-      <button class="mode-btn" id="modeNeedsReviewBtn" onclick="switchMode('needsreview')">
-        &#x1F4CB; Needs Review
       </button>
     </div>
 
@@ -226,13 +224,6 @@
           </div>
         </div>
 
-      </div>
-    </div>
-
-    <!-- ── CAPABILITY 3: NEEDS REVIEW AI TRIAGE ──────────── -->
-    <div id="needsReviewPanel" style="display:none;">
-      <div id="needsReviewContent">
-        <div style="padding:40px; text-align:center; color:var(--slds-text-label); font-size:13px;">Select a program to view the triage queue.</div>
       </div>
     </div>
 
@@ -620,19 +611,14 @@ function updateUserDisplay(programId) {
 // ================================================================
 function switchMode(mode) {
   currentMode = mode;
-  document.getElementById('aiPanel').style.display           = mode === 'ai'          ? 'block' : 'none';
-  document.getElementById('sandboxPanel').style.display      = mode === 'sandbox'     ? 'block' : 'none';
-  document.getElementById('needsReviewPanel').style.display  = mode === 'needsreview' ? 'block' : 'none';
+  document.getElementById('aiPanel').style.display      = mode === 'ai'      ? 'block' : 'none';
+  document.getElementById('sandboxPanel').style.display = mode === 'sandbox' ? 'block' : 'none';
   document.getElementById('modeAiBtn').classList.toggle('active', mode === 'ai');
   document.getElementById('modeSandboxBtn').classList.toggle('active', mode === 'sandbox');
-  document.getElementById('modeNeedsReviewBtn').classList.toggle('active', mode === 'needsreview');
 
   if (mode === 'sandbox') {
     loadSandboxes();
     loadProgramRules();
-  }
-  if (mode === 'needsreview') {
-    loadNeedsReview();
   }
 }
 
@@ -1950,196 +1936,6 @@ function downloadBlob(blob, filename) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-// ================================================================
-// CAPABILITY 3 — NEEDS REVIEW AI TRIAGE
-// ================================================================
-const FLAG_LABELS = {
-  'DDC-015:income_doc_expired':        'Expired Income Documentation',
-  'DDC-013:annual_cap_exceeded':       'Annual Cap Exceeded',
-  'DDC-008:cooling_period_borderline': 'Cooling Period Borderline',
-  'DDC-014:no_facility_capacity':      'No Facility Capacity',
-  'DDC-018:priority_queue_eligible':   'Priority Queue Eligible',
-};
-
-async function loadNeedsReview() {
-  const content = document.getElementById('needsReviewContent');
-  content.innerHTML = `<div style="padding:40px;text-align:center;color:var(--slds-text-label);"><div class="spinner"></div><p style="margin-top:12px;font-size:13px;">Loading triage queue…</p></div>`;
-
-  if (currentProgram !== 'doggy-daycare') {
-    const cfg = PROGRAM_CONFIG[currentProgram];
-    content.innerHTML = `
-      <div class="empty-state" style="padding:48px 32px;">
-        <div style="margin-bottom:16px;">${renderDataBadge('estimated', 'Not Configured')}</div>
-        <h3 class="empty-state-title">Needs Review Triage Not Yet Configured</h3>
-        <p class="empty-state-text" style="max-width:520px; margin:0 auto 16px;">
-          The <strong>${escHtml(cfg ? cfg.programName : currentProgram)}</strong> program does not yet have a connected application dataset with pending-review flags.
-        </p>
-        <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:14px 18px; max-width:520px; margin:0 auto; text-align:left; font-size:13px; color:var(--text-label); line-height:1.6;">
-          <strong style="color:var(--text-dark); display:block; margin-bottom:6px;">To enable this tab:</strong>
-          <ol style="margin:0; padding-left:18px;">
-            <li>Connect a live application dataset for this program with a <code>pending</code> decision bucket and <code>review_flags</code> field.</li>
-            <li>Add the program's flag codes and policy context to the <code>analyze-needs-review</code> edge function.</li>
-            <li>Remove the program from the "not configured" guard in <code>loadNeedsReview()</code>.</li>
-          </ol>
-          <p style="margin:10px 0 0;">Impact Preview and Rule Condition Editor are fully active for this program using seeded synthetic data.</p>
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  try {
-    const apps = await sbFetch('grant_applications',
-      `decision=eq.pending&select=app_id,applicant_name,county,household_income,household_size,review_flags,review_notes&order=submitted_at.asc&limit=200`);
-    const pendingApps = Array.isArray(apps) ? apps : [];
-
-    if (pendingApps.length === 0) {
-      content.innerHTML = `
-        <div class="empty-state" style="padding:48px 32px;">
-          <div class="empty-state-icon">&#x2705;</div>
-          <h3 class="empty-state-title">No Applications Pending Review</h3>
-          <p class="empty-state-text">All applications have been processed.</p>
-        </div>
-      `;
-      return;
-    }
-
-    renderNeedsReviewGroups(pendingApps);
-  } catch (err) {
-    content.innerHTML = `<div style="padding:40px;text-align:center;color:var(--slds-error);font-size:13px;">Failed to load triage queue.</div>`;
-    console.error(err);
-  }
-}
-
-function renderNeedsReviewGroups(apps) {
-  const content = document.getElementById('needsReviewContent');
-
-  // Group by primary flag (first element of review_flags array)
-  const groups = {};
-  for (const app of apps) {
-    const flags = Array.isArray(app.review_flags) && app.review_flags.length > 0
-      ? app.review_flags : ['no_flag'];
-    const primary = flags[0];
-    if (!groups[primary]) groups[primary] = { flags: [primary], apps: [] };
-    groups[primary].apps.push(app);
-  }
-
-  const groupEntries = Object.values(groups).sort((a, b) => b.apps.length - a.apps.length);
-
-  let html = `
-    <div style="padding:0 0 24px;">
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-        <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin:0;">Needs Review Queue</h3>
-        ${renderDataBadge('seeded', 'Seeded')}
-        <span style="font-size:13px; color:var(--text-label);">
-          ${apps.length} application${apps.length !== 1 ? 's' : ''} pending &middot; ${groupEntries.length} group${groupEntries.length !== 1 ? 's' : ''}
-        </span>
-      </div>
-
-      <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:20px; font-size:13px; color:var(--text-label); line-height:1.6;">
-        <strong style="color:var(--text-dark); display:block; margin-bottom:4px;">What is this?</strong>
-        These are applications that passed initial eligibility screening but were flagged for coordinator attention — usually because a document is expired, a cap was reached, or a discretionary policy may apply.
-        Applications are grouped by their primary review flag so coordinators can handle similar cases together.
-        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
-          <strong style="color:var(--text-dark);">What can I do here?</strong>
-          <ul style="margin:6px 0 0 0; padding-left:18px;">
-            <li>Review each group to understand which policy is in play.</li>
-            <li>Click <strong>Analyze with AI ✨</strong> to get a recommended action with a specific policy citation and priority level.</li>
-            <li>Use <strong>Override</strong> on any recommendation to record your own coordinator rationale before finalizing.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px;">
-  `;
-
-  groupEntries.forEach((group, idx) => {
-    const flagCode = group.flags[0];
-    const label = FLAG_LABELS[flagCode] || flagCode;
-    html += `
-      <div class="snapshot-card" id="flagCard_${idx}">
-        <div class="snapshot-card-header">
-          <span class="snapshot-rule-id">${escHtml(flagCode)}</span>
-          <span style="background:#E8F3FD; color:#0176D3; border:1px solid #B0CFED; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">
-            ${group.apps.length} app${group.apps.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-        <div style="font-size:13px; font-weight:600; color:var(--slds-text-dark); margin-bottom:8px;">${escHtml(label)}</div>
-        <div style="font-size:12px; color:var(--slds-text-label); margin-bottom:12px; line-height:1.6;">
-          ${group.apps.slice(0, 3).map(a => `${escHtml(a.applicant_name || a.app_id)} &middot; ${escHtml(a.county || 'N/A')}`).join('<br>')}
-          ${group.apps.length > 3 ? `<br><span style="color:var(--slds-text-hint);">+${group.apps.length - 3} more</span>` : ''}
-        </div>
-        <button class="btn-generate" style="width:100%; font-size:13px; padding:10px;" onclick="analyzeNeedsReview(${idx})">
-          &#x2728; Analyze with AI
-        </button>
-        <div id="flagCardResult_${idx}" style="margin-top:12px; display:none;"></div>
-      </div>
-    `;
-  });
-
-  html += `</div></div>`;
-  content.innerHTML = html;
-  content._groups = groupEntries;
-}
-
-async function analyzeNeedsReview(groupIdx) {
-  const content = document.getElementById('needsReviewContent');
-  const groups = content._groups;
-  if (!groups || !groups[groupIdx]) return;
-
-  const group = groups[groupIdx];
-  const btn = document.querySelector(`#flagCard_${groupIdx} .btn-generate`);
-  const resultDiv = document.getElementById(`flagCardResult_${groupIdx}`);
-
-  btn.disabled = true;
-  btn.textContent = 'Analyzing…';
-  resultDiv.style.display = 'none';
-
-  try {
-    const res = await fetch(`${EDGE_BASE}/analyze-needs-review`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({
-        programId: 'doggy-daycare',
-        groups: [{
-          flags: group.flags,
-          appCount: group.apps.length,
-          sampleApps: group.apps.slice(0, 3)
-        }]
-      })
-    });
-
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-
-    const rec = data.groups && data.groups[0];
-    if (!rec) throw new Error('No recommendation returned');
-
-    const priorityColor = rec.priority === 'high' ? '#BA0517' : rec.priority === 'low' ? '#2E844A' : '#DD7A01';
-    const priorityBg    = rec.priority === 'high' ? '#FDECEA' : rec.priority === 'low' ? '#EBF7EE'  : '#FEF3E2';
-
-    resultDiv.innerHTML = `
-      <div style="background:#F8F9FB; border:1px solid #E5E5E5; border-radius:6px; padding:12px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
-          <span style="font-size:13px; font-weight:700; color:var(--slds-text-dark);">${escHtml(rec.action)}</span>
-          <span style="background:${priorityBg}; color:${priorityColor}; border:1px solid ${priorityColor}40; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase;">${escHtml(rec.priority)}</span>
-        </div>
-        <div style="font-size:11px; color:var(--slds-text-label); margin-bottom:8px;">&#x1F4D6; ${escHtml(rec.citation)}</div>
-        <p style="font-size:12px; color:var(--slds-text-dark); line-height:1.5; margin-bottom:8px;">${escHtml(rec.reasoning)}</p>
-        <div style="font-size:11px; color:var(--slds-text-hint);">Model: ${escHtml(data.model || 'claude-haiku-4-5-20251001')}</div>
-      </div>
-    `;
-    resultDiv.style.display = 'block';
-  } catch (err) {
-    resultDiv.innerHTML = `<div style="color:var(--slds-error);font-size:12px;padding:8px;">Analysis failed: ${escHtml(String(err))}</div>`;
-    resultDiv.style.display = 'block';
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '&#x2728; Analyze with AI';
-  }
 }
 
 // ================================================================

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiPoint | Review Queue</title>
+<link rel="stylesheet" href="https://unpkg.com/@salesforce-ux/design-system@2.25.6/assets/styles/salesforce-lightning-design-system.min.css" />
+<script src="program-switcher.js"></script>
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="scenario-sandbox.css" />
+<style>
+  .rq-integration-banner {
+    background: #FFF8E1;
+    border: 1px solid #F4C842;
+    border-left: 4px solid #DD7A01;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .rq-integration-banner-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .rq-integration-banner-body {
+    font-size: 13px;
+    color: #5C4B00;
+    line-height: 1.6;
+  }
+  .rq-integration-banner-body strong {
+    color: #3D3200;
+  }
+  .rq-integration-banner-systems {
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .rq-system-chip {
+    background: #FFF3C4;
+    border: 1px solid #F4C842;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #5C4B00;
+  }
+  .rq-page-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .rq-page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+  }
+  .rq-program-bar {
+    background: var(--card-white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .rq-program-label {
+    color: var(--text-label);
+  }
+  .rq-program-name {
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+</style>
+</head>
+<body class="slds-scope">
+
+<nav class="topnav">
+  <div class="logo">
+    <span class="ohio-mark">⟨°⟩</span>
+    <span>LexiPoint</span>
+  </div>
+
+  <div id="programSwitcherMount" class="tenant-switcher"></div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-links">
+    <a href="index.html">New Request</a>
+    <a href="ontology.html">Ontology</a>
+    <a href="review-queue.html" class="active">Review Queue</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="scenario-sandbox.html">Scenarios</a>
+  </div>
+
+  <div class="nav-controls">
+    <div class="notification-bell" id="notificationBell" onclick="this.querySelector('.notification-dropdown').classList.toggle('show')">
+      <span>&#x1F514;</span>
+      <span class="notification-badge">3</span>
+      <div class="notification-dropdown">
+        <div class="notification-item">
+          <strong>OH-020 Telehealth Bed Equivalency submitted for review</strong>
+          <div class="notification-time">2 hours ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>FED-003 CMS CoP updated — affects 4 rules</strong>
+          <div class="notification-time">1 day ago</div>
+        </div>
+        <div class="notification-item">
+          <strong>OH-015 Fire Code Compliance: Review deadline in 3 days</strong>
+          <div class="notification-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-indicator" id="userIndicator">
+      <div class="avatar-circle">–</div>
+      <div class="role-text">
+        <div class="user-name">Loading…</div>
+        <div class="user-role"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-body">
+
+  <!-- Integration messaging banner -->
+  <div class="rq-integration-banner">
+    <div class="rq-integration-banner-icon">&#x1F4CB;</div>
+    <div class="rq-integration-banner-body">
+      <strong>This page is illustrative.</strong>
+      In a live deployment, coordinators work their review queue inside their existing case management or workflow system — LexiPoint does not replace those tools.
+      LexiPoint integrates as the <strong>policy decision layer</strong>: it evaluates applications against your encoded statutes, flags exceptions, and surfaces AI-assisted recommendations that your existing system surfaces to coordinators via API.
+      <div class="rq-integration-banner-systems">
+        <span>Integrates with:</span>
+        <span class="rq-system-chip">Salesforce</span>
+        <span class="rq-system-chip">Accela</span>
+        <span class="rq-system-chip">Tyler Technologies</span>
+        <span class="rq-system-chip">ServiceNow</span>
+        <span class="rq-system-chip">Custom agency portals</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page header -->
+  <div class="rq-page-header">
+    <h1 class="rq-page-title">Review Queue</h1>
+  </div>
+
+  <!-- Program context bar -->
+  <div class="rq-program-bar" id="programBar">
+    <span class="rq-program-label">Program:</span>
+    <span class="rq-program-name" id="programBarName">Loading…</span>
+  </div>
+
+  <!-- Queue content -->
+  <div id="needsReviewContent">
+    <div style="padding:40px; text-align:center; color:var(--text-label);">
+      <div class="spinner"></div>
+      <p style="margin-top:12px; font-size:13px;">Loading queue…</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://fshdlcveidwwufdigekh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaGRsY3ZlaWR3d3VmZGlnZWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjgzOTgsImV4cCI6MjA4ODg0NDM5OH0.2x-ipiRpBCphclHyXb0bD98WwA392jOfd-8tuAOc2CY';
+const EDGE_BASE   = 'https://fshdlcveidwwufdigekh.supabase.co/functions/v1';
+
+let currentProgram = 'doggy-daycare';
+
+// ── Utility ──────────────────────────────────────────────────
+function escHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function sbFetch(table, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+    headers: {
+      'apikey':        SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type':  'application/json'
+    }
+  });
+  return res.json();
+}
+
+function renderDataBadge(type, label) {
+  return `<span class="data-badge data-badge--${escHtml(type)}">${escHtml(label)}</span>`;
+}
+
+// ── Flag metadata ─────────────────────────────────────────────
+const FLAG_LABELS = {
+  'DDC-015:income_doc_expired':        'Expired Income Documentation',
+  'DDC-013:annual_cap_exceeded':       'Annual Cap Exceeded',
+  'DDC-008:cooling_period_borderline': 'Cooling Period Borderline',
+  'DDC-014:no_facility_capacity':      'No Facility Capacity',
+  'DDC-018:priority_queue_eligible':   'Priority Queue Eligible',
+};
+
+// ── Program switcher integration ──────────────────────────────
+function updateUserIndicator(programId) {
+  const cfg = PROGRAM_CONFIG[programId];
+  const user = cfg && USER_DISPLAY ? USER_DISPLAY[cfg.userId] : null;
+  if (!user) return;
+  const el = document.getElementById('userIndicator');
+  if (!el) return;
+  el.querySelector('.avatar-circle').textContent = user.initials;
+  el.querySelector('.user-name').textContent = user.name;
+  el.querySelector('.user-role').textContent = `${user.role} | ${cfg.programName}`;
+}
+
+function switchProgram(programId) {
+  currentProgram = programId;
+  if (typeof updateSwitcherUI === 'function') updateSwitcherUI(programId);
+  const cfg = (typeof PROGRAM_CONFIG !== 'undefined') ? PROGRAM_CONFIG[programId] : null;
+  document.getElementById('programBarName').textContent = cfg ? cfg.programName : programId;
+  updateUserIndicator(programId);
+  loadQueue();
+}
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof renderProgramSwitcher === 'function') {
+    renderProgramSwitcher(currentProgram);  // takes 1 arg — mount ID is hardcoded inside
+  }
+  const cfg = (typeof PROGRAM_CONFIG !== 'undefined') ? PROGRAM_CONFIG[currentProgram] : null;
+  document.getElementById('programBarName').textContent = cfg ? cfg.programName : currentProgram;
+  updateUserIndicator(currentProgram);
+  loadQueue();
+});
+
+// ── Queue loader ──────────────────────────────────────────────
+async function loadQueue() {
+  const content = document.getElementById('needsReviewContent');
+  content.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-label);"><div class="spinner"></div><p style="margin-top:12px;font-size:13px;">Loading triage queue…</p></div>`;
+
+  if (currentProgram !== 'doggy-daycare') {
+    const cfg = (typeof PROGRAM_CONFIG !== 'undefined') ? PROGRAM_CONFIG[currentProgram] : null;
+    const programName = cfg ? cfg.programName : currentProgram;
+    content.innerHTML = `
+      <div class="empty-state" style="padding:48px 32px;">
+        <div style="margin-bottom:16px;">${renderDataBadge('estimated', 'Not Configured')}</div>
+        <h3 class="empty-state-title">Review Queue Not Yet Configured for This Program</h3>
+        <p class="empty-state-text" style="max-width:520px; margin:0 auto 20px;">
+          <strong>${escHtml(programName)}</strong> does not yet have a connected application dataset with pending-review flags.
+          In a live deployment, applications flagged by LexiPoint's policy engine would surface here (or in your existing workflow system) for coordinator action.
+        </p>
+        <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:16px 20px; max-width:520px; margin:0 auto; text-align:left; font-size:13px; color:var(--text-label); line-height:1.7;">
+          <strong style="color:var(--text-dark); display:block; margin-bottom:8px;">How this works in production:</strong>
+          <ol style="margin:0; padding-left:18px;">
+            <li>Your agency's workflow system (Salesforce, Accela, Tyler, etc.) submits applications to LexiPoint's policy API.</li>
+            <li>LexiPoint evaluates each application against encoded statutes and flags those requiring coordinator review with a specific flag code and policy context.</li>
+            <li>Flagged applications are returned to your existing system, which routes them to the coordinator queue. LexiPoint can also surface AI-assisted recommendations alongside each flag.</li>
+          </ol>
+          <p style="margin:12px 0 0; padding-top:10px; border-top:1px solid var(--border);">
+            To see a live demo of the configured queue, switch to <a href="#" onclick="switchProgram('doggy-daycare'); return false;" style="color:var(--brand-blue); text-decoration:none; font-weight:600;">Doggy Day Care Grants</a>.
+            Impact Preview and the Scenario Planner are fully active for <strong>${escHtml(programName)}</strong> using seeded synthetic data —
+            <a href="scenario-sandbox.html" style="color:var(--brand-blue); text-decoration:none; font-weight:600;">Go to Scenario Planner →</a>
+          </p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    const apps = await sbFetch('grant_applications',
+      `decision=eq.pending&select=app_id,applicant_name,county,household_income,household_size,review_flags,review_notes&order=submitted_at.asc&limit=200`);
+    const pendingApps = Array.isArray(apps) ? apps : [];
+
+    if (pendingApps.length === 0) {
+      content.innerHTML = `
+        <div class="empty-state" style="padding:48px 32px;">
+          <div class="empty-state-icon">&#x2705;</div>
+          <h3 class="empty-state-title">Queue Clear</h3>
+          <p class="empty-state-text">All flagged applications have been processed.</p>
+        </div>
+      `;
+      return;
+    }
+
+    renderQueueGroups(pendingApps);
+  } catch (err) {
+    content.innerHTML = `<div style="padding:40px;text-align:center;color:#BA0517;font-size:13px;">Failed to load queue. Check your connection and try again.</div>`;
+    console.error(err);
+  }
+}
+
+// ── Render flag groups ────────────────────────────────────────
+function renderQueueGroups(apps) {
+  const content = document.getElementById('needsReviewContent');
+
+  const groups = {};
+  for (const app of apps) {
+    const flags = Array.isArray(app.review_flags) && app.review_flags.length > 0
+      ? app.review_flags : ['no_flag'];
+    const primary = flags[0];
+    if (!groups[primary]) groups[primary] = { flags: [primary], apps: [] };
+    groups[primary].apps.push(app);
+  }
+
+  const groupEntries = Object.values(groups).sort((a, b) => b.apps.length - a.apps.length);
+
+  let html = `
+    <div style="padding:0 0 24px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <h2 style="font-size:16px; font-weight:700; color:var(--text-dark); margin:0;">Flagged Applications</h2>
+        ${renderDataBadge('seeded', 'Seeded')}
+        <span style="font-size:13px; color:var(--text-label);">
+          ${apps.length} application${apps.length !== 1 ? 's' : ''} pending &middot; ${groupEntries.length} group${groupEntries.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      <div style="background:#F8F9FB; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:20px; font-size:13px; color:var(--text-label); line-height:1.6;">
+        <strong style="color:var(--text-dark); display:block; margin-bottom:4px;">How to use this queue</strong>
+        Each card below represents a group of applications that share the same review flag — meaning LexiPoint's policy engine identified the same exception for each one.
+        Handle them together to apply consistent policy decisions.
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+          <ol style="margin:4px 0 0 0; padding-left:18px;">
+            <li>Review the flag code and applicant list to understand the policy in play.</li>
+            <li>Click <strong>Get AI Recommendation ✨</strong> for a suggested action with a specific policy citation and priority.</li>
+            <li>Use <strong>Override</strong> to record your own coordinator rationale if you disagree with the recommendation before finalizing in your workflow system.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px;">
+  `;
+
+  groupEntries.forEach((group, idx) => {
+    const flagCode = group.flags[0];
+    const label = FLAG_LABELS[flagCode] || flagCode;
+    html += `
+      <div class="snapshot-card" id="flagCard_${idx}">
+        <div class="snapshot-card-header">
+          <span class="snapshot-rule-id">${escHtml(flagCode)}</span>
+          <span style="background:#E8F3FD; color:#0176D3; border:1px solid #B0CFED; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">
+            ${group.apps.length} app${group.apps.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div style="font-size:13px; font-weight:600; color:var(--text-dark); margin-bottom:8px;">${escHtml(label)}</div>
+        <div style="font-size:12px; color:var(--text-label); margin-bottom:12px; line-height:1.6;">
+          ${group.apps.slice(0, 3).map(a => `${escHtml(a.applicant_name || a.app_id)} &middot; ${escHtml(a.county || 'N/A')}`).join('<br>')}
+          ${group.apps.length > 3 ? `<br><span style="color:var(--text-hint);">+${group.apps.length - 3} more</span>` : ''}
+        </div>
+        <button class="btn-generate" style="width:100%; font-size:13px; padding:10px;" onclick="analyzeGroup(${idx})">
+          &#x2728; Get AI Recommendation
+        </button>
+        <div id="flagCardResult_${idx}" style="margin-top:12px; display:none;"></div>
+      </div>
+    `;
+  });
+
+  html += `</div></div>`;
+  content.innerHTML = html;
+  content._groups = groupEntries;
+}
+
+// ── AI recommendation ─────────────────────────────────────────
+async function analyzeGroup(groupIdx) {
+  const content = document.getElementById('needsReviewContent');
+  const groups = content._groups;
+  if (!groups || !groups[groupIdx]) return;
+
+  const group = groups[groupIdx];
+  const btn   = document.querySelector(`#flagCard_${groupIdx} .btn-generate`);
+  const resultDiv = document.getElementById(`flagCardResult_${groupIdx}`);
+
+  btn.disabled = true;
+  btn.textContent = 'Analyzing…';
+  resultDiv.style.display = 'none';
+
+  try {
+    const res = await fetch(`${EDGE_BASE}/analyze-needs-review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({
+        programId: 'doggy-daycare',
+        groups: [{
+          flags:      group.flags,
+          appCount:   group.apps.length,
+          sampleApps: group.apps.slice(0, 3)
+        }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const rec = data.groups && data.groups[0];
+    if (!rec) throw new Error('No recommendation returned');
+
+    const priorityColor = rec.priority === 'high' ? '#BA0517' : rec.priority === 'low' ? '#2E844A' : '#DD7A01';
+    const priorityBg    = rec.priority === 'high' ? '#FDECEA' : rec.priority === 'low' ? '#EBF7EE'  : '#FEF3E2';
+
+    resultDiv.innerHTML = `
+      <div style="background:#F8F9FB; border:1px solid #E5E5E5; border-radius:6px; padding:12px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+          <span style="font-size:13px; font-weight:700; color:var(--text-dark);">${escHtml(rec.action)}</span>
+          <span style="background:${priorityBg}; color:${priorityColor}; border:1px solid ${priorityColor}40; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase;">${escHtml(rec.priority)}</span>
+        </div>
+        <div style="font-size:11px; color:var(--text-label); margin-bottom:8px;">&#x1F4D6; ${escHtml(rec.citation)}</div>
+        <p style="font-size:12px; color:var(--text-dark); line-height:1.5; margin-bottom:10px;">${escHtml(rec.reasoning)}</p>
+        <div id="overrideSection_${groupIdx}">
+          <a href="#" style="font-size:11px; color:var(--brand-blue); text-decoration:none;" onclick="toggleOverride(${groupIdx}); return false;">Override recommendation</a>
+        </div>
+        <div id="overrideInput_${groupIdx}" style="display:none; margin-top:8px;">
+          <textarea id="overrideText_${groupIdx}" placeholder="Enter coordinator rationale…"
+            style="width:100%; box-sizing:border-box; font-size:12px; padding:8px; border:1px solid var(--border); border-radius:4px; resize:vertical; min-height:64px; font-family:inherit;"></textarea>
+          <button onclick="saveOverride(${groupIdx})" style="margin-top:6px; background:var(--brand-blue); color:#fff; border:none; padding:5px 14px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer;">Save Rationale</button>
+        </div>
+        <div style="font-size:10px; color:var(--text-hint); margin-top:8px;">AI · ${escHtml(data.model || 'claude-haiku-4-5-20251001')}</div>
+      </div>
+    `;
+    resultDiv.style.display = 'block';
+  } catch (err) {
+    resultDiv.innerHTML = `<div style="color:#BA0517; font-size:12px; padding:8px;">Analysis failed: ${escHtml(String(err))}</div>`;
+    resultDiv.style.display = 'block';
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '&#x2728; Get AI Recommendation';
+  }
+}
+
+function toggleOverride(idx) {
+  const el = document.getElementById(`overrideInput_${idx}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'block') {
+    document.getElementById(`overrideText_${idx}`).focus();
+  }
+}
+
+function saveOverride(idx) {
+  const text = document.getElementById(`overrideText_${idx}`).value.trim();
+  if (!text) return;
+  const section = document.getElementById(`overrideSection_${idx}`);
+  section.innerHTML = `
+    <div style="background:#EBF7EE; border:1px solid #A8D5B2; border-radius:4px; padding:8px; font-size:12px; color:#2E844A; margin-top:4px;">
+      &#x2713; Rationale recorded: "${escHtml(text)}"
+    </div>
+  `;
+  document.getElementById(`overrideInput_${idx}`).style.display = 'none';
+}
+</script>
+</body>
+</html>
